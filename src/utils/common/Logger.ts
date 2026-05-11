@@ -1,4 +1,4 @@
-import { config, APP_ENV } from '@/config';
+import { config as appConfig, APP_ENV } from '@/config';
 
 export enum LogLevel {
 	INFO = 'info',
@@ -37,7 +37,7 @@ class Logger {
 	}
 
 	private checkIfEnabled(): boolean {
-		return this.config.enabledEnvironments.includes(config.app.env);
+		return this.config.enabledEnvironments.includes(appConfig.app.env);
 	}
 
 	private formatMessage(level: LogLevel, ...args: unknown[]): string {
