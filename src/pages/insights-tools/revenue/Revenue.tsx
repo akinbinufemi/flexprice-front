@@ -259,9 +259,7 @@ const Revenue = () => {
 									<TableHead className={`font-semibold text-gray-700 text-[13px] ${!showVoiceColumns ? 'rounded-tr-md' : ''}`}>
 										Usage Revenue
 									</TableHead>
-									{showVoiceColumns && (
-										<TableHead className='font-semibold text-gray-700 text-[13px]'>Voice Minutes</TableHead>
-									)}
+									{showVoiceColumns && <TableHead className='font-semibold text-gray-700 text-[13px]'>Voice Minutes</TableHead>}
 									{showVoiceColumns && (
 										<TableHead className='rounded-tr-md font-semibold text-gray-700 text-[13px]'>Cost / Minute</TableHead>
 									)}
@@ -296,7 +294,9 @@ const Revenue = () => {
 											</TableCell>
 										)}
 										{showVoiceColumns && (
-											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{formatDecimal(toNumberOrNull(row.cpm))}</TableCell>
+											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
+												{formatDecimal(toNumberOrNull(row.cpm))}
+											</TableCell>
 										)}
 									</TableRow>
 								))}

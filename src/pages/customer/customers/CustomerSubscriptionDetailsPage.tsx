@@ -16,8 +16,7 @@ import { useParams, Link } from 'react-router';
 import { INVOICE_TYPE } from '@/models/Invoice';
 import { TAXRATE_ENTITY_TYPE } from '@/models/Tax';
 import TaxAssociationTable from '@/components/molecules/TaxAssociationTable';
-import { SUBSCRIPTION_STATUS } from '@/models/Subscription';
-import { Subscription as SubscriptionType } from '@/models/Subscription';
+import { Subscription as SubscriptionType, SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE } from '@/models/Subscription';
 import { EXPAND } from '@/models';
 import { DataType, FilterOperator } from '@/types/common/QueryBuilder';
 import { SubscriptionResponse } from '@/types/dto/Subscription';
@@ -25,6 +24,30 @@ import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import formatDate from '@/utils/common/format_date';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { ExternalLink } from 'lucide-react';
+import { formatSubscriptionTypeDisplayLabel } from '@/utils/subscription/formatSubscriptionTypeDisplay';
+
+type SubscriptionTypeChipProps =
+	| { variant: 'default' | 'success' | 'warning' | 'failed' | 'info' }
+	| { textColor: string; bgColor: string; borderColor: string };
+
+/** Distinct palettes per API `subscription_type` (avoids dull grey for the common cases). */
+function getSubscriptionTypeChipProps(raw: string | null | undefined): SubscriptionTypeChipProps {
+	const t = raw?.trim().toLowerCase();
+	switch (t) {
+		case SUBSCRIPTION_TYPE.STANDALONE:
+			return { textColor: '#0F766E', bgColor: '#CCFBF1', borderColor: '#99F6E4' };
+		case SUBSCRIPTION_TYPE.PARENT:
+			return { variant: 'success' };
+		case SUBSCRIPTION_TYPE.INHERITED:
+			return { variant: 'info' };
+		case SUBSCRIPTION_TYPE.GROUPED_INVOICING:
+			return { variant: 'warning' };
+		case SUBSCRIPTION_TYPE.DELEGATED_INVOICING:
+			return { textColor: '#6D28D9', bgColor: '#F5F3FF', borderColor: '#DDD6FE' };
+		default:
+			return { textColor: '#4338CA', bgColor: '#EEF2FF', borderColor: '#E0E7FF' };
+	}
+}
 
 function getCommitmentPeriodLabel(subscription: SubscriptionType | undefined): string {
 	const period = subscription?.commitment_duration;
@@ -171,6 +194,21 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				render: (row) => (
 					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>{row.customer?.name ?? '—'}</RedirectCell>
 				),
+			},
+			{
+				title: 'Type',
+				render: (row) => {
+					const chip = getSubscriptionTypeChipProps(row.subscription_type);
+					return (
+						<Chip
+							label={formatSubscriptionTypeDisplayLabel(row.subscription_type)}
+							className='shrink-0'
+							{...('variant' in chip
+								? { variant: chip.variant }
+								: { textColor: chip.textColor, bgColor: chip.bgColor, borderColor: chip.borderColor })}
+						/>
+					);
+				},
 			},
 			{
 				title: 'Plan',
@@ -376,7 +414,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 
 			{inheritedSubscriptionRows.length > 0 && (
 				<Card className='card mt-8'>
-					<FormHeader className='mb-0' title='Inherited subscriptions' variant='sub-header' titleClassName='font-semibold' />
+					<FormHeader className='mb-0' title='Subscriptions Inheritance' variant='sub-header' titleClassName='font-semibold' />
 					<div className='mt-4 rounded-[6px] border border-gray-300'>
 						<FlexpriceTable data={inheritedSubscriptionRows} columns={inheritedSubscriptionsColumns} />
 					</div>
