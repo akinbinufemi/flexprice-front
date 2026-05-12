@@ -3,6 +3,8 @@ import Intercom from '@intercom/messenger-js-sdk';
 import './index.css';
 import { BotMessageSquare } from 'lucide-react';
 import { Button } from '@/components/atoms';
+import { config } from '@/config/config';
+import { INTERCOM_MESSENGER_FLOW, isIntercomMessengerAvailable } from '@/config/intercomMessengerConfig';
 import { getCommandPaletteActionEventName, CommandPaletteActionId } from '@/core/actions';
 import useUser from '@/hooks/useUser';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -11,10 +13,8 @@ import { TenantMetadataKey } from '@/models/Tenant';
 import { toast } from 'react-hot-toast';
 import { refetchQueries } from '../tanstack/ReactQueryProvider';
 
-// mseconds * seconds * minutes
-const INACTIVITY_TIMEOUT = 1000 * 60 * 15; // 15 minutes
-
-const IntercomMessenger = () => {
+/** Mounted only when Intercom is enabled with an app id; owns SDK init and onboarding/help behavior. */
+const IntercomMessengerImpl = () => {
 	const { user } = useUser();
 	const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
 	const isInitialized = useRef(false);
@@ -57,68 +57,56 @@ const IntercomMessenger = () => {
 		onSuccess: async () => {
 			// Refetch user data to update the UI
 			await refetchQueries(['user', 'tenant']);
-			toast.success("Welcome! You've been marked as onboarded.");
+			toast.success(INTERCOM_MESSENGER_FLOW.toastSuccessMarkOnboarded);
 		},
-		onError: (error: any) => {
+		onError: (error: unknown) => {
 			console.error('Failed to mark user as onboarded:', error);
-			toast.error('Failed to update onboarding status. Please try again.');
+			toast.error(INTERCOM_MESSENGER_FLOW.toastErrorMarkOnboarded);
 		},
 	});
 
-	// Handle Intercom events
+	// Fires when the messenger is dismissed (polling, postMessage, or user action).
 	const handleIntercomHide = useCallback(() => {
 		if (hideEventTriggered.current) return; // Prevent multiple calls
 
 		hideEventTriggered.current = true;
 		isIntercomOpen.current = false;
 
-		// Check if user hasn't completed onboarding
 		const onboardingMetadata = tenant?.metadata?.[TenantMetadataKey.ONBOARDING_COMPLETED];
 		const onboardingCompleted = onboardingMetadata === 'true';
 
-		if (!onboardingCompleted && user && tenant) {
-			// Mark user as onboarded when they close Intercom
+		if (INTERCOM_MESSENGER_FLOW.markCompletedOnClose && !onboardingCompleted && user && tenant) {
 			updateTenantOnIntercomClose();
 		}
 
-		// Add your custom actions here
-		// For example:
-		// - Track analytics event
-		// - Update user preferences
-		// - Show a follow-up message
-		// - Reset inactivity timer
-		// - etc.
-
-		// Example: Track that user closed the messenger
-		if (typeof window !== 'undefined' && (window as any).gtag) {
-			(window as any).gtag('event', 'intercom_messenger_closed', {
+		if (
+			INTERCOM_MESSENGER_FLOW.trackGtagEvents &&
+			typeof window !== 'undefined' &&
+			typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === 'function'
+		) {
+			(window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', INTERCOM_MESSENGER_FLOW.gtagClosedEvent, {
 				user_id: user?.id,
 				tenant_id: user?.tenant?.id,
 				onboarding_completed: onboardingCompleted,
 			});
 		}
 
-		// Example: Store in localStorage that user has seen the messenger
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('intercom_messenger_seen', 'true');
+		if (INTERCOM_MESSENGER_FLOW.persistMessengerSeenToStorage && typeof window !== 'undefined') {
+			localStorage.setItem(INTERCOM_MESSENGER_FLOW.messengerSeenStorageKey, 'true');
 		}
-
-		// Example: You could also trigger other actions
-		// like showing a different UI element or updating state
 	}, [user, tenant, updateTenantOnIntercomClose]);
 
 	const handleIntercomShow = useCallback(() => {
 		isIntercomOpen.current = true;
 		hideEventTriggered.current = false;
 
-		// Add your custom actions here when messenger is shown
-		// For example:
-		// - Track that user opened messenger
-		// - Update analytics
-		// - etc.
-
-		if (typeof window !== 'undefined' && (window as any).gtag) {
-			(window as any).gtag('event', 'intercom_messenger_opened', {
+		// Analytics when the messenger becomes visible
+		if (
+			INTERCOM_MESSENGER_FLOW.trackGtagEvents &&
+			typeof window !== 'undefined' &&
+			typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === 'function'
+		) {
+			(window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', INTERCOM_MESSENGER_FLOW.gtagOpenedEvent, {
 				user_id: user?.id,
 				tenant_id: user?.tenant?.id,
 			});
@@ -135,43 +123,42 @@ const IntercomMessenger = () => {
 				const isVisible = window.Intercom('isVisible');
 
 				if (isVisible && !isIntercomOpen.current) {
-					// Intercom was opened
+					// Messenger opened (e.g. programmatic show)
 					handleIntercomShow();
 				} else if (!isVisible && isIntercomOpen.current && !hideEventTriggered.current) {
-					// Intercom was closed
+					// Visible → hidden without hide handler firing yet
 					handleIntercomHide();
 				}
-			} catch (error) {
+			} catch {
 				// Intercom might not be ready yet
 			}
 		};
 
-		const interval = setInterval(checkIntercomState, 1000); // Check every second
+		const interval = setInterval(checkIntercomState, INTERCOM_MESSENGER_FLOW.statePollIntervalMs);
 
 		return () => {
 			clearInterval(interval);
 		};
 	}, [handleIntercomShow, handleIntercomHide]);
 
-	// Initialize Intercom with user data
+	// Initialize Intercom with user data (`app_id` from env via config.intercom)
 	useEffect(() => {
 		if (!user || isInitialized.current) return;
 
 		Intercom({
-			app_id: 'yprjoygg',
+			app_id: config.intercom.appId,
 			user_id: user.id,
 			name: user.tenant?.name,
 			email: user.email,
 			created_at: user.tenant?.created_at ? new Date(user.tenant.created_at).getTime() : undefined,
-			hide_default_launcher: true,
+			hide_default_launcher: INTERCOM_MESSENGER_FLOW.hideDefaultLauncher,
 		});
 
 		isInitialized.current = true;
 
-		// Add event listeners for Intercom events
+		// postMessage events from the Intercom embed (when supported)
 		const handleMessage = (event: MessageEvent) => {
 			if (event.data && typeof event.data === 'object') {
-				// Handle Intercom events
 				if (event.data.type === 'intercom:hide' || event.data.type === 'hide') {
 					handleIntercomHide();
 				} else if (event.data.type === 'intercom:show' || event.data.type === 'show') {
@@ -182,75 +169,65 @@ const IntercomMessenger = () => {
 
 		window.addEventListener('message', handleMessage);
 
-		// Cleanup
 		return () => {
 			window.removeEventListener('message', handleMessage);
 		};
 	}, [user, handleIntercomHide, handleIntercomShow]);
 
-	// Create resetTimer callback outside useEffect
 	const resetTimer = useCallback(() => {
-		// Clear existing timer
+		if (!INTERCOM_MESSENGER_FLOW.autoOpenOnInactivity) return;
+
 		if (inactivityTimer.current) {
 			clearTimeout(inactivityTimer.current);
 		}
 
-		// Set new timer if onboarding is not completed (metadata is null, field doesn't exist, or isn't 'true')
+		// Schedule auto-open only while onboarding metadata is missing or not `'true'`
 		const onboardingMetadata = tenant?.metadata?.[TenantMetadataKey.ONBOARDING_COMPLETED];
 		const onboardingCompleted = onboardingMetadata === 'true';
 
 		if (!onboardingCompleted) {
 			inactivityTimer.current = setTimeout(() => {
 				openIntercom();
-			}, INACTIVITY_TIMEOUT);
+			}, INTERCOM_MESSENGER_FLOW.inactivityOpenDelayMs);
 		}
 	}, [tenant?.metadata, openIntercom]);
 
-	// Handle inactivity timer for onboarding users
+	// Inactivity timer: auto-open Intercom for users who have not completed onboarding (metadata not `'true'`)
 	useEffect(() => {
-		// Clear any existing timer first
+		if (!INTERCOM_MESSENGER_FLOW.autoOpenOnInactivity) return;
+
 		if (inactivityTimer.current) {
 			clearTimeout(inactivityTimer.current);
 			inactivityTimer.current = null;
 		}
 
-		// Don't set up timer if:
-		// 1. User is not loaded
-		// 2. Tenant is still loading
+		// Don't attach listeners until user and tenant are ready
 		if (!user || isTenantLoading) {
 			return;
 		}
 
-		// Check onboarding status - show timer if metadata is null, field doesn't exist, or isn't 'true'
 		const onboardingMetadata = tenant?.metadata?.[TenantMetadataKey.ONBOARDING_COMPLETED];
 		const onboardingCompleted = onboardingMetadata === 'true';
 
-		// Show timer if:
-		// 1. Metadata is null/undefined
-		// 2. Onboarding field doesn't exist in metadata
-		// 3. Onboarding field exists but isn't set to 'true'
 		if (onboardingCompleted) {
 			return;
 		}
-		const activityEvents = ['mousemove', 'keydown', 'scroll', 'touchstart'];
 
-		// Add event listeners
+		const activityEvents = INTERCOM_MESSENGER_FLOW.activityEvents;
+
 		activityEvents.forEach((event) => {
 			window.addEventListener(event, resetTimer, { passive: true });
 		});
 
-		// Start initial timer
+		// Start initial countdown; user activity resets the timer via listeners above
 		resetTimer();
 
-		// Cleanup function
 		return () => {
-			// Clear timer
 			if (inactivityTimer.current) {
 				clearTimeout(inactivityTimer.current);
 				inactivityTimer.current = null;
 			}
 
-			// Remove event listeners
 			activityEvents.forEach((event) => {
 				window.removeEventListener(event, resetTimer);
 			});
@@ -273,6 +250,12 @@ const IntercomMessenger = () => {
 			Help
 		</Button>
 	);
+};
+
+/** Renders nothing when Intercom is disabled or app id is missing (see `config.intercom`). */
+const IntercomMessenger = () => {
+	if (!isIntercomMessengerAvailable()) return null;
+	return <IntercomMessengerImpl />;
 };
 
 export default IntercomMessenger;
