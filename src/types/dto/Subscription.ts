@@ -358,6 +358,9 @@ export interface CreateSubscriptionRequest {
 
 	/** When set, creates parent/inherited child subscriptions per backend hierarchy rules. */
 	inheritance?: SubscriptionInheritanceConfig;
+
+	/** Optional threshold for auto-invoice behavior (typically usage-only plans). Omit when not used. */
+	auto_invoice_threshold?: number;
 }
 
 export interface SubscriptionPhaseCreateRequest {

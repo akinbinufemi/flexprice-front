@@ -101,6 +101,9 @@ export interface Subscription extends BaseModel {
 
 	// commitment duration
 	readonly commitment_duration?: string;
+
+	/** Usage-style subscriptions: optional threshold amount for auto-invoicing behavior (API-defined semantics). */
+	readonly auto_invoice_threshold?: number;
 }
 
 export interface SubscriptionUsage extends BaseModel {

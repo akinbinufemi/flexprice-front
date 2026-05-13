@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { Input } from '@/components/atoms';
 
 interface Props {
@@ -13,6 +13,12 @@ interface Props {
 	error?: string;
 	description?: string;
 	suffix?: string;
+	id?: string;
+	className?: string;
+	/** Passed to the native input when `label` is omitted (accessibility). */
+	ariaLabel?: string;
+	/** Shown before the input (e.g. currency symbol). */
+	inputPrefix?: ReactNode;
 }
 
 const DecimalUsageInput: FC<Props> = ({
@@ -27,6 +33,10 @@ const DecimalUsageInput: FC<Props> = ({
 	error,
 	description,
 	suffix,
+	id,
+	className,
+	ariaLabel,
+	inputPrefix,
 }) => {
 	const validateDecimal = (value: string): boolean => {
 		if (value.trim() === '') {
@@ -72,6 +82,9 @@ const DecimalUsageInput: FC<Props> = ({
 
 	return (
 		<Input
+			id={id}
+			className={className}
+			aria-label={ariaLabel}
 			label={label}
 			value={value}
 			onChange={handleChange}
@@ -80,6 +93,7 @@ const DecimalUsageInput: FC<Props> = ({
 			error={error}
 			description={description}
 			suffix={suffix}
+			inputPrefix={inputPrefix}
 			variant='formatted-number'
 		/>
 	);

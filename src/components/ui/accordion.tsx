@@ -9,7 +9,9 @@ const Accordion = AccordionPrimitive.Root;
 const AccordionItem = React.forwardRef<
 	React.ElementRef<typeof AccordionPrimitive.Item>,
 	React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
->(({ className, ...props }, ref) => <AccordionPrimitive.Item ref={ref} className={cn('border-b', className)} {...props} />);
+>(({ className, ...props }, ref) => (
+	<AccordionPrimitive.Item ref={ref} className={cn('border-b border-zinc-200/90 last:border-b-0', className)} {...props} />
+));
 AccordionItem.displayName = 'AccordionItem';
 
 const AccordionTrigger = React.forwardRef<
@@ -20,12 +22,16 @@ const AccordionTrigger = React.forwardRef<
 		<AccordionPrimitive.Trigger
 			ref={ref}
 			className={cn(
-				'flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left [&[data-state=open]>svg]:rotate-180',
+				'group flex flex-1 items-center justify-between gap-3 py-3.5 text-left text-[15px] font-semibold leading-snug tracking-tight text-zinc-900 outline-none transition-colors',
+				'hover:bg-zinc-50 hover:no-underline',
+				'focus-visible:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-zinc-300/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+				'data-[state=open]:bg-zinc-50/90',
+				'[&[data-state=open]>svg]:rotate-180',
 				className,
 			)}
 			{...props}>
 			{children}
-			<ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200' />
+			<ChevronDown className='h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-500' />
 		</AccordionPrimitive.Trigger>
 	</AccordionPrimitive.Header>
 ));

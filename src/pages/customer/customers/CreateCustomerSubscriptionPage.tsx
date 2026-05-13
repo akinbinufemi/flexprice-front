@@ -23,6 +23,7 @@ import {
 	PAYMENT_TERMS,
 	SUBSCRIPTION_PRORATION_BEHAVIOR,
 	SUBSCRIPTION_STATUS,
+	PRICE_TYPE,
 } from '@/models';
 import { InternalCreditGrantRequest, creditGrantToInternal, internalToCreateRequest } from '@/types/dto/CreditGrant';
 import { BILLING_PERIOD, PAYMENT_TERMS_NONE, SANDBOX_AUTO_CANCELLATION_DAYS } from '@/constants/constants';
@@ -53,6 +54,17 @@ import {
 	isOneTimePlanPrice,
 	uniqueRecurringBillingPeriodsFromPrices,
 } from '@/utils/subscription/planPricesForSubscriptionUi';
+
+function subscriptionChargesHaveFixedPrice(
+	prices: SearchPricesResponse | null,
+	billingPeriod: BILLING_PERIOD,
+	currency: string,
+	isPriceActiveFn: (price: { start_date?: string }) => boolean,
+): boolean {
+	const activeItems = prices?.items?.filter(isPriceActiveFn) ?? [];
+	const filtered = filterPlanPricesForSubscriptionCharges(activeItems, billingPeriod, currency);
+	return filtered.some((p) => p.type === PRICE_TYPE.FIXED);
+}
 
 type Params = {
 	id: string;
@@ -101,10 +113,10 @@ export type SubscriptionFormState = {
 	addedSubscriptionLineItems: AddedSubscriptionLineItem[];
 	/** Customers that should receive inherited child subscriptions (serialized as external IDs on create) */
 	inheritanceCustomers: Customer[];
-	/** When true, create payload sends `trial_period_days`; when false, omit (inherit from plan). */
-	subscriptionTrialEnabled: boolean;
-	/** Day count when `subscriptionTrialEnabled`; empty when disabled. */
+	/** Set to send `trial_period_days`; leave empty to omit (inherit from plan). */
 	subscriptionTrialPeriodDays: string;
+	/** Set to send `auto_invoice_threshold` when plan has no FIXED charges; leave empty to omit. */
+	autoInvoiceThreshold: string;
 };
 
 const usePlans = () => {
@@ -271,8 +283,8 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		hasModifiedPlanCreditGrants: false,
 		addedSubscriptionLineItems: [],
 		inheritanceCustomers: [],
-		subscriptionTrialEnabled: false,
 		subscriptionTrialPeriodDays: '',
+		autoInvoiceThreshold: '',
 	});
 
 	const { data: plans, isLoading: plansLoading, isError: plansError } = usePlans();
@@ -343,9 +355,16 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 				...(() => {
 					const tpd = (subscriptionData.details as { trial_period_days?: number | null }).trial_period_days;
 					if (typeof tpd === 'number' && tpd > 0) {
-						return { subscriptionTrialEnabled: true, subscriptionTrialPeriodDays: String(tpd) };
+						return { subscriptionTrialPeriodDays: String(tpd) };
 					}
-					return { subscriptionTrialEnabled: false, subscriptionTrialPeriodDays: '' };
+					return { subscriptionTrialPeriodDays: '' };
+				})(),
+				...(() => {
+					const ait = (subscriptionData.details as { auto_invoice_threshold?: number | null }).auto_invoice_threshold;
+					if (typeof ait === 'number' && Number.isFinite(ait)) {
+						return { autoInvoiceThreshold: String(ait) };
+					}
+					return { autoInvoiceThreshold: '' };
 				})(),
 			}));
 		}
@@ -436,14 +455,28 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			return 'Please save your changes before submitting.';
 		}
 
-		if (subscriptionState.subscriptionTrialEnabled) {
-			const raw = subscriptionState.subscriptionTrialPeriodDays.trim();
-			if (!raw) {
-				return 'Trial period is required when a custom trial is enabled.';
-			}
-			const n = parseInt(raw, 10);
+		const trialRaw = subscriptionState.subscriptionTrialPeriodDays.trim();
+		if (trialRaw !== '') {
+			const n = parseInt(trialRaw, 10);
 			if (!Number.isFinite(n) || n < 1) {
-				return 'Enter a valid trial length in days (at least 1).';
+				return 'Enter a valid trial length in days (at least 1), or leave empty to use the plan default.';
+			}
+		}
+
+		const hasFixedCharges = subscriptionChargesHaveFixedPrice(
+			subscriptionState.prices,
+			subscriptionState.billingPeriod,
+			subscriptionState.currency,
+			isPriceActive,
+		);
+		const thresholdRaw = subscriptionState.autoInvoiceThreshold.trim();
+		if (thresholdRaw !== '') {
+			if (hasFixedCharges) {
+				return 'Auto invoice threshold is not available when the plan includes fixed charges.';
+			}
+			const n = parseFloat(thresholdRaw);
+			if (!Number.isFinite(n) || n < 0) {
+				return 'Enter a valid auto invoice threshold (0 or greater), or leave empty to omit.';
 			}
 		}
 
@@ -483,9 +516,11 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			addedSubscriptionLineItems,
 			customerId: formCustomerId,
 			inheritanceCustomers,
-			subscriptionTrialEnabled,
 			subscriptionTrialPeriodDays,
+			autoInvoiceThreshold,
 		} = subscriptionState;
+
+		const hasFixedSubscriptionChargePrice = subscriptionChargesHaveFixedPrice(prices, billingPeriod, currency, isPriceActive);
 
 		let finalStartDate: string;
 		let finalEndDate: string | undefined;
@@ -563,8 +598,23 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 				? invoicingCustomer.external_id.trim()
 				: undefined;
 
-		const trial_period_days: number | undefined =
-			subscriptionTrialEnabled && subscriptionTrialPeriodDays.trim() !== '' ? parseInt(subscriptionTrialPeriodDays.trim(), 10) : undefined;
+		const trialTrimmed = subscriptionTrialPeriodDays.trim();
+		let trial_period_days: number | undefined;
+		if (trialTrimmed !== '') {
+			const n = parseInt(trialTrimmed, 10);
+			if (Number.isFinite(n) && n >= 1) {
+				trial_period_days = n;
+			}
+		}
+
+		let auto_invoice_threshold: number | undefined;
+		const thresholdTrimmed = autoInvoiceThreshold.trim();
+		if (thresholdTrimmed !== '' && !hasFixedSubscriptionChargePrice) {
+			const parsed = parseFloat(thresholdTrimmed);
+			if (Number.isFinite(parsed) && parsed >= 0) {
+				auto_invoice_threshold = parsed;
+			}
+		}
 
 		return {
 			billingPeriod,
@@ -591,6 +641,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			addedSubscriptionLineItems,
 			inheritanceExternalIds,
 			trial_period_days,
+			auto_invoice_threshold,
 		};
 	};
 
@@ -683,6 +734,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 					: undefined,
 			inheritance: Object.keys(inheritancePayload).length > 0 ? inheritancePayload : undefined,
 			...(sanitized.trial_period_days !== undefined ? { trial_period_days: sanitized.trial_period_days } : {}),
+			...(sanitized.auto_invoice_threshold !== undefined ? { auto_invoice_threshold: sanitized.auto_invoice_threshold } : {}),
 		};
 
 		setIsDraft(isDraftParam);

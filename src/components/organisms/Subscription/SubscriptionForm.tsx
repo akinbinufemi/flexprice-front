@@ -1,7 +1,19 @@
-import { Select, FormHeader, Label, DecimalUsageInput, DatePicker, Input } from '@/components/atoms';
+import {
+	Select,
+	FormHeader,
+	Label,
+	DecimalUsageInput,
+	DatePicker,
+	Input,
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+	Tooltip,
+} from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { toSentenceCase } from '@/utils/common/helper_functions';
+import { toSentenceCase, getCurrencySymbol } from '@/utils/common/helper_functions';
 import { PlanResponse } from '@/types';
 import { useMemo, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -18,6 +30,7 @@ import {
 	ENTITY_STATUS,
 	EXPAND,
 	Customer,
+	PRICE_TYPE,
 } from '@/models';
 import { BILLING_PERIOD, PAYMENT_TERMS_NONE, paymentTermsOptions } from '@/constants/constants';
 import { SubscriptionFormState } from '@/pages';
@@ -45,6 +58,29 @@ import {
 	isOneTimePlanPrice,
 	uniqueRecurringBillingPeriodsFromPrices,
 } from '@/utils/subscription/planPricesForSubscriptionUi';
+import { Info } from 'lucide-react';
+
+const BillingAccordionInfoTooltip = ({ description, ariaLabel }: { description: string; ariaLabel: string }) => (
+	<Tooltip
+		delayDuration={0}
+		side='top'
+		align='end'
+		sideOffset={6}
+		content={<span className='block max-w-xs text-xs font-normal leading-relaxed text-popover-foreground'>{description}</span>}
+		className='max-w-xs'>
+		<span
+			className='inline-flex size-[22px] shrink-0 items-center justify-center rounded-md text-zinc-400 outline-none transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:ring-2 focus-visible:ring-zinc-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+			tabIndex={0}
+			aria-label={ariaLabel}
+			onPointerDown={(e) => e.stopPropagation()}
+			onClick={(e) => e.stopPropagation()}
+			onKeyDown={(e) => {
+				if (e.key === ' ' || e.key === 'Enter') e.stopPropagation();
+			}}>
+			<Info className='size-3.5' strokeWidth={1.5} aria-hidden />
+		</span>
+	</Tooltip>
+);
 
 // Helper components
 const BillingCycleSelector = ({
@@ -122,6 +158,20 @@ const SubscriptionForm = ({
 	const currentPrices = selectedPlanPrices?.items
 		? filterPlanPricesForSubscriptionCharges(selectedPlanPrices.items, state.billingPeriod, state.currency)
 		: [];
+
+	const hasFixedSubscriptionChargePrice = useMemo(() => {
+		if (!selectedPlanPrices?.items?.length) return false;
+		const filtered = filterPlanPricesForSubscriptionCharges(selectedPlanPrices.items, state.billingPeriod, state.currency);
+		return filtered.some((p) => p.type === PRICE_TYPE.FIXED);
+	}, [selectedPlanPrices?.items, state.billingPeriod, state.currency]);
+
+	useEffect(() => {
+		if (!hasFixedSubscriptionChargePrice) return;
+		setState((prev) => {
+			if (prev.autoInvoiceThreshold === '') return prev;
+			return { ...prev, autoInvoiceThreshold: '' };
+		});
+	}, [hasFixedSubscriptionChargePrice, setState]);
 
 	// Price overrides functionality for subscription-level
 	const { overriddenPrices, overridePrice, resetOverride } = usePriceOverrides(currentPrices);
@@ -887,55 +937,94 @@ const SubscriptionForm = ({
 						/>
 					</div>
 
-					<div className='rounded-xl border border-zinc-200/90 bg-white shadow-sm overflow-hidden'>
-						<div className='flex flex-row items-center justify-between gap-4 px-4 py-3 border-b border-zinc-100/90'>
-							<label
-								htmlFor='subscription-billing-proration'
-								className='text-sm font-medium text-zinc-900 leading-snug cursor-default block min-w-0 flex-1 pr-3'>
-								Proration behavior
-							</label>
-							<Switch
-								id='subscription-billing-proration'
-								className='shrink-0'
-								checked={state.prorationCreateLineItems}
-								onCheckedChange={(checked) => setState((prev) => ({ ...prev, prorationCreateLineItems: checked }))}
-								disabled={isDisabled}
-							/>
-						</div>
+					<Accordion
+						type='multiple'
+						className='overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06)]'>
+						<AccordionItem value='trial'>
+							<AccordionTrigger className='px-5 py-4'>
+								<span className='flex min-w-0 flex-1 items-center'>
+									<span className='min-w-0 flex-1 truncate'>Free trial</span>
+									<span className='ml-auto flex shrink-0 items-center pl-2'>
+										<BillingAccordionInfoTooltip
+											ariaLabel='About free trial'
+											description='Optional trial length for this subscription in days. Leave empty to use the plan default (or no trial if the plan defines none).'
+										/>
+									</span>
+								</span>
+							</AccordionTrigger>
+							<AccordionContent className='border-t border-zinc-100 bg-white px-5 pb-5 pt-4'>
+								<div className='max-w-xs'>
+									<Input
+										id='subscription-billing-trial-days'
+										aria-label='Trial period days'
+										variant='number'
+										value={state.subscriptionTrialPeriodDays}
+										onChange={(value) => setState((prev) => ({ ...prev, subscriptionTrialPeriodDays: value }))}
+										suffix='days'
+										placeholder='14'
+										disabled={isDisabled || isLoadingPlanDetails}
+									/>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
 
-						<div className='flex flex-row items-center justify-between gap-4 px-4 py-3 bg-zinc-50/40'>
-							<label
-								htmlFor='subscription-billing-trial'
-								className='text-sm font-medium text-zinc-900 leading-snug cursor-pointer block min-w-0 flex-1 pr-3'>
-								Free trial
-							</label>
-							<Switch
-								id='subscription-billing-trial'
-								className='shrink-0'
-								checked={state.subscriptionTrialEnabled}
-								onCheckedChange={(value) => {
-									setState((prev) => ({
-										...prev,
-										subscriptionTrialEnabled: value,
-										subscriptionTrialPeriodDays: value ? prev.subscriptionTrialPeriodDays : '',
-									}));
-								}}
-								disabled={isDisabled || isLoadingPlanDetails}
-							/>
-						</div>
-					</div>
-					{state.subscriptionTrialEnabled && (
-						<Input
-							id='subscription-billing-trial-days'
-							label='Trial Period Days'
-							variant='number'
-							value={state.subscriptionTrialPeriodDays}
-							onChange={(value) => setState((prev) => ({ ...prev, subscriptionTrialPeriodDays: value }))}
-							suffix='days'
-							placeholder='14'
-							disabled={isDisabled || isLoadingPlanDetails}
-						/>
-					)}
+						<AccordionItem value='proration'>
+							<AccordionTrigger className='px-5 py-4'>
+								<span className='flex min-w-0 flex-1 items-center'>
+									<span className='min-w-0 flex-1 truncate'>Proration behavior</span>
+									<span className='ml-auto flex shrink-0 items-center pl-2'>
+										<BillingAccordionInfoTooltip
+											ariaLabel='About proration'
+											description='When enabled, mid-cycle subscription changes generate proration line items so invoices reflect time spent on each price.'
+										/>
+									</span>
+								</span>
+							</AccordionTrigger>
+							<AccordionContent className='border-t border-zinc-100 bg-white px-5 pb-5 pt-4'>
+								<div className='flex flex-row items-center justify-between gap-4 w-full'>
+									<p className='text-[13px] leading-relaxed text-zinc-600 min-w-0 flex-1'>
+										Create proration line items when the subscription changes mid-cycle.
+									</p>
+									<Switch
+										id='subscription-billing-proration'
+										className='shrink-0'
+										checked={state.prorationCreateLineItems}
+										onCheckedChange={(checked) => setState((prev) => ({ ...prev, prorationCreateLineItems: checked }))}
+										disabled={isDisabled}
+									/>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+
+						<AccordionItem value='auto-invoice'>
+							<AccordionTrigger className='px-5 py-4'>
+								<span className='flex min-w-0 flex-1 items-center'>
+									<span className='min-w-0 flex-1 truncate'>Auto invoice threshold</span>
+									<span className='ml-auto flex shrink-0 items-center pl-2'>
+										<BillingAccordionInfoTooltip
+											ariaLabel='About auto invoice threshold'
+											description='Usage amount that can trigger an invoice before the period ends. Available when charges are usage-based; fixed-price subscription charges disable this field.'
+										/>
+									</span>
+								</span>
+							</AccordionTrigger>
+							<AccordionContent className='border-t border-zinc-100 bg-white px-5 pb-5 pt-4'>
+								<div className='flex-1 min-w-[12rem] max-w-md'>
+									<DecimalUsageInput
+										id='subscription-billing-auto-invoice-threshold-amount'
+										ariaLabel='Auto invoice threshold amount'
+										suffix={state.currency ? getCurrencySymbol(state.currency) : undefined}
+										value={state.autoInvoiceThreshold}
+										onChange={(value) => setState((prev) => ({ ...prev, autoInvoiceThreshold: value }))}
+										placeholder='100.00'
+										disabled={isDisabled || isLoadingPlanDetails || hasFixedSubscriptionChargePrice}
+										precision={2}
+										min={0}
+									/>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+					</Accordion>
 				</div>
 			)}
 		</div>

@@ -395,6 +395,15 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 						</p>
 					</div>
 				)}
+
+				{subscriptionDetails?.auto_invoice_threshold != null && (
+					<div className='w-full flex justify-between items-center'>
+						<p className='text-[#71717A] text-sm'>Auto invoice threshold</p>
+						<p className='text-[#09090B] text-sm'>
+							{getCurrencySymbol(subscriptionDetails?.currency || '')} {subscriptionDetails.auto_invoice_threshold}
+						</p>
+					</div>
+				)}
 				<Spacer className='!my-4' />
 
 				{subscriptionDetails?.overage_factor && subscriptionDetails?.overage_factor > 1 && (

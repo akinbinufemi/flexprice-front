@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { GetEventDebugResponse, DebugTrackerStatus, EventDebugStatus } from '@/types/dto';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/atoms';
 import EventTrackerStep from './EventTrackerStep';
 import JsonCodeBlock from './JsonCodeBlock';
 import toast from 'react-hot-toast';

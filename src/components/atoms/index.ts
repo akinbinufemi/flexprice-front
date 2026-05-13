@@ -75,6 +75,9 @@ export { default as PaymentUrlSuccessDialog } from './PaymentUrlSuccessDialog';
 // New billing tier components
 export { default as DecimalUsageInput } from './DecimalUsageInput';
 
+// Accordion primitives (shadcn/Radix; import from atoms barrel instead of @/components/ui/accordion)
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './Accordion';
+
 // Error Boundary
 export { default as ErrorBoundary } from './ErrorBoundary';
 
