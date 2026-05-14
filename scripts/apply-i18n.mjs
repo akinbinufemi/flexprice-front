@@ -51,12 +51,7 @@ for (const [file, fileReplacements] of Object.entries(byFile)) {
 
 	for (const r of fileReplacements) {
 		const { originalString, suggestedKey } = r;
-		// Build the t() call — use namespace: prefix if key belongs to a different namespace
-		const keyArg = suggestedKey.startsWith(`${namespace}.`)
-			? `'${suggestedKey.slice(namespace.length + 1)}'`
-			: `'${suggestedKey}'`; // cross-namespace key (common:actions.save handled by caller)
-
-		const tCall = `t(${keyArg})`;
+		const tCall = `t('${suggestedKey}')`;
 		const lineIdx = r.line - 1;
 		const line = lines[lineIdx] ?? '';
 
@@ -97,23 +92,48 @@ for (const [file, fileReplacements] of Object.entries(byFile)) {
 
 	// Add useTranslation import if not already present
 	if (!content.includes('useTranslation')) {
-		// Insert after last import line
-		content = content.replace(/((?:import .+\n)+)(?!import)/, `$1import { useTranslation } from 'react-i18next';\n`);
+		const fileLines = content.split('\n');
+		let lastImportIdx = -1;
+		for (let i = 0; i < fileLines.length; i++) {
+			if (/^import\b/.test(fileLines[i])) lastImportIdx = i;
+		}
+		if (lastImportIdx >= 0) {
+			// Walk forward from last `import` keyword line to find the closing `;`
+			let closingIdx = lastImportIdx;
+			while (closingIdx < fileLines.length - 1 && !fileLines[closingIdx].includes(';')) {
+				closingIdx++;
+			}
+			fileLines.splice(closingIdx + 1, 0, `import { useTranslation } from 'react-i18next';`);
+			content = fileLines.join('\n');
+		}
 	}
 
 	// Add const { t } = useTranslation('namespace') hook if not present
 	// Heuristic: insert after the opening brace of the first arrow function component
-	if (!content.includes(`useTranslation('${namespace}')`) && !content.includes(`useTranslation(["${namespace}`)) {
+	if (
+		!content.includes(`useTranslation('${namespace}')`) &&
+		!content.includes(`useTranslation(["${namespace}`) &&
+		!content.includes(`useTranslation(['${namespace}`)
+	) {
 		const hookLine = `\n\tconst { t } = useTranslation('${namespace}');\n`;
-		// Match: const ComponentName: FC<...> = (...) => {  OR  const ComponentName = (...) => {
-		content = content.replace(
-			/(const \w+ ?(?::\s*FC[^=]*)? ?= ?(?:\([^)]*\)) ?=> ?\{)/,
+		// Match: const ComponentName: React.FC<...> = (...) => {  OR  const ComponentName: FC<...> = (...) => {  OR  const ComponentName = (...) => {
+		const newContent = content.replace(
+			/(const \w+ ?(?::\s*(?:React\.)?FC[^=]*)? ?= ?(?:\([^)]*\)) ?=> ?\{)/,
 			`$1${hookLine}`,
 		);
+		if (newContent === content) {
+			console.warn(`  ⚠ ${file}: could not auto-insert useTranslation hook — add manually`);
+		} else {
+			content = newContent;
+		}
 	}
 
-	writeFileSync(file, content, 'utf8');
-	console.log(`  ✓ ${file} — ${appliedInFile.length} replaced`);
+	try {
+		writeFileSync(file, content, 'utf8');
+		console.log(`  ✓ ${file} — ${appliedInFile.length} replaced`);
+	} catch (err) {
+		console.error(`  ✗ Failed to write ${file}: ${err.message}`);
+	}
 }
 
 console.log(`\nSummary: ${totalApplied} replacements applied`);
@@ -121,7 +141,10 @@ console.log(`\nSummary: ${totalApplied} replacements applied`);
 if (manualItems.length) {
 	console.log(`\n⚠  ${manualItems.length} items need manual replacement:`);
 	for (const item of manualItems) {
-		console.log(`   ${item.file}:${item.line}  "${item.originalString}"  →  {t('${item.suggestedKey.slice(namespace.length + 1)}')}`);
+		const displayKey = item.suggestedKey.startsWith(`${namespace}.`)
+			? item.suggestedKey.slice(namespace.length + 1)
+			: item.suggestedKey;
+		console.log(`   ${item.file}:${item.line}  "${item.originalString}"  →  {t('${displayKey}')}`);
 	}
 }
 
