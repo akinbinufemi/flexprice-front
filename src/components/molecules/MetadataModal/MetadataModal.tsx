@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, Button, Input, Textarea } from '@/components/atoms';
 import { Trash2 } from 'lucide-react';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
+import { useTranslation } from 'react-i18next';
 
 interface MetadataModalProps {
 	open: boolean;
@@ -11,6 +12,7 @@ interface MetadataModalProps {
 }
 
 const MetadataModal: React.FC<MetadataModalProps> = ({ open, data, onSave, onClose }) => {
+	const { t } = useTranslation('common');
 	const [localData, setLocalData] = useState<{ key: string; value: string }[]>([]);
 
 	// Sync local state with prop when modal opens
@@ -61,37 +63,37 @@ const MetadataModal: React.FC<MetadataModalProps> = ({ open, data, onSave, onClo
 			onOpenChange={(isOpen) => {
 				if (!isOpen) onClose();
 			}}
-			title='Edit Metadata'
+			title={t('labels.editMetadata')}
 			showCloseButton>
 			<div className='flex flex-col gap-4 min-w-[600px]'>
 				{localData.map((item, idx) => (
 					<div key={idx} className='flex gap-2 items-start'>
 						<div className='flex-[3] min-w-0'>
-							<Input placeholder='Key' value={item.key} onChange={(v) => handleKeyChange(idx, v)} className='rounded-lg' />
+							<Input placeholder={t('form.key')} value={item.key} onChange={(v) => handleKeyChange(idx, v)} className='rounded-lg' />
 						</div>
 
 						<div className='flex-[5] min-w-0'>
 							<Textarea
-								placeholder='Value'
+								placeholder={t('form.value')}
 								value={item.value}
 								onChange={(v) => handleValueChange(idx, v)}
 								textAreaClassName='min-h-6 h-6 rounded-md'
 								className='rounded-md'
 							/>
 						</div>
-						<Button variant='ghost' className='size-10' onClick={() => handleRemove(idx)} aria-label='Remove'>
+						<Button variant='ghost' className='size-10' onClick={() => handleRemove(idx)} aria-label={t('form.remove')}>
 							<Trash2 className='size-6' />
 						</Button>
 					</div>
 				))}
 				<div>
-					<AddChargesButton onClick={handleAdd} label='Add another item' />
+					<AddChargesButton onClick={handleAdd} label={t('form.addAnotherItem')} />
 				</div>
 				<div className='flex justify-end gap-2 mt-4'>
 					<Button variant='outline' onClick={onClose}>
-						Cancel
+						{t('actions.cancel')}
 					</Button>
-					<Button onClick={handleSave}>Save</Button>
+					<Button onClick={handleSave}>{t('actions.save')}</Button>
 				</div>
 			</div>
 		</Dialog>

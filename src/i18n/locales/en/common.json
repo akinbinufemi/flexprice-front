@@ -54,6 +54,16 @@
 		"maxLength": "Must be at most {{max}} characters",
 		"invalidFormat": "Invalid format"
 	},
+	"search": {
+		"loadingOptions": "Loading options...",
+		"searching": "Searching...",
+		"errorLoadingOptions": "Error loading options",
+		"pleaseRetry": "Please try again",
+		"noOptionsAvailable": "No options available",
+		"tryDifferentTerm": "Try a different search term",
+		"items": "{{count}} items",
+		"selectAll": "Select all"
+	},
 	"table": {
 		"noResults": "No results found",
 		"empty": "No data yet",
@@ -85,6 +95,12 @@
 		"noResults": "No results match your search",
 		"getStarted": "Get started by creating your first {{entity}}"
 	},
+	"form": {
+		"key": "Key",
+		"value": "Value",
+		"addAnotherItem": "Add another item",
+		"remove": "Remove"
+	},
 	"labels": {
 		"payload": "Payload",
 		"sort": "Sort",
@@ -93,7 +109,11 @@
 		"taxRateOverrides": "Tax Rate Overrides",
 		"taxes": "Taxes",
 		"yes": "Yes",
-		"no": "No"
+		"no": "No",
+		"editMetadata": "Edit Metadata",
+		"linkCoupon": "Link Coupon",
+		"selectCoupon": "Select Coupon",
+		"chooseACoupon": "Choose a coupon to link"
 	},
 	"nav": {
 		"home": "Home",
