@@ -12,6 +12,8 @@ import EventsApi from '@/api/EventsApi';
 import { getCommandPaletteActionEventName, CommandPaletteActionId } from '@/core/actions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 import { AddButton } from '@/components/atoms';
+import { useLocaleStore } from '@/store/useLocaleStore';
+import { Direction } from '@/config/branding';
 
 const TOTAL_EVENTS = 60; // Number of events to simulate
 const STREAM_DURATION = TOTAL_EVENTS * 1000; // 1 minute
@@ -19,6 +21,9 @@ const STREAM_DURATION = TOTAL_EVENTS * 1000; // 1 minute
 const DebugMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { isDevelopment, activeEnvironment } = useEnvironment();
+	const direction = useLocaleStore((s) => s.direction);
+	const isRTL = direction === Direction.RTL;
+	const anchorClass = isRTL ? 'left-6' : 'right-6';
 	const [isStreaming, setIsStreaming] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [eventsCompleted, setEventsCompleted] = useState(false);
@@ -137,7 +142,7 @@ const DebugMenu = () => {
 					<TooltipTrigger asChild>
 						<Button
 							variant='outline'
-							className='fixed bottom-6 right-6 size-10 z-[100] shadow-sm hover:shadow-md transition-all bg-white'
+							className={`fixed bottom-6 ${anchorClass} size-10 z-[100] shadow-sm hover:shadow-md transition-all bg-white`}
 							onClick={() => setIsOpen(!isOpen)}>
 							{isStreaming ? (
 								<div className='relative'>
@@ -162,21 +167,21 @@ const DebugMenu = () => {
 			<AnimatePresence>
 				{isOpen && (
 					<motion.div
-						initial={{ opacity: 0, scale: 0.95, x: 20 }}
+						initial={{ opacity: 0, scale: 0.95, x: isRTL ? -20 : 20 }}
 						animate={{ opacity: 1, scale: 1, x: 0 }}
-						exit={{ opacity: 0, scale: 0.95, x: 20 }}
+						exit={{ opacity: 0, scale: 0.95, x: isRTL ? -20 : 20 }}
 						transition={{
 							type: 'spring',
 							stiffness: 300,
 							damping: 25,
 							duration: 0.3,
 						}}
-						className='fixed bottom-6 right-6 w-[300px] bg-white/95 dark:bg-gray-900/95 rounded-lg shadow-lg z-[100] border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm'
+						className={`fixed bottom-6 ${anchorClass} w-[300px] bg-white/95 dark:bg-gray-900/95 rounded-lg shadow-lg z-[100] border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm`}
 						drag
 						dragConstraints={{
 							top: -400,
-							left: -600,
-							right: 0,
+							left: isRTL ? 0 : -600,
+							right: isRTL ? 600 : 0,
 							bottom: 0,
 						}}
 						dragElastic={0.1}
