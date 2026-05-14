@@ -1,4 +1,7 @@
-import { includes } from 'lodash';
+// src/utils/region/regionUtils.ts
+import { RegionOption } from '@/config/authTemplates';
+
+// Keep legacy types/functions for backward compat — not used by RegionSelector anymore
 import { config } from '@/config/config';
 import { Region } from '@/types/enums/Region';
 
@@ -7,106 +10,42 @@ export interface DashboardUrls {
 	us: string | undefined;
 }
 
-/**
- * Gets dashboard URLs from environment variables
- * @returns Object containing India and US dashboard URLs
- */
-export const getDashboardUrls = (): DashboardUrls => {
-	return {
-		india: config.region.indiaUrl || undefined,
-		us: config.region.usUrl || undefined,
-	};
-};
+/** @deprecated Use detectCurrentRegion(regions) with config.regions.regions */
+export const getDashboardUrls = (): DashboardUrls => ({
+	india: config.region.indiaUrl || undefined,
+	us: config.region.usUrl || undefined,
+});
 
-/**
- * Detects the current region based on window.location.origin
- * Compares the current origin with configured dashboard URLs
- * @returns Region enum value or null if region cannot be determined
- */
-export const detectCurrentRegion = (): Region | null => {
-	const currentOrigin = window.location.origin;
-	const { india: indiaUrl, us: usUrl } = getDashboardUrls();
-
-	// Extract origin from full URLs with error handling
-	let indiaOrigin: string | null = null;
-	let usOrigin: string | null = null;
-
-	try {
-		if (indiaUrl) {
-			indiaOrigin = new URL(indiaUrl).origin;
-		}
-	} catch (error) {
-		console.warn('Invalid VITE_DASHBOARD_URL_INDIA:', error);
-	}
-
-	try {
-		if (usUrl) {
-			usOrigin = new URL(usUrl).origin;
-		}
-	} catch (error) {
-		console.warn('Invalid VITE_DASHBOARD_URL_US:', error);
-	}
-
-	// Check if current origin matches any configured region
-	const origins = [indiaOrigin, usOrigin].filter(Boolean) as string[];
-
-	if (origins.length === 0) {
-		return null; // No valid URLs configured
-	}
-
-	// Use lodash includes to check if current origin matches any region
-	if (includes(origins, currentOrigin)) {
-		switch (currentOrigin) {
-			case indiaOrigin:
-				return Region.INDIA;
-			case usOrigin:
-				return Region.US;
-			default:
-				return null;
-		}
-	}
-
-	// Fallback: if only one region is configured, return it
-	if (indiaOrigin && !usOrigin) return Region.INDIA;
-	if (usOrigin && !indiaOrigin) return Region.US;
-
-	return null; // Unknown region or multiple regions configured but current doesn't match
-};
-
-/**
- * Gets the dashboard URL for a specific region
- * @param region - The region to get the dashboard URL for
- * @returns The dashboard URL for the region or null if not configured
- */
+/** @deprecated Use switchRegion(region) */
 export const getRegionDashboardUrl = (region: Region): string | null => {
 	const urls = getDashboardUrls();
-
-	switch (region) {
-		case Region.INDIA:
-			return urls.india || null;
-		case Region.US:
-			return urls.us || null;
-		default:
-			return null;
-	}
+	if (region === Region.INDIA) return urls.india || null;
+	if (region === Region.US) return urls.us || null;
+	return null;
 };
 
 /**
- * Switches to a different region by replacing the current URL
- * @param region - The region to switch to
+ * Finds the region whose URL origin matches window.location.origin.
+ * Returns null if no match.
  */
-export const switchRegion = (region: Region): void => {
-	const newUrl = getRegionDashboardUrl(region);
+export const detectCurrentRegion = (regions: RegionOption[]): RegionOption | null => {
+	const currentOrigin = window.location.origin;
+	return (
+		regions.find((r) => {
+			try {
+				return new URL(r.url).origin === currentOrigin;
+			} catch {
+				return false;
+			}
+		}) ?? null
+	);
+};
 
-	if (!newUrl) {
-		console.warn(`Dashboard URL not configured for region: ${region}`);
-		return;
-	}
-
-	// Preserve pathname and search params when switching
+/**
+ * Navigates to the region's dashboard URL, preserving current pathname + search.
+ */
+export const switchRegion = (region: RegionOption): void => {
 	const currentPath = window.location.pathname;
 	const currentSearch = window.location.search;
-	const targetUrl = `${newUrl}${currentPath}${currentSearch}`;
-
-	window.location.replace(targetUrl);
+	window.location.replace(`${region.url}${currentPath}${currentSearch}`);
 };
