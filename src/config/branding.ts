@@ -1,3 +1,18 @@
+// src/config/branding.ts
+import {
+	AUTH_TEMPLATE,
+	AuthPageConfig,
+	LandingContentAlign,
+	LandingTheme,
+	RegionOption,
+	RegionsConfig,
+	Template1Config,
+} from './authTemplates';
+
+// Re-export for backward compat — all existing imports from branding.ts continue to work
+export { AUTH_TEMPLATE, LandingTheme, LandingContentAlign };
+export type { AuthPageConfig, Template1Config, RegionOption, RegionsConfig };
+
 export enum Locale {
 	En = 'en',
 	Ar = 'ar',
@@ -11,16 +26,6 @@ export enum Direction {
 	RTL = 'rtl',
 }
 
-export enum LandingTheme {
-	Light = 'light',
-	Dark = 'dark',
-}
-
-export enum LandingContentAlign {
-	Left = 'left',
-	Center = 'center',
-}
-
 export interface BrandConfig {
 	name: string;
 	logo: string;
@@ -28,23 +33,16 @@ export interface BrandConfig {
 	favicon: string;
 }
 
-export interface AuthPageConfig {
-	tagline: string | null;
-	supportEmail: string;
-	loginBgImage: string | null;
-	slackCommunityUrl: string | null;
-	showTestimonials: boolean;
-	landingTheme: LandingTheme;
-	landingContentAlign: LandingContentAlign;
-	showLogoOnLanding: boolean;
-}
-
 export interface I18nConfig {
 	locale: Locale;
 	direction: Direction;
 }
 
+export const SUPPORTED_LOCALES: Locale[] = [Locale.En, Locale.Ar];
+
 const RTL_LOCALES = new Set<Locale>([Locale.Ar, Locale.He, Locale.Fa, Locale.Ur]);
+
+const DEFAULT_SLACK_URL = 'https://join.slack.com/t/flexpricecommunity/shared_invite/zt-39uat51l0-n8JmSikHZP~bHJNXladeaQ';
 
 export function parseBrandConfig(): BrandConfig {
 	try {
@@ -63,35 +61,94 @@ export function parseBrandConfig(): BrandConfig {
 export function parseAuthPageConfig(): AuthPageConfig {
 	try {
 		const raw = JSON.parse(import.meta.env.VITE_AUTH_CONFIG ?? '{}');
+		const template = (Object.values(AUTH_TEMPLATE) as string[]).includes(raw.template)
+			? (raw.template as AUTH_TEMPLATE)
+			: AUTH_TEMPLATE.TEMPLATE_1;
+
+		if (template === AUTH_TEMPLATE.TEMPLATE_2) {
+			return {
+				template: AUTH_TEMPLATE.TEMPLATE_2,
+				config: {
+					tagline: 'tagline' in raw ? raw.tagline : null,
+					supportEmail: raw.supportEmail ?? 'support@flexprice.io',
+					loginBgImage: 'loginBgImage' in raw ? raw.loginBgImage : null,
+					landingBgColor: raw.landingBgColor ?? null,
+					showLogoOnLanding: raw.showLogoOnLanding ?? false,
+				},
+			};
+		}
+
 		return {
-			tagline: 'tagline' in raw ? raw.tagline : null,
-			supportEmail: raw.supportEmail ?? 'support@flexprice.io',
-			loginBgImage: 'loginBgImage' in raw ? raw.loginBgImage : null,
-			slackCommunityUrl:
-				'slackCommunityUrl' in raw
-					? raw.slackCommunityUrl
-					: 'https://join.slack.com/t/flexpricecommunity/shared_invite/zt-39uat51l0-n8JmSikHZP~bHJNXladeaQ',
-			showTestimonials: raw.showTestimonials ?? true,
-			landingTheme: (Object.values(LandingTheme) as string[]).includes(raw.landingTheme)
-				? (raw.landingTheme as LandingTheme)
-				: LandingTheme.Light,
-			landingContentAlign: (Object.values(LandingContentAlign) as string[]).includes(raw.landingContentAlign)
-				? (raw.landingContentAlign as LandingContentAlign)
-				: LandingContentAlign.Center,
-			showLogoOnLanding: raw.showLogoOnLanding ?? false,
+			template: AUTH_TEMPLATE.TEMPLATE_1,
+			config: {
+				tagline: 'tagline' in raw ? raw.tagline : null,
+				supportEmail: raw.supportEmail ?? 'support@flexprice.io',
+				loginBgImage: 'loginBgImage' in raw ? raw.loginBgImage : null,
+				slackCommunityUrl: 'slackCommunityUrl' in raw ? raw.slackCommunityUrl : DEFAULT_SLACK_URL,
+				showTestimonials: raw.showTestimonials ?? true,
+				landingTheme: (Object.values(LandingTheme) as string[]).includes(raw.landingTheme)
+					? (raw.landingTheme as LandingTheme)
+					: LandingTheme.Light,
+				landingContentAlign: (Object.values(LandingContentAlign) as string[]).includes(raw.landingContentAlign)
+					? (raw.landingContentAlign as LandingContentAlign)
+					: LandingContentAlign.Center,
+				showLogoOnLanding: raw.showLogoOnLanding ?? false,
+			},
 		};
 	} catch {
 		return {
-			tagline: null,
-			supportEmail: 'support@flexprice.io',
-			loginBgImage: null,
-			slackCommunityUrl: 'https://join.slack.com/t/flexpricecommunity/shared_invite/zt-39uat51l0-n8JmSikHZP~bHJNXladeaQ',
-			showTestimonials: true,
-			landingTheme: LandingTheme.Light,
-			landingContentAlign: LandingContentAlign.Center,
-			showLogoOnLanding: false,
+			template: AUTH_TEMPLATE.TEMPLATE_1,
+			config: {
+				tagline: null,
+				supportEmail: 'support@flexprice.io',
+				loginBgImage: null,
+				slackCommunityUrl: DEFAULT_SLACK_URL,
+				showTestimonials: true,
+				landingTheme: LandingTheme.Light,
+				landingContentAlign: LandingContentAlign.Center,
+				showLogoOnLanding: false,
+			},
 		};
 	}
+}
+
+export function parseRegionsConfig(): RegionsConfig {
+	try {
+		const raw = JSON.parse(import.meta.env.VITE_AUTH_CONFIG ?? '{}');
+		if (Array.isArray(raw.regions?.regions) && raw.regions.regions.length > 0) {
+			return {
+				enabled: raw.regions.enabled ?? true,
+				regions: raw.regions.regions as RegionOption[],
+			};
+		}
+	} catch {
+		// fall through to legacy
+	}
+
+	// Backward-compat: build RegionOption[] from old env vars
+	const regions: RegionOption[] = [];
+	if (import.meta.env.VITE_DASHBOARD_URL_INDIA) {
+		regions.push({ key: 'india', label: 'India', url: import.meta.env.VITE_DASHBOARD_URL_INDIA, countryCode: 'IN' });
+	}
+	if (import.meta.env.VITE_DASHBOARD_URL_US) {
+		regions.push({ key: 'us', label: 'United States', url: import.meta.env.VITE_DASHBOARD_URL_US, countryCode: 'US' });
+	}
+	return {
+		enabled: import.meta.env.VITE_DATA_REGION_SELECTION_ENABLED === 'true' && regions.length > 0,
+		regions,
+	};
+}
+
+export function parseAllowedLocales(): Locale[] {
+	try {
+		const raw = JSON.parse(import.meta.env.VITE_AUTH_CONFIG ?? '{}');
+		if (Array.isArray(raw.allowedLocales) && raw.allowedLocales.length > 0) {
+			return raw.allowedLocales.filter((l: string): l is Locale => (Object.values(Locale) as string[]).includes(l));
+		}
+	} catch {
+		// fall through
+	}
+	return SUPPORTED_LOCALES;
 }
 
 export function parseI18nConfig(): I18nConfig {
@@ -102,6 +159,8 @@ export function parseI18nConfig(): I18nConfig {
 
 export const brandConfig: BrandConfig = parseBrandConfig();
 export const authPageConfig: AuthPageConfig = parseAuthPageConfig();
+export const regionsConfig: RegionsConfig = parseRegionsConfig();
+export const allowedLocalesConfig: Locale[] = parseAllowedLocales();
 export const i18nConfig: I18nConfig = parseI18nConfig();
 
 /** Returns the app's active brand config. Not a React hook — safe to call anywhere. */
