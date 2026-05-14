@@ -10,6 +10,7 @@ import { ENTITY_STATUS } from '@/models';
 import GUIDES from '@/constants/guides';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GroupApi } from '@/api/GroupApi';
 import formatDate from '@/utils/common/format_date';
 import formatChips from '@/utils/common/format_chips';
@@ -21,6 +22,7 @@ import {
 } from '@/pages/product-catalog/groups/groupsQueryConfig';
 
 const GroupsPage = () => {
+	const { t } = useTranslation('catalog');
 	const navigate = useNavigate();
 	const [groupDrawerOpen, setGroupDrawerOpen] = useState(false);
 
@@ -64,7 +66,7 @@ const GroupsPage = () => {
 	);
 
 	return (
-		<Page heading='Groups' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('groups.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<GroupDrawer data={null} open={groupDrawerOpen} onOpenChange={setGroupDrawerOpen} refetchQueryKeys={['fetchGroups']} />
 			<ApiDocsContent tags={API_DOCS_TAGS.Groups} />
 			<div className='space-y-6'>

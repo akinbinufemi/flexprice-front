@@ -19,6 +19,7 @@ import {
 import { ENTITY_STATUS } from '@/models';
 import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
+import { useTranslation } from 'react-i18next';
 
 const sortingOptions: SortOption[] = [
 	{
@@ -128,6 +129,7 @@ const formatConversionRate = (rate: string): string => {
 };
 
 const PriceUnitsPage = () => {
+	const { t } = useTranslation('catalog');
 	const [activePriceUnit, setActivePriceUnit] = useState<PriceUnit | null>(null);
 	const [priceUnitDrawerOpen, setPriceUnitDrawerOpen] = useState(false);
 
@@ -207,7 +209,7 @@ const PriceUnitsPage = () => {
 	);
 
 	return (
-		<Page heading='Price Units' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('priceUnits.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<PriceUnitDrawer
 				data={activePriceUnit}
 				open={priceUnitDrawerOpen}

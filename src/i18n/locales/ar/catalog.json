@@ -100,6 +100,9 @@
 		}
 	},
 	"costSheets": {
+		"listPage": {
+			"title": "أوراق التكلفة"
+		},
 		"drawer": {
 			"editTitle": "تعديل جدول التكلفة",
 			"createTitle": "إنشاء جدول تكلفة",
@@ -134,6 +137,9 @@
 		}
 	},
 	"coupons": {
+		"listPage": {
+			"title": "الكوبونات"
+		},
 		"drawer": {
 			"editTitle": "تعديل القسيمة",
 			"createTitle": "إنشاء قسيمة",
@@ -211,6 +217,9 @@
 		}
 	},
 	"groups": {
+		"listPage": {
+			"title": "المجموعات"
+		},
 		"drawer": {
 			"editTitle": "تعديل المجموعة",
 			"createTitle": "إنشاء مجموعة",
@@ -229,6 +238,7 @@
 		},
 		"profile": {
 			"notFound": "المجموعة غير موجودة.",
+			"notFoundPageTitle": "مجموعة",
 			"tabOverview": "نظرة عامة",
 			"tabInformation": "المعلومات"
 		},
@@ -285,6 +295,44 @@
 			"archiving": "جاري الأرشفة…",
 			"confirmDescription": "هل أنت متأكد أنك تريد أرشفة «{{name}}»؟ لن تكون هذه الخطة متاحة للاشتراكات الجديدة."
 		},
+		"listPage": {
+			"title": "الخطط",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"status": "الحالة",
+				"createdAt": "تاريخ الإنشاء"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"columns": {
+				"name": "الاسم",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"paginationUnit": "خطط التسعير",
+			"rowActions": {
+				"edit": "تعديل",
+				"duplicate": "نسخ",
+				"archive": "أرشفة"
+			},
+			"createWithAi": "إنشاء بالذكاء الاصطناعي",
+			"emptyStateCustom": {
+				"heading": "الخطط",
+				"description": "أنشئ خطة لعرض التسعير والبدء بفوترة العملاء."
+			},
+			"toast": {
+				"archiveSuccess": "تمت أرشفة الخطة بنجاح",
+				"archiveErrorFallback": "تعذّرت أرشفة الخطة"
+			}
+		},
 		"tabs": {
 			"creditGrants": "منح الرصيد",
 			"entitlements": "الاستحقاقات"
@@ -295,7 +343,8 @@
 			"metadata": "البيانات الوصفية"
 		},
 		"pricing": {
-			"noWidget": "لا يوجد عنصر واجهة للتسعير"
+			"noWidget": "لا يوجد عنصر واجهة للتسعير",
+			"widgetsPageTitle": "عناصر التسعير"
 		},
 		"organisms": {
 			"chargeLabels": {
@@ -371,6 +420,9 @@
 		}
 	},
 	"priceUnits": {
+		"listPage": {
+			"title": "وحدات السعر"
+		},
 		"drawer": {
 			"editTitle": "تعديل وحدة السعر",
 			"createTitle": "إنشاء وحدة سعر",
@@ -604,6 +656,12 @@
 		}
 	},
 	"entityChargesPage": {
+		"addChargesPageTitle": "إضافة رسوم إلى {{name}}",
+		"entityTypeDisplay": {
+			"PLAN": "خطة",
+			"ADDON": "إضافة",
+			"COSTSHEET": "ورقة تكلفة"
+		},
 		"selectChargeTypeTitle": "اختر نوع الرسم",
 		"addChargeOptionsGroupAria": "خيارات إضافة رسم",
 		"addFixedCharge": "إضافة رسم ثابت",

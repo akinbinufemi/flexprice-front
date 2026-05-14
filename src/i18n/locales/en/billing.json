@@ -137,6 +137,14 @@
 	"creditNotes": {
 		"title": "Credit Notes",
 		"empty": "No credit notes found",
+		"toast": {
+			"fetchListError": "Error fetching credit notes"
+		},
+		"list": {
+			"paginationUnit": "Credit Notes",
+			"emptyHeading": "Issue a credit note",
+			"emptyDescription": "Add a credit note to adjust or refund customer invoices."
+		},
 		"detailPage": {
 			"title": "Credit Note Details",
 			"creditNoteNumber": "Credit Note Number",
@@ -197,6 +205,49 @@
 	},
 	"subscriptions": {
 		"title": "Subscriptions",
+		"listPage": {
+			"sortLabels": {
+				"createdAt": "Created At",
+				"updatedAt": "Updated At",
+				"startDate": "Start Date",
+				"endDate": "End Date"
+			},
+			"filterLabels": {
+				"customer": "Customer",
+				"plan": "Plan",
+				"status": "Status",
+				"billingCadence": "Billing Cadence",
+				"billingPeriod": "Billing Period"
+			},
+			"billingCadence": {
+				"recurring": "Recurring",
+				"onetime": "One-time"
+			},
+			"billingPeriod": {
+				"daily": "Daily",
+				"weekly": "Weekly",
+				"monthly": "Monthly",
+				"quarterly": "Quarterly",
+				"halfYearly": "Half-yearly",
+				"annual": "Annual",
+				"onetime": "One-time"
+			},
+			"columns": {
+				"customer": "Customer",
+				"plan": "Plan",
+				"status": "Status",
+				"startDate": "Start Date",
+				"renewalDate": "Renewal Date"
+			},
+			"paginationUnit": "Subscriptions",
+			"emptyState": {
+				"description": "Create your first subscription to start billing your customers.",
+				"createButton": "Create Subscription"
+			},
+			"inheritedReadOnlyTooltip": "Inherited subscriptions are read-only. Make changes on the parent subscription.",
+			"cancelAction": "Cancel",
+			"entityNameForActions": "Subscription"
+		},
 		"empty": "No subscriptions found",
 		"addSuccess": "Subscription created successfully",
 		"archiveConfirm": "Are you sure you want to archive this subscription?",
@@ -524,6 +575,7 @@
 		}
 	},
 	"createInvoice": {
+		"pageTitle": "Create One-off Invoice",
 		"issueDate": "Issue Date",
 		"issueDatePlaceholder": "Select issue date",
 		"currency": "Currency",

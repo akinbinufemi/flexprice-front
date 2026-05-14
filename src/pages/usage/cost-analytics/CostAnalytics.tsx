@@ -99,7 +99,7 @@ const CostAnalyticsPage: React.FC = () => {
 	};
 
 	return (
-		<Page heading='Analytics'>
+		<Page heading={t('usage.costAnalytics.pageTitle')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
 				{/* Filters Section */}

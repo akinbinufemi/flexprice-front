@@ -211,7 +211,7 @@ const CreateInvoicePage: FC = () => {
 		: '--';
 
 	return (
-		<Page heading='Create One-off Invoice'>
+		<Page heading={t('createInvoice.pageTitle')}>
 			<div className='space-y-6'>
 				<div className='rounded-xl border border-gray-300 p-6'>
 					<div className='p-4'>

@@ -74,7 +74,7 @@ const GroupProfilePage = () => {
 
 	if (!group) {
 		return (
-			<Page heading='Group'>
+			<Page heading={t('groups.profile.notFoundPageTitle')}>
 				<div className='flex items-center justify-center h-64'>
 					<p className='text-muted-foreground'>{t('catalog:groups.profile.notFound')}</p>
 				</div>

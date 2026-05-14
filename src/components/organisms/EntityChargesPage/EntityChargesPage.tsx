@@ -222,6 +222,11 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 		return RouteNames.costSheetDetails;
 	}, [entityType]);
 
+	const chargesPageHeading = useMemo(() => {
+		const displayName = entityName || t(`entityChargesPage.entityTypeDisplay.${entityType}`);
+		return t('entityChargesPage.addChargesPageTitle', { name: displayName });
+	}, [entityName, entityType, t]);
+
 	// ===== MEMOIZED CALLBACKS =====
 	const handleAddNewPrice = useCallback((type: PRICE_TYPE) => {
 		const newPrice = createEmptyPrice(type);
@@ -401,7 +406,7 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 
 	// ===== RENDER =====
 	return (
-		<Page documentTitle={`Add Charges to ${entityName || entityType}`} heading={`Add Charges to ${entityName || entityType}`}>
+		<Page documentTitle={chargesPageHeading} heading={chargesPageHeading}>
 			<div className='space-y-6'>
 				{/* Fixed charges section */}
 				{state.recurringCharges.map((charge, index) => (

@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
 import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
+import { useTranslation } from 'react-i18next';
 
 const sortingOptions: SortOption[] = [
 	{
@@ -102,6 +103,7 @@ const initialSorts: SortOption[] = [
 ];
 
 const CostSheetsPage = () => {
+	const { t } = useTranslation('catalog');
 	const [activeCostSheet, setActiveCostSheet] = useState<CostSheet | null>(null);
 	const [costSheetDrawerOpen, setCostSheetDrawerOpen] = useState(false);
 	const navigate = useNavigate();
@@ -166,7 +168,7 @@ const CostSheetsPage = () => {
 	);
 
 	return (
-		<Page heading='Cost Sheets' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('costSheets.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<CostSheetDrawer
 				data={activeCostSheet}
 				open={costSheetDrawerOpen}

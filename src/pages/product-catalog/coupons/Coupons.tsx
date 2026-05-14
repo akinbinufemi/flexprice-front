@@ -24,6 +24,7 @@ import { RouteNames } from '@/core/routes/Routes';
 import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
+import { useTranslation } from 'react-i18next';
 
 const sortingOptions: SortOption[] = [
 	{
@@ -108,6 +109,7 @@ const initialSorts: SortOption[] = [
 ];
 
 const CouponsPage = () => {
+	const { t } = useTranslation('catalog');
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 	const navigate = useNavigate();
@@ -191,7 +193,7 @@ const CouponsPage = () => {
 	return (
 		<>
 			<Page
-				heading='Coupons'
+				heading={t('coupons.listPage.title')}
 				headingCTA={
 					<div className='flex justify-between items-center gap-2'>
 						<AddButton onClick={handleCreateCoupon} />

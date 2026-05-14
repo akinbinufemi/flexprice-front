@@ -137,6 +137,14 @@
 	"creditNotes": {
 		"title": "إشعارات دائنة",
 		"empty": "لم يتم العثور على إشعارات دائنة",
+		"toast": {
+			"fetchListError": "خطأ في جلب الإشعارات الدائنة"
+		},
+		"list": {
+			"paginationUnit": "إشعارات دائنة",
+			"emptyHeading": "إصدار إشعار دائن",
+			"emptyDescription": "أضف إشعاراً دائناً لتعديل فواتير العملاء أو استرداد مبالغها."
+		},
 		"detailPage": {
 			"title": "تفاصيل الإشعار الدائن",
 			"creditNoteNumber": "رقم الإشعار الدائن",
@@ -197,6 +205,49 @@
 	},
 	"subscriptions": {
 		"title": "الاشتراكات",
+		"listPage": {
+			"sortLabels": {
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث",
+				"startDate": "تاريخ البدء",
+				"endDate": "تاريخ الانتهاء"
+			},
+			"filterLabels": {
+				"customer": "العميل",
+				"plan": "الخطة",
+				"status": "الحالة",
+				"billingCadence": "إيقاع الفوترة",
+				"billingPeriod": "فترة الفوترة"
+			},
+			"billingCadence": {
+				"recurring": "متكرر",
+				"onetime": "مرة واحدة"
+			},
+			"billingPeriod": {
+				"daily": "يومي",
+				"weekly": "أسبوعي",
+				"monthly": "شهري",
+				"quarterly": "ربع سنوي",
+				"halfYearly": "نصف سنوي",
+				"annual": "سنوي",
+				"onetime": "مرة واحدة"
+			},
+			"columns": {
+				"customer": "العميل",
+				"plan": "الخطة",
+				"status": "الحالة",
+				"startDate": "تاريخ البدء",
+				"renewalDate": "تاريخ التجديد"
+			},
+			"paginationUnit": "اشتراكات",
+			"emptyState": {
+				"description": "أنشئ أول اشتراك للبدء بفوترة عملائك.",
+				"createButton": "إنشاء اشتراك"
+			},
+			"inheritedReadOnlyTooltip": "الاشتراكات الموروثة للقراءة فقط. عدّل الاشتراك الأب.",
+			"cancelAction": "إلغاء",
+			"entityNameForActions": "اشتراك"
+		},
 		"empty": "لم يتم العثور على اشتراكات",
 		"addSuccess": "تم إنشاء الاشتراك بنجاح",
 		"archiveConfirm": "هل أنت متأكد أنك تريد أرشفة هذا الاشتراك؟",
@@ -524,6 +575,7 @@
 		}
 	},
 	"createInvoice": {
+		"pageTitle": "إنشاء فاتورة لمرة واحدة",
 		"issueDate": "تاريخ الإصدار",
 		"issueDatePlaceholder": "اختر تاريخ الإصدار",
 		"currency": "العملة",

@@ -560,7 +560,7 @@ const PricingPage = () => {
 		return (
 			<div className='space-y-6'>
 				<Page
-					heading='Pricing Widgets'
+					heading={t('plans.pricing.widgetsPageTitle')}
 					headingCTA={
 						<AddButton
 							onClick={() => {
@@ -596,7 +596,7 @@ const PricingPage = () => {
 	return (
 		<Page
 			headingClassName='items-center'
-			heading='Pricing Widgets'
+			heading={t('plans.pricing.widgetsPageTitle')}
 			headingCTA={
 				<div className='w-full flex justify-start gap-4'>
 					<Select

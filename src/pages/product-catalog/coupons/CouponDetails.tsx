@@ -14,7 +14,7 @@ import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { useTranslation } from 'react-i18next';
 
 const CouponDetails = () => {
-	const { t } = useTranslation(['catalog']);
+	const { t } = useTranslation(['catalog', 'common']);
 	const { id } = useParams<{ id: string }>();
 
 	const {
@@ -34,7 +34,7 @@ const CouponDetails = () => {
 	if (isError || !coupon) {
 		toast.error('Error loading coupon details');
 		return (
-			<Page heading='Error'>
+			<Page heading={t('common:errors.loadFailedShort')}>
 				<div className='flex items-center justify-center h-64'>
 					<div className='text-muted-foreground'>{t('catalog:coupons.details.loadError')}</div>
 				</div>

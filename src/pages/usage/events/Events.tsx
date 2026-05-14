@@ -301,7 +301,7 @@ const EventsPage: React.FC = () => {
 	}, [apiParams]);
 
 	return (
-		<Page heading='Events'>
+		<Page heading={t('events.listPage.title')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<PropertyFilterQueryBuilder

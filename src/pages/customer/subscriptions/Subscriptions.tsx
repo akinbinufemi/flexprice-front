@@ -17,7 +17,6 @@ import {
 import { BILLING_CADENCE } from '@/models/Invoice';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { SUBSCRIPTION_STATUS } from '@/models/Subscription';
-import { toSentenceCase } from '@/utils/common/helper_functions';
 import { EXPAND } from '@/models/expand';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import { searchCustomersForFilter, searchPlansForFilter } from '@/utils/filterSearchHelpers';
@@ -26,93 +25,27 @@ import { RouteNames } from '@/core/routes/Routes';
 import formatDate from '@/utils/common/format_date';
 import { Trash2 } from 'lucide-react';
 import { SubscriptionResponse } from '@/types/dto/Subscription';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import SubscriptionCancelDialog from '@/components/molecules/SubscriptionCancelDialog/SubscriptionCancelDialog';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
 
-const sortingOptions: SortOption[] = [
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'start_date',
-		label: 'Start Date',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'end_date',
-		label: 'End Date',
-		direction: SortDirection.DESC,
-	},
-];
+const BILLING_CADENCE_I18N_KEYS: Record<BILLING_CADENCE, 'recurring' | 'onetime'> = {
+	[BILLING_CADENCE.RECURRING]: 'recurring',
+	[BILLING_CADENCE.ONETIME]: 'onetime',
+};
 
-const filterOptions: FilterField[] = [
+const BILLING_PERIOD_I18N_KEYS: Record<BILLING_PERIOD, 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'halfYearly' | 'annual' | 'onetime'> =
 	{
-		field: 'customer_id',
-		label: 'Customer',
-		fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		asyncConfig: {
-			searchFn: searchCustomersForFilter,
-		},
-	},
-	{
-		field: 'plan_id',
-		label: 'Plan',
-		fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		asyncConfig: {
-			searchFn: searchPlansForFilter,
-		},
-	},
-	{
-		field: 'subscription_status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: SUBSCRIPTION_STATUS.ACTIVE, label: 'Active' },
-			{ value: SUBSCRIPTION_STATUS.CANCELLED, label: 'Cancelled' },
-			{ value: SUBSCRIPTION_STATUS.INCOMPLETE, label: 'Incomplete' },
-			{ value: SUBSCRIPTION_STATUS.TRIALING, label: 'Trialing' },
-			{ value: SUBSCRIPTION_STATUS.DRAFT, label: 'Draft' },
-		],
-	},
-	{
-		field: 'billing_cadence',
-		label: 'Billing Cadence',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN],
-		dataType: DataType.ARRAY,
-		options: Object.values(BILLING_CADENCE).map((cadence) => ({
-			value: cadence,
-			label: cadence.charAt(0).toUpperCase() + cadence.slice(1).toLowerCase(),
-		})),
-	},
-	{
-		field: 'billing_period',
-		label: 'Billing Period',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN],
-		dataType: DataType.ARRAY,
-		options: Object.values(BILLING_PERIOD).map((period) => ({
-			value: period,
-			label: toSentenceCase(period.replace('_', ' ')),
-		})),
-	},
-];
+		[BILLING_PERIOD.DAILY]: 'daily',
+		[BILLING_PERIOD.WEEKLY]: 'weekly',
+		[BILLING_PERIOD.MONTHLY]: 'monthly',
+		[BILLING_PERIOD.QUARTERLY]: 'quarterly',
+		[BILLING_PERIOD.HALF_YEARLY]: 'halfYearly',
+		[BILLING_PERIOD.ANNUAL]: 'annual',
+		[BILLING_PERIOD.ONETIME]: 'onetime',
+	};
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -121,14 +54,6 @@ const initialFilters: FilterCondition[] = [
 		valueArray: [SUBSCRIPTION_STATUS.ACTIVE],
 		dataType: DataType.ARRAY,
 		id: 'initial-status',
-	},
-];
-
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
 	},
 ];
 
@@ -154,30 +79,133 @@ const SubscriptionsPage = () => {
 	const { t } = useTranslation(['billing', 'common']);
 	const [cancelSubscriptionId, setCancelSubscriptionId] = useState<string | null>(null);
 
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'created_at',
+				label: t('subscriptions.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('subscriptions.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'start_date',
+				label: t('subscriptions.listPage.sortLabels.startDate'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'end_date',
+				label: t('subscriptions.listPage.sortLabels.endDate'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'customer_id',
+				label: t('subscriptions.listPage.filterLabels.customer'),
+				fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				asyncConfig: {
+					searchFn: searchCustomersForFilter,
+				},
+			},
+			{
+				field: 'plan_id',
+				label: t('subscriptions.listPage.filterLabels.plan'),
+				fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				asyncConfig: {
+					searchFn: searchPlansForFilter,
+				},
+			},
+			{
+				field: 'subscription_status',
+				label: t('subscriptions.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: SUBSCRIPTION_STATUS.ACTIVE, label: t('common:status.active') },
+					{ value: SUBSCRIPTION_STATUS.CANCELLED, label: t('common:status.cancelled') },
+					{ value: SUBSCRIPTION_STATUS.INCOMPLETE, label: t('common:status.incomplete') },
+					{ value: SUBSCRIPTION_STATUS.TRIALING, label: t('common:status.trialing') },
+					{ value: SUBSCRIPTION_STATUS.DRAFT, label: t('common:status.draft') },
+				],
+			},
+			{
+				field: 'billing_cadence',
+				label: t('subscriptions.listPage.filterLabels.billingCadence'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN],
+				dataType: DataType.ARRAY,
+				options: Object.values(BILLING_CADENCE).map((cadence) => ({
+					value: cadence,
+					label: t(`subscriptions.listPage.billingCadence.${BILLING_CADENCE_I18N_KEYS[cadence]}`),
+				})),
+			},
+			{
+				field: 'billing_period',
+				label: t('subscriptions.listPage.filterLabels.billingPeriod'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN],
+				dataType: DataType.ARRAY,
+				options: Object.values(BILLING_PERIOD).map((period) => ({
+					value: period,
+					label: t(`subscriptions.listPage.billingPeriod.${BILLING_PERIOD_I18N_KEYS[period]}`),
+				})),
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('subscriptions.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const handleEmptyCreate = useCallback(() => {
+		navigate(RouteNames.customers);
+	}, [navigate]);
+
 	const columns: ColumnData<SubscriptionResponse>[] = useMemo(
 		() => [
 			{
-				title: 'Customer',
+				title: t('subscriptions.listPage.columns.customer'),
 				render: (row) => (
 					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>{row.customer?.name || row.customer_id}</RedirectCell>
 				),
 			},
 			{
-				title: 'Plan',
+				title: t('subscriptions.listPage.columns.plan'),
 				render: (row) => <RedirectCell redirectUrl={`${RouteNames.plan}/${row.plan_id}`}>{row.plan?.name || row.plan_id}</RedirectCell>,
 			},
 			{
-				title: 'Status',
+				title: t('subscriptions.listPage.columns.status'),
 				render: (row) => {
 					return getSubscriptionStatusChip(row.subscription_status, t);
 				},
 			},
 			{
-				title: 'Start Date',
+				title: t('subscriptions.listPage.columns.startDate'),
 				render: (row) => formatDate(row.start_date),
 			},
 			{
-				title: 'Renewal Date',
+				title: t('subscriptions.listPage.columns.renewalDate'),
 				render: (row) => formatDate(row.current_period_end),
 			},
 			{
@@ -185,7 +213,7 @@ const SubscriptionsPage = () => {
 				render: (row) => {
 					if (isInheritedSubscription(row)) {
 						return (
-							<Tooltip delayDuration={0} content='Inherited subscriptions are read-only. Make changes on the parent subscription.'>
+							<Tooltip delayDuration={0} content={t('subscriptions.listPage.inheritedReadOnlyTooltip')}>
 								<span className='inline-flex cursor-default text-muted-foreground tabular-nums'>—</span>
 							</Tooltip>
 						);
@@ -196,7 +224,7 @@ const SubscriptionsPage = () => {
 							deleteMutationFn={async () => Promise.resolve()}
 							refetchQueryKey='fetchSubscriptions'
 							isArchiveDisabled={true}
-							entityName='Subscription'
+							entityName={t('subscriptions.listPage.entityNameForActions')}
 							edit={{
 								path: `${RouteNames.subscriptions}/${row.id}/edit`,
 							}}
@@ -205,7 +233,7 @@ const SubscriptionsPage = () => {
 							}}
 							customActions={[
 								{
-									text: 'Cancel',
+									text: t('subscriptions.listPage.cancelAction'),
 									icon: <Trash2 />,
 									enabled: row.subscription_status !== SUBSCRIPTION_STATUS.CANCELLED,
 									onClick: () => setCancelSubscriptionId(row.id),
@@ -221,7 +249,7 @@ const SubscriptionsPage = () => {
 
 	return (
 		<>
-			<Page heading='Subscriptions'>
+			<Page heading={t('subscriptions.title')}>
 				<ApiDocsContent tags={API_DOCS_TAGS.Subscriptions} />
 				<QueryableDataArea<SubscriptionResponse>
 					queryConfig={{
@@ -255,12 +283,13 @@ const SubscriptionsPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Subscriptions',
+						unit: t('subscriptions.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						heading: 'Subscriptions',
-						description: 'Create your first subscription to start billing your customers.',
-						buttonLabel: 'Create Subscription',
+						heading: t('subscriptions.title'),
+						description: t('subscriptions.listPage.emptyState.description'),
+						buttonLabel: t('subscriptions.listPage.emptyState.createButton'),
+						buttonAction: handleEmptyCreate,
 						tags: API_DOCS_TAGS.Subscriptions,
 						tutorials: GUIDES.customers.tutorials,
 					}}

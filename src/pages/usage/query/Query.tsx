@@ -218,7 +218,7 @@ const QueryPage: React.FC = () => {
 	} satisfies ChartConfig;
 
 	return (
-		<Page heading='Query'>
+		<Page heading={t('usage.query.pageTitle')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<QueryBuilder

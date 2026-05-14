@@ -6,7 +6,7 @@ import { Plan } from '@/models/Plan';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PlanApi } from '@/api/PlanApi';
 import {
@@ -22,65 +22,11 @@ import {
 import { ENTITY_STATUS } from '@/models';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import toast from 'react-hot-toast';
 import { Copy, EllipsisVertical, EyeOff, Pencil, WandSparkles } from 'lucide-react';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { useTranslation } from 'react-i18next';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'lookup_key',
-		label: 'Lookup Key',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-];
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -106,16 +52,8 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
 const PlansPage = () => {
-	const { t } = useTranslation(['catalog', 'common']);
+	const { t, i18n } = useTranslation(['catalog', 'common']);
 	const [activePlan, setActivePlan] = useState<Plan | null>(null);
 	const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
 	const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
@@ -123,6 +61,76 @@ const PlansPage = () => {
 	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 	const [planToArchive, setPlanToArchive] = useState<Plan | null>(null);
 	const navigate = useNavigate();
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('plans.listPage.sortLabels.name'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'created_at',
+				label: t('plans.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('plans.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('plans.listPage.filterLabels.name'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'lookup_key',
+				label: t('plans.listPage.filterLabels.lookupKey'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'status',
+				label: t('plans.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('plans.listPage.filterStatus.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('plans.listPage.filterStatus.inactive') },
+				],
+			},
+			{
+				field: 'created_at',
+				label: t('plans.listPage.filterLabels.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('plans.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
 
 	/** When the account has at least one plan, show Create with AI in the header; hide it on the true empty state to avoid duplicating the in-panel CTA. */
 	const { data: hasAnyPlanInSystem } = useQuery({
@@ -138,68 +146,72 @@ const PlansPage = () => {
 	const { mutate: archivePlan, isPending: isArchiving } = useMutation({
 		mutationFn: (id: string) => PlanApi.deletePlan(id),
 		onSuccess: async () => {
-			toast.success('Plan archived successfully');
+			toast.success(i18n.t('catalog:plans.listPage.toast.archiveSuccess'));
 			setArchiveDialogOpen(false);
 			setPlanToArchive(null);
 			await refetchQueries('fetchPlans');
 		},
 		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to archive plan');
+			toast.error(error.message || i18n.t('catalog:plans.listPage.toast.archiveErrorFallback'));
 		},
 	});
 
-	const handleOnAdd = () => {
+	const handleOnAdd = useCallback(() => {
 		setActivePlan(null);
 		setPlanDrawerOpen(true);
-	};
+	}, []);
 
-	const handleEdit = (plan: Plan) => {
+	const handleEdit = useCallback((plan: Plan) => {
 		setActivePlan(plan);
 		setPlanDrawerOpen(true);
-	};
+	}, []);
 
-	const handleDuplicate = (plan: Plan) => {
+	const handleDuplicate = useCallback((plan: Plan) => {
 		setPlanToDuplicate(plan);
 		setDuplicateDialogOpen(true);
-	};
+	}, []);
 
-	const getRowDropdownOptions = (row: Plan): DropdownMenuOption[] => [
-		{
-			label: 'Edit',
-			icon: <Pencil />,
-			onSelect: () => handleEdit(row),
-		},
-		{
-			label: 'Duplicate',
-			icon: <Copy />,
-			onSelect: () => handleDuplicate(row),
-		},
-		{
-			label: 'Archive',
-			icon: <EyeOff />,
-			onSelect: () => {
-				setPlanToArchive(row);
-				setArchiveDialogOpen(true);
+	const getRowDropdownOptions = useCallback(
+		(row: Plan): DropdownMenuOption[] => [
+			{
+				label: t('plans.listPage.rowActions.edit'),
+				icon: <Pencil />,
+				onSelect: () => handleEdit(row),
 			},
-			disabled: row.status !== ENTITY_STATUS.PUBLISHED,
-		},
-	];
+			{
+				label: t('plans.listPage.rowActions.duplicate'),
+				icon: <Copy />,
+				onSelect: () => handleDuplicate(row),
+			},
+			{
+				label: t('plans.listPage.rowActions.archive'),
+				icon: <EyeOff />,
+				onSelect: () => {
+					setPlanToArchive(row);
+					setArchiveDialogOpen(true);
+				},
+				disabled: row.status !== ENTITY_STATUS.PUBLISHED,
+			},
+		],
+		[t, handleEdit, handleDuplicate],
+	);
 
 	const columns: ColumnData<Plan>[] = useMemo(
 		() => [
 			{
 				fieldName: 'name',
-				title: 'Name',
+				title: t('plans.listPage.columns.name'),
 			},
 			{
-				title: 'Status',
+				title: t('plans.listPage.columns.status'),
 				render: (row) => {
-					const label = formatChips(row.status);
-					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+					const isActive = row.status === ENTITY_STATUS.PUBLISHED;
+					const label = isActive ? t('plans.listPage.filterStatus.active') : t('plans.listPage.filterStatus.inactive');
+					return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
-				title: 'Updated at',
+				title: t('plans.listPage.columns.updatedAt'),
 				render: (row) => {
 					return formatDate(row.updated_at);
 				},
@@ -218,12 +230,33 @@ const PlansPage = () => {
 				),
 			},
 		],
-		[],
+		[t, getRowDropdownOptions],
+	);
+
+	const emptyStateCustom = useMemo(
+		() => (
+			<div className='mx-auto flex h-[360px] w-full flex-col items-center justify-center rounded-[6px] border border-[#E9E9E9] bg-[#fafafa] px-4'>
+				<div className='mb-4 text-center text-[20px] font-medium leading-normal text-gray-700'>
+					{t('plans.listPage.emptyStateCustom.heading')}
+				</div>
+				<div className='mb-8 max-w-[350px] bg-[#F9F9F9] text-center text-[16px] font-normal leading-normal text-gray-400'>
+					{t('plans.listPage.emptyStateCustom.description')}
+				</div>
+				<Button
+					variant='outline'
+					prefixIcon={<WandSparkles className='text-black' />}
+					onClick={() => navigate(RouteNames.pricingSetup, { state: { from: 'plans' } })}
+					className='!border-indigo-200 !bg-white !p-5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'>
+					<span className='analyzing-prompt-shimmer text-sm font-medium'>{t('plans.listPage.createWithAi')}</span>
+				</Button>
+			</div>
+		),
+		[t, navigate],
 	);
 
 	return (
 		<Page
-			heading='Plans'
+			heading={t('plans.listPage.title')}
 			headingCTA={
 				<div className='flex items-center gap-2'>
 					{hasAnyPlanInSystem ? (
@@ -232,7 +265,7 @@ const PlansPage = () => {
 							prefixIcon={<WandSparkles className='text-indigo-600' />}
 							onClick={() => navigate(RouteNames.pricingSetup, { state: { from: 'plans' } })}
 							className='border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'>
-							<span className='analyzing-prompt-shimmer font-medium'>Create with AI</span>
+							<span className='analyzing-prompt-shimmer font-medium'>{t('plans.listPage.createWithAi')}</span>
 						</Button>
 					) : null}
 					<AddButton onClick={handleOnAdd} />
@@ -252,14 +285,14 @@ const PlansPage = () => {
 			<Dialog
 				isOpen={archiveDialogOpen}
 				onOpenChange={setArchiveDialogOpen}
-				title={t('catalog:plans.archive.title')}
-				description={t('catalog:plans.archive.confirmDescription', { name: planToArchive?.name ?? '' })}>
+				title={t('plans.archive.title')}
+				description={t('plans.archive.confirmDescription', { name: planToArchive?.name ?? '' })}>
 				<div className='flex justify-end gap-2'>
 					<Button variant='outline' onClick={() => setArchiveDialogOpen(false)}>
 						{t('common:actions.cancel')}
 					</Button>
 					<Button variant='destructive' onClick={() => planToArchive && archivePlan(planToArchive.id)} disabled={isArchiving}>
-						{isArchiving ? t('catalog:plans.archive.archiving') : t('common:actions.archive')}
+						{isArchiving ? t('plans.archive.archiving') : t('common:actions.archive')}
 					</Button>
 				</div>
 			</Dialog>
@@ -304,24 +337,10 @@ const PlansPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Pricing Plans',
+						unit: t('plans.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						customComponent: (
-							<div className='mx-auto flex h-[360px] w-full flex-col items-center justify-center rounded-[6px] border border-[#E9E9E9] bg-[#fafafa] px-4'>
-								<div className='mb-4 text-center text-[20px] font-medium leading-normal text-gray-700'>Plans</div>
-								<div className='mb-8 max-w-[350px] bg-[#F9F9F9] text-center text-[16px] font-normal leading-normal text-gray-400'>
-									Create a plan to display pricing and start billing customers.
-								</div>
-								<Button
-									variant='outline'
-									prefixIcon={<WandSparkles className='text-black' />}
-									onClick={() => navigate(RouteNames.pricingSetup, { state: { from: 'plans' } })}
-									className='!border-indigo-200 !bg-white !p-5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700'>
-									<span className='analyzing-prompt-shimmer text-sm font-medium'>Create with AI</span>
-								</Button>
-							</div>
-						),
+						customComponent: emptyStateCustom,
 						tags: API_DOCS_TAGS.Plans,
 						tutorials: GUIDES.plans.tutorials,
 					}}
