@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Link } from 'react-router';
-import { BsChevronRight } from 'react-icons/bs';
+import { BsChevronRight, BsChevronLeft } from 'react-icons/bs';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -9,6 +9,8 @@ import LocaleSelector from '@/components/molecules/LocaleSelector/LocaleSelector
 import IntercomMessenger from '@/core/services/intercom/IntercomMessenger';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/atoms';
+import { useLocaleStore } from '@/store/useLocaleStore';
+import { Direction } from '@/config/branding';
 
 const COMMAND_PALETTE_EVENT = 'open-command-palette';
 
@@ -37,6 +39,8 @@ const BreadCrumbsSearchTrigger: React.FC = () => {
 const BreadCrumbs: FC = () => {
 	useBreadcrumbs();
 	const { breadcrumbs, isLoading } = useBreadcrumbsStore();
+	const direction = useLocaleStore((s) => s.direction);
+	const Separator = direction === Direction.RTL ? BsChevronLeft : BsChevronRight;
 
 	if (isLoading) {
 		return (
@@ -80,7 +84,7 @@ const BreadCrumbs: FC = () => {
 							)}
 							{index < breadcrumbs.length - 1 && (
 								<span className='shrink-0'>
-									<BsChevronRight />
+									<Separator />
 								</span>
 							)}
 						</span>
