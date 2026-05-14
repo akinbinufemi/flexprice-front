@@ -84,12 +84,12 @@ const Template2: React.FC<Template2Props> = ({ config, currentTab, switchTab }) 
 				</div>
 			</div>
 
-			{/* Right — background image, logo top-left, tagline bottom-left (always LTR regardless of locale) */}
+			{/* Right — background image, logo + tagline grouped & centered-left (always LTR) */}
 			<div className='w-[55%] min-h-screen relative' style={rightPanelStyle} dir='ltr'>
-				<div className='absolute inset-0 flex flex-col justify-between items-start p-10'>
-					<img src={config.landingLogo ?? logo} alt={name} className='max-h-12 object-contain object-left' />
+				<div className='absolute inset-0 flex flex-col justify-center items-start px-14'>
+					<img src={config.landingLogo ?? logo} alt={name} className='max-h-14 object-contain object-left mb-6' />
 					{config.tagline && (
-						<p className='text-3xl font-bold text-white leading-tight text-left' style={{ maxWidth: '16rem' }}>
+						<p className='text-4xl font-bold text-white leading-tight text-left' style={{ maxWidth: '22rem' }}>
 							{config.tagline}
 						</p>
 					)}
