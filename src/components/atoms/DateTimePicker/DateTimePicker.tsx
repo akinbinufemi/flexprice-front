@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarIcon } from '@radix-ui/react-icons';
+import { CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Button, Calendar, Popover, PopoverContent, PopoverTrigger, ScrollArea, ScrollBar } from '@/components/ui';
+import { Calendar, Popover, PopoverContent, PopoverTrigger } from '@/components/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { CalendarTimezone } from '@/components/ui/calendar';
 import {
 	formatDateTimeInZone,
@@ -24,12 +25,37 @@ interface Props {
 	title?: string;
 }
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
 export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, placeholder, title }) => {
 	const [isOpen, setIsOpen] = React.useState(false);
 	const [timezone, setTimezone] = React.useState<CalendarTimezone>('local');
-
-	const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 	const tz = timezone as DateTimezone;
+
+	const timeInZone = date ? getTimeInZone(date, tz) : null;
+	const [hourInput, setHourInput] = React.useState(timeInZone ? pad(timeInZone.hours) : '');
+	const [minuteInput, setMinuteInput] = React.useState(timeInZone ? pad(timeInZone.minutes) : '');
+
+	// Sync inputs when date or timezone changes externally
+	React.useEffect(() => {
+		if (!date) {
+			setHourInput('');
+			setMinuteInput('');
+			return;
+		}
+		const t = getTimeInZone(date, tz);
+		setHourInput(pad(t.hours));
+		setMinuteInput(pad(t.minutes));
+	}, [date, tz]);
+
+	const applyTime = React.useCallback(
+		(h: number, m: number) => {
+			if (!date) return;
+			const { year, month, date: d } = getCalendarDayInZone(date, tz);
+			setDate(dateTimeInZone(year, month, d, h, m, 0, tz));
+		},
+		[date, tz, setDate],
+	);
 
 	const handleDateSelect = React.useCallback(
 		(selectedDate: Date | undefined) => {
@@ -37,37 +63,24 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 			const y = selectedDate.getFullYear();
 			const mo = selectedDate.getMonth();
 			const d = selectedDate.getDate();
-			if (date) {
-				const { hours: h, minutes: m, seconds: s } = getTimeInZone(date, tz);
-				setDate(dateTimeInZone(y, mo, d, h, m, s, tz));
-			} else {
-				setDate(dateTimeInZone(y, mo, d, 0, 0, 0, tz));
-			}
+			const h = Math.min(23, Math.max(0, parseInt(hourInput) || 0));
+			const m = Math.min(59, Math.max(0, parseInt(minuteInput) || 0));
+			setDate(dateTimeInZone(y, mo, d, h, m, 0, tz));
 		},
-		[date, tz, setDate],
+		[hourInput, minuteInput, tz, setDate],
 	);
 
-	const handleTimeChange = React.useCallback(
-		(type: 'hour' | 'minute' | 'ampm', value: string) => {
-			if (!date) return;
-			const { year, month, date: d } = getCalendarDayInZone(date, tz);
-			const { hours: initialH, minutes: initialM, seconds: s } = getTimeInZone(date, tz);
-			let h = initialH;
-			let m = initialM;
-			if (type === 'hour') {
-				const hour = parseInt(value, 10);
-				const isPM = h >= 12;
-				h = isPM ? (hour === 12 ? 12 : hour + 12) : hour === 12 ? 0 : hour;
-			} else if (type === 'minute') {
-				m = parseInt(value, 10);
-			} else if (type === 'ampm') {
-				const currentHours = h % 12;
-				h = value === 'PM' ? currentHours + 12 : currentHours;
-			}
-			setDate(dateTimeInZone(year, month, d, h, m, s, tz));
-		},
-		[date, tz, setDate],
-	);
+	const handleHourBlur = React.useCallback(() => {
+		const h = Math.min(23, Math.max(0, parseInt(hourInput) || 0));
+		setHourInput(pad(h));
+		applyTime(h, parseInt(minuteInput) || 0);
+	}, [hourInput, minuteInput, applyTime]);
+
+	const handleMinuteBlur = React.useCallback(() => {
+		const m = Math.min(59, Math.max(0, parseInt(minuteInput) || 0));
+		setMinuteInput(pad(m));
+		applyTime(parseInt(hourInput) || 0, m);
+	}, [hourInput, minuteInput, applyTime]);
 
 	const handleTimezoneChange = React.useCallback(
 		(newTz: CalendarTimezone) => {
@@ -80,87 +93,71 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 	);
 
 	const displayDate = date ? toCalendarDisplayDate(date, tz) : undefined;
-	const displayLabel = date ? formatDateTimeInZone(date, tz) : (placeholder ?? 'MM/DD/YYYY hh:mm aa');
-	const timeInZone = date ? getTimeInZone(date, tz) : null;
+	const displayLabel = date ? formatDateTimeInZone(date, tz) : (placeholder ?? 'Pick a date & time');
 
 	return (
 		<div className='space-y-1'>
 			{title && <div className='text-sm font-medium text-zinc-950'>{title}</div>}
 			<Popover open={isOpen} onOpenChange={setIsOpen}>
 				<PopoverTrigger asChild>
-					<Button
-						variant='outline'
+					<button
+						type='button'
+						disabled={disabled}
 						className={cn(
-							'w-full justify-start text-left font-normal h-10',
-							date && 'border-primary-foreground',
-							disabled && 'bg-gray-100',
+							'flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm text-left',
+							'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+							'disabled:cursor-not-allowed disabled:opacity-50',
 							!date && 'text-muted-foreground',
-						)}
-						disabled={disabled}>
-						<CalendarIcon className='mr-2 h-4 w-4' />
-						{date ? displayLabel : <span>{placeholder ?? 'MM/DD/YYYY hh:mm aa'}</span>}
-					</Button>
+						)}>
+						<CalendarIcon className='h-4 w-4 shrink-0 text-muted-foreground' />
+						<span>{displayLabel}</span>
+					</button>
 				</PopoverTrigger>
-				<PopoverContent className='w-auto p-0'>
-					<div className='sm:flex'>
-						<Calendar
-							mode='single'
-							selected={displayDate}
-							onSelect={handleDateSelect}
-							initialFocus
-							timezone={timezone}
-							onTimezoneChange={handleTimezoneChange}
-						/>
-						<div className='flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x'>
-							<ScrollArea className='w-64 sm:w-auto'>
-								<div className='flex sm:flex-col p-2'>
-									{hours.reverse().map((hour) => (
-										<Button
-											key={hour}
-											size='icon'
-											variant={timeInZone && timeInZone.hours % 12 === hour % 12 ? 'default' : 'ghost'}
-											className='sm:w-full shrink-0 aspect-square'
-											onClick={() => handleTimeChange('hour', hour.toString())}>
-											{hour}
-										</Button>
-									))}
-								</div>
-								<ScrollBar orientation='horizontal' className='sm:hidden' />
-							</ScrollArea>
-							<ScrollArea className='w-64 sm:w-auto'>
-								<div className='flex sm:flex-col p-2'>
-									{Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
-										<Button
-											key={minute}
-											size='icon'
-											variant={timeInZone && timeInZone.minutes === minute ? 'default' : 'ghost'}
-											className='sm:w-full shrink-0 aspect-square'
-											onClick={() => handleTimeChange('minute', minute.toString())}>
-											{minute}
-										</Button>
-									))}
-								</div>
-								<ScrollBar orientation='horizontal' className='sm:hidden' />
-							</ScrollArea>
-							<ScrollArea>
-								<div className='flex sm:flex-col p-2'>
-									{['AM', 'PM'].map((ampm) => (
-										<Button
-											key={ampm}
-											size='icon'
-											variant={
-												timeInZone && ((ampm === 'AM' && timeInZone.hours < 12) || (ampm === 'PM' && timeInZone.hours >= 12))
-													? 'default'
-													: 'ghost'
-											}
-											className='sm:w-full shrink-0 aspect-square'
-											onClick={() => handleTimeChange('ampm', ampm)}>
-											{ampm}
-										</Button>
-									))}
-								</div>
-							</ScrollArea>
+				<PopoverContent className='w-auto p-0' align='start' onInteractOutside={() => setIsOpen(false)}>
+					<Calendar mode='single' selected={displayDate} onSelect={handleDateSelect} initialFocus />
+					{/* Time + timezone row — no nested browser picker */}
+					<div className='border-t border-border px-3 py-3 flex items-center gap-2'>
+						<span className='text-xs text-muted-foreground font-medium w-10'>Time</span>
+						<div className='flex items-center gap-1 flex-1'>
+							<input
+								type='text'
+								inputMode='numeric'
+								maxLength={2}
+								value={hourInput}
+								onChange={(e) => setHourInput(e.target.value.replace(/\D/g, ''))}
+								onBlur={handleHourBlur}
+								onFocus={(e) => e.target.select()}
+								placeholder='HH'
+								className={cn(
+									'w-10 h-8 rounded-md border border-input bg-transparent text-center text-sm',
+									'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+								)}
+							/>
+							<span className='text-muted-foreground font-semibold'>:</span>
+							<input
+								type='text'
+								inputMode='numeric'
+								maxLength={2}
+								value={minuteInput}
+								onChange={(e) => setMinuteInput(e.target.value.replace(/\D/g, ''))}
+								onBlur={handleMinuteBlur}
+								onFocus={(e) => e.target.select()}
+								placeholder='MM'
+								className={cn(
+									'w-10 h-8 rounded-md border border-input bg-transparent text-center text-sm',
+									'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+								)}
+							/>
 						</div>
+						<Select value={timezone} onValueChange={(v) => handleTimezoneChange(v as CalendarTimezone)}>
+							<SelectTrigger className='h-8 w-[80px] text-xs border-input'>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent align='end'>
+								<SelectItem value='local' className='text-xs'>Local</SelectItem>
+								<SelectItem value='utc' className='text-xs'>UTC</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</PopoverContent>
 			</Popover>

@@ -11,7 +11,7 @@ import {
 } from '@/components/molecules';
 import { Price, Plan, PRICE_STATUS, PRICE_ENTITY_TYPE } from '@/models';
 import { PriceUnit } from '@/models/PriceUnit';
-import { Plus, Trash2, Pencil, FileText } from 'lucide-react';
+import { Plus, Trash2, Pencil, FileText, Copy } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PriceApi } from '@/api/PriceApi';
 import toast from 'react-hot-toast';
@@ -73,6 +73,16 @@ const PriceDropdown: FC<PriceDropdownProps> = ({ row, hasEndDate, onEditPrice, o
 				isOpen={isOpen}
 				onOpenChange={setIsOpen}
 				options={[
+					{
+						label: 'Copy Price ID',
+						icon: <Copy />,
+						onSelect: (e: Event) => {
+							e.preventDefault();
+							setIsOpen(false);
+							navigator.clipboard.writeText(row.id);
+							toast.success('Price ID copied to clipboard');
+						},
+					},
 					{
 						label: 'Update Price',
 						icon: <Pencil />,
