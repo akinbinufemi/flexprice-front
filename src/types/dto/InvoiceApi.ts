@@ -182,6 +182,11 @@ export interface CreateInvoicePayload {
 
 	// Optional: tax rate overrides to apply on this invoice
 	tax_rate_overrides?: TaxRateOverride[];
+
+	// Optional: override the finalized_at timestamp (ISO string). When provided, the
+	// invoice is stamped with this date instead of the wall-clock time at finalization.
+	// Use to back-date manual invoices (e.g. creating a previous-month invoice today).
+	issue_date?: string;
 }
 
 export interface GetInvoicePdfPayload {

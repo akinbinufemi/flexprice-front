@@ -1,12 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Button, FormHeader, Input, Loader, Page, Select, Spacer, Divider } from '@/components/atoms';
+import { Button, DateTimePicker, FormHeader, Input, Loader, Page, Select, Spacer, Divider } from '@/components/atoms';
 import CustomerApi from '@/api/CustomerApi';
 import { useParams, useNavigate } from 'react-router';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import useUser from '@/hooks/useUser';
 import { currencyOptions } from '@/constants/constants';
-import { formatDateShort, getCurrencySymbol, calculateCouponDiscount } from '@/utils/common/helper_functions';
+import { getCurrencySymbol, calculateCouponDiscount } from '@/utils/common/helper_functions';
 import InvoiceApi from '@/api/InvoiceApi';
 import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
@@ -51,9 +51,7 @@ const CreateInvoicePage: FC = () => {
 	const [finalTotal, setFinalTotal] = useState<number>(0);
 	const [taxOverrides, setTaxOverrides] = useState<TaxRateOverride[]>([]);
 
-	// Calculate period start as today at midnight UTC
-	const today = new Date();
-	today.setUTCHours(0, 0, 0, 0);
+	const [issueDate, setIssueDate] = useState<Date | undefined>(new Date());
 
 	useEffect(() => {
 		if (customer?.name) {
@@ -141,13 +139,16 @@ const CreateInvoicePage: FC = () => {
 				})),
 			];
 
+			const resolvedIssueDate = issueDate ?? new Date();
+
 			return await InvoiceApi.createInvoice({
 				customer_id: customerId!,
 				invoice_type: InvoiceType.ONE_OFF,
 				currency,
 				payment_status: PAYMENT_STATUS.PENDING,
 				amount_due: finalTotal,
-				period_start: today.toISOString(),
+				period_start: resolvedIssueDate.toISOString(),
+				issue_date: resolvedIssueDate.toISOString(),
 				line_items: invoiceLineItems,
 				total: finalTotal,
 				subtotal: calculateSubtotal(),
@@ -212,12 +213,17 @@ const CreateInvoicePage: FC = () => {
 						<FormHeader title='Invoice Details' variant='sub-header' titleClassName='font-semibold' />
 						<Spacer className='!my-6' />
 						<div className='w-full grid grid-cols-3 gap-4'>
-							<p className='text-[#71717A] text-sm'>Issue Date</p>
+							<p></p>
 							<p></p>
 							<p className='text-[#71717A] text-sm'>Currency</p>
 						</div>
 						<div className='w-full grid grid-cols-3 gap-4'>
-							<p className='text-[#09090B] text-sm'>{formatDateShort(today.toISOString())}</p>
+							<DateTimePicker
+								title='Issue Date'
+								date={issueDate}
+								setDate={setIssueDate}
+								placeholder='Select issue date'
+							/>
 							<p></p>
 							<Select value={currency} options={currencyOptions} onChange={setCurrency} />
 						</div>

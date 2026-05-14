@@ -31,6 +31,7 @@ export interface Invoice extends BaseModel {
 	readonly paid_at: string;
 	readonly voided_at?: string;
 	readonly finalized_at: string;
+	readonly issue_date?: string;
 	readonly billing_reason: INVOICE_BILLING_REASON;
 	readonly line_items: LineItem[];
 	readonly total_tax: number;

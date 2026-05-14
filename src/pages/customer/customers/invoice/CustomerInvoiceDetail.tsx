@@ -189,7 +189,7 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 						</div>
 						<div className='w-full grid grid-cols-4 gap-4 text-[#71717A] text-sm'>
 							<p>{data?.invoice_number}</p>
-							<p>{formatDate(data?.created_at ?? '')}</p>
+							<p>{formatDate(data?.issue_date ?? data?.created_at ?? '')}</p>
 							<p>{data?.due_date ? formatDate(data?.due_date ?? '') : '--'}</p>
 							<p>{getPaymentStatusChip(data?.payment_status ?? '')}</p>
 						</div>
