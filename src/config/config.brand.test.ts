@@ -53,19 +53,21 @@ describe('parseAuthPageConfig', () => {
 	});
 
 	it('returns template_2 shape with config', () => {
-		const result = parseAuthPageConfig({ template: 'template_2', landingBgColor: '#1a1a2e' });
+		const result = parseAuthPageConfig({ template: 'template_2', tagline: 'hello', landingLogo: 'https://example.com/logo.png' });
 		expect(result.template).toBe('template_2');
 		if (result.template === 'template_2') {
-			expect(result.config.landingBgColor).toBe('#1a1a2e');
-			expect(result.config.showLogoOnLanding).toBe(false);
-			expect(result.config.tagline).toBeNull();
+			expect(result.config.tagline).toBe('hello');
+			expect(result.config.landingLogo).toBe('https://example.com/logo.png');
+			expect(result.config.loginBgImage).toBeNull();
 		}
 	});
 
-	it('template_2 showLogoOnLanding defaults to false', () => {
+	it('template_2 fields default to null when absent', () => {
 		const result = parseAuthPageConfig({ template: 'template_2' });
 		if (result.template === 'template_2') {
-			expect(result.config.showLogoOnLanding).toBe(false);
+			expect(result.config.tagline).toBeNull();
+			expect(result.config.landingLogo).toBeNull();
+			expect(result.config.loginBgImage).toBeNull();
 		}
 	});
 });
