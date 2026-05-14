@@ -69,6 +69,7 @@ export function parseAuthPageConfig(raw: Record<string, unknown>): AuthPageConfi
 				tagline: 'tagline' in raw ? (raw.tagline as string | null) : null,
 				loginBgImage: 'loginBgImage' in raw ? (raw.loginBgImage as string | null) : null,
 				landingBgColor: typeof raw.landingBgColor === 'string' ? raw.landingBgColor : null,
+				landingLogo: typeof raw.landingLogo === 'string' ? raw.landingLogo : null,
 				showLogoOnLanding: raw.showLogoOnLanding === true,
 			},
 		};

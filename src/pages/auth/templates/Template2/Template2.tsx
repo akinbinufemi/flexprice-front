@@ -86,7 +86,7 @@ const Template2: React.FC<Template2Props> = ({ config, currentTab, switchTab }) 
 				{config.showLogoOnLanding && (
 					<div className='flex items-center justify-center h-full'>
 						<div className='text-center px-8'>
-							<img src={logo} alt={name} className='max-h-16 object-contain mx-auto mb-6' />
+							<img src={config.landingLogo ?? logo} alt={name} className='max-h-16 object-contain mx-auto mb-6' />
 							{config.tagline && <p className='text-xl font-medium'>{config.tagline}</p>}
 						</div>
 					</div>

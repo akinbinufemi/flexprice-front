@@ -20,6 +20,7 @@ export interface Template2Config {
 	tagline: string | null;
 	loginBgImage: string | null;
 	landingBgColor: string | null;
+	landingLogo: string | null; // separate logo for the right panel (e.g. white logo on a dark bg image); falls back to brand.logo
 	showLogoOnLanding: boolean;
 }
 
