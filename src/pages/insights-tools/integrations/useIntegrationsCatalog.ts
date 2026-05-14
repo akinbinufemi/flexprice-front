@@ -48,7 +48,6 @@ function mapSpecToIntegration(
 }
 
 export function useIntegrationsCatalog(): Integration[] {
-	 
 	const { t } = useTranslation('settings');
 	return useMemo(() => integrationCatalogSpecs.map((spec) => mapSpecToIntegration(t, spec)), [t]);
 }

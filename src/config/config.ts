@@ -68,6 +68,50 @@ interface RestrictionsConfig {
 	rawEnvs: string;
 }
 
+/** UI fonts: primary + fallback → `fontFamily` (see `VITE_FONT_CONFIG`, `initTypography()`). */
+export interface TypographyConfig {
+	primaryFont: string;
+	fallbackFont: string;
+	/** Full CSS `font-family` value (primary first, then fallback). */
+	fontFamily: string;
+}
+
+const DEFAULT_FONT_PRIMARY = 'Inter';
+const DEFAULT_FONT_FALLBACK = 'ui-sans-serif, system-ui, sans-serif';
+
+/** Wrap family name in quotes when needed for valid CSS `font-family`. */
+function cssFontFamilyToken(name: string): string {
+	const t = name.trim();
+	if (!t) return '';
+	if (/^["'].*["']$/.test(t)) return t;
+	if (/[^a-zA-Z0-9-]/.test(t)) return `'${t.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+	return t;
+}
+
+interface FontConfigJson {
+	primary?: string;
+	fallback?: string;
+}
+
+function parseTypographyConfig(): TypographyConfig {
+	const raw = import.meta.env.VITE_FONT_CONFIG?.trim();
+	let primary = DEFAULT_FONT_PRIMARY;
+	let fallback = DEFAULT_FONT_FALLBACK;
+	if (raw) {
+		try {
+			const parsed = JSON.parse(raw) as FontConfigJson;
+			if (typeof parsed.primary === 'string' && parsed.primary.trim()) primary = parsed.primary.trim();
+			if (typeof parsed.fallback === 'string' && parsed.fallback.trim()) fallback = parsed.fallback.trim();
+		} catch {
+			// invalid JSON — keep defaults
+		}
+	}
+	const fontFamily = [cssFontFamilyToken(primary), fallback].join(', ');
+	return { primaryFont: primary, fallbackFont: fallback, fontFamily };
+}
+
+const typographyConfig = parseTypographyConfig();
+
 export interface Config {
 	app: AppConfig;
 	api: ApiConfig;
@@ -84,6 +128,7 @@ export interface Config {
 	i18n: I18nConfig;
 	regions: RegionsConfig;
 	allowedLocales: Locale[];
+	typography: TypographyConfig;
 }
 
 function parseAppEnv(): APP_ENV {
@@ -143,4 +188,11 @@ export const config: Config = {
 	i18n: i18nConfig,
 	regions: regionsConfig,
 	allowedLocales: allowedLocalesConfig,
+	typography: typographyConfig,
 };
+
+/** Sets `--font-sans` from `config.typography.fontFamily` (see `src/index.css`). Call once at startup. */
+export function initTypography(): void {
+	if (typeof document === 'undefined') return;
+	document.documentElement.style.setProperty('--font-sans', config.typography.fontFamily);
+}

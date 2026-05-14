@@ -1,5 +1,3 @@
- 
-
 /** Tag key for integrations hidden from main grids (none in catalog today). */
 export const INTEGRATION_TAG_DATA_PIPELINES = 'dataPipelines';
 
