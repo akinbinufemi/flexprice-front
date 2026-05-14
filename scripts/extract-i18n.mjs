@@ -74,7 +74,7 @@ const NAMESPACE_GLOBS = {
 	],
 	customers: [
 		'src/pages/customer/customers/**/*.tsx',
-		'src/pages/customer/index.ts',
+		'src/components/customers/*.tsx',
 		'src/components/molecules/Customer/**/*.tsx',
 		'src/components/molecules/CustomerUsageTable/**/*.tsx',
 	],
@@ -134,7 +134,7 @@ function inferSection(filePath) {
 	// Remove common suffixes
 	const base = name.replace(/(Page|Table|Drawer|Modal|Form|Card|Widget|List|Section|Dialog|Chart).*$/, '');
 	// Convert PascalCase to camelCase first segment
-	return base.replace(/([A-Z])/g, (c, i) => (i === 0 ? c.toLowerCase() : `_${c.toLowerCase()}`)).split('_')[0];
+	return (base.charAt(0).toLowerCase() + base.slice(1).replace(/[A-Z]/g, c => `_${c.toLowerCase()}`)).split('_')[0];
 }
 
 const globs = NAMESPACE_GLOBS[namespace];
