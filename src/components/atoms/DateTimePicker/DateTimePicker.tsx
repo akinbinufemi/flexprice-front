@@ -38,17 +38,20 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 
 	// Sync inputs when date or timezone changes externally
 	React.useEffect(() => {
-		if (date) {
-			const t = getTimeInZone(date, tz);
-			setHourInput(pad(t.hours));
-			setMinuteInput(pad(t.minutes));
+		if (!date) {
+			setHourInput('');
+			setMinuteInput('');
+			return;
 		}
+		const t = getTimeInZone(date, tz);
+		setHourInput(pad(t.hours));
+		setMinuteInput(pad(t.minutes));
 	}, [date, tz]);
 
 	const applyTime = React.useCallback(
 		(h: number, m: number) => {
-			const base = date ?? new Date();
-			const { year, month, date: d } = getCalendarDayInZone(base, tz);
+			if (!date) return;
+			const { year, month, date: d } = getCalendarDayInZone(date, tz);
 			setDate(dateTimeInZone(year, month, d, h, m, 0, tz));
 		},
 		[date, tz, setDate],
@@ -60,8 +63,8 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 			const y = selectedDate.getFullYear();
 			const mo = selectedDate.getMonth();
 			const d = selectedDate.getDate();
-			const h = parseInt(hourInput) || 0;
-			const m = parseInt(minuteInput) || 0;
+			const h = Math.min(23, Math.max(0, parseInt(hourInput) || 0));
+			const m = Math.min(59, Math.max(0, parseInt(minuteInput) || 0));
 			setDate(dateTimeInZone(y, mo, d, h, m, 0, tz));
 		},
 		[hourInput, minuteInput, tz, setDate],

@@ -59,7 +59,8 @@ const ForceRunDrawer: FC<ForceRunDrawerProps> = ({ isOpen, onOpenChange, onConfi
 		setErrors(validationErrors);
 
 		if (Object.keys(validationErrors).length === 0) {
-			onConfirm(startTime!.toISOString(), endTime!.toISOString());
+			if (!startTime || !endTime) return;
+			onConfirm(startTime.toISOString(), endTime.toISOString());
 			handleClose();
 		}
 	}, [runType, startTime, endTime, validate, onConfirm, handleClose]);
