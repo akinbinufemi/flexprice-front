@@ -1,6 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import resourcesToBackend from 'i18next-resources-to-backend';
 import { Direction } from '@/config/branding';
+
+export const NAMESPACES = ['auth', 'common', 'billing', 'catalog', 'customers', 'developers', 'settings', 'customer-portal'] as const;
+
+export type Namespace = (typeof NAMESPACES)[number];
 
 export async function initI18n(locale: string, direction: Direction): Promise<void> {
 	if (i18n.isInitialized) {
@@ -10,19 +15,18 @@ export async function initI18n(locale: string, direction: Direction): Promise<vo
 		return;
 	}
 
-	const [enAuth, arAuth] = await Promise.all([import('./locales/en/auth.json'), import('./locales/ar/auth.json')]);
-
 	try {
-		await i18n.use(initReactI18next).init({
-			lng: locale,
-			fallbackLng: 'en',
-			defaultNS: 'auth',
-			resources: {
-				en: { auth: enAuth.default },
-				ar: { auth: arAuth.default },
-			},
-			interpolation: { escapeValue: false },
-		});
+		await i18n
+			.use(resourcesToBackend((language: string, namespace: string) => import(`./locales/${language}/${namespace}.json`)))
+			.use(initReactI18next)
+			.init({
+				lng: locale,
+				fallbackLng: 'en',
+				defaultNS: 'common',
+				ns: NAMESPACES,
+				partialBundledLanguages: true,
+				interpolation: { escapeValue: false },
+			});
 	} catch (err) {
 		console.error('[i18n] Initialization failed:', err);
 		throw err;
