@@ -521,17 +521,8 @@ const SidebarMenuSub = React.forwardRef<HTMLUListElement, React.ComponentProps<'
 	<ul
 		ref={ref}
 		data-sidebar='menu-sub'
-		className={cn('relative mx-3.5 flex min-w-0 flex-col gap-0.5 px-2.5 py-0.5', 'group-data-[collapsible=icon]:hidden', className)}
+		className={cn('mx-3.5 flex min-w-0 flex-col gap-0.5 px-2.5 py-0.5', 'group-data-[collapsible=icon]:hidden', className)}
 		{...props}>
-		{/* Vertical line, centered with the icon */}
-		<div
-			className='absolute -left-1.5 top-0 bottom-0 flex items-center'
-			aria-hidden='true'
-			style={{ width: '1.25rem' }} // matches icon area
-		>
-			<div className='mx-auto h-full w-px bg-gray-300' style={{ minHeight: '32px' }} />
-		</div>
-		{/* Sub-menu items */}
 		{children}
 	</ul>
 ));
