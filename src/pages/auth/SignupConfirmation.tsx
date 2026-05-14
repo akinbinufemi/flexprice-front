@@ -5,10 +5,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const SignupConfirmation = () => {
 	const userContext = useUser();
 	const navigate = useNavigate();
+	const { t } = useTranslation('auth');
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: async () => {
@@ -67,14 +69,14 @@ const SignupConfirmation = () => {
 				{isPending && (
 					<div className='text-center'>
 						<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4'></div>
-						<h2 className='text-xl font-semibold'>Completing Authentication...</h2>
-						<p className='text-gray-600 mt-2'>Please wait while we set up your account</p>
+						<h2 className='text-xl font-semibold'>{t('signupConfirmation.completingHeading')}</h2>
+						<p className='text-gray-600 mt-2'>{t('signupConfirmation.completingDescription')}</p>
 					</div>
 				)}
 				{!isPending && (
 					<div className='text-center'>
-						<h2 className='text-xl font-semibold'>Processing your information...</h2>
-						<p className='text-gray-600 mt-2'>You'll be redirected shortly</p>
+						<h2 className='text-xl font-semibold'>{t('signupConfirmation.processingHeading')}</h2>
+						<p className='text-gray-600 mt-2'>{t('signupConfirmation.processingDescription')}</p>
 					</div>
 				)}
 			</div>

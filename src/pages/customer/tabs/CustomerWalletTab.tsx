@@ -11,6 +11,7 @@ import {
 	WalletAlertDialog,
 	WalletAutoTopup,
 } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import type { AutoTopupConfig } from '@/components/molecules/WalletAutoTopup/WalletAutoTopup';
 import { Dialog, Skeleton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 import usePagination from '@/hooks/usePagination';
@@ -210,7 +211,7 @@ const CustomerWalletTab = () => {
 	// Render wallet details
 	return (
 		<div className='space-y-6'>
-			<ApiDocsContent tags={['Wallets', 'Topup']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Wallets} />
 
 			{/* Create Wallet Modal */}
 			<CreateCustomerWalletModal

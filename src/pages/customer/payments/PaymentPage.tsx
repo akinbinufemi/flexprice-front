@@ -1,4 +1,5 @@
 import { ApiDocsContent, FlatTabs } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { Page } from '@/components/atoms';
 import PaymentList from './PaymentList';
 import WalletTransactionList from './WalletTransactionList';
@@ -9,7 +10,7 @@ const PaymentPage = () => {
 
 	return (
 		<Page heading={t('payments.title')}>
-			<ApiDocsContent tags={['Payments']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Payments} />
 			<div className='space-y-6'>
 				<FlatTabs
 					tabs={[

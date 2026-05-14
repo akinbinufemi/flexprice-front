@@ -1,5 +1,6 @@
 import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
 import { ApiDocsContent, PriceUnitDrawer } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ColumnData } from '@/components/molecules/Table';
 import { PriceUnit } from '@/models/PriceUnit';
 import { QueryableDataArea } from '@/components/organisms';
@@ -213,7 +214,7 @@ const PriceUnitsPage = () => {
 				onOpenChange={setPriceUnitDrawerOpen}
 				refetchQueryKeys={['fetchPriceUnits']}
 			/>
-			<ApiDocsContent tags={['Price Units']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.PriceUnits} />
 			<div className='space-y-6'>
 				<QueryableDataArea<PriceUnit>
 					queryConfig={{
@@ -247,7 +248,7 @@ const PriceUnitsPage = () => {
 						description: 'Create a price unit to define custom currencies or tokens for pricing.',
 						buttonLabel: 'Create Price Unit',
 						buttonAction: handleOnAdd,
-						tags: ['Price Units'],
+						tags: API_DOCS_TAGS.PriceUnits,
 					}}
 				/>
 			</div>

@@ -8,6 +8,7 @@ import { Group } from '@/models/Group';
 import { getGroupEntityTypeLabel } from '@/models/Group';
 import { ENTITY_STATUS } from '@/models';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState, useMemo } from 'react';
 import { GroupApi } from '@/api/GroupApi';
 import formatDate from '@/utils/common/format_date';
@@ -65,7 +66,7 @@ const GroupsPage = () => {
 	return (
 		<Page heading='Groups' headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<GroupDrawer data={null} open={groupDrawerOpen} onOpenChange={setGroupDrawerOpen} refetchQueryKeys={['fetchGroups']} />
-			<ApiDocsContent tags={['Groups']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Groups} />
 			<div className='space-y-6'>
 				<QueryableDataArea<Group>
 					queryConfig={{
@@ -113,7 +114,7 @@ const GroupsPage = () => {
 						description: 'Create a group to organize your pricing entities.',
 						buttonLabel: 'Create Group',
 						buttonAction: handleOnAdd,
-						tags: ['Groups'],
+						tags: API_DOCS_TAGS.Groups,
 						tutorials: GUIDES.groups.tutorials,
 					}}
 				/>

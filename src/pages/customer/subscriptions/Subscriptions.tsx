@@ -3,6 +3,7 @@ import { ApiDocsContent, RedirectCell } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import SubscriptionApi from '@/api/SubscriptionApi';
 import {
 	FilterField,
@@ -221,7 +222,7 @@ const SubscriptionsPage = () => {
 	return (
 		<>
 			<Page heading='Subscriptions'>
-				<ApiDocsContent tags={['Subscriptions', 'Subscription']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Subscriptions} />
 				<QueryableDataArea<SubscriptionResponse>
 					queryConfig={{
 						filterOptions,
@@ -260,7 +261,7 @@ const SubscriptionsPage = () => {
 						heading: 'Subscriptions',
 						description: 'Create your first subscription to start billing your customers.',
 						buttonLabel: 'Create Subscription',
-						tags: ['Subscriptions', 'Subscription'],
+						tags: API_DOCS_TAGS.Subscriptions,
 						tutorials: GUIDES.customers.tutorials,
 					}}
 				/>

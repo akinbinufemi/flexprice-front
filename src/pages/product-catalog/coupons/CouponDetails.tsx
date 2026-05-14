@@ -1,5 +1,6 @@
 import { Page, Spacer, Chip, Card, CardHeader, Loader } from '@/components/atoms';
 import { Detail, ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import CouponApi from '@/api/CouponApi';
@@ -101,7 +102,7 @@ const CouponDetails = () => {
 
 	return (
 		<Page documentTitle={coupon.name} heading={coupon.name}>
-			<ApiDocsContent tags={['Coupons']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Coupons} />
 
 			<Spacer className='!h-6' />
 

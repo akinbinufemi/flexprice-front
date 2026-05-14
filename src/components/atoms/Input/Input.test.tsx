@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- Fixtures for Input props; strings are assertions only */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import '@testing-library/jest-dom';

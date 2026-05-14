@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 // Internal components
 import { Button, CopyIdButton, Loader, Page } from '@/components/atoms';
 import { ApiDocsContent, DropdownMenu, DuplicatePlanDialog, PlanDrawer } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import type { DropdownMenuOption } from '@/components/molecules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 
@@ -271,7 +272,7 @@ const PlanDetailsPage = () => {
 				refetchQueryKeys={['fetchPlan', 'planEntitlements']}
 			/>
 
-			<ApiDocsContent tags={['Plans']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Plans} />
 
 			<div className='border-b border-border mt-4 mb-6'>
 				<nav className='flex space-x-4' aria-label={t('common:labels.tabs')}>

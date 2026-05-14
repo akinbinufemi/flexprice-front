@@ -1,5 +1,6 @@
 import { config } from '@/config/config';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/atoms';
 import { InfoIcon, XIcon } from 'lucide-react';
@@ -8,6 +9,7 @@ const isProd = config.app.isProd;
 const LAST_DISMISSED_VERSION = 'lastDismissedVersion';
 
 export default function useVersionCheck(intervalMs = 5 * 60 * 1000) {
+	const { t } = useTranslation('common');
 	const currentVersion = __APP_VERSION__;
 
 	useEffect(() => {
@@ -34,7 +36,7 @@ export default function useVersionCheck(intervalMs = 5 * 60 * 1000) {
 
 					console.info(`[VersionCheck][${timestamp}] New version detected. Current: ${currentVersion}, Latest: ${latestVersion}`);
 					toast(
-						(t) => (
+						(toastCtx) => (
 							<div className='bg-white border-gray-200 w-80'>
 								{/* Header */}
 								<div className='flex items-center justify-between mb-3'>
@@ -42,15 +44,15 @@ export default function useVersionCheck(intervalMs = 5 * 60 * 1000) {
 										<div className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center'>
 											<InfoIcon className='w-4 h-4 text-blue-600' />
 										</div>
-										<h3 className='text-lg font-regular text-gray-900'>New version available</h3>
+										<h3 className='text-lg font-regular text-gray-900'>{t('versionCheck.toastTitle')}</h3>
 									</div>
-									<button onClick={() => toast.dismiss(t.id)} className='text-gray-400 hover:text-gray-600 transition-colors'>
+									<button onClick={() => toast.dismiss(toastCtx.id)} className='text-gray-400 hover:text-gray-600 transition-colors'>
 										<XIcon className='w-5 h-5' />
 									</button>
 								</div>
 
 								{/* Body */}
-								<p className='text-sm text-gray-600 mb-4'>A new software version is available for download.</p>
+								<p className='text-sm text-gray-600 mb-4'>{t('versionCheck.toastDescription')}</p>
 
 								{/* Action Buttons */}
 								<div className='flex gap-3 justify-end'>
@@ -59,18 +61,18 @@ export default function useVersionCheck(intervalMs = 5 * 60 * 1000) {
 										size='sm'
 										onClick={() => {
 											localStorage.setItem(LAST_DISMISSED_VERSION, latestVersion);
-											toast.dismiss(t.id);
+											toast.dismiss(toastCtx.id);
 										}}>
-										Not now
+										{t('versionCheck.notNow')}
 									</Button>
 									<Button
 										variant='default'
 										size='sm'
 										onClick={() => {
-											toast.dismiss(t.id);
+											toast.dismiss(toastCtx.id);
 											window.location.reload();
 										}}>
-										Update
+										{t('versionCheck.reloadToUpdate')}
 									</Button>
 								</div>
 							</div>
@@ -95,5 +97,5 @@ export default function useVersionCheck(intervalMs = 5 * 60 * 1000) {
 		// Set interval
 		const intervalId = setInterval(refreshIfNewBuild, intervalMs);
 		return () => clearInterval(intervalId);
-	}, [intervalMs]);
+	}, [intervalMs, t, currentVersion]);
 }

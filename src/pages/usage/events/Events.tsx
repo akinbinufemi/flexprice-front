@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Page } from '@/components/atoms';
 import { EventsTable, ApiDocsContent, PropertyFilterQueryBuilder } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { Event } from '@/models/Event';
 import EventsApi from '@/api/EventsApi';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -301,7 +302,7 @@ const EventsPage: React.FC = () => {
 
 	return (
 		<Page heading='Events'>
-			<ApiDocsContent tags={['Events']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<PropertyFilterQueryBuilder
 					filterOptions={filterOptions}

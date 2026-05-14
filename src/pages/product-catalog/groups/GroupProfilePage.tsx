@@ -6,6 +6,7 @@ import { GroupApi } from '@/api/GroupApi';
 import { Loader, Page } from '@/components/atoms';
 import { cn } from '@/lib/utils';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import GroupHeader from '@/pages/product-catalog/groups/GroupHeader';
 import { RouteNames } from '@/core/routes/Routes';
 import { useTranslation } from 'react-i18next';
@@ -83,7 +84,7 @@ const GroupProfilePage = () => {
 
 	return (
 		<Page className='space-y-6'>
-			<ApiDocsContent tags={['Groups']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Groups} />
 			<GroupHeader groupId={groupId!} />
 
 			<div className='border-b border-border mt-4 mb-6'>

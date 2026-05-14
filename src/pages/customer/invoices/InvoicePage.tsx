@@ -4,6 +4,7 @@ import { ColumnData } from '@/components/molecules/Table';
 import InvoiceTableMenu from '@/components/molecules/InvoiceTable/InvoiceTableMenu';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import InvoiceApi from '@/api/InvoiceApi';
 import CustomerApi from '@/api/CustomerApi';
 import {
@@ -337,7 +338,7 @@ const InvoicesPage = () => {
 
 	return (
 		<Page heading={t('invoices.title')}>
-			<ApiDocsContent tags={['Invoices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<QueryableDataArea<EnrichedInvoice>
 				queryConfig={{
 					filterOptions,
@@ -372,7 +373,7 @@ const InvoicesPage = () => {
 				emptyStateConfig={{
 					heading: t('invoices.title'),
 					description: t('invoices.list.emptyDescription'),
-					tags: ['Invoices'],
+					tags: API_DOCS_TAGS.Invoices,
 					tutorials: GUIDES.invoices.tutorials,
 				}}
 			/>

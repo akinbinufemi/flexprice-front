@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui';
 import { Blocks, Rocket, Server, ChevronsUpDown, Plus, Copy, Pencil } from 'lucide-react';
 import { useGlobalLoading } from '@/core/services/tanstack/ReactQueryProvider';
@@ -64,6 +65,7 @@ const getEnvironmentIcon = (type: ENVIRONMENT_TYPE) => {
 };
 
 const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) => {
+	const { t } = useTranslation('settings');
 	const { loading, user } = useUser();
 	const { open: sidebarOpen } = useSidebar();
 	const navigate = useNavigate();
@@ -87,7 +89,7 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 		);
 
 	if (!environments || environments.length === 0) {
-		return <div className='p-2 text-sm text-muted-foreground'>No environments available</div>;
+		return <div className='p-2 text-sm text-muted-foreground'>{t('environment.selector.noneAvailable')}</div>;
 	}
 
 	const options: SelectOption[] = environments.map((env) => ({
@@ -124,7 +126,7 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 
 	// If activeEnvironment is null, use the first environment as a fallback
 	const currentEnvironment = activeEnvironment || environments[0];
-	const environmentName = currentEnvironment?.name || 'No environment';
+	const environmentName = currentEnvironment?.name || t('environment.selector.noEnvironment');
 
 	return (
 		<div className={cn('mt-1 w-full', className)}>
@@ -136,10 +138,10 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 							?.split(' ')
 							.map((n) => n[0])
 							.join('')
-							.slice(0, 2) || 'UN'}
+							.slice(0, 2) || t('environment.selector.fallbackTenantLetters')}
 					</span>
 					<div className={cn('text-start min-w-0', sidebarOpen ? '' : 'hidden')}>
-						<p className='font-medium text-[16px] leading-snug truncate'>{user?.tenant?.name || 'Unknown'}</p>
+						<p className='font-medium text-[16px] leading-snug truncate'>{user?.tenant?.name || t('environment.selector.unknownTenant')}</p>
 					</div>
 				</div>
 			</div>
@@ -184,7 +186,7 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 								</SelectItem>
 								<button
 									type='button'
-									aria-label={`Rename ${option.label}`}
+									aria-label={t('environment.selector.renameAria', { name: option.label })}
 									onPointerDown={(e) => e.stopPropagation()}
 									onClick={(e) => handleEditClick(env, e)}
 									className='absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-[4px] text-muted-foreground hover:bg-accent hover:text-foreground opacity-60 hover:opacity-100 transition-opacity'>
@@ -204,7 +206,7 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 							size='sm'
 							className='w-full text-center rounded-[6px] justify-center items-center'>
 							<Plus className='h-4 w-4' />
-							Add Environment
+							{t('environment.selector.addEnvironment')}
 						</Button>
 						<Button
 							onClick={() => {
@@ -216,7 +218,7 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 							variant='outline'
 							className='w-full text-center rounded-[6px] justify-center items-center'>
 							<Copy className='h-4 w-4' />
-							Copy Environment
+							{t('environment.selector.copyEnvironment')}
 						</Button>
 					</div>
 				</SelectContent>
@@ -257,8 +259,8 @@ const EnvironmentSelector: React.FC<Props> = ({ disabled = false, className }) =
 			<ContactUsDialog
 				isOpen={isSuspendedDialogOpen}
 				onOpenChange={setIsSuspendedDialogOpen}
-				title='Environment suspended'
-				description='This environment is temporarily closed. Contact us to continue.'
+				title={t('environment.selector.suspendedTitle')}
+				description={t('environment.selector.suspendedDescription')}
 			/>
 		</div>
 	);

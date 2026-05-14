@@ -5,6 +5,7 @@ import WalletApi from '@/api/WalletApi';
 import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface WalletTerminalProps {
 	isOpen: boolean;
@@ -13,6 +14,7 @@ interface WalletTerminalProps {
 }
 
 const TerminateWalletModal: FC<WalletTerminalProps> = ({ isOpen, onOpenChange, wallet }) => {
+	const { t } = useTranslation('billing');
 	const { isPending, mutate: terminateWallet } = useMutation({
 		mutationFn: async () => {
 			return await WalletApi.terminateWallet(wallet?.id as string);
@@ -31,15 +33,11 @@ const TerminateWalletModal: FC<WalletTerminalProps> = ({ isOpen, onOpenChange, w
 	return (
 		<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
 			<div className='card bg-white max-w-lg'>
-				<FormHeader
-					title='Terminate Wallet'
-					variant='sub-header'
-					subtitle='Are you sure you want to terminate this wallet? This action cannot be undone.'
-				/>
+				<FormHeader title={t('wallet.terminate.title')} variant='sub-header' subtitle={t('wallet.terminate.subtitle')} />
 				<Spacer className='!my-6' />
 				<div className='flex justify-end gap-4'>
 					<Button onClick={() => onOpenChange(false)} variant={'outline'} className='btn btn-primary'>
-						Cancel
+						{t('wallet.terminate.cancel')}
 					</Button>
 					<Button
 						disabled={isPending}
@@ -48,7 +46,7 @@ const TerminateWalletModal: FC<WalletTerminalProps> = ({ isOpen, onOpenChange, w
 							terminateWallet();
 						}}
 						className='btn btn-primary'>
-						Terminate
+						{t('wallet.terminate.confirm')}
 					</Button>
 				</div>
 			</div>

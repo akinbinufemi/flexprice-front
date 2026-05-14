@@ -630,7 +630,256 @@
 			"connectedAccountsTitle": "الحسابات المتصلة",
 			"deleteConnectionConfirmTitle": "هل تريد بالتأكيد حذف الاتصال \"{{name}}\"؟",
 			"deleteConnectionIrreversible": "لا يمكن التراجع عن هذا الإجراء.",
-			"deleteConnection": "حذف الاتصال"
+			"deleteConnection": "حذف الاتصال",
+			"toastDisconnected": "تم قطع اتصال {{name}}",
+			"toastDisconnectFailed": "فشل قطع الاتصال",
+			"toastPreviewDisconnectMock": "معاينة فقط — هذه حالة اتصال وهمية.",
+			"toastConnectionDeleted": "تم حذف الاتصال بنجاح",
+			"toastConnectionDeleteFailed": "فشل حذف الاتصال",
+			"catalog": {
+				"tags": {
+					"payments": "المدفوعات",
+					"invoices": "الفواتير",
+					"crm": "إدارة علاقات العملاء",
+					"sales": "المبيعات",
+					"marketing": "التسويق",
+					"customerService": "خدمة العملاء",
+					"accounting": "المحاسبة",
+					"payment": "الدفع",
+					"invoiceCustomer": "فاتورة العميل"
+				},
+				"mode": {
+					"test": "وضع الاختبار"
+				},
+				"stripe": {
+					"name": "Stripe",
+					"description": "أرسل الفواتير واحسب الضريبة وتحصّل المدفوعات عبر موصلنا الأصلي مع Stripe.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ Stripe إصدار الفواتير وتحصيل الضرائب والمدفوعات عبر Stripe."]
+						},
+						"stripeInvoicing": {
+							"title": "فوترة Stripe",
+							"paragraphs": ["أنشئ وأرسل الفواتير عبر Stripe Invoicing مباشرة من Flexprice مع تحصيل المدفوعات تلقائياً."]
+						},
+						"automaticTax": {
+							"title": "حساب الضريبة تلقائياً",
+							"paragraphs": [
+								"استفد من Stripe Tax لإدارة قواعد ومعدلات الضريبة المعقّدة في أي منطقة. يضمن التكامل حسابات ضريبية دقيقة ومحدّثة لكل فاتورة ويقلّل مخاطر الامتثال."
+							]
+						},
+						"securePayments": {
+							"title": "مدفوعات آمنة ومرنة",
+							"paragraphs": [
+								"تحصّل المدفوعات بسرعة وأمان عبر بوابة Stripe. يمكن لعملائك اختيار طرق دفع متعددة مثل البطاقة والـ ACH وغيرها لتحسين التجربة وتسريع التحصيل."
+							]
+						}
+					}
+				},
+				"razorpay": {
+					"name": "Razorpay",
+					"description": "اقبل المعالجة والصرف للمدفوعات عبر موصلنا الأصلي مع Razorpay.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": [
+								"يتيح تطبيق Flexprice لـ Razorpay إصدار الفواتير وحساب الضرائب وتحصيل المدفوعات عبر Razorpay، مع ربط سلس بـ Flexprice أو محرك الفوترة لديك."
+							]
+						},
+						"razorpayInvoicing": {
+							"title": "فوترة Razorpay",
+							"paragraphs": [
+								"أنشئ وأرسل الفواتير بخطوات قليلة من Flexprice باستخدام فوترة Razorpay، مع إمكانية أتمتة التحصيل وتقليل المتابعات اليدوية."
+							]
+						},
+						"automaticTax": {
+							"title": "حساب الضريبة تلقائياً",
+							"paragraphs": [
+								"استفد من دعم Razorpay لقواعد الضريبة الإقليمية (مثل ضريبة السلع والخدمات في الهند) لضمان معدلات دقيقة لكل فاتورة وتقليل المخاطر والحساب اليدوي."
+							]
+						},
+						"securePayments": {
+							"title": "مدفوعات آمنة ومرنة",
+							"paragraphs": [
+								"تحصّل المدفوعات بسرعة عبر بوابة Razorpay. يمكن للعملاء الدفع بالبطاقات والتحويل المصرفي وUPI والمحافظ لتحسين التجربة وتسريع التدفق النقدي."
+							]
+						}
+					}
+				},
+				"chargebee": {
+					"name": "Chargebee",
+					"description": "زامن الفواتير والرسوم/الأسعار بين Flexprice وChargebee لعمليات فوترة سلسة.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ Chargebee مزامنة الفواتير والرسوم والأسعار بين المنصتين لتبسيط سير عمل الفوترة."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": ["زامن الفواتير من Flexprice إلى Chargebee ليبقى نظام الفوترة محدثاً بأحدث البيانات."]
+						},
+						"chargePriceSync": {
+							"title": "مزامنة الرسوم والأسعار",
+							"paragraphs": ["زامن الرسوم والأسعار بين Flexprice وChargebee للحفاظ على اتساق منصة الفوترة."]
+						}
+					}
+				},
+				"hubspot": {
+					"name": "HubSpot",
+					"description": "HubSpot منصة لإدارة علاقات العملاء والمبيعات والتسويق وخدمة العملاء.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ HubSpot مزامنة الصفقات والفواتير والعملاء والمدفوعات بين HubSpot وFlexprice."]
+						},
+						"dealLineItems": {
+							"title": "مزامنة بنود الصفقة",
+							"paragraphs": ["زامن بنود الصفقات من HubSpot إلى Flexprice لضمان تتبع الإيرادات والفوترة بدقة."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": ["ادفع الفواتير من Flexprice إلى HubSpot ليبقى الـ CRM محدثاً بمعلومات الفوترة."]
+						},
+						"customerSync": {
+							"title": "مزامنة العملاء",
+							"paragraphs": ["زامن بيانات العملاء بين HubSpot وFlexprice لمصدر واحد موثوق لمعلومات العملاء."]
+						},
+						"paymentsSync": {
+							"title": "مزامنة المدفوعات",
+							"paragraphs": ["حافظ على تسجيلات المدفوعات متزامنة بين المنصتين للتقارير المالية الدقيقة."]
+						},
+						"revenueReporting": {
+							"title": "حسابات الإيراد في HubSpot",
+							"paragraphs": ["استفد من تقارير HubSpot مع بيانات إيراد دقيقة مزامنة من Flexprice."]
+						}
+					}
+				},
+				"salesforce": {
+					"name": "Salesforce",
+					"description": "Salesforce منصة لإدارة علاقات العملاء (CRM)."
+				},
+				"paypal": {
+					"name": "PayPal",
+					"description": "PayPal نظام دفع عبر الإنترنت يدعم تحويل الأموال."
+				},
+				"zoho": {
+					"name": "Zoho",
+					"description": "يتيح تكامل Zoho Books إدارة مهام المحاسبة المهمة مباشرة من Flexprice.",
+					"sections": {
+						"createCustomer": {
+							"title": "إنشاء عميل في Zoho Books",
+							"paragraphs": ["أنشئ أو حدّث العملاء في Zoho Books تلقائياً عند إضافة عميل أو تعديله في Flexprice."]
+						},
+						"createInvoice": {
+							"title": "إنشاء فاتورة في Zoho Books",
+							"paragraphs": ["ولّد فواتير Zoho Books بسلاسة من بيانات الاستخدام أو محفزات الفوترة في Flexprice مع تقليل العمل اليدوي."]
+						},
+						"transformInvoice": {
+							"title": "تحويل فاتورة Flexprice إلى Zoho Books",
+							"paragraphs": ["حوّل كائن فاتورة Flexprice إلى تنسيق فاتورة Zoho Books لتبسيط تدفق البيانات وضمان الدقة."]
+						}
+					}
+				},
+				"quickbooks": {
+					"name": "QuickBooks",
+					"description": "زامن الخطط والعملاء والفواتير من Flexprice إلى QuickBooks Online لعمليات محاسبية سلسة.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": [
+								"يتيح تكامل Flexprice مع QuickBooks مزامنة أحادية الاتجاه من Flexprice إلى QuickBooks Online لمزامنة الخطط والعملاء والفواتير تلقائياً."
+							]
+						},
+						"planPriceSync": {
+							"title": "مزامنة الخطة/السعر",
+							"paragraphs": [
+								"أنشئ عناصر QuickBooks (نوع خدمة) تلقائياً عند إنشاء الخطط في Flexprice. تُربط كل أسعار بعنصر QuickBooks لبنود فاتورة دقيقة."
+							]
+						},
+						"customerSync": {
+							"title": "مزامنة العملاء",
+							"paragraphs": ["يُنشأ العملاء في QuickBooks تلقائياً عند مزامنة الفواتير، مع مزامنة الاسم والبريد وعنوان الفوترة."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": [
+								"زامن الفواتير من Flexprice إلى QuickBooks Online مع ربط بنود الفاتورة بعناصر QuickBooks لسجلات محاسبية دقيقة."
+							]
+						},
+						"tokenRefresh": {
+							"title": "تجديد الرمز تلقائياً",
+							"paragraphs": ["يُجدّد الخادم رموز OAuth تلقائياً عند انتهائها لضمان استمرار المزامنة دون تدخل يدوي."]
+						}
+					}
+				},
+				"nomod": {
+					"name": "Nomod",
+					"description": "أرسل الفواتير وتحصّل المدفوعات عبر روابط دفع من تكامل Nomod.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ Nomod إصدار الفواتير وتحصيل المدفوعات عبر روابط دفع Nomod مع ربط سلس بـ Flexprice."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": ["أنشئ وأرسل فواتير بروابط دفع عبر Nomod من Flexprice مع إمكانية أتمتة التحصيل عبر الروابط."]
+						},
+						"paymentLinks": {
+							"title": "روابط الدفع",
+							"paragraphs": ["أنشئ روابط دفع آمنة لفواتيرك عبر Nomod ليتمكن العملاء من الدفع بسرعة عبر الطرق المدعومة."]
+						},
+						"webhooks": {
+							"title": "تكامل الويبهوك",
+							"paragraphs": ["استقبل إشعارات فورية عن أحداث الفواتير وروابط الدفع عبر الويبهوك لمتابعة حالة الدفع وإنشاء الفواتير وغيرها."]
+						}
+					}
+				},
+				"moyasar": {
+					"name": "Moyasar",
+					"description": "أرسل الفواتير وتحصّل المدفوعات عبر بوابة Moyasar.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ Moyasar إصدار الفواتير وتحصيل المدفوعات عبر بوابة Moyasar مع ربط سلس بـ Flexprice."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": ["أنشئ وأرسل الفواتير عبر Moyasar من Flexprice مع إمكانية أتمتة التحصيل عبر البوابة."]
+						},
+						"securePayments": {
+							"title": "مدفوعات آمنة",
+							"paragraphs": ["تحصّل المدفوعات بسرعة عبر Moyasar مع خيارات دفع متعددة لتحسين التجربة وتسريع التحصيل."]
+						},
+						"webhooks": {
+							"title": "تكامل الويبهوك",
+							"paragraphs": ["استقبل إشعارات فورية عن أحداث الدفع عبر الويبهوك؛ اشترك في حدث payment_paid لمتابعة حالة الدفع."]
+						}
+					}
+				},
+				"paddle": {
+					"name": "Paddle",
+					"description": "أرسل الفواتير وتحصّل المدفوعات عبر بوابة Paddle.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": ["يتيح تطبيق Flexprice لـ Paddle إصدار الفواتير وتحصيل المدفوعات عبر بوابة Paddle مع ربط سلس بـ Flexprice."]
+						},
+						"invoiceSync": {
+							"title": "مزامنة الفواتير",
+							"paragraphs": ["أنشئ وأرسل الفواتير عبر Paddle من Flexprice مع إمكانية أتمتة التحصيل عبر البوابة."]
+						},
+						"securePayments": {
+							"title": "مدفوعات آمنة",
+							"paragraphs": ["تحصّل المدفوعات بسرعة عبر Paddle مع خيارات دفع متعددة لتحسين التجربة وتسريع التحصيل."]
+						},
+						"webhooksPaddle": {
+							"title": "تكامل الويبهوك",
+							"paragraphs": ["استقبل إشعارات فورية عن أحداث الدفع عبر الويبهوك؛ اشترك في حدث transactions.completed لمتابعة حالة الدفع."]
+						}
+					}
+				}
+			}
 		},
 		"oauthCallback": {
 			"authorizationFailed": "فشل التفويض",
@@ -659,5 +908,163 @@
 			"filterLastQuarter": "الربع الماضي",
 			"filterLastYear": "السنة الماضية"
 		}
+	},
+	"integrations": {
+		"stripe": {
+			"description": "قم بربط Stripe لمزامنة بيانات الفوترة الخاصة بك.",
+			"connectionPlaceholder": "مثال: حساب Stripe الرئيسي",
+			"connectionNameHint": "أدخل اسمًا لهذا الاتصال في Stripe",
+			"secretKeyLabel": "المفتاح السري",
+			"secretKeyPlaceholder": "sk_...",
+			"secretKeyHint": "يمكنك العثور على مفتاح Stripe السري في إعدادات API",
+			"pullFromStripe": "سحب من Stripe",
+			"pushToStripe": "إرسال إلى Stripe",
+			"webhookSecretDescription": "هذا المفتاح مطلوب للتحقق من أحداث Webhook القادمة من Stripe",
+			"webhookSecretPlaceholder": "whsec_...",
+			"webhookIntro": "أضف عنوان URL التالي إلى إعدادات Webhook في Stripe:",
+			"webhookEventsIntro": "قم بتفعيل الأحداث التالية في إعدادات Webhook داخل Stripe:",
+			"labels": {
+				"plans": "الخطط",
+				"invoices": "الفواتير",
+				"subscriptions": "الاشتراكات"
+			},
+			"toast": {
+				"stripeCreated": "تم إنشاء اتصال Stripe بنجاح",
+				"stripeUpdated": "تم تحديث اتصال Stripe بنجاح"
+			}
+		}
+	},
+	"environment": {
+		"types": {
+			"sandbox": "بيئة تجريبية",
+			"production": "الإنتاج",
+			"sandboxDescription": "بيئة اختبار وتطوير",
+			"productionDescription": "بيئة الإنتاج المباشرة"
+		},
+		"copy": {
+			"title": "نسخ البيئة",
+			"fallbackDescription": "تعذر تحميل البيئات المتاحة حاليًا.",
+			"introBeforeBadge": "النسخ من",
+			"intoNew": "إلى بيئة جديدة.",
+			"intoSelected": "إلى البيئة المحددة.",
+			"cleanupTitle": "تنظيف بعد النسخ",
+			"cleanupBodyLead": "سيتم حذف الموارد المؤقتة بعد الانتهاء. قد يستغرق هذا بعض الوقت حتى يكتمل ",
+			"cleanupBefore": "بعد",
+			"cleanupBodyTrail": " العملية.",
+			"copyIntoLabel": "نسخ إلى",
+			"selectTargetPlaceholder": "اختر البيئة المستهدفة",
+			"createNewOption": "إنشاء بيئة جديدة",
+			"createNewOptionDescription": "إنشاء بيئة جديدة تمامًا",
+			"newEnvironmentName": "اسم البيئة الجديدة",
+			"namePlaceholder": "مثال: Staging أو Sandbox",
+			"typeLabel": "النوع",
+			"typePlaceholder": "اختر نوع البيئة",
+			"whatCopiedHeading": "ما الذي سيتم نسخه؟",
+			"featuresTitle": "ما الميزات التي سيتم نسخها؟",
+			"featuresDescription": "سيتم نسخ جميع الإعدادات والخصائص المتعلقة بالبيئة الحالية",
+			"plansTitle": "ما الذي سيحدث للخطط؟",
+			"plansDescription": "سيتم أيضًا نسخ جميع الخطط والاشتراكات المرتبطة بهذه البيئة",
+			"excludedLead": "لن يتم تضمين البيانات الحساسة والإعدادات الخاصة بالمستخدمين أثناء عملية النسخ ",
+			"excludedBold": "لن",
+			"excludedTail": " يتم نسخها.",
+			"noteAsyncNewEnv": "قد تستغرق عملية النسخ بعض الوقت. ستظهر البيئة الجديدة في القائمة بمجرد اكتمال العملية.",
+			"noteAsyncOnly": "قد تستغرق عملية النسخ بعض الوقت حتى تكتمل بالكامل.",
+			"copyingEllipsis": "جارٍ النسخ...",
+			"buttonCopy": "نسخ البيئة",
+			"toastStarted": "تم بدء عملية النسخ، وستظهر البيئة الجديدة بعد اكتمال العملية.",
+			"toastCloneFailed": "فشل نسخ البيئة",
+			"errorNameRequired": "اسم البيئة مطلوب",
+			"errorNoSource": "لم يتم تحديد بيئة المصدر"
+		},
+		"creator": {
+			"title": "إنشاء بيئة",
+			"description": "قم بإنشاء بيئة جديدة",
+			"nameLabel": "الاسم",
+			"namePlaceholder": "أدخل اسم البيئة",
+			"typeLabel": "النوع",
+			"typePlaceholder": "اختر نوع البيئة",
+			"sandboxCancellationNote": "سيتم حذف البيئات التجريبية غير النشطة بعد {{days}} يومًا",
+			"productionBodyLine1": "بيئات الإنتاج مخصصة للاستخدام المباشر.",
+			"productionContactPrompt": "لإنشاء بيئة إنتاج:",
+			"brandSlack": "Slack",
+			"brandEmail": "البريد الإلكتروني",
+			"bookACall": "احجز مكالمة",
+			"ariaSlackContact": "التواصل عبر Slack",
+			"ariaEmailContact": "التواصل عبر البريد",
+			"ariaBookCall": "احجز مكالمة",
+			"slackAlt": "Slack",
+			"toastCreated": "تم إنشاء البيئة بنجاح",
+			"toastCreateFailed": "فشل إنشاء البيئة",
+			"errorNameRequired": "اسم البيئة مطلوب",
+			"errorCreateUnknown": "حدث خطأ أثناء إنشاء البيئة",
+			"savingEllipsis": "جارٍ الحفظ...",
+			"submitCreate": "إنشاء البيئة"
+		},
+		"editor": {
+			"title": "تعديل اسم البيئة",
+			"description": "قم بتحديث اسم البيئة",
+			"nameLabel": "الاسم",
+			"namePlaceholder": "أدخل اسم البيئة",
+			"savingEllipsis": "جارٍ الحفظ...",
+			"submitSave": "حفظ",
+			"toastUpdated": "تم تحديث البيئة بنجاح",
+			"toastUpdateFailed": "فشل تحديث البيئة",
+			"errorNameRequired": "اسم البيئة مطلوب",
+			"errorNoEnvironment": "لم يتم العثور على البيئة",
+			"errorUpdateUnknown": "حدث خطأ أثناء تحديث البيئة"
+		},
+		"selector": {
+			"noneAvailable": "لا توجد بيئات",
+			"noEnvironment": "لا توجد بيئة",
+			"fallbackTenantLetters": "UN",
+			"unknownTenant": "مستأجر غير معروف",
+			"addEnvironment": "إضافة بيئة",
+			"copyEnvironment": "نسخ البيئة",
+			"renameAria": "إعادة تسمية البيئة {{name}}",
+			"suspendedTitle": "تم تعليق البيئة",
+			"suspendedDescription": "هذه البيئة معلقة حاليًا. يرجى التواصل مع الدعم."
+		},
+		"restrictedBanner": {
+			"productionAccount": "حساب الإنتاج",
+			"sandboxAccount": "الحساب التجريبي",
+			"grace": "ستنتهي صلاحية {{envType}} خلال {{count}} {{dayWord}}. يرجى التواصل معنا ",
+			"dayWordOne": "يوم",
+			"dayWordPlural": "أيام",
+			"contactUs": "تواصل معنا",
+			"suspended": "تم تعليق {{envType}}. يرجى التواصل معنا"
+		}
+	},
+	"debug": {
+		"tooltipTitle": "قم بإنشاء بيانات تجريبية لاختبار التدفقات",
+		"sampleEventsCreated": "تم إنشاء أحداث تجريبية",
+		"loading": "جارٍ التحميل...",
+		"titleStreamSamples": "بث بيانات تجريبية",
+		"noCustomers": "لا يوجد عملاء. قم بإنشاء عميل أولاً.",
+		"needSubscriptionLead": "تحتاج إلى اشتراك نشط لإنشاء أحداث تجريبية لـ",
+		"eventsFiredSentence": "تم إرسال {{count}} حدث إلى ",
+		"eventsFiredMiddle": " خلال ",
+		"eventsFiredTrailing": " ثانية.",
+		"viewEvents": "عرض الأحداث",
+		"streamAgain": "إعادة البث",
+		"streamIntro": "قم ببث أحداث تجريبية تحاكي بيانات الاستخدام الحقيقية. سيتم إنشاء بيانات مرتبطة بـ ",
+		"planBridge": " ضمن ",
+		"planEnd": " الخطة.",
+		"progress": "{{current}} من {{total}} حدث",
+		"streaming": "جارٍ البث...",
+		"startStreaming": "بدء البث"
+	},
+	"region": {
+		"dataRegion": "منطقة البيانات",
+		"selectPlaceholder": "اختر المنطقة",
+		"tooltipLearnMore": "اعرف المزيد حول مناطق البيانات",
+		"dialogTitle": "اختر منطقة البيانات",
+		"dialogDescription": "حدد المنطقة المناسبة. سيتم تخزين بياناتك ومعالجتها داخل المنطقة المختارة.",
+		"sectionUs": "الولايات المتحدة الأمريكية",
+		"benefitUs1": "أداء أفضل للمستخدمين في أمريكا الشمالية",
+		"benefitUs2": "بنية تحتية عالية الاعتمادية",
+		"benefitUs3": "مستضافة في AWS us-west-2",
+		"sectionIndia": "الهند",
+		"benefitIn1": "أداء أفضل للمستخدمين في الهند",
+		"benefitIn2": "مستضافة في AWS ap-south-1"
 	}
 }

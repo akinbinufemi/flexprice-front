@@ -1,5 +1,6 @@
 import { Page, Chip } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ColumnData, TooltipCell } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import WorkflowApi from '@/api/WorkflowApi';
@@ -178,7 +179,7 @@ const WorkflowsPage = () => {
 
 	return (
 		<Page heading={t('common:nav.workflows')}>
-			<ApiDocsContent tags={['Workflows']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Workflows} />
 			<QueryableDataArea<WorkflowExecutionDTO>
 				queryConfig={{
 					filterOptions,
@@ -209,7 +210,7 @@ const WorkflowsPage = () => {
 				emptyStateConfig={{
 					heading: t('common:nav.workflows'),
 					description: t('workflows.empty.description'),
-					tags: ['Workflows'],
+					tags: API_DOCS_TAGS.Workflows,
 				}}
 			/>
 		</Page>

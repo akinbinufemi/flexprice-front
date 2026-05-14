@@ -1,5 +1,6 @@
 import { AddButton, CardHeader, Loader, NoDataCard } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { CreditNoteTable } from '@/components/molecules/CreditNoteTable';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { useQuery } from '@tanstack/react-query';
@@ -60,7 +61,7 @@ const CreditNote = () => {
 
 	return (
 		<div>
-			<ApiDocsContent tags={['Credit Notes']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotes} />
 			<Card variant='notched'>
 				<CardHeader
 					title={t('creditNotes.title')}

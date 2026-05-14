@@ -8,8 +8,8 @@ import { ConnectionApi, TaskApi } from '@/api';
 import { ENTITY_STATUS, CONNECTION_PROVIDER_TYPE } from '@/models';
 import toast from 'react-hot-toast';
 import S3ConnectionDrawer from '@/components/molecules/S3ConnectionDrawer/S3ConnectionDrawer';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 const S3Exports = () => {
 	const { t } = useTranslation('settings');

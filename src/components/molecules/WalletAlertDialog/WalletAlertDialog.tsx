@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, Button, Input, Toggle, Select } from '@/components/atoms';
 import toast from 'react-hot-toast';
 import { WalletAlertSettings, WalletAlertThreshold, WalletAlertLevel } from '@/models/Wallet';
+import { useTranslation } from 'react-i18next';
 
 interface WalletAlertDialogProps {
 	open: boolean;
@@ -12,6 +13,7 @@ interface WalletAlertDialogProps {
 }
 
 const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettings, onSave, onClose, currency }) => {
+	const { t } = useTranslation('billing');
 	const [localAlertSettings, setLocalAlertSettings] = useState<WalletAlertSettings>({
 		alert_enabled: false,
 		critical: null,
@@ -191,11 +193,11 @@ const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettin
 					</div>
 					{threshold ? (
 						<Button variant='ghost' size='sm' onClick={() => handleRemoveThreshold(level)} disabled={isSaving}>
-							Remove
+							{t('wallet.alerts.remove')}
 						</Button>
 					) : (
 						<Button variant='outline' size='sm' onClick={() => handleAddThreshold(level)} disabled={isSaving}>
-							Add
+							{t('wallet.alerts.add')}
 						</Button>
 					)}
 				</div>
@@ -203,9 +205,11 @@ const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettin
 				{threshold && (
 					<div className='grid grid-cols-2 gap-3'>
 						<div className='space-y-1'>
-							<label className='text-xs font-medium text-gray-700'>Threshold Value{currency ? ` (${currency})` : ''}</label>
+							<label className='text-xs font-medium text-gray-700'>
+								{t('wallet.alerts.thresholdValueLabel', { currencySuffix: currency ? ` (${currency})` : '' })}
+							</label>
 							<Input
-								placeholder='0.00'
+								placeholder={t('wallet.alerts.amountPlaceholder')}
 								value={threshold.threshold}
 								onChange={(value) => handleThresholdChange(level, 'threshold', value)}
 								type='number'
@@ -214,11 +218,11 @@ const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettin
 							/>
 						</div>
 						<div className='space-y-1'>
-							<label className='text-xs font-medium text-gray-700'>Condition</label>
+							<label className='text-xs font-medium text-gray-700'>{t('wallet.alerts.conditionLabel')}</label>
 							<Select
 								options={[
-									{ label: 'Below', value: 'below' },
-									{ label: 'Above', value: 'above' },
+									{ label: t('wallet.alerts.conditionBelow'), value: 'below' },
+									{ label: t('wallet.alerts.conditionAbove'), value: 'above' },
 								]}
 								value={threshold.condition}
 								onChange={(value) => handleThresholdChange(level, 'condition', value)}
@@ -243,14 +247,14 @@ const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettin
 			onOpenChange={(isOpen) => {
 				if (!isOpen) handleClose();
 			}}
-			title='Wallet Alert Settings'
+			title={t('wallet.alerts.dialogTitle')}
 			showCloseButton>
 			<div className='flex flex-col gap-6 min-w-[600px]'>
 				{/* Alert Toggle */}
 				<Toggle
-					title='Enable Alerts'
-					label='Monitor wallet balance against configured thresholds'
-					description='Get notified when balance crosses configured thresholds for this wallet'
+					title={t('wallet.alerts.enableTitle')}
+					label={t('wallet.alerts.enableLabel')}
+					description={t('wallet.alerts.enableDescription')}
 					checked={localAlertSettings.alert_enabled || false}
 					onChange={handleToggleChange}
 					disabled={isSaving}
@@ -259,19 +263,19 @@ const WalletAlertDialog: React.FC<WalletAlertDialogProps> = ({ open, alertSettin
 				{/* Alert Configuration */}
 				{localAlertSettings.alert_enabled && (
 					<div className='space-y-4'>
-						{renderThresholdInput(WalletAlertLevel.CRITICAL, 'Critical Threshold', 'Alert when balance reaches critical level')}
-						{renderThresholdInput(WalletAlertLevel.WARNING, 'Warning Threshold', 'Alert when balance reaches warning level')}
-						{renderThresholdInput(WalletAlertLevel.INFO, 'Info Threshold', 'Alert when balance reaches info level')}
+						{renderThresholdInput(WalletAlertLevel.CRITICAL, t('wallet.alerts.criticalTitle'), t('wallet.alerts.criticalDescription'))}
+						{renderThresholdInput(WalletAlertLevel.WARNING, t('wallet.alerts.warningTitle'), t('wallet.alerts.warningDescription'))}
+						{renderThresholdInput(WalletAlertLevel.INFO, t('wallet.alerts.infoTitle'), t('wallet.alerts.infoDescription'))}
 					</div>
 				)}
 
 				{/* Action Buttons */}
 				<div className='flex justify-end gap-2 mt-6'>
 					<Button variant='outline' onClick={handleClose} disabled={isSaving}>
-						Cancel
+						{t('wallet.alerts.cancel')}
 					</Button>
 					<Button onClick={handleSave} disabled={isSaving}>
-						{isSaving ? 'Saving...' : 'Save Changes'}
+						{isSaving ? t('wallet.alerts.saving') : t('wallet.alerts.saveChanges')}
 					</Button>
 				</div>
 			</div>

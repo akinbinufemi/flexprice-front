@@ -12,6 +12,7 @@ import { PlanResponse, PriceResponse, EntitlementResponse } from '@/types';
 import { GetAllPlansResponse } from '@/api/PlanApi';
 import { PricingCard, type PricingCardProps } from '@/components/molecules';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { PlanDrawer } from '@/components/molecules';
 import {
 	Price,
@@ -567,7 +568,7 @@ const PricingPage = () => {
 							}}
 						/>
 					}>
-					<ApiDocsContent tags={['Plans', 'Prices']} />
+					<ApiDocsContent tags={API_DOCS_TAGS.PlansAndPrices} />
 					<div className='flex flex-col items-center mt-6'>
 						{/* 3 Dotted Placeholder Boxes */}
 						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full mb-16'>
@@ -614,7 +615,7 @@ const PricingPage = () => {
 					/>
 				</div>
 			}>
-			<ApiDocsContent tags={['Plans', 'Prices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.PlansAndPrices} />
 			{/* filters */}
 
 			<div className='flex flex-col'>

@@ -6,6 +6,7 @@ import { TAXRATE_ENTITY_TYPE } from '@/models/Tax';
 import { CreateTaxAssociationRequest, TaxRateResponse } from '@/types/dto/tax';
 import { ENTITY_STATUS } from '@/models';
 import { currencyOptions } from '@/constants/constants';
+import { useTranslation } from 'react-i18next';
 
 interface TaxAssociationDialogProps {
 	open: boolean;
@@ -41,6 +42,7 @@ const TaxAssociationDialog: FC<TaxAssociationDialogProps> = ({
 	data,
 	alreadyLinkedTaxRateCodes,
 }) => {
+	const { t } = useTranslation('common');
 	const [formData, setFormData] = useState<FormData>({
 		tax_rate_code: data?.tax_rate_code || '',
 		priority: data?.priority || 1,
@@ -63,25 +65,25 @@ const TaxAssociationDialog: FC<TaxAssociationDialogProps> = ({
 
 		// Validate tax rate code
 		if (!formData.tax_rate_code?.trim()) {
-			newErrors.tax_rate_code = 'Tax rate is required';
+			newErrors.tax_rate_code = t('taxAssociation.taxRateRequired');
 		}
 
 		// Validate priority
 		const priority = Number(formData.priority);
 		if (isNaN(priority) || priority < 1) {
-			newErrors.priority = 'Priority must be a positive number';
+			newErrors.priority = t('taxAssociation.priorityPositive');
 		}
 
 		// Validate currency
 		if (!formData.currency?.trim()) {
-			newErrors.currency = 'Currency is required';
+			newErrors.currency = t('taxAssociation.currencyRequired');
 		}
 
 		return {
 			isValid: Object.keys(newErrors).length === 0,
 			errors: newErrors,
 		};
-	}, [formData]);
+	}, [formData, t]);
 
 	// Handle field changes with error clearing
 	const handleFieldChange = useCallback(
@@ -140,44 +142,44 @@ const TaxAssociationDialog: FC<TaxAssociationDialogProps> = ({
 	}));
 
 	return (
-		<Dialog isOpen={open} onOpenChange={onOpenChange} title='Link Tax Rate' className='sm:max-w-[500px]'>
+		<Dialog isOpen={open} onOpenChange={onOpenChange} title={t('taxAssociation.dialogTitle')} className='sm:max-w-[500px]'>
 			<form onSubmit={handleSubmit} className='space-y-6'>
 				<div className='space-y-4'>
 					<div className='space-y-2'>
 						<Select
-							label='Tax Rate'
+							label={t('taxAssociation.labelTaxRate')}
 							value={formData.tax_rate_code}
 							onChange={(value: string) => handleFieldChange('tax_rate_code', value)}
 							options={taxRateOptions}
-							placeholder='Select a tax rate'
+							placeholder={t('taxAssociation.placeholderTaxRate')}
 							disabled={isLoadingTaxRates}
-							noOptionsText='No tax rates found'
+							noOptionsText={t('taxAssociation.noTaxRatesFound')}
 							error={errors.tax_rate_code}
 						/>
-						{isLoadingTaxRates && <p className='text-sm text-gray-500 mt-1'>Loading tax rates...</p>}
+						{isLoadingTaxRates && <p className='text-sm text-gray-500 mt-1'>{t('taxAssociation.loadingTaxRates')}</p>}
 					</div>
 
 					<div className='space-y-2'>
 						<Input
-							label='Priority'
+							label={t('taxAssociation.labelPriority')}
 							id='priority'
 							type='number'
 							min='1'
 							value={formData.priority.toString()}
 							onChange={(value) => handleFieldChange('priority', parseInt(value) || 1)}
-							placeholder='Enter priority (1-100)'
+							placeholder={t('taxAssociation.placeholderPriority')}
 							error={errors.priority}
 						/>
-						<p className='text-sm text-gray-500'>Determines the order of application when multiple tax rates apply</p>
+						<p className='text-sm text-gray-500'>{t('taxAssociation.priorityHint')}</p>
 					</div>
 
 					<div className='space-y-2'>
 						<Select
-							label='Currency'
+							label={t('taxAssociation.labelCurrency')}
 							value={formData.currency}
 							onChange={(value: string) => handleFieldChange('currency', value)}
 							options={currencyOptions}
-							placeholder='Select currency'
+							placeholder={t('taxAssociation.placeholderCurrency')}
 							error={errors.currency}
 						/>
 					</div>
@@ -186,18 +188,18 @@ const TaxAssociationDialog: FC<TaxAssociationDialogProps> = ({
 						<Toggle
 							checked={formData.auto_apply}
 							onChange={(checked: boolean) => handleFieldChange('auto_apply', checked)}
-							label='Auto Apply'
+							label={t('taxAssociation.labelAutoApply')}
 						/>
-						<p className='text-sm text-gray-500'>Automatically apply this tax rate when applicable</p>
+						<p className='text-sm text-gray-500'>{t('taxAssociation.autoApplyHint')}</p>
 					</div>
 				</div>
 
 				<div className='flex justify-end space-x-3 pt-4'>
 					<Button type='button' variant='outline' onClick={handleCancel}>
-						Cancel
+						{t('actions.cancel')}
 					</Button>
 					<Button type='submit' disabled={!formData.tax_rate_code || isLoadingTaxRates}>
-						Link Tax Rate
+						{t('taxAssociation.submitLink')}
 					</Button>
 				</div>
 			</form>

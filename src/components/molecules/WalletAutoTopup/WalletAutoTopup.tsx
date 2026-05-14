@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, Button, Input, Toggle } from '@/components/atoms';
 import { toast } from 'react-hot-toast';
 import { PremiumFeatureIcon } from '../PremiumFeature/PremiumFeature';
+import { useTranslation } from 'react-i18next';
 
 export interface AutoTopupConfig {
 	enabled: boolean;
@@ -18,6 +19,7 @@ interface WalletAutoTopupProps {
 }
 
 const WalletAutoTopup: React.FC<WalletAutoTopupProps> = ({ open, autoTopupConfig, onSave, onClose }) => {
+	const { t } = useTranslation('billing');
 	const [localConfig, setLocalConfig] = useState<AutoTopupConfig>(
 		autoTopupConfig || {
 			enabled: false,
@@ -76,7 +78,7 @@ const WalletAutoTopup: React.FC<WalletAutoTopupProps> = ({ open, autoTopupConfig
 			}}
 			title={
 				<div className='flex items-center gap-2'>
-					<span className='text-lg font-medium'>Auto Top-Up Settings</span>
+					<span className='text-lg font-medium'>{t('wallet.autoTopup.dialogTitle')}</span>
 					<PremiumFeatureIcon />
 				</div>
 			}
@@ -84,9 +86,9 @@ const WalletAutoTopup: React.FC<WalletAutoTopupProps> = ({ open, autoTopupConfig
 			<div className='flex flex-col gap-6 min-w-[500px]'>
 				{/* Enable Auto Top-Up Toggle */}
 				<Toggle
-					title='Enable Auto Top-Up'
-					label='Automatically add credits when ongoing balance falls below threshold'
-					description='When enabled, credits will be automatically added to the wallet when the ongoing balance drops below the specified threshold'
+					title={t('wallet.autoTopup.enableTitle')}
+					label={t('wallet.autoTopup.enableLabel')}
+					description={t('wallet.autoTopup.enableDescription')}
 					checked={localConfig.enabled}
 					onChange={(enabled) => setLocalConfig({ ...localConfig, enabled })}
 				/>
@@ -97,38 +99,38 @@ const WalletAutoTopup: React.FC<WalletAutoTopupProps> = ({ open, autoTopupConfig
 						{/* Threshold Input */}
 						<div className='space-y-2'>
 							<Input
-								label='Threshold (Credits)'
-								placeholder='0.00'
+								label={t('wallet.autoTopup.thresholdLabel')}
+								placeholder={t('wallet.autoTopup.thresholdPlaceholder')}
 								value={localConfig.threshold}
 								onChange={(value) => setLocalConfig({ ...localConfig, threshold: value })}
 								type='number'
 								step='0.01'
-								description='Minimum ongoing balance (in credits) that triggers auto top-up. When ongoing balance falls below this value, auto top-up will be triggered.'
+								description={t('wallet.autoTopup.thresholdDescription')}
 							/>
 						</div>
 
 						{/* Amount Input */}
 						<div className='space-y-2'>
 							<Input
-								label='Top-Up Amount (Credits)'
-								placeholder='0.00'
+								label={t('wallet.autoTopup.amountLabel')}
+								placeholder={t('wallet.autoTopup.amountPlaceholder')}
 								value={localConfig.amount}
 								onChange={(value) => setLocalConfig({ ...localConfig, amount: value })}
 								type='number'
 								step='0.01'
 								min='0'
-								description='Number of credits to add when auto top-up is triggered'
+								description={t('wallet.autoTopup.amountDescription')}
 							/>
 						</div>
 
 						{/* Invoicing Toggle */}
 						<Toggle
-							title='Require Invoice Payment'
-							label='Create invoice for auto top-up (requires payment before credits are added)'
+							title={t('wallet.autoTopup.invoiceTitle')}
+							label={t('wallet.autoTopup.invoiceLabel')}
 							description={
 								localConfig.invoicing
-									? 'Credits will be added only after the invoice is paid. An invoice will be created in PENDING state when auto top-up is triggered.'
-									: 'Credits will be added immediately when auto top-up is triggered.'
+									? t('wallet.autoTopup.invoiceDescriptionWhenInvoiced')
+									: t('wallet.autoTopup.invoiceDescriptionImmediate')
 							}
 							checked={localConfig.invoicing}
 							onChange={(invoicing) => setLocalConfig({ ...localConfig, invoicing })}
@@ -139,9 +141,9 @@ const WalletAutoTopup: React.FC<WalletAutoTopupProps> = ({ open, autoTopupConfig
 				{/* Action Buttons */}
 				<div className='flex justify-end gap-2 mt-6'>
 					<Button variant='outline' onClick={handleClose}>
-						Cancel
+						{t('wallet.autoTopup.cancel')}
 					</Button>
-					<Button onClick={handleSave}>Save Changes</Button>
+					<Button onClick={handleSave}>{t('wallet.autoTopup.saveChanges')}</Button>
 				</div>
 			</div>
 		</Dialog>

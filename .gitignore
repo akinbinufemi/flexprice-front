@@ -47,3 +47,5 @@ scripts/i18n-replacements/
 
 # Local scratch / one-off tool output (eslint redirects, etc.)
 tmp-*.txt
+scripts/.eslint-i18n-report.json
+scripts/.eslint-i18n-audit-report.json

@@ -1,5 +1,6 @@
 import { AddButton, Card, CardHeader, Loader, NoDataCard, ShortPagination } from '@/components/atoms';
 import { ApiDocsContent, CustomerInvoiceTable } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import InvoiceApi from '@/api/InvoiceApi';
 import CustomerApi from '@/api/CustomerApi';
 import { useQuery } from '@tanstack/react-query';
@@ -89,7 +90,7 @@ const CustomerInvoiceTab = () => {
 	}
 	return (
 		<div>
-			<ApiDocsContent tags={['Invoices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<Card variant='notched'>
 				<CardHeader
 					title={t('tabPanels.invoice.title')}

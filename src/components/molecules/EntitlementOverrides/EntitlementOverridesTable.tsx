@@ -18,7 +18,7 @@ interface EntitlementOverridesTableProps {
 }
 
 const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitlements, overrides, onOverrideChange, onOverrideReset }) => {
-	const { t } = useTranslation('common');
+	const { t } = useTranslation('catalog');
 	const [selectedEntitlement, setSelectedEntitlement] = useState<any | null>(null);
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
@@ -70,11 +70,11 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 		const type = featureType?.toLowerCase();
 		switch (type) {
 			case 'metered':
-				return <Chip label={t('labels.metered')} variant='info' />;
+				return <Chip label={t('entitlements.overridesTable.featureTypeMetered')} variant='info' />;
 			case 'boolean':
-				return <Chip label={t('labels.boolean')} variant='success' />;
+				return <Chip label={t('entitlements.overridesTable.featureTypeBoolean')} variant='success' />;
 			case 'static':
-				return <Chip label={t('labels.static')} variant='warning' />;
+				return <Chip label={t('entitlements.overridesTable.featureTypeStatic')} variant='warning' />;
 			default:
 				return <Chip label={featureType} variant='info' />;
 		}
@@ -90,8 +90,8 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 			const resetPeriod = entitlement.usage_reset_period;
 			const valueText =
 				limit !== null && limit !== undefined
-					? `${limit.toLocaleString()}${resetPeriod ? ` / ${resetPeriod.toLowerCase()}` : ''}`
-					: 'Unlimited';
+					? `${limit.toLocaleString()}${resetPeriod ? t('entitlements.overridesTable.perPeriodSuffix', { period: resetPeriod.toLowerCase() }) : ''}`
+					: t('entitlements.overridesTable.unlimited');
 
 			// Check if there's an override and the value has changed (including null to number or vice versa)
 			const hasChangedValue = hasOverride && limit !== originalLimit;
@@ -109,11 +109,12 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 									sideOffset={5}
 									className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[300px]'>
 									<div className='space-y-2'>
-										<div className='font-medium text-gray-900'>{t('labels.entitlementOverrideApplied')}</div>
-										{/* eslint-disable-next-line i18next/no-literal-string */}
+										<div className='font-medium text-gray-900'>{t('entitlements.overridesTable.overrideAppliedTitle')}</div>
 										<div className='text-sm text-gray-600'>
-											• Usage Limit: {originalLimit === null ? t('labels.unlimited') : originalLimit?.toLocaleString()} →{' '}
-											{limit === null ? t('labels.unlimited') : limit?.toLocaleString()}
+											{t('entitlements.overridesTable.tooltipUsageLimit', {
+												from: originalLimit === null ? t('entitlements.overridesTable.unlimited') : String(originalLimit?.toLocaleString()),
+												to: limit === null ? t('entitlements.overridesTable.unlimited') : String(limit?.toLocaleString()),
+											})}
 										</div>
 									</div>
 								</TooltipContent>
@@ -123,8 +124,8 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 				</div>
 			);
 		} else if (featureType === FEATURE_TYPE.STATIC) {
-			const value = entitlement.displayStaticValue || '--';
-			const originalValue = entitlement.static_value || '--';
+			const value = entitlement.displayStaticValue || t('entitlements.overridesTable.valuePlaceholder');
+			const originalValue = entitlement.static_value || t('entitlements.overridesTable.valuePlaceholder');
 
 			return (
 				<div className='flex items-center gap-2'>
@@ -139,10 +140,12 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 									sideOffset={5}
 									className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[300px]'>
 									<div className='space-y-2'>
-										<div className='font-medium text-gray-900'>{t('labels.entitlementOverrideApplied')}</div>
-										{/* eslint-disable-next-line i18next/no-literal-string */}
+										<div className='font-medium text-gray-900'>{t('entitlements.overridesTable.overrideAppliedTitle')}</div>
 										<div className='text-sm text-gray-600'>
-											• Static Value: {originalValue} → {value}
+											{t('entitlements.overridesTable.tooltipStaticValue', {
+												from: String(originalValue),
+												to: String(value),
+											})}
 										</div>
 									</div>
 								</TooltipContent>
@@ -152,8 +155,8 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 				</div>
 			);
 		} else if (featureType === FEATURE_TYPE.BOOLEAN) {
-			const value = entitlement.displayIsEnabled ? t('labels.enabled') : t('labels.disabled');
-			const originalValue = entitlement.is_enabled ? t('labels.enabled') : t('labels.disabled');
+			const value = entitlement.displayIsEnabled ? t('entitlements.overridesTable.enabled') : t('entitlements.overridesTable.disabled');
+			const originalValue = entitlement.is_enabled ? t('entitlements.overridesTable.enabled') : t('entitlements.overridesTable.disabled');
 
 			return (
 				<div className='flex items-center gap-2'>
@@ -168,10 +171,12 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 									sideOffset={5}
 									className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[300px]'>
 									<div className='space-y-2'>
-										<div className='font-medium text-gray-900'>{t('labels.entitlementOverrideApplied')}</div>
-										{/* eslint-disable-next-line i18next/no-literal-string */}
+										<div className='font-medium text-gray-900'>{t('entitlements.overridesTable.overrideAppliedTitle')}</div>
 										<div className='text-sm text-gray-600'>
-											• Status: {originalValue} → {value}
+											{t('entitlements.overridesTable.tooltipStatus', {
+												from: originalValue,
+												to: value,
+											})}
 										</div>
 									</div>
 								</TooltipContent>
@@ -181,24 +186,24 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 				</div>
 			);
 		}
-		return '--';
+		return t('entitlements.overridesTable.valuePlaceholder');
 	};
 
 	const columns: ColumnData<any>[] = [
 		{
-			title: 'Feature Name',
-			render: (row: any) => <span>{row.feature?.name || t('labels.unknownFeature')}</span>,
+			title: t('entitlements.overridesTable.columnFeatureName'),
+			render: (row: any) => <span>{row.feature?.name || t('entitlements.overridesTable.unknownFeature')}</span>,
 		},
 		{
-			title: 'Entity Type',
+			title: t('entitlements.overridesTable.columnEntityType'),
 			render: (row: any) => <span className='capitalize'>{row.entity_type?.toLowerCase()}</span>,
 		},
 		{
-			title: 'Feature Type',
+			title: t('entitlements.overridesTable.columnFeatureType'),
 			render: (row: any) => getFeatureTypeChip(row.feature_type),
 		},
 		{
-			title: 'Value',
+			title: t('entitlements.overridesTable.columnValue'),
 			render: (row: any) => getEntitlementValue(row),
 		},
 		{
@@ -233,7 +238,7 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 									}}
 									className='flex gap-2 items-center cursor-pointer'>
 									<Pencil className='h-4 w-4' />
-									<span>{t('actions.edit')}</span>
+									<span>{t('entitlements.overridesTable.edit')}</span>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -246,7 +251,7 @@ const EntitlementOverridesTable: FC<EntitlementOverridesTableProps> = ({ entitle
 	if (entitlements.length === 0) {
 		return (
 			<div className='text-center py-8 text-gray-500'>
-				<p>{t('labels.noEntitlementsAvailable')}</p>
+				<p>{t('entitlements.overridesTable.noEntitlements')}</p>
 			</div>
 		);
 	}

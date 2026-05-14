@@ -7,6 +7,7 @@ import usePagination from '@/hooks/usePagination';
 import TaxApi from '@/api/TaxApi';
 import { EmptyPage } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import TaxTable from '@/components/molecules/TaxTable/TaxTable';
 import TaxDrawer from '@/components/molecules/TaxDrawer/TaxDrawer';
 import { TaxRateResponse } from '@/types/dto/tax';
@@ -57,7 +58,7 @@ const TaxPage = () => {
 		return (
 			<EmptyPage
 				heading={t('taxes.list.pageHeading')}
-				tags={['Taxes', 'Tax', 'Tax Rates']}
+				tags={API_DOCS_TAGS.TaxRates}
 				emptyStateCard={{
 					heading: t('taxes.list.emptyHeading'),
 					description: t('taxes.list.emptyDescription'),
@@ -78,7 +79,7 @@ const TaxPage = () => {
 
 	return (
 		<Page heading={t('taxes.list.pageHeading')} headingCTA={<AddButton onClick={handleCreateNew} />}>
-			<ApiDocsContent tags={['Taxes', 'Tax', 'Tax Rates']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxRates} />
 			<div className='px-0'>
 				<TaxTable data={taxData?.items || []} onEdit={handleEdit} />
 				<Spacer className='!h-4' />

@@ -1,5 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { Button, DatePicker, Dialog } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 
 interface TerminateLineItemModalProps {
 	isOpen: boolean;
@@ -10,6 +11,7 @@ interface TerminateLineItemModalProps {
 }
 
 const TerminateLineItemModal: FC<TerminateLineItemModalProps> = ({ isOpen, onOpenChange, onCancel, onConfirm, isLoading = false }) => {
+	const { t } = useTranslation('billing');
 	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
 	useEffect(() => {
@@ -37,26 +39,31 @@ const TerminateLineItemModal: FC<TerminateLineItemModalProps> = ({ isOpen, onOpe
 	};
 
 	return (
-		<Dialog isOpen={isOpen} onOpenChange={handleOpenChange} title='Terminate Line Item' className='sm:max-w-[600px]' showCloseButton={true}>
+		<Dialog
+			isOpen={isOpen}
+			onOpenChange={handleOpenChange}
+			title={t('termination.lineItem.title')}
+			className='sm:max-w-[600px]'
+			showCloseButton={true}>
 			<div className='space-y-6'>
 				<div className='space-y-2'>
 					<DatePicker
-						label='Effective From (Optional)'
-						placeholder='Select effective date'
+						label={t('termination.lineItem.effectiveFromOptional')}
+						placeholder={t('termination.lineItem.selectEffectiveDate')}
 						date={endDate}
 						popoverTriggerClassName='w-full'
 						setDate={setEndDate}
 						className='w-full'
 					/>
-					<p className='text-xs text-gray-500'>Leave empty to terminate immediately. Select a future date to schedule termination.</p>
+					<p className='text-xs text-gray-500'>{t('termination.lineItem.hint')}</p>
 				</div>
 
 				<div className='flex justify-end space-x-3 pt-4'>
 					<Button variant='outline' onClick={handleCancel} disabled={isLoading}>
-						Cancel
+						{t('termination.lineItem.cancel')}
 					</Button>
 					<Button onClick={handleConfirm} isLoading={isLoading}>
-						Terminate
+						{t('termination.lineItem.terminate')}
 					</Button>
 				</div>
 			</div>

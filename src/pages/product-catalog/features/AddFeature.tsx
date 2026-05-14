@@ -1,5 +1,6 @@
 import { Button, Card, CodePreview, FormHeader, Input, Page, Select, SelectOption, Spacer, Textarea } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import EventFilter, { EventFilterData } from '@/components/molecules/EventFilter';
 import SelectGroup from '@/components/organisms/PlanForm/SelectGroup';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
@@ -1020,7 +1021,7 @@ const AddFeaturePage = () => {
 	const isMeteredType = data.type === FEATURE_TYPE.METERED;
 	return (
 		<Page type='left-aligned'>
-			<ApiDocsContent tags={['Features']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Features} />
 			<p className='text-2xl font-medium'>{t('catalog:features.form.pageTitle')}</p>
 
 			<Spacer height='16px' />

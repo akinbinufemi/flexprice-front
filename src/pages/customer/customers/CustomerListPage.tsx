@@ -3,6 +3,7 @@ import { CreateCustomerDrawer, ApiDocsContent } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import Customer from '@/models/Customer';
 import CustomerApi from '@/api/CustomerApi';
 import { useState, useMemo, useCallback, FC } from 'react';
@@ -230,7 +231,7 @@ const CustomerListPage = () => {
 					/>
 				</div>
 			}>
-			<ApiDocsContent tags={['Customers']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Customers} />
 			<QueryableDataArea<Customer>
 				queryConfig={{
 					filterOptions,
@@ -273,7 +274,7 @@ const CustomerListPage = () => {
 					description: t('list.emptyDescription'),
 					buttonLabel: t('list.createCustomer'),
 					buttonAction: handleCreateCustomer,
-					tags: ['Customers'],
+					tags: API_DOCS_TAGS.Customers,
 					tutorials: GUIDES.customers.tutorials,
 				}}
 			/>

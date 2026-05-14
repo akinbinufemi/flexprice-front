@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import PaymentApi from '@/api/PaymentApi';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { ApiDocsContent, CustomTabs } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { Loader, NoDataCard, ShortPagination } from '@/components/atoms';
 import { InvoicePaymentsTable, CreditNoteTable } from '@/components/molecules';
 import usePagination from '@/hooks/usePagination';
@@ -78,7 +79,7 @@ const CustomerInvoiceDetailsPage = () => {
 
 	return (
 		<div className='mt-5 '>
-			<ApiDocsContent tags={['Invoices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<div className=''>
 				<CustomTabs tabs={tabs} defaultValue='Overview' />
 			</div>

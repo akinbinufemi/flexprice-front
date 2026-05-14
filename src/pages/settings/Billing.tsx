@@ -1,6 +1,6 @@
 import { Card, CardHeader, FormHeader, Loader, Page, Button } from '@/components/atoms';
-import { Detail, DetailsCard, FlatTabs } from '@/components/molecules';
-import { ApiDocsContent } from '@/components/molecules';
+import { Detail, DetailsCard, FlatTabs, ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import CustomerUsageTable from '@/components/molecules/CustomerUsageTable/CustomerUsageTable';
 import SubscriptionTable from '@/components/organisms/Subscription/SubscriptionTable';
 import useUser from '@/hooks/useUser';
@@ -75,7 +75,7 @@ const BillingPage = () => {
 
 	return (
 		<Page heading={t('page.billing')}>
-			<ApiDocsContent tags={['Tenants']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Tenants} />
 
 			<FlatTabs
 				tabs={[

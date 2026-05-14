@@ -7,6 +7,7 @@ import CreditNoteApi from '@/api/CreditNoteApi';
 import { CustomTabs } from '@/components/molecules';
 import { Loader, NoDataCard, Page, ShortPagination } from '@/components/atoms';
 import { ApiDocsContent, InvoicePaymentsTable, CreditNoteTable } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useTranslation } from 'react-i18next';
 
 const InvoiceDetailsPage = () => {
@@ -78,7 +79,7 @@ const InvoiceDetailsPage = () => {
 
 	return (
 		<Page>
-			<ApiDocsContent tags={['Invoices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<CustomTabs tabs={tabs} defaultValue='Overview' />
 		</Page>
 	);

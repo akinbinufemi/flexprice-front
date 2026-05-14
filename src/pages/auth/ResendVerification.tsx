@@ -54,7 +54,7 @@ const ResendVerification = () => {
 				<div className='w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg'>
 					<div className='text-center'>
 						<div className='mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50'>
-							<img src='/assets/svg/query.svg' alt='Email' className='h-10 w-10' />
+							<img src='/assets/svg/query.svg' alt={t('images.emailIconAlt')} className='h-10 w-10' />
 						</div>
 						<h2 className='mt-6 text-2xl font-bold text-gray-900'>{t('resend.checkEmailHeading')}</h2>
 						<p className='mt-2 text-gray-600'>{t('resend.checkEmailDescription', { brandName: name })}</p>

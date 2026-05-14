@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, Input, Select, Button } from '@/components/atoms';
 import { ENVIRONMENT_TYPE } from '@/models/Environment';
@@ -15,54 +16,58 @@ interface Props {
 }
 
 const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironmentCreated }) => {
-	const [name, setName] = useState('Sandbox');
+	const { t } = useTranslation('settings');
+	const [name, setName] = useState('');
 	const [type, setType] = useState<ENVIRONMENT_TYPE>(ENVIRONMENT_TYPE.DEVELOPMENT);
 	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		if (isOpen) {
+			setName(t('environment.types.sandbox'));
+			setType(ENVIRONMENT_TYPE.DEVELOPMENT);
+		}
+	}, [isOpen, t]);
 
 	const environmentTypeOptions = useMemo(
 		() => [
 			{
 				value: ENVIRONMENT_TYPE.DEVELOPMENT,
-				label: 'Sandbox',
-				description: 'For development and testing purposes',
+				label: t('environment.types.sandbox'),
+				description: t('environment.types.sandboxDescription'),
 			},
 			{
 				value: ENVIRONMENT_TYPE.PRODUCTION,
-				label: 'Production',
-				description: 'For live production environment',
+				label: t('environment.types.production'),
+				description: t('environment.types.productionDescription'),
 			},
 		],
-		[],
+		[t],
 	);
 
 	const { mutate: createEnvironment, isPending } = useMutation({
 		mutationFn: async (payload: CreateEnvironmentPayload) => {
 			const result = await EnvironmentApi.createEnvironment(payload);
 			if (!result) {
-				throw new Error('Failed to create environment');
+				throw new Error(t('environment.creator.errorCreateUnknown'));
 			}
 			return result;
 		},
 		onSuccess: async (result) => {
-			toast.success('Environment created successfully');
-			// Reset form
+			toast.success(t('environment.creator.toastCreated'));
 			setName('');
 			setType(ENVIRONMENT_TYPE.DEVELOPMENT);
-			// Close dialog
 			onOpenChange(false);
-			// Invalidate environments query to refetch the list
 			queryClient.invalidateQueries({ queryKey: ['environments'] });
-			// Call callback with the created environment ID (await if it's async)
 			await onEnvironmentCreated(result?.id);
 		},
 		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to create environment');
+			toast.error(error.message || t('environment.creator.toastCreateFailed'));
 		},
 	});
 
 	const handleCreate = useCallback(() => {
 		if (!name.trim()) {
-			toast.error('Environment name is required');
+			toast.error(t('environment.creator.errorNameRequired'));
 			return;
 		}
 
@@ -70,7 +75,7 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 			name: name.trim(),
 			type,
 		});
-	}, [name, type, createEnvironment]);
+	}, [createEnvironment, name, t, type]);
 
 	const handleCancel = useCallback(() => {
 		setName('');
@@ -93,15 +98,21 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 		<Dialog
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title='Create Environment'
+			title={t('environment.creator.title')}
 			className='max-w-[550px]'
-			description='Create a new environment for your application'>
+			description={t('environment.creator.description')}>
 			<div className='space-y-4'>
-				<Input label='Name' placeholder='Enter environment name' value={name} onChange={setName} disabled={isPending || isProduction} />
+				<Input
+					label={t('environment.creator.nameLabel')}
+					placeholder={t('environment.creator.namePlaceholder')}
+					value={name}
+					onChange={setName}
+					disabled={isPending || isProduction}
+				/>
 
 				<Select
-					label='Type'
-					placeholder='Select environment type'
+					label={t('environment.creator.typeLabel')}
+					placeholder={t('environment.creator.typePlaceholder')}
 					options={environmentTypeOptions}
 					value={type}
 					onChange={(value) => setType(value as ENVIRONMENT_TYPE)}
@@ -113,7 +124,7 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 					<div className='w-full flex items-center gap-2.5 rounded-md border border-amber-300 bg-amber-50/80 px-3 py-2.5'>
 						<AlertTriangle className='h-4 w-4 flex-shrink-0 text-amber-600' />
 						<span className='text-sm font-medium text-amber-800 leading-relaxed'>
-							Sandbox subscriptions are automatically cancelled after {SANDBOX_AUTO_CANCELLATION_DAYS} days
+							{t('environment.creator.sandboxCancellationNote', { days: SANDBOX_AUTO_CANCELLATION_DAYS })}
 						</span>
 					</div>
 				)}
@@ -123,9 +134,9 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 					<div className='space-y-6 pt-2'>
 						<div className='text-center'>
 							<p className='text-sm text-gray-600 mb-6'>
-								Production environments require an approval.
+								{t('environment.creator.productionBodyLine1')}
 								<br />
-								Contact us to get started:
+								{t('environment.creator.productionContactPrompt')}
 							</p>
 						</div>
 						<div className='flex gap-8 justify-center items-center px-4'>
@@ -133,42 +144,42 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 								type='button'
 								onClick={() => handleContactClick(slackLink)}
 								className='flex flex-col items-center gap-2 group transition-transform duration-300 ease-in-out hover:scale-[1.03]'
-								aria-label='Contact Slack'>
+								aria-label={t('environment.creator.ariaSlackContact')}>
 								<div
 									className='h-14 w-14 rounded-xl flex items-center justify-center shadow-sm transition-shadow duration-300 ease-in-out group-hover:shadow-md'
 									style={{ backgroundColor: '#4A154B' }}>
-									<img src='/assets/logo/slack-logo.png' alt='Slack' className='h-7 w-7 object-contain' />
+									<img src='/assets/logo/slack-logo.png' alt={t('environment.creator.slackAlt')} className='h-7 w-7 object-contain' />
 								</div>
 								<span className='text-xs font-medium text-gray-700 group-hover:text-[#4A154B] transition-colors duration-300 ease-in-out'>
-									Slack
+									{t('environment.creator.brandSlack')}
 								</span>
 							</button>
 							<button
 								type='button'
 								onClick={() => handleContactClick(emailLink)}
 								className='flex flex-col items-center gap-2 group transition-transform duration-300 ease-in-out hover:scale-[1.03]'
-								aria-label='Contact Email'>
+								aria-label={t('environment.creator.ariaEmailContact')}>
 								<div
 									className='h-14 w-14 rounded-xl flex items-center justify-center shadow-sm transition-shadow duration-300 ease-in-out group-hover:shadow-md'
 									style={{ backgroundColor: '#E5E7EB' }}>
 									<Mail className='h-7 w-7 text-gray-700' strokeWidth={1.5} />
 								</div>
 								<span className='text-xs font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300 ease-in-out'>
-									Email
+									{t('environment.creator.brandEmail')}
 								</span>
 							</button>
 							<button
 								type='button'
 								onClick={() => handleContactClick(calendlyLink)}
 								className='flex flex-col items-center gap-2 group transition-transform duration-300 ease-in-out hover:scale-[1.03]'
-								aria-label='Book a call'>
+								aria-label={t('environment.creator.ariaBookCall')}>
 								<div
 									className='h-14 w-14 rounded-xl flex items-center justify-center shadow-sm transition-shadow duration-300 ease-in-out group-hover:shadow-md'
 									style={{ backgroundColor: '#0069FF' }}>
 									<CalendarDays className='h-7 w-7 text-white' strokeWidth={1.5} />
 								</div>
 								<span className='text-xs font-medium text-gray-700 group-hover:text-[#0069FF] transition-colors duration-300 ease-in-out'>
-									Book a call
+									{t('environment.creator.bookACall')}
 								</span>
 							</button>
 						</div>
@@ -179,10 +190,10 @@ const EnvironmentCreator: React.FC<Props> = ({ isOpen, onOpenChange, onEnvironme
 				{!isProduction && (
 					<div className='flex justify-end space-x-2 pt-4'>
 						<Button variant='outline' onClick={handleCancel} disabled={isPending}>
-							Cancel
+							{t('connection.buttons.cancel')}
 						</Button>
 						<Button onClick={handleCreate} disabled={isPending || !name.trim()}>
-							{isPending ? 'Creating...' : 'Create Environment'}
+							{isPending ? t('environment.creator.savingEllipsis') : t('environment.creator.submitCreate')}
 						</Button>
 					</div>
 				)}

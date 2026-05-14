@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Card } from '@/components/atoms';
 import { TIER_MODE } from '@/models/Price';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
+import { useTranslation } from 'react-i18next';
 
 interface TierBreakdownItem {
 	range: string;
@@ -20,25 +21,27 @@ interface Props {
 }
 
 const TierBreakdown: FC<Props> = ({ tiers, totalCost, effectiveRate, tierMode, currency, usageQuantity }) => {
+	const { t } = useTranslation('billing');
 	const currencySymbol = getCurrencySymbol(currency);
+	const volumeRate = `${currencySymbol}${effectiveRate}`;
 
 	return (
 		<Card className='p-4'>
 			<div className='space-y-4'>
 				<div className='flex justify-between items-center'>
-					<h3 className='text-lg font-semibold text-gray-900'>Tier Breakdown</h3>
+					<h3 className='text-lg font-semibold text-gray-900'>{t('tierBreakdown.title')}</h3>
 					<div className='text-sm text-gray-600'>
-						Mode: <span className='font-medium'>{tierMode}</span>
+						{t('tierBreakdown.modeLabel')} <span className='font-medium'>{tierMode}</span>
 					</div>
 				</div>
 
 				<div className='grid grid-cols-2 gap-4 text-sm'>
 					<div>
-						<span className='text-gray-600'>Total Usage:</span>
+						<span className='text-gray-600'>{t('tierBreakdown.totalUsage')}</span>
 						<span className='ms-2 font-medium'>{usageQuantity}</span>
 					</div>
 					<div>
-						<span className='text-gray-600'>Total Cost:</span>
+						<span className='text-gray-600'>{t('tierBreakdown.totalCost')}</span>
 						<span className='ms-2 font-medium'>
 							{currencySymbol}
 							{totalCost}
@@ -49,8 +52,7 @@ const TierBreakdown: FC<Props> = ({ tiers, totalCost, effectiveRate, tierMode, c
 				{tierMode === TIER_MODE.VOLUME && (
 					<div className='bg-blue-50 p-3 rounded-md'>
 						<div className='text-sm text-blue-800'>
-							<strong>Volume Mode:</strong> All {usageQuantity} units charged at the highest tier rate of {currencySymbol}
-							{effectiveRate} per unit.
+							<strong>{t('tierBreakdown.volumeModeTitle')}</strong> {t('tierBreakdown.volumeModeBody', { usageQuantity, rate: volumeRate })}
 						</div>
 					</div>
 				)}
@@ -58,34 +60,34 @@ const TierBreakdown: FC<Props> = ({ tiers, totalCost, effectiveRate, tierMode, c
 				{tierMode === TIER_MODE.SLAB && (
 					<div className='bg-green-50 p-3 rounded-md'>
 						<div className='text-sm text-green-800'>
-							<strong>Slab Mode:</strong> Each tier range priced separately and summed.
+							<strong>{t('tierBreakdown.slabModeTitle')}</strong> {t('tierBreakdown.slabModeBody')}
 						</div>
 					</div>
 				)}
 
 				{tiers.length > 0 && (
 					<div className='space-y-2'>
-						<div className='text-sm font-medium text-gray-700'>Tier Details:</div>
+						<div className='text-sm font-medium text-gray-700'>{t('tierBreakdown.tierDetails')}</div>
 						<div className='space-y-1'>
 							{tiers.map((tier, index) => (
 								<div key={index} className='flex justify-between text-sm py-1 border-b border-gray-100 last:border-b-0'>
 									<div className='flex-1'>
-										<span className='text-gray-600'>Range:</span>
+										<span className='text-gray-600'>{t('tierBreakdown.range')}</span>
 										<span className='ms-2 font-medium'>{tier.range}</span>
 									</div>
 									<div className='flex-1'>
-										<span className='text-gray-600'>Quantity:</span>
+										<span className='text-gray-600'>{t('tierBreakdown.quantity')}</span>
 										<span className='ms-2 font-medium'>{tier.quantity}</span>
 									</div>
 									<div className='flex-1'>
-										<span className='text-gray-600'>Rate:</span>
+										<span className='text-gray-600'>{t('tierBreakdown.rate')}</span>
 										<span className='ms-2 font-medium'>
 											{currencySymbol}
 											{tier.rate}
 										</span>
 									</div>
 									<div className='flex-1'>
-										<span className='text-gray-600'>Cost:</span>
+										<span className='text-gray-600'>{t('tierBreakdown.cost')}</span>
 										<span className='ms-2 font-medium'>
 											{currencySymbol}
 											{tier.cost}

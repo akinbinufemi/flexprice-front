@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatCompactNumber } from '@/utils';
 import { GetUsageAnalyticsResponse } from '@/types/dto';
 import { UsageAnalyticItem } from '@/models/Analytics';
+import { useTranslation } from 'react-i18next';
 
 // Configuration constants - adjust these values as needed
 const MAX_LEGEND_ITEMS = 5;
@@ -16,7 +17,7 @@ const TOOLTIP_MAX_HEIGHT = 200; // pixels
  * @param items Array of UsageAnalyticItem from API response
  * @returns Normalized data ready for chart consumption
  */
-const normalizeUsageData = (items: UsageAnalyticItem[]) => {
+const normalizeUsageData = (items: UsageAnalyticItem[], getSeriesFallbackName: (seriesIndex: number) => string) => {
 	// Early return if no items
 	if (!items || items.length === 0) {
 		return {
@@ -34,7 +35,7 @@ const normalizeUsageData = (items: UsageAnalyticItem[]) => {
 	// Process each item (data series)
 	items.forEach((item, index) => {
 		const seriesId = item.source || item.feature_id || `series-${index}`;
-		const seriesName = item.name || item.event_name || `Series ${index + 1}`;
+		const seriesName = item.name || item.event_name || getSeriesFallbackName(index);
 
 		// Add to series config
 		seriesIds.push(seriesId);
@@ -91,8 +92,11 @@ interface CustomerUsageChartProps {
 }
 
 export const CustomerUsageChart: React.FC<CustomerUsageChartProps> = ({ data, title, description, className, primaryColor }) => {
+	const { t } = useTranslation('common');
 	// Process the data for chart display
-	const { chartData, seriesConfig, seriesIds } = normalizeUsageData(data.items);
+	const { chartData, seriesConfig, seriesIds } = normalizeUsageData(data.items, (seriesIndex) =>
+		t('customerCharts.seriesFallback', { index: seriesIndex + 1 }),
+	);
 
 	// State for zoom functionality
 	const [zoomState, setZoomState] = useState({
@@ -201,10 +205,10 @@ export const CustomerUsageChart: React.FC<CustomerUsageChartProps> = ({ data, ti
 			<Card className={`py-4 sm:py-0 ${className || ''}`}>
 				<CardHeader>
 					<CardTitle>{title}</CardTitle>
-					<CardDescription>No usage data available</CardDescription>
+					<CardDescription>{t('customerCharts.usageNoDataDescription')}</CardDescription>
 				</CardHeader>
 				<CardContent className='flex items-center justify-center h-[250px]'>
-					<p className='text-muted-foreground'>No data to display</p>
+					<p className='text-muted-foreground'>{t('customerCharts.usageNoDataBody')}</p>
 				</CardContent>
 			</Card>
 		);
@@ -261,13 +265,13 @@ export const CustomerUsageChart: React.FC<CustomerUsageChartProps> = ({ data, ti
 								strokeLinejoin='round'>
 								<path d='M2 12A10 10 0 1 0 12 2v10z'></path>
 							</svg>
-							Reset zoom
+							{t('customerCharts.resetZoom')}
 						</button>
 					</div>
 					<div className='relative' style={{ width: '100%', height: 400 }}>
 						{zoomState.refAreaLeft && zoomState.refAreaRight && (
 							<div className='absolute top-0 right-0 bg-indigo-50 text-xs text-indigo-600 py-1 px-2 rounded-md z-10 border border-indigo-200'>
-								Selecting area...
+								{t('customerCharts.selectingArea')}
 							</div>
 						)}
 						<ResponsiveContainer width='100%' height='100%'>

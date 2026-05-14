@@ -1,5 +1,6 @@
 import { Loader, Page } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules/ApiDocs/ApiDocs';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AppPortal } from 'svix-react';
@@ -44,7 +45,7 @@ const WebhookDashboard = () => {
 	if (isLoading) {
 		return (
 			<Page className='h-full w-full' heading={webhooksHeading}>
-				<ApiDocsContent tags={['Webhooks']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Webhooks} />
 				<div className='flex items-center justify-center h-96'>
 					<Loader />
 				</div>
@@ -60,7 +61,7 @@ const WebhookDashboard = () => {
 		);
 		return (
 			<Page className='h-full w-full' heading={webhooksHeading}>
-				<ApiDocsContent tags={['Webhooks']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Webhooks} />
 				<EmptyPage
 					heading={webhooksHeading}
 					emptyStateCard={{
@@ -75,7 +76,7 @@ const WebhookDashboard = () => {
 	if (!data?.svix_enabled) {
 		return (
 			<Page className='h-full w-full' heading={webhooksHeading}>
-				<ApiDocsContent tags={['Webhooks']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Webhooks} />
 				<EmptyPage
 					heading={webhooksHeading}
 					emptyStateCard={{
@@ -89,7 +90,7 @@ const WebhookDashboard = () => {
 
 	return (
 		<Page className='h-full w-full' heading={webhooksHeading}>
-			<ApiDocsContent tags={['Webhooks']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Webhooks} />
 			<AppPortal {...appPortalProps} />
 		</Page>
 	);

@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface FilterMultiSelectProps {
 	value: string[];
@@ -19,10 +20,13 @@ const FilterMultiSelect: React.FC<FilterMultiSelectProps> = ({
 	value = [],
 	options,
 	onChange,
-	placeholder = 'Select options...',
-	searchPlaceholder = 'Search options...',
+	placeholder,
+	searchPlaceholder,
 	className,
 }) => {
+	const { t } = useTranslation('common');
+	const resolvedPlaceholder = placeholder ?? t('selectUi.selectOptions');
+	const resolvedSearchPlaceholder = searchPlaceholder ?? t('selectUi.searchOptionsPlaceholder');
 	const [isOpen, setIsOpen] = useState(false);
 
 	const selectedOptions = options.filter((option) => value.includes(option.value));
@@ -53,10 +57,10 @@ const FilterMultiSelect: React.FC<FilterMultiSelectProps> = ({
 			<PopoverTrigger asChild>
 				<Button variant='outline' size='sm' className={cn(className, 'h-9 rounded-sm text-xs w-full justify-start font-normal')}>
 					{value.length === 0 ? (
-						<span className='truncate text-sm'>{placeholder}</span>
+						<span className='truncate text-sm'>{resolvedPlaceholder}</span>
 					) : (
 						<Chip
-							label={value.length > 1 ? `${value.length} selected` : selectedOptions[0]?.label}
+							label={value.length > 1 ? t('queryBuilder.selectedCount', { count: value.length }) : (selectedOptions[0]?.label ?? '')}
 							className='truncate bg-muted rounded-md'
 						/>
 					)}
@@ -64,18 +68,18 @@ const FilterMultiSelect: React.FC<FilterMultiSelectProps> = ({
 			</PopoverTrigger>
 			<PopoverContent align='start' className='w-48 p-0'>
 				<Command>
-					<CommandInput placeholder={searchPlaceholder} />
+					<CommandInput placeholder={resolvedSearchPlaceholder} />
 					<CommandList>
-						<CommandEmpty>No options found.</CommandEmpty>
+						<CommandEmpty>{t('queryBuilder.noOptionsFound')}</CommandEmpty>
 						{options.length > 0 && (
 							<>
 								{/* Select All Checkbox */}
 								<div className='flex items-center gap-2 px-2 py-2 border-b bg-muted/20'>
 									<Checkbox id='select-all-multi' checked={isAllSelected} onCheckedChange={handleSelectAll} className='h-4 w-4' />
 									<label htmlFor='select-all-multi' className='text-sm font-medium leading-none cursor-pointer select-none flex-1'>
-										Select all
+										{t('search.selectAll')}
 									</label>
-									<span className='text-xs text-muted-foreground'>{options.length} items</span>
+									<span className='text-xs text-muted-foreground'>{t('search.items', { count: options.length })}</span>
 								</div>
 
 								<CommandGroup>

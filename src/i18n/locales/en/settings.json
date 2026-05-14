@@ -630,7 +630,302 @@
 			"connectedAccountsTitle": "Connected Accounts",
 			"deleteConnectionConfirmTitle": "Are you sure you want to delete the connection \"{{name}}\"?",
 			"deleteConnectionIrreversible": "This action cannot be undone.",
-			"deleteConnection": "Delete Connection"
+			"deleteConnection": "Delete Connection",
+			"toastDisconnected": "{{name}} disconnected",
+			"toastDisconnectFailed": "Failed to disconnect",
+			"toastPreviewDisconnectMock": "Preview only — this is a mock connected state.",
+			"toastConnectionDeleted": "Connection deleted successfully",
+			"toastConnectionDeleteFailed": "Failed to delete connection",
+			"catalog": {
+				"tags": {
+					"payments": "Payments",
+					"invoices": "Invoices",
+					"crm": "CRM",
+					"sales": "Sales",
+					"marketing": "Marketing",
+					"customerService": "Customer Service",
+					"accounting": "Accounting",
+					"payment": "Payment",
+					"invoiceCustomer": "Invoice Customer"
+				},
+				"mode": {
+					"test": "Test Mode"
+				},
+				"stripe": {
+					"name": "Stripe",
+					"description": "Send invoices, calculate tax, and collect payments using our native connector to Stripe.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": ["The Flexprice Stripe app enables invoicing, tax collection, and payment via Stripe."]
+						},
+						"stripeInvoicing": {
+							"title": "Stripe Invoicing",
+							"paragraphs": [
+								"Create and send invoices through Stripe Invoicing directly from Flexprice and automatically collect payments."
+							]
+						},
+						"automaticTax": {
+							"title": "Automatic Tax Calculations",
+							"paragraphs": [
+								"Leverage Stripe Tax to handle complex tax rules and rates for any region. The integration ensures accurate, up-to-date tax calculations for each invoice, removing the guesswork and reducing compliance risks."
+							]
+						},
+						"securePayments": {
+							"title": "Secure and Flexible Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Stripe's trusted payment gateway. Your customers can choose from various payment methods - credit card, ACH, and more - to improve the overall customer experience and speed up cash flow."
+							]
+						}
+					}
+				},
+				"razorpay": {
+					"name": "Razorpay",
+					"description": "Accept, process and disburse payments using our native connector to Razorpay.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Razorpay app enables invoicing, tax calculations, and payment collection directly through Razorpay. Integrate it seamlessly with Flexprice (or your billing engine) to streamline your payment workflows."
+							]
+						},
+						"razorpayInvoicing": {
+							"title": "Razorpay Invoicing",
+							"paragraphs": [
+								"Create and send invoices with a few clicks - right from Flexprice - using Razorpay's invoicing capabilities. Payment collection can be automated, reducing manual follow-ups."
+							]
+						},
+						"automaticTax": {
+							"title": "Automatic Tax Calculations",
+							"paragraphs": [
+								"Leverage Razorpay's support for regional tax rules (e.g., GST in India). This integration ensures accurate, up-to-date tax rates for each invoice, minimizing compliance risks and manual calculations."
+							]
+						},
+						"securePayments": {
+							"title": "Secure and Flexible Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Razorpay's trusted payment gateway. Your customers can choose from various methods - credit cards, debit cards, net banking, UPI, and wallets - enhancing the payment experience and accelerating cash flow."
+							]
+						}
+					}
+				},
+				"chargebee": {
+					"name": "Chargebee",
+					"description": "Sync invoices and charges/prices between Flexprice and Chargebee for seamless billing operations.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Chargebee app enables seamless synchronization of invoices and charges/prices between Flexprice and Chargebee. Integrate it to streamline your billing workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Sync invoices from Flexprice to Chargebee, ensuring your billing system stays up to date with the latest invoice data."
+							]
+						},
+						"chargePriceSync": {
+							"title": "Charge and Price Sync",
+							"paragraphs": [
+								"Synchronize charges and prices between Flexprice and Chargebee to maintain consistency across your billing platform."
+							]
+						}
+					}
+				},
+				"hubspot": {
+					"name": "Hubspot",
+					"description": "Hubspot is a CRM, sales, marketing and customer service platform.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice HubSpot app enables seamless syncing of deals, invoices, customers, and payments between HubSpot and Flexprice."
+							]
+						},
+						"dealLineItems": {
+							"title": "Deal Line Items Sync",
+							"paragraphs": [
+								"Automatically sync deal line items from HubSpot to Flexprice, ensuring accurate revenue tracking and billing."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": ["Push invoices from Flexprice to HubSpot to keep your CRM up to date with billing information."]
+						},
+						"customerSync": {
+							"title": "Customer Sync",
+							"paragraphs": [
+								"Sync customer data between HubSpot and Flexprice to maintain a single source of truth for customer information."
+							]
+						},
+						"paymentsSync": {
+							"title": "Payments Sync",
+							"paragraphs": ["Keep payment records synchronized between both platforms for accurate financial reporting."]
+						},
+						"revenueReporting": {
+							"title": "Revenue Calculations on HubSpot",
+							"paragraphs": ["Leverage HubSpot's reporting capabilities with accurate revenue data synced from Flexprice."]
+						}
+					}
+				},
+				"salesforce": {
+					"name": "Salesforce",
+					"description": "Salesforce is a customer relationship management (CRM) platform."
+				},
+				"paypal": {
+					"name": "PayPal",
+					"description": "PayPal is an online payment system that supports online money transfers."
+				},
+				"zoho": {
+					"name": "Zoho",
+					"description": "The Zoho Books integration lets you manage critical accounting tasks directly from Flexprice.",
+					"sections": {
+						"createCustomer": {
+							"title": "Create Customer in Zoho Books",
+							"paragraphs": [
+								"Automatically create or update customers in Zoho Books whenever a new customer is added or modified in Flexprice."
+							]
+						},
+						"createInvoice": {
+							"title": "Create Invoice in Zoho Books",
+							"paragraphs": ["Generate Zoho Books invoices seamlessly from Flexprice usage data or billing triggers, reducing manual work."]
+						},
+						"transformInvoice": {
+							"title": "Transform Flexprice Invoice to Zoho Books Invoice",
+							"paragraphs": [
+								"Convert a Flexprice invoice object into Zoho Books' invoice format - streamlining data flow and ensuring accuracy."
+							]
+						}
+					}
+				},
+				"quickbooks": {
+					"name": "QuickBooks",
+					"description": "Sync plans, customers, and invoices from Flexprice to QuickBooks Online for seamless accounting operations.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice QuickBooks integration enables one-way sync from Flexprice to QuickBooks Online. Automatically sync plans, customers, and invoices to keep your accounting system up to date."
+							]
+						},
+						"planPriceSync": {
+							"title": "Plan/Price Sync",
+							"paragraphs": [
+								"Automatically create QuickBooks Items (Service type) when plans are created in Flexprice. Each price is mapped to a QuickBooks Item for accurate invoice line items."
+							]
+						},
+						"customerSync": {
+							"title": "Customer Sync",
+							"paragraphs": [
+								"Customers are automatically created in QuickBooks when invoices are synced. Customer data including name, email, and billing address is synchronized."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Automatically sync invoices from Flexprice to QuickBooks Online. Invoice line items are mapped to QuickBooks Items, ensuring accurate accounting records."
+							]
+						},
+						"tokenRefresh": {
+							"title": "Automatic Token Refresh",
+							"paragraphs": [
+								"OAuth tokens are automatically refreshed by the backend when they expire, ensuring uninterrupted sync operations without manual intervention."
+							]
+						}
+					}
+				},
+				"nomod": {
+					"name": "Nomod",
+					"description": "Send invoices and collect payments using payment links through Nomod integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Nomod app enables invoicing and payment collection through Nomod payment links. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices with payment links through Nomod directly from Flexprice. Payment collection can be automated through Nomod payment links."
+							]
+						},
+						"paymentLinks": {
+							"title": "Payment Links",
+							"paragraphs": [
+								"Generate secure payment links for your invoices using Nomod. Your customers can pay quickly and securely through various payment methods supported by Nomod."
+							]
+						},
+						"webhooks": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about invoice and payment link events through webhooks. Stay updated on payment status, invoice creation, and more."
+							]
+						}
+					}
+				},
+				"moyasar": {
+					"name": "Moyasar",
+					"description": "Send invoices and collect payments using Moyasar payment gateway integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Moyasar app enables invoicing and payment collection through Moyasar payment gateway. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices through Moyasar directly from Flexprice. Payment collection can be automated through Moyasar payment gateway."
+							]
+						},
+						"securePayments": {
+							"title": "Secure Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Moyasar payment gateway. Your customers can choose from various payment methods to improve the overall customer experience and speed up cash flow."
+							]
+						},
+						"webhooks": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about payment events through webhooks. Subscribe to payment_paid event to stay updated on payment status."
+							]
+						}
+					}
+				},
+				"paddle": {
+					"name": "Paddle",
+					"description": "Send invoices and collect payments using Paddle payment gateway integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Paddle app enables invoicing and payment collection through Paddle payment gateway. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices through Paddle directly from Flexprice. Payment collection can be automated through Paddle payment gateway."
+							]
+						},
+						"securePayments": {
+							"title": "Secure Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Paddle payment gateway. Your customers can choose from various payment methods to improve the overall customer experience and speed up cash flow."
+							]
+						},
+						"webhooksPaddle": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about payment events through webhooks. Subscribe to transactions.completed event to stay updated on payment status."
+							]
+						}
+					}
+				}
+			}
 		},
 		"oauthCallback": {
 			"authorizationFailed": "❌ Authorization Failed",
@@ -659,5 +954,163 @@
 			"filterLastQuarter": "Last quarter",
 			"filterLastYear": "Last year"
 		}
+	},
+	"integrations": {
+		"stripe": {
+			"description": "Configure your Stripe integration with the required credentials.",
+			"connectionPlaceholder": "e.g., Production Stripe, Test Stripe",
+			"connectionNameHint": "A friendly name to identify this Stripe connection",
+			"secretKeyLabel": "Secret Key",
+			"secretKeyPlaceholder": "sk_...",
+			"secretKeyHint": "Your Stripe secret key from the API keys section",
+			"pullFromStripe": "Pull from Stripe",
+			"pushToStripe": "Push to Stripe",
+			"webhookSecretDescription": "The webhook secret provided by Stripe after setting up the webhook endpoint",
+			"webhookSecretPlaceholder": "whsec_...",
+			"webhookIntro": "Set up this webhook URL in your Stripe dashboard to receive event notifications:",
+			"webhookEventsIntro": "Based on your sync configuration, subscribe to these events in your Stripe dashboard:",
+			"labels": {
+				"plans": "Plans",
+				"invoices": "Invoices",
+				"subscriptions": "Subscriptions"
+			},
+			"toast": {
+				"stripeCreated": "Stripe connection created successfully",
+				"stripeUpdated": "Stripe connection updated successfully"
+			}
+		}
+	},
+	"environment": {
+		"types": {
+			"sandbox": "Sandbox",
+			"production": "Production",
+			"sandboxDescription": "For development and testing purposes",
+			"productionDescription": "For live production environment"
+		},
+		"copy": {
+			"title": "Copy Environment",
+			"fallbackDescription": "Copy all published configuration into an environment.",
+			"introBeforeBadge": "Copying from",
+			"intoNew": "into a new environment.",
+			"intoSelected": "into the selected environment.",
+			"cleanupTitle": "Clean up before copying",
+			"cleanupBodyLead": "All active features and plans will be copied as-is. Archive or remove anything you don't want carried over ",
+			"cleanupBefore": "before",
+			"cleanupBodyTrail": " proceeding.",
+			"copyIntoLabel": "Copy into",
+			"selectTargetPlaceholder": "Select target environment",
+			"createNewOption": "Create a new environment",
+			"createNewOptionDescription": "A new environment will be created for the copy",
+			"newEnvironmentName": "New Environment Name",
+			"namePlaceholder": "e.g. Staging, Production Clone",
+			"typeLabel": "Type",
+			"typePlaceholder": "Select environment type",
+			"whatCopiedHeading": "What will be copied",
+			"featuresTitle": "All active features",
+			"featuresDescription": "Static, Boolean & Metered features along with their associated meters",
+			"plansTitle": "All active plans",
+			"plansDescription": "Including all prices, entitlements, and credit grants attached to each plan",
+			"excludedLead": "Draft entities, archived entities, customers, subscriptions, invoices, and wallet balances are ",
+			"excludedBold": "not",
+			"excludedTail": " copied.",
+			"noteAsyncNewEnv": "The environment is created immediately. Features and plans are cloned in the background and may take a few seconds to appear.",
+			"noteAsyncOnly": "Features and plans are cloned in the background and may take a few seconds to appear.",
+			"copyingEllipsis": "Copying...",
+			"buttonCopy": "Copy Environment",
+			"toastStarted": "Environment clone started — features and plans are being copied in the background.",
+			"toastCloneFailed": "Failed to clone environment",
+			"errorNameRequired": "Environment name is required",
+			"errorNoSource": "No source environment selected"
+		},
+		"creator": {
+			"title": "Create Environment",
+			"description": "Create a new environment for your application",
+			"nameLabel": "Name",
+			"namePlaceholder": "Enter environment name",
+			"typeLabel": "Type",
+			"typePlaceholder": "Select environment type",
+			"sandboxCancellationNote": "Sandbox subscriptions are automatically cancelled after {{days}} days",
+			"productionBodyLine1": "Production environments require an approval.",
+			"productionContactPrompt": "Contact us to get started:",
+			"brandSlack": "Slack",
+			"brandEmail": "Email",
+			"bookACall": "Book a call",
+			"ariaSlackContact": "Contact Slack",
+			"ariaEmailContact": "Contact Email",
+			"ariaBookCall": "Book a call",
+			"slackAlt": "Slack",
+			"toastCreated": "Environment created successfully",
+			"toastCreateFailed": "Failed to create environment",
+			"errorNameRequired": "Environment name is required",
+			"errorCreateUnknown": "Failed to create environment",
+			"savingEllipsis": "Creating...",
+			"submitCreate": "Create Environment"
+		},
+		"editor": {
+			"title": "Rename Environment",
+			"description": "Update the name for this environment",
+			"nameLabel": "Name",
+			"namePlaceholder": "Enter environment name",
+			"savingEllipsis": "Saving...",
+			"submitSave": "Save",
+			"toastUpdated": "Environment updated successfully",
+			"toastUpdateFailed": "Failed to update environment",
+			"errorNameRequired": "Environment name is required",
+			"errorNoEnvironment": "No environment selected",
+			"errorUpdateUnknown": "Failed to update environment"
+		},
+		"selector": {
+			"noneAvailable": "No environments available",
+			"noEnvironment": "No environment",
+			"fallbackTenantLetters": "UN",
+			"unknownTenant": "Unknown",
+			"addEnvironment": "Add Environment",
+			"copyEnvironment": "Copy Environment",
+			"renameAria": "Rename {{name}}",
+			"suspendedTitle": "Environment suspended",
+			"suspendedDescription": "This environment is temporarily closed. Contact us to continue."
+		},
+		"restrictedBanner": {
+			"productionAccount": "production account",
+			"sandboxAccount": "sandbox",
+			"grace": "Your {{envType}} is active for the next {{count}} {{dayWord}}. To continue after that, ",
+			"dayWordOne": "day",
+			"dayWordPlural": "days",
+			"contactUs": "contact us",
+			"suspended": "Your {{envType}} is temporarily closed. To continue, "
+		}
+	},
+	"debug": {
+		"tooltipTitle": "Checkout usage based pricing in action",
+		"sampleEventsCreated": "Sample Events Created",
+		"loading": "Loading...",
+		"titleStreamSamples": "Stream Sample Events",
+		"noCustomers": "No customers found. Create one to get started.",
+		"needSubscriptionLead": "Assign a subscription to stream sample events to",
+		"eventsFiredSentence": "{{count}} events have been fired for ",
+		"eventsFiredMiddle": " for ",
+		"eventsFiredTrailing": " plan.",
+		"viewEvents": "View Events",
+		"streamAgain": "Stream Again",
+		"streamIntro": "Experience how metering, billing, and entitlements update in real time. Sample events will be triggered for ",
+		"planBridge": " under the ",
+		"planEnd": " plan.",
+		"progress": "{{current}} of {{total}} events fired",
+		"streaming": "Streaming...",
+		"startStreaming": "Start Streaming"
+	},
+	"region": {
+		"dataRegion": "Data region",
+		"selectPlaceholder": "Select a region",
+		"tooltipLearnMore": "Click to learn more about regions",
+		"dialogTitle": "Which region would you like to choose?",
+		"dialogDescription": "Please choose your region carefully. While migration to another region is possible, it requires manual intervention and cannot be changed automatically.",
+		"sectionUs": "US hosting",
+		"benefitUs1": "Faster if you and your users are based in the US",
+		"benefitUs2": "Easier to comply with some US regulations",
+		"benefitUs3": "Hosted in Oregon, USA (us-west-2)",
+		"sectionIndia": "India hosting",
+		"benefitIn1": "Faster if you and your users are based in India",
+		"benefitIn2": "Hosted in Mumbai, India (ap-south-1)"
 	}
 }

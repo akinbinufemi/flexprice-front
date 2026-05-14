@@ -67,6 +67,36 @@
 			"add": "إضافة",
 			"addonRequiredError": "الإضافة مطلوبة",
 			"noDescription": "لا يوجد وصف"
+		},
+		"listPage": {
+			"title": "الإضافات",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"columns": {
+				"addonName": "اسم الإضافة",
+				"lookupKey": "مفتاح البحث",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"paginationUnit": "إضافات",
+			"emptyState": {
+				"heading": "الإضافات",
+				"description": "أنشئ أول إضافة لتحديد خدمات إضافية يمكن للعملاء شراؤها.",
+				"createButton": "إنشاء إضافة"
+			}
 		}
 	},
 	"costSheets": {
@@ -413,6 +443,50 @@
 		}
 	},
 	"features": {
+		"listPage": {
+			"title": "الميزات",
+			"columns": {
+				"featureName": "اسم الميزة",
+				"group": "المجموعة",
+				"type": "النوع",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة",
+				"type": "النوع",
+				"group": "المجموعة"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"filterTypes": {
+				"metered": "مُقاس",
+				"boolean": "منطقي",
+				"static": "ثابت"
+			},
+			"typeChips": {
+				"metered": "مُقاس",
+				"boolean": "منطقي",
+				"static": "ثابت",
+				"unknown": "غير معروف"
+			},
+			"emptyCell": "—",
+			"paginationUnit": "ميزات",
+			"emptyState": {
+				"heading": "الميزات",
+				"description": "أنشئ أول ميزة لتحديد ما يدفع العملاء مقابله.",
+				"createButton": "إنشاء ميزة"
+			}
+		},
 		"drawer": {
 			"editTitle": "تعديل الميزة",
 			"description": "تحديث تفاصيل الميزة.",
@@ -429,7 +503,7 @@
 			"displayUnitPlural": "جمع وحدة العرض",
 			"conversionFactor": "معامل تحويل وحدة العرض",
 			"conversionFactorPh": "مثل: 0.0000167",
-			"displayUnitPluralAutoSuffix": "",
+			"displayUnitPluralAutoSuffix": "s",
 			"saveFeature": "حفظ الميزة"
 		},
 		"alerts": {
@@ -598,5 +672,153 @@
 			"tierAddedDetails": "من (>): {{from}}، حتى (<=): {{upTo}}، سعر الوحدة: {{perUnit}}، رسوم ثابتة: {{flatFee}}",
 			"detailSep": "، "
 		}
+	},
+	"entitlements": {
+		"usageResetPeriod": {
+			"DAILY": "يومي",
+			"WEEKLY": "أسبوعي",
+			"MONTHLY": "شهري",
+			"QUARTERLY": "ربع سنوي",
+			"HALF_YEARLY": "نصف سنوي",
+			"ANNUAL": "سنوي",
+			"NEVER": "أبدًا"
+		},
+		"validation": {
+			"featureMeterRequired": "يجب أن يكون للميزة عدّاد مرتبط",
+			"usageLimitNegative": "حد الاستخدام لا يمكن أن يكون سالبًا",
+			"usageLimitRequired": "حد الاستخدام مطلوب",
+			"usageResetRequired": "فترة إعادة ضبط الاستخدام مطلوبة",
+			"staticValueRequired": "القيمة مطلوبة",
+			"staticValueNegative": "القيمة لا يمكن أن تكون سالبة",
+			"staticValueEmpty": "القيمة لا يمكن أن تكون فارغة",
+			"selectFeature": "يُرجى اختيار ميزة",
+			"invalidFeatureType": "نوع الميزة غير صالح",
+			"featureAlreadyAdded": "هذه الميزة مضافة مسبقًا",
+			"addAtLeastOne": "يُرجى إضافة استحقاق واحد على الأقل"
+		},
+		"errors": {
+			"entityIdRequired": "معرّف الكيان مطلوب"
+		},
+		"toast": {
+			"addedSuccess": "تمت إضافة الاستحقاقات بنجاح",
+			"addFailed": "فشل إضافة الاستحقاقات. يُرجى المحاولة مجددًا."
+		},
+		"addDrawer": {
+			"title": "إضافة استحقاق",
+			"description": "حدّد الميزات التي سيحصل العملاء عليها.",
+			"featuresLabel": "الميزات",
+			"selectFeaturePlaceholder": "اختر ميزة",
+			"valueLabel": "القيمة",
+			"enterValuePlaceholder": "أدخل القيمة",
+			"setInfiniteLabel": "تعيين كغير محدود",
+			"usageResetLabel": "إعادة ضبط الاستخدام",
+			"usageResetPlaceholder": "اختر فترة إعادة الضبط",
+			"usageResetDescription": "تُعاد القيم ضمن الفاصل الزمني المحدد",
+			"softLimitLabel": "حد مرن",
+			"softLimitDescription": "عند التفعيل، يُمنح الوصول دائمًا حتى عند تجاوز الحد.",
+			"cancel": "إلغاء",
+			"add": "إضافة",
+			"addAnotherFeature": "إضافة ميزة أخرى",
+			"save": "حفظ",
+			"unlimitedDisplay": "غير محدود",
+			"calculatorAriaLabel": "آلة حاسبة للقيمة المعروضة",
+			"unitsFallback": "وحدات"
+		},
+		"displayCalculator": {
+			"titleFallback": "القيمة المعروضة",
+			"noDisplayUnit": "لم يُضبط وحدة عرض لهذه الميزة.",
+			"title": "تعيين الاستحقاق بوحدات العرض",
+			"description": "أدخل قيمة بـ <strongDisplay>{{displayUnit}}</strongDisplay> لمعرفة حد الاستخدام المكافئ بـ <strongBase>{{baseUnit}}</strongBase>.",
+			"valueInDisplayUnitLabel": "القيمة بوحدة العرض",
+			"enterValuePlaceholder": "أدخل القيمة",
+			"calculatedUsageLimit": "حد الاستخدام المحسوب:",
+			"conversionFactor": "عامل التحويل لهذه الميزة مضبوط على <rate>{{rate}}</rate>.",
+			"emDash": "—",
+			"confirm": "موافق"
+		},
+		"editDrawer": {
+			"title": "تعديل الاستحقاق: {{name}}",
+			"unknownFeature": "غير معروف",
+			"description": "تجاوز قيم الاستحقاق لهذا الاشتراك",
+			"featureType": "نوع الميزة",
+			"usageLimit": "حد الاستخدام",
+			"enterUsageLimitPlaceholder": "أدخل حد الاستخدام",
+			"originalPrefix": "الأصلي:",
+			"resetsSuffix": " (يعاد ضبطه {{period}})",
+			"setInfiniteLabel": "تعيين كغير محدود",
+			"staticValue": "قيمة ثابتة",
+			"enterStaticPlaceholder": "أدخل القيمة الثابتة",
+			"notSet": "غير مضبوط",
+			"enabledLabel": "مفعّل",
+			"enabled": "مفعّل",
+			"disabled": "معطّل",
+			"originalBooleanPrefix": "الأصلي:",
+			"cancel": "إلغاء",
+			"resetToDefault": "إعادة للافتراضي",
+			"saveOverride": "حفظ التجاوز"
+		},
+		"overridesTable": {
+			"columnFeatureName": "اسم الميزة",
+			"columnEntityType": "نوع الكيان",
+			"columnFeatureType": "نوع الميزة",
+			"columnValue": "القيمة",
+			"tooltipUsageLimit": "حد الاستخدام: {{from}} → {{to}}",
+			"tooltipStaticValue": "القيمة الثابتة: {{from}} → {{to}}",
+			"tooltipStatus": "الحالة: {{from}} → {{to}}",
+			"valuePlaceholder": "--",
+			"perPeriodSuffix": " / {{period}}",
+			"featureTypeMetered": "مقاس",
+			"featureTypeBoolean": "منطقي",
+			"featureTypeStatic": "ثابت",
+			"overrideAppliedTitle": "تم تطبيق تجاوز الاستحقاق",
+			"edit": "تعديل",
+			"noEntitlements": "لا توجد استحقاقات متاحة",
+			"unlimited": "غير محدود",
+			"enabled": "مفعّل",
+			"disabled": "معطّل",
+			"unknownFeature": "ميزة غير معروفة"
+		}
+	},
+	"premiumFeature": {
+		"tooltip": "ميزة مميزة",
+		"dialogTitle": "ميزة مميزة",
+		"dialogDescription": "هذه ميزة مميزة. تحتاج إلى ترقية الخطة لاستخدامها.",
+		"contactUs": "تواصل معنا"
+	},
+	"priceDialogs": {
+		"billingModels": {
+			"flatFee": "رسوم ثابتة",
+			"package": "حزمة",
+			"volumeTiered": "شرائح حجمية",
+			"slabTiered": "شرائح طبقية"
+		},
+		"originalPrice": "السعر الأصلي",
+		"billingModel": "نموذج الفوترة",
+		"selectBillingModel": "اختر نموذج الفوترة",
+		"overrideAmountLabel": "مبلغ التجاوز ({{unit}})",
+		"enterNewAmountOptional": "أدخل مبلغًا جديدًا (اختياري)",
+		"tiers": "الشرائح",
+		"packageConfiguration": "إعداد الحزمة",
+		"unitsPerPackage": "وحدات لكل حزمة",
+		"enterUnitsPerPackage": "أدخل وحدات لكل حزمة",
+		"originalUnitsPerPackage": "الأصلي: {{count}} وحدة لكل حزمة",
+		"effectiveFromOptional": "ساري من (اختياري)",
+		"selectDateScheduledUpdate": "اختر تاريخ التحديث المجدول",
+		"schedulePriceChangeHint": "جدولة سريان تغيير السعر في تاريخ مستقبلي",
+		"priceOverriddenNotice": "تم تجاوز هذا السعر. راجع التغييرات أعلاه.",
+		"cancel": "إلغاء",
+		"reset": "إعادة ضبط",
+		"modifyPricingDescription": "تعديل إعداد التسعير لـ {{name}}",
+		"updatePricingDescription": "تحديث إعداد التسعير (المبلغ، نموذج الفوترة، الشرائح) لـ {{name}}",
+		"thisChargeFallback": "هذا الرسم",
+		"overrideTitle": "تجاوز إعداد السعر",
+		"updateTitle": "تحديث السعر",
+		"overridePrice": "تجاوز السعر",
+		"updateOverride": "تحديث التجاوز",
+		"updatePrice": "تحديث السعر",
+		"failedUpdateToast": "فشل تحديث السعر",
+		"toastScheduled": "سيسري {{name}} اعتبارًا من {{date}}.",
+		"toastUpdated": "تم تحديث {{name}} بنجاح.",
+		"fallbackPriceName": "سعر"
 	}
 }

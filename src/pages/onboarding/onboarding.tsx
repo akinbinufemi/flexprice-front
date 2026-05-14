@@ -3,6 +3,7 @@ import { AlignJustify, ArrowRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState } from 'react';
 import { logger } from '@/utils/common/Logger';
 
@@ -88,7 +89,7 @@ const OnboardingPage = () => {
 			)}
 			<Page>
 				{/* Top Containers */}
-				<ApiDocsContent tags={['Events']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 				<div className='flex gap-6 mb-16 w-full'>
 					{/* Welcome Container */}
 					<div className='flex-1 w-[70%] flex-grow rounded bg-[#dde1eb] p-8'>

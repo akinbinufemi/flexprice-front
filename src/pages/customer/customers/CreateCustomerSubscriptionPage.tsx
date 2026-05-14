@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import { Button, SelectOption } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { UsageTable, SubscriptionForm } from '@/components/organisms';
 import { AlertTriangle } from 'lucide-react';
 
@@ -767,7 +768,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 
 	return (
 		<div className={cn('flex gap-8 mt-5 relative mb-12')}>
-			<ApiDocsContent tags={['Subscriptions']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.SubscriptionsOnly} />
 			<div className='flex-[6] space-y-6 mb-12 overflow-y-auto pr-4'>
 				{subscriptionData?.usage?.charges && subscriptionData.usage.charges.length > 0 && (
 					<div>

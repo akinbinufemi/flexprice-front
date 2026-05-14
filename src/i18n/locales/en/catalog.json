@@ -67,6 +67,36 @@
 			"add": "Add",
 			"addonRequiredError": "Addon is required",
 			"noDescription": "No description"
+		},
+		"listPage": {
+			"title": "Addons",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"lookupKey": "Lookup Key",
+				"createdAt": "Created At",
+				"status": "Status"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"columns": {
+				"addonName": "Addon Name",
+				"lookupKey": "Lookup Key",
+				"status": "Status",
+				"updatedAt": "Updated At"
+			},
+			"paginationUnit": "Addons",
+			"emptyState": {
+				"heading": "Addons",
+				"description": "Create your first addon to define additional services customers can purchase.",
+				"createButton": "Create Addon"
+			}
 		}
 	},
 	"costSheets": {
@@ -413,6 +443,50 @@
 		}
 	},
 	"features": {
+		"listPage": {
+			"title": "Features",
+			"columns": {
+				"featureName": "Feature Name",
+				"group": "Group",
+				"type": "Type",
+				"status": "Status",
+				"updatedAt": "Updated At"
+			},
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"status": "Status",
+				"type": "Type",
+				"group": "Group"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"filterTypes": {
+				"metered": "Metered",
+				"boolean": "Boolean",
+				"static": "Static"
+			},
+			"typeChips": {
+				"metered": "Metered",
+				"boolean": "Boolean",
+				"static": "Static",
+				"unknown": "Unknown"
+			},
+			"emptyCell": "—",
+			"paginationUnit": "Features",
+			"emptyState": {
+				"heading": "Features",
+				"description": "Create your first feature to define what customers pay for.",
+				"createButton": "Create Feature"
+			}
+		},
 		"drawer": {
 			"editTitle": "Edit Feature",
 			"description": "Update feature details.",
@@ -598,5 +672,153 @@
 			"tierAddedDetails": "From (>): {{from}}, Up to (<=): {{upTo}}, Per unit price: {{perUnit}}, Flat fee: {{flatFee}}",
 			"detailSep": ", "
 		}
+	},
+	"entitlements": {
+		"usageResetPeriod": {
+			"DAILY": "Daily",
+			"WEEKLY": "Weekly",
+			"MONTHLY": "Monthly",
+			"QUARTERLY": "Quarterly",
+			"HALF_YEARLY": "Half-Yearly",
+			"ANNUAL": "Yearly",
+			"NEVER": "Never"
+		},
+		"validation": {
+			"featureMeterRequired": "Feature must have an associated meter",
+			"usageLimitNegative": "Usage limit cannot be negative",
+			"usageLimitRequired": "Usage limit is required",
+			"usageResetRequired": "Usage reset period is required",
+			"staticValueRequired": "Value is required",
+			"staticValueNegative": "Value cannot be negative",
+			"staticValueEmpty": "Value cannot be empty",
+			"selectFeature": "Please select a feature",
+			"invalidFeatureType": "Invalid feature type",
+			"featureAlreadyAdded": "This feature is already added",
+			"addAtLeastOne": "Please add at least one entitlement"
+		},
+		"errors": {
+			"entityIdRequired": "Entity ID is required"
+		},
+		"toast": {
+			"addedSuccess": "Entitlements added successfully",
+			"addFailed": "Failed to add entitlements. Please try again."
+		},
+		"addDrawer": {
+			"title": "Add Entitlement",
+			"description": "Define the features that customers will be entitled to.",
+			"featuresLabel": "Features",
+			"selectFeaturePlaceholder": "Select feature",
+			"valueLabel": "Value",
+			"enterValuePlaceholder": "Enter value",
+			"setInfiniteLabel": "Set to infinite",
+			"usageResetLabel": "Usage reset",
+			"usageResetPlaceholder": "Select usage reset period",
+			"usageResetDescription": "The values get reset in the given interval",
+			"softLimitLabel": "Soft Limit",
+			"softLimitDescription": "If enabled, access is always granted, even if the limit is exceeded.",
+			"cancel": "Cancel",
+			"add": "Add",
+			"addAnotherFeature": "Add another feature",
+			"save": "Save",
+			"unlimitedDisplay": "Unlimited",
+			"calculatorAriaLabel": "Display value calculator",
+			"unitsFallback": "units"
+		},
+		"displayCalculator": {
+			"titleFallback": "Display value",
+			"noDisplayUnit": "No display unit configured for this feature.",
+			"title": "Set Entitlement in Display Units",
+			"description": "Enter a value in <strongDisplay>{{displayUnit}}</strongDisplay> to see the equivalent usage limit in <strongBase>{{baseUnit}}</strongBase>.",
+			"valueInDisplayUnitLabel": "Value in Display Unit",
+			"enterValuePlaceholder": "Enter Value",
+			"calculatedUsageLimit": "Calculated Usage Limit:",
+			"conversionFactor": "The conversion factor for this feature is set at <rate>{{rate}}</rate>.",
+			"emDash": "—",
+			"confirm": "OK"
+		},
+		"editDrawer": {
+			"title": "Edit Entitlement: {{name}}",
+			"unknownFeature": "Unknown",
+			"description": "Override entitlement values for this subscription",
+			"featureType": "Feature Type",
+			"usageLimit": "Usage Limit",
+			"enterUsageLimitPlaceholder": "Enter usage limit",
+			"originalPrefix": "Original:",
+			"resetsSuffix": " (resets {{period}})",
+			"setInfiniteLabel": "Set to infinite",
+			"staticValue": "Static Value",
+			"enterStaticPlaceholder": "Enter static value",
+			"notSet": "Not set",
+			"enabledLabel": "Enabled",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"originalBooleanPrefix": "Original:",
+			"cancel": "Cancel",
+			"resetToDefault": "Reset to Default",
+			"saveOverride": "Save Override"
+		},
+		"overridesTable": {
+			"columnFeatureName": "Feature Name",
+			"columnEntityType": "Entity Type",
+			"columnFeatureType": "Feature Type",
+			"columnValue": "Value",
+			"tooltipUsageLimit": "Usage Limit: {{from}} → {{to}}",
+			"tooltipStaticValue": "Static Value: {{from}} → {{to}}",
+			"tooltipStatus": "Status: {{from}} → {{to}}",
+			"valuePlaceholder": "--",
+			"perPeriodSuffix": " / {{period}}",
+			"featureTypeMetered": "Metered",
+			"featureTypeBoolean": "Boolean",
+			"featureTypeStatic": "Static",
+			"overrideAppliedTitle": "Entitlement Override Applied",
+			"edit": "Edit",
+			"noEntitlements": "No entitlements available",
+			"unlimited": "Unlimited",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"unknownFeature": "Unknown Feature"
+		}
+	},
+	"premiumFeature": {
+		"tooltip": "Premium feature",
+		"dialogTitle": "Premium Feature",
+		"dialogDescription": "This is a premium feature. You need to upgrade to a premium plan to use this feature.",
+		"contactUs": "Contact Us"
+	},
+	"priceDialogs": {
+		"billingModels": {
+			"flatFee": "Flat Fee",
+			"package": "Package",
+			"volumeTiered": "Volume Tiered",
+			"slabTiered": "Slab Tiered"
+		},
+		"originalPrice": "Original Price",
+		"billingModel": "Billing Model",
+		"selectBillingModel": "Select billing model",
+		"overrideAmountLabel": "Override Amount ({{unit}})",
+		"enterNewAmountOptional": "Enter new amount (optional)",
+		"tiers": "Tiers",
+		"packageConfiguration": "Package Configuration",
+		"unitsPerPackage": "Units per package",
+		"enterUnitsPerPackage": "Enter units per package",
+		"originalUnitsPerPackage": "Original: {{count}} units per package",
+		"effectiveFromOptional": "Effective From (Optional)",
+		"selectDateScheduledUpdate": "Select date for scheduled update",
+		"schedulePriceChangeHint": "Schedule this price change to take effect on a future date",
+		"priceOverriddenNotice": "This price has been overridden. Review the changes above.",
+		"cancel": "Cancel",
+		"reset": "Reset",
+		"modifyPricingDescription": "Modify the pricing configuration for {{name}}",
+		"updatePricingDescription": "Update the pricing configuration (amount, billing model, tiers) for {{name}}",
+		"thisChargeFallback": "this charge",
+		"overrideTitle": "Override Price Configuration",
+		"updateTitle": "Update Price",
+		"overridePrice": "Override Price",
+		"updateOverride": "Update Override",
+		"updatePrice": "Update Price",
+		"failedUpdateToast": "Failed to update price",
+		"toastScheduled": "{{name}} will be effective from {{date}}.",
+		"toastUpdated": "{{name}} has been updated successfully.",
+		"fallbackPriceName": "Price"
 	}
 }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DayPicker } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
 };
 
 function Calendar({ className, classNames, showOutsideDays = true, timezone, onTimezoneChange, ...props }: CalendarProps) {
+	const { t } = useTranslation('common');
 	const showTimezone = timezone !== undefined || onTimezoneChange !== undefined;
 	const currentTz = timezone ?? 'local';
 	const isInteractive = onTimezoneChange !== undefined;
@@ -61,9 +63,9 @@ function Calendar({ className, classNames, showOutsideDays = true, timezone, onT
 				{...props}
 			/>
 			{showTimezone && (
-				<div className='mt-3 pt-3 border-t border-border px-3 pb-2.5' role='group' aria-label='Timezone'>
+				<div className='mt-3 pt-3 border-t border-border px-3 pb-2.5' role='group' aria-label={t('dateTime.timezoneSectionAriaLabel')}>
 					<div className='flex items-center justify-between gap-3'>
-						<span className='text-xs text-muted-foreground font-normal'>Timezone</span>
+						<span className='text-xs text-muted-foreground font-normal'>{t('dateTime.timezoneSectionLabel')}</span>
 						{isInteractive ? (
 							<Select value={currentTz} onValueChange={(value) => onTimezoneChange(value as CalendarTimezone)}>
 								<SelectTrigger className='h-8 min-w-[84px] w-[84px] border-border bg-background px-2.5 text-xs font-normal shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-1 [&>svg]:h-3.5 [&>svg]:w-3.5'>
@@ -71,15 +73,17 @@ function Calendar({ className, classNames, showOutsideDays = true, timezone, onT
 								</SelectTrigger>
 								<SelectContent align='end' side='top' className='z-[70]'>
 									<SelectItem value='local' className='text-xs'>
-										Local
+										{t('dateTime.timezoneLocal')}
 									</SelectItem>
 									<SelectItem value='utc' className='text-xs'>
-										UTC
+										{t('dateTime.timezoneUtc')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
 						) : (
-							<span className='text-xs text-foreground font-medium'>{currentTz === 'local' ? 'Local' : 'UTC'}</span>
+							<span className='text-xs text-foreground font-medium'>
+								{currentTz === 'local' ? t('dateTime.timezoneLocal') : t('dateTime.timezoneUtc')}
+							</span>
 						)}
 					</div>
 				</div>

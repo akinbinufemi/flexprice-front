@@ -5,6 +5,7 @@ import { ColumnData } from '@/components/molecules/Table';
 import { Plan } from '@/models/Plan';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PlanApi } from '@/api/PlanApi';
@@ -262,7 +263,7 @@ const PlansPage = () => {
 					</Button>
 				</div>
 			</Dialog>
-			<ApiDocsContent tags={['Plans']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Plans} />
 			<div className='space-y-6'>
 				<QueryableDataArea<Plan>
 					queryConfig={{
@@ -321,7 +322,7 @@ const PlansPage = () => {
 								</Button>
 							</div>
 						),
-						tags: ['Plans'],
+						tags: API_DOCS_TAGS.Plans,
 						tutorials: GUIDES.plans.tutorials,
 					}}
 				/>

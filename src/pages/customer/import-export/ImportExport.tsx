@@ -1,8 +1,8 @@
 import { Button, Chip, Loader, Page, ShortPagination } from '@/components/atoms';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent, ColumnData, FlexpriceTable, ImportFileDrawer } from '@/components/molecules';
 import { EmptyPage } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import usePagination from '@/hooks/usePagination';
 import { ImportTask } from '@/models/ImportTask';
 import TaskApi from '@/api/TaskApi';
@@ -114,7 +114,7 @@ const ImportExport = () => {
 					},
 				}}
 				tutorials={GUIDES.importExport.tutorials}
-				tags={[...API_DOCS_TAGS.Tasks]}>
+				tags={API_DOCS_TAGS.Tasks}>
 				<ImportFileDrawer taskId={activeTask} isOpen={drawerOpen} onOpenChange={(value) => setdrawerOpen(value)} />
 			</EmptyPage>
 		);
@@ -138,7 +138,7 @@ const ImportExport = () => {
 					</Button>
 				</>
 			}>
-			<ApiDocsContent tags={[...API_DOCS_TAGS.Tasks]} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Tasks} />
 			{/* import export drawer */}
 			<ImportFileDrawer taskId={activeTask} isOpen={drawerOpen} onOpenChange={(value) => setdrawerOpen(value)} />
 

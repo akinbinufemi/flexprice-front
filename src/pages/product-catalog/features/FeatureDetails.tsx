@@ -25,6 +25,7 @@ import {
 	DropdownMenuOption,
 	FeatureDrawer,
 } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { FilterOperator, DataType } from '@/types/common/QueryBuilder';
 import { FeatureAlertDialog } from '@/components/molecules/FeatureAlertDialog';
 
@@ -324,7 +325,7 @@ const FeatureDetails = () => {
 					{data?.id && <CopyIdButton id={data.id} entityType='Feature' />}
 				</div>
 			}>
-			<ApiDocsContent tags={['Features']} snippets={data?.type === FEATURE_TYPE.METERED ? snippets : undefined} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Features} snippets={data?.type === FEATURE_TYPE.METERED ? snippets : undefined} />
 
 			{/* Feature Alert Dialog */}
 			<FeatureAlertDialog

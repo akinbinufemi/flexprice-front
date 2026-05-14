@@ -2,29 +2,10 @@
 
 import { Select } from '@/components/atoms';
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { WindowSize } from '@/models';
 import { TIME_PERIOD } from '@/constants/constants';
 import { getTypographyClass } from '@/lib/typography';
-
-const timePeriodOptions = [
-	{ value: TIME_PERIOD.LAST_HOUR, label: 'Last hour' },
-	{ value: TIME_PERIOD.LAST_DAY, label: 'Last day' },
-	{ value: TIME_PERIOD.LAST_WEEK, label: 'Last week' },
-	{ value: TIME_PERIOD.LAST_30_DAYS, label: 'Last 30 days' },
-];
-
-const windowSizeOptions = [
-	{ value: WindowSize.MINUTE, label: 'Minute' },
-	{ value: WindowSize.FIFTEEN_MIN, label: '15 Minutes' },
-	{ value: WindowSize.THIRTY_MIN, label: '30 Minutes' },
-	{ value: WindowSize.HOUR, label: 'Hour' },
-	{ value: WindowSize.THREE_HOUR, label: '3 Hours' },
-	{ value: WindowSize.SIX_HOUR, label: '6 Hours' },
-	{ value: WindowSize.TWELVE_HOUR, label: '12 Hours' },
-	{ value: WindowSize.DAY, label: 'Day' },
-	{ value: WindowSize.WEEK, label: 'Week' },
-	{ value: WindowSize.MONTH, label: 'Month' },
-];
 
 interface DashboardControlsProps {
 	timePeriod: TIME_PERIOD;
@@ -35,6 +16,33 @@ interface DashboardControlsProps {
 
 export const DashboardControls: React.FC<DashboardControlsProps> = ({ timePeriod, windowSize, onTimePeriodChange, onWindowSizeChange }) => {
 	const { t } = useTranslation('common');
+
+	const timePeriodOptions = useMemo(
+		() => [
+			{ value: TIME_PERIOD.LAST_HOUR, label: t('dashboardHome.timePeriodLastHour') },
+			{ value: TIME_PERIOD.LAST_DAY, label: t('dashboardHome.timePeriodLastDay') },
+			{ value: TIME_PERIOD.LAST_WEEK, label: t('dashboardHome.timePeriodLastWeek') },
+			{ value: TIME_PERIOD.LAST_30_DAYS, label: t('dashboardHome.timePeriodLast30Days') },
+		],
+		[t],
+	);
+
+	const windowSizeOptions = useMemo(
+		() => [
+			{ value: WindowSize.MINUTE, label: t('dashboardHome.windowSizeMinute') },
+			{ value: WindowSize.FIFTEEN_MIN, label: t('dashboardHome.windowSize15Min') },
+			{ value: WindowSize.THIRTY_MIN, label: t('dashboardHome.windowSize30Min') },
+			{ value: WindowSize.HOUR, label: t('dashboardHome.windowSizeHour') },
+			{ value: WindowSize.THREE_HOUR, label: t('dashboardHome.windowSize3Hours') },
+			{ value: WindowSize.SIX_HOUR, label: t('dashboardHome.windowSize6Hours') },
+			{ value: WindowSize.TWELVE_HOUR, label: t('dashboardHome.windowSize12Hours') },
+			{ value: WindowSize.DAY, label: t('dashboardHome.windowSizeDay') },
+			{ value: WindowSize.WEEK, label: t('dashboardHome.windowSizeWeek') },
+			{ value: WindowSize.MONTH, label: t('dashboardHome.windowSizeMonth') },
+		],
+		[t],
+	);
+
 	return (
 		<div className='flex flex-col sm:flex-row gap-4 sm:justify-end mb-6'>
 			<div className='flex flex-col sm:flex-row gap-4'>

@@ -1,10 +1,10 @@
 import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
 import { ApiDocsContent, CostSheetDrawer } from '@/components/molecules';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import CostSheet from '@/models/CostSheet';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState, useMemo } from 'react';
 import CostSheetApi from '@/api/CostSheetApi';
 import {
@@ -173,7 +173,7 @@ const CostSheetsPage = () => {
 				onOpenChange={setCostSheetDrawerOpen}
 				refetchQueryKeys={['fetchCostSheets']}
 			/>
-			<ApiDocsContent tags={[...API_DOCS_TAGS.Costs]} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
 				<QueryableDataArea<CostSheet>
 					queryConfig={{
@@ -210,7 +210,7 @@ const CostSheetsPage = () => {
 						description: 'Create your first cost sheet to define pricing structures and charges.',
 						buttonLabel: 'Create Cost Sheet',
 						buttonAction: handleOnAdd,
-						tags: [...API_DOCS_TAGS.Costs],
+						tags: API_DOCS_TAGS.Costs,
 						tutorials: GUIDES.features.tutorials,
 					}}
 				/>

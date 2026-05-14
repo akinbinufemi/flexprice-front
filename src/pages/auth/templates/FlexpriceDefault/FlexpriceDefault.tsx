@@ -45,7 +45,7 @@ const FlexpriceDefault: React.FC<FlexpriceDefaultProps> = ({ currentTab, switchT
 					className='w-full h-[48px] flex items-center justify-center gap-2.5 cursor-pointer border-y border-gray-100 hover:opacity-90 transition-opacity'
 					style={{ background: 'linear-gradient(to right, #F7F7F7, #EDEDED, #F7F7F7)' }}>
 					<span className='text-[15px] font-medium text-gray-700'>{t('slackBanner', { brandName: name })}</span>
-					<img src='/assets/logo/slack-logo.png' alt='Slack Logo' className='h-4 w-auto' />
+					<img src='/assets/logo/slack-logo.png' alt={t('images.slackLogoAlt')} className='h-4 w-auto' />
 				</a>
 				<div className='flex-1 flex justify-center items-center pt-[10px]'>
 					<div className='flex flex-col justify-center max-w-xl w-[55%] mx-auto'>

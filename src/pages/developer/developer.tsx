@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { EmptyPage } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import ActionButton from '@/components/atoms/ActionButton/ActionButton';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
@@ -207,7 +208,7 @@ const DeveloperPage = () => {
 
 	return (
 		<div>
-			<ApiDocsContent tags={['secrets']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Secrets} />
 			<SecretKeyDrawer isOpen={isSecretKeyDrawerOpen} onOpenChange={setIsSecretKeyDrawerOpen} />
 
 			{/* API Keys Section */}
@@ -222,7 +223,7 @@ const DeveloperPage = () => {
 						buttonAction: handleAddSecretKey,
 					}}
 					tutorials={GUIDES.secrets.tutorials}
-					tags={['secrets']}
+					tags={API_DOCS_TAGS.Secrets}
 				/>
 			)}
 			{(secretKeys?.items.length || 0) > 0 && (

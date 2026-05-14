@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import TaskRunsTable from '@/components/molecules/TaskRunsTable/TaskRunsTable';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { RouteNames } from '@/core/routes/Routes';
 
 const TaskRunsPage = () => {

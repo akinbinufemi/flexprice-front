@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Page, Select } from '@/components/atoms';
 import { ApiDocsContent, QueryBuilder } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import EventsApi from '@/api/EventsApi';
 import { Skeleton } from '@/components/ui';
 import { RefreshCw } from 'lucide-react';
@@ -218,7 +219,7 @@ const QueryPage: React.FC = () => {
 
 	return (
 		<Page heading='Query'>
-			<ApiDocsContent tags={['Events']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<QueryBuilder
 					filterOptions={filterOptions}

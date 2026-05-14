@@ -3,6 +3,7 @@ import { type DialogProps } from '@radix-ui/react-dialog';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search, CornerDownLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
 import { Dialog } from '@/components/ui/dialog';
@@ -27,6 +28,7 @@ type CommandPaletteDialogProps = DialogProps & {
 };
 
 const CommandPaletteDialog = ({ children, value, onValueChange, filter, open, ...props }: CommandPaletteDialogProps) => {
+	const { t } = useTranslation('common');
 	return (
 		<Dialog open={open} {...props}>
 			<DialogPrimitive.Portal>
@@ -39,7 +41,7 @@ const CommandPaletteDialog = ({ children, value, onValueChange, filter, open, ..
 					)}
 				/>
 				<DialogPrimitive.Content
-					aria-label='Search and run commands'
+					aria-label={t('commandPalette.searchAndRunCommandsAriaLabel')}
 					role='dialog'
 					aria-modal='true'
 					className={cn(

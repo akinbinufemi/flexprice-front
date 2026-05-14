@@ -145,7 +145,7 @@ const LandingSection: React.FC = () => {
 						<div key={logo} className='flex items-center justify-center'>
 							<img
 								src={logo}
-								alt='customer logo'
+								alt={t('landing.customerLogoAlt')}
 								className='max-h-10 object-contain transition-all duration-200'
 								style={{ maxWidth: 140 }}
 							/>

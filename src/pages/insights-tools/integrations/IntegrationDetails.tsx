@@ -1,5 +1,5 @@
 import { useParams } from 'react-router';
-import { integrations } from './integrationsData';
+import { useIntegrationsCatalog } from './useIntegrationsCatalog';
 import { cn } from '@/lib/utils';
 import { Button, FormHeader, Page, Dialog } from '@/components/atoms';
 import { useState } from 'react';
@@ -17,6 +17,7 @@ import PaddleConnectionDrawer from '@/components/molecules/PaddleConnectionDrawe
 import { PencilIcon, TrashIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 import ConnectionApi from '@/api/ConnectionApi';
@@ -25,8 +26,9 @@ import { CONNECTION_PROVIDER_TYPE } from '@/models/Connection';
 const IntegrationDetails = () => {
 	const { t } = useTranslation('settings');
 	const { i18n } = useTranslation();
+	const integrations = useIntegrationsCatalog();
 	const { id: name } = useParams() as { id: string };
-	const integration = integrations.find((integration) => integration.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+	const integration = integrations.find((i) => i.id === name.toLowerCase());
 	const providerType =
 		name.toLowerCase() === 'zoho' ? CONNECTION_PROVIDER_TYPE.ZOHO_BOOKS : (name.toLowerCase() as CONNECTION_PROVIDER_TYPE);
 
@@ -50,11 +52,11 @@ const IntegrationDetails = () => {
 	const { mutate: deleteConnection, isPending: isDeletingConnection } = useMutation({
 		mutationFn: (id: string) => ConnectionApi.Delete(id),
 		onSuccess: () => {
-			toast.success('Connection deleted successfully');
+			toast.success(t('insightsTools.integrations.toastConnectionDeleted'));
 			refetchConnections();
 		},
 		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to delete connection');
+			toast.error(error.message || t('insightsTools.integrations.toastConnectionDeleteFailed'));
 		},
 	});
 
@@ -102,7 +104,7 @@ const IntegrationDetails = () => {
 
 	return (
 		<Page>
-			<ApiDocsContent tags={['Integrations', 'secrets']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Integrations} />
 			<div className={cn('border rounded-[6px] p-4 flex items-center shadow-sm', !integration.premium && 'cursor-pointer')}>
 				<div className='size-20 flex items-center justify-center bg-gray-100 rounded-[6px]'>
 					<img src={integration.logo} alt={integration.name} className='size-10 object-contain' />

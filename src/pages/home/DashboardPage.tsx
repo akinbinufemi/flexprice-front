@@ -9,18 +9,19 @@ import { GetMonitoringDataRequest } from '@/types';
 import { WindowSize } from '@/models';
 import { TIME_PERIOD } from '@/constants/constants';
 import {
-	ApiDocsContent,
 	EventsMonitoringChart,
 	DashboardControls,
 	RecentSubscriptionsCard,
 	// RevenueTrendCard,
 	InvoiceIssuesCard,
+	ApiDocsContent,
 } from '@/components/molecules';
 import { useRecentSubscriptions, /* useRevenueData, */ useInvoiceIssues } from '@/hooks/useDashboardData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui';
 import { AlertCircle } from 'lucide-react';
 import { getTypographyClass } from '@/lib/typography';
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 const getTimeRangeForPeriod = (period: TIME_PERIOD): { startDate: Date; endDate: Date } => {
 	const endDate = new Date();
@@ -163,7 +164,7 @@ const DashboardPage = () => {
 
 	return (
 		<Page
-			heading='Home'
+			heading={t('dashboardHome.pageTitle')}
 			headingCTA={
 				<DashboardControls
 					timePeriod={timePeriod}
@@ -172,7 +173,7 @@ const DashboardPage = () => {
 					onWindowSizeChange={setWindowSize}
 				/>
 			}>
-			<ApiDocsContent tags={['Events']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='space-y-6'>
 				{/* Events Monitoring Chart */}
 				<div>

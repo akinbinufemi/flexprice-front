@@ -3,6 +3,7 @@ import { ApiDocsContent, CouponDrawer } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import CouponApi from '@/api/CouponApi';
 import { useState, useMemo } from 'react';
 import {
@@ -196,7 +197,7 @@ const CouponsPage = () => {
 						<AddButton onClick={handleCreateCoupon} />
 					</div>
 				}>
-				<ApiDocsContent tags={['Coupons']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Coupons} />
 				<QueryableDataArea<Coupon>
 					queryConfig={{
 						filterOptions,
@@ -232,7 +233,7 @@ const CouponsPage = () => {
 						description: 'Create your first coupon to offer discounts to customers.',
 						buttonLabel: 'Create Coupon',
 						buttonAction: handleCreateCoupon,
-						tags: ['Coupons'],
+						tags: API_DOCS_TAGS.Coupons,
 						tutorials: GUIDES.coupons.tutorials,
 					}}
 				/>

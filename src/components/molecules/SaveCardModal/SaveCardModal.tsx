@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import PaymentApi from '@/api/PaymentApi';
 import toast from 'react-hot-toast';
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { useTranslation } from 'react-i18next';
 
 interface SaveCardModalProps {
 	isOpen: boolean;
@@ -15,6 +16,7 @@ interface SaveCardModalProps {
 }
 
 const SaveCardModal: FC<SaveCardModalProps> = ({ isOpen, onOpenChange, customerId, currentUrl }) => {
+	const { t } = useTranslation('billing');
 	const [setAsDefault, setSetAsDefault] = useState(true);
 	const [setupUrlPopup, setSetupUrlPopup] = useState<{
 		isOpen: boolean;
@@ -100,31 +102,28 @@ const SaveCardModal: FC<SaveCardModalProps> = ({ isOpen, onOpenChange, customerI
 					<DialogHeader>
 						<DialogTitle className='text-lg font-semibold text-[#18181B] flex items-center gap-2'>
 							<CreditCard className='size-5' />
-							Save Card on Stripe
+							{t('saveCardModal.title')}
 						</DialogTitle>
 					</DialogHeader>
 
 					<div className='space-y-6 py-4'>
-						<div className='text-sm text-gray-600'>
-							This will create a secure payment setup link that allows the customer to save their card details on Stripe for future
-							payments.
-						</div>
+						<div className='text-sm text-gray-600'>{t('saveCardModal.intro')}</div>
 
 						<div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
 							<div className='flex-1'>
-								<h4 className='font-medium text-sm text-gray-900'>Save as default payment method</h4>
-								<p className='text-xs text-gray-500'>Make this the primary payment method for the customer</p>
+								<h4 className='font-medium text-sm text-gray-900'>{t('saveCardModal.defaultMethodTitle')}</h4>
+								<p className='text-xs text-gray-500'>{t('saveCardModal.defaultMethodHint')}</p>
 							</div>
 							<Switch checked={setAsDefault} onCheckedChange={setSetAsDefault} />
 						</div>
 
 						<div className='flex justify-end gap-3'>
 							<Button variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
-								Cancel
+								{t('saveCardModal.cancel')}
 							</Button>
 							<Button onClick={handleGetLink} disabled={isPending} isLoading={isPending} className='flex items-center gap-2'>
 								<ExternalLink className='size-4' />
-								Get Link
+								{t('saveCardModal.getLink')}
 							</Button>
 						</div>
 					</div>
@@ -135,28 +134,28 @@ const SaveCardModal: FC<SaveCardModalProps> = ({ isOpen, onOpenChange, customerI
 			<Dialog open={setupUrlPopup.isOpen} onOpenChange={handleCloseUrlPopup}>
 				<DialogContent className='bg-white sm:max-w-[500px]'>
 					<DialogHeader>
-						<DialogTitle className='text-lg font-semibold text-[#18181B]'>Card Setup Link Created</DialogTitle>
+						<DialogTitle className='text-lg font-semibold text-[#18181B]'>{t('saveCardModal.successTitle')}</DialogTitle>
 					</DialogHeader>
 
 					<div className='space-y-4 py-4'>
 						<div className='p-4 bg-green-50 border border-green-200 rounded-lg'>
-							<div className='text-sm text-green-800 mb-2'>Your card setup link has been successfully created!</div>
+							<div className='text-sm text-green-800 mb-2'>{t('saveCardModal.successBody')}</div>
 						</div>
 
 						<div className='flex gap-3'>
 							<Button onClick={handleGoToLink} className='flex-1 flex items-center gap-2'>
 								<ExternalLink className='w-4 h-4' />
-								Go to Setup Link
+								{t('saveCardModal.goToLink')}
 							</Button>
 							<Button variant='outline' onClick={handleCopyUrl} className='flex-1 flex items-center gap-2'>
 								{setupUrlPopup.isCopied ? <CheckCircle className='w-4 h-4' /> : <Copy className='w-4 h-4' />}
-								{setupUrlPopup.isCopied ? 'Copied!' : 'Copy Link'}
+								{setupUrlPopup.isCopied ? t('saveCardModal.copied') : t('saveCardModal.copyLink')}
 							</Button>
 						</div>
 
 						<div className='pt-2 flex justify-end'>
 							<Button variant='outline' onClick={handleCloseUrlPopup}>
-								Close
+								{t('saveCardModal.close')}
 							</Button>
 						</div>
 					</div>

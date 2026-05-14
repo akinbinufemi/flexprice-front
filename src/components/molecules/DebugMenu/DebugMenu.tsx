@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui';
 import { Loader2, Rocket, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 import useEnvironment from '@/hooks/useEnvironment';
 import { useQuery } from '@tanstack/react-query';
@@ -15,10 +16,11 @@ import { AddButton } from '@/components/atoms';
 import { useLocaleStore } from '@/store/useLocaleStore';
 import { Direction } from '@/config/branding';
 
-const TOTAL_EVENTS = 60; // Number of events to simulate
-const STREAM_DURATION = TOTAL_EVENTS * 1000; // 1 minute
+const TOTAL_EVENTS = 60;
+const STREAM_DURATION = TOTAL_EVENTS * 1000;
 
 const DebugMenu = () => {
+	const { t } = useTranslation('settings');
 	const [isOpen, setIsOpen] = useState(false);
 	const { isDevelopment, activeEnvironment } = useEnvironment();
 	const direction = useLocaleStore((s) => s.direction);
@@ -30,7 +32,9 @@ const DebugMenu = () => {
 	const [eventCount, setEventCount] = useState(0);
 	const navigate = useNavigate();
 
-	// Fetch first customer
+	const eventsScale = 5;
+	const totalTriggered = TOTAL_EVENTS * eventsScale;
+
 	const {
 		data: customerData,
 		isLoading: isCustomerLoading,
@@ -43,7 +47,6 @@ const DebugMenu = () => {
 		enabled: isDevelopment,
 	});
 
-	// Fetch customer's subscriptions
 	const {
 		data: subscriptions,
 		isLoading: isSubscriptionLoading,
@@ -54,13 +57,11 @@ const DebugMenu = () => {
 		enabled: !!customerData?.items[0]?.id && isDevelopment,
 	});
 
-	// Refetch data when environment changes
 	useEffect(() => {
 		refetchCustomer();
 		refetchSubscription();
-	}, [isDevelopment, activeEnvironment?.id]);
+	}, [isDevelopment, activeEnvironment?.id, refetchCustomer, refetchSubscription]);
 
-	// Handle streaming simulation
 	useEffect(() => {
 		if (!isStreaming) return;
 
@@ -70,7 +71,6 @@ const DebugMenu = () => {
 			const currentProgress = Math.min((elapsed / STREAM_DURATION) * 100, 100);
 			setProgress(currentProgress);
 
-			// Simulate events being fired
 			const expectedEvents = Math.floor((currentProgress / 100) * TOTAL_EVENTS);
 			setEventCount(expectedEvents);
 
@@ -131,6 +131,11 @@ const DebugMenu = () => {
 	const hasCustomer = !!customerData?.items?.length;
 	const hasSubscription = !!subscriptions?.items?.length;
 
+	const custId = customerData?.items?.[0]?.id;
+	const custName = customerData?.items?.[0]?.name;
+	const planName = subscriptions?.items?.[0]?.plan?.name;
+	const subscriptionId = subscriptions?.items?.[0]?.id;
+
 	if (!isDevelopment) {
 		return null;
 	}
@@ -159,7 +164,7 @@ const DebugMenu = () => {
 						align='end'
 						sideOffset={8}
 						className='flex flex-col gap-1 bg-black/90 text-white px-4 py-2 rounded-lg max-w-[240px]'>
-						<div className='text-[13px] text-white'>Checkout usage based pricing in action</div>
+						<div className='text-[13px] text-white'>{t('debug.tooltipTitle')}</div>
 					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>
@@ -189,7 +194,7 @@ const DebugMenu = () => {
 						<div className='p-5'>
 							<div className='flex items-center justify-between mb-4'>
 								<h2 className='text-base font-semibold'>
-									{eventsCompleted ? 'Sample Events Created' : isLoading ? 'Loading...' : 'Stream Sample Events'}
+									{eventsCompleted ? t('debug.sampleEventsCreated') : isLoading ? t('debug.loading') : t('debug.titleStreamSamples')}
 								</h2>
 								<Button variant='ghost' size='sm' className='size-6 p-0 opacity-60 hover:opacity-100' onClick={handleClose}>
 									<X className='size-3' />
@@ -202,15 +207,15 @@ const DebugMenu = () => {
 								</div>
 							) : !hasCustomer ? (
 								<div className='space-y-3'>
-									<p className='text-sm text-muted-foreground'>No customers found. Create one to get started.</p>
+									<p className='text-sm text-muted-foreground'>{t('debug.noCustomers')}</p>
 									<AddButton onClick={handleCreateCustomer} className='w-full' />
 								</div>
 							) : !hasSubscription ? (
 								<div className='space-y-5'>
 									<p className='text-sm text-muted-foreground leading-6'>
-										Assign a subscription to stream sample events to{' '}
-										<Link to={`${RouteNames.customers}/${customerData.items?.[0]?.id}`} className='text-blue-500'>
-											{customerData.items?.[0]?.name}
+										{t('debug.needSubscriptionLead')}{' '}
+										<Link to={`${RouteNames.customers}/${custId}`} className='text-blue-500'>
+											{custName}
 										</Link>
 									</p>
 									<AddButton onClick={handleCreateSubscription} className='w-full !mt-6' />
@@ -218,50 +223,46 @@ const DebugMenu = () => {
 							) : eventsCompleted ? (
 								<>
 									<p className='text-sm text-muted-foreground mb-4'>
-										{eventCount * 5} events have been fired for
-										<Link to={`${RouteNames.customers}/${customerData.items?.[0]?.id}`} className='text-blue-500'>
-											{` ${customerData.items?.[0]?.name} `}
+										{t('debug.eventsFiredSentence', { count: eventCount * eventsScale })}
+										<Link to={`${RouteNames.customers}/${custId}`} className='text-blue-500'>
+											{` ${custName} `}
 										</Link>
-										for
-										<Link
-											to={`${RouteNames.customers}/${customerData.items?.[0]?.id}/subscription/${subscriptions.items?.[0]?.id}`}
-											className='text-blue-500'>
-											{` ${subscriptions.items?.[0]?.plan?.name} `}
+										{t('debug.eventsFiredMiddle')}
+										<Link to={`${RouteNames.customers}/${custId}/subscription/${subscriptionId}`} className='text-blue-500'>
+											{` ${planName} `}
 										</Link>
-										plan.
+										{t('debug.eventsFiredTrailing')}
 									</p>
 									<div className='flex gap-2'>
 										<Link to={RouteNames.events} className='flex-1'>
 											<Button variant='outline' size='sm' className='w-full'>
-												View Events
+												{t('debug.viewEvents')}
 											</Button>
 										</Link>
 										<Button variant='outline' size='sm' className='flex-1' onClick={handleStartStreaming}>
-											Stream Again
+											{t('debug.streamAgain')}
 										</Button>
 									</div>
 								</>
 							) : (
 								<>
 									<p className='text-sm text-muted-foreground mb-4'>
-										Experience how metering, billing, and entitlements update in real time. Sample events will be triggered for
-										<Link to={`${RouteNames.customers}/${customerData.items?.[0]?.id}`} className='text-blue-500'>
-											{` ${customerData.items?.[0]?.name} `}
-										</Link>{' '}
-										under the{' '}
-										<Link
-											to={`${RouteNames.customers}/${customerData.items?.[0]?.id}/subscription/${subscriptions.items?.[0]?.id}`}
-											className='text-blue-500'>
-											{` ${subscriptions.items?.[0]?.plan?.name} `}
-										</Link>{' '}
-										plan.
+										{t('debug.streamIntro')}
+										<Link to={`${RouteNames.customers}/${custId}`} className='text-blue-500'>
+											{` ${custName} `}
+										</Link>
+										{t('debug.planBridge')}
+										<Link to={`${RouteNames.customers}/${custId}/subscription/${subscriptionId}`} className='text-blue-500'>
+											{` ${planName} `}
+										</Link>
+										{t('debug.planEnd')}
 									</p>
 
 									{isStreaming && (
 										<div className='mb-4'>
 											<Progress value={progress} className='h-1' />
 											<p className='text-xs text-muted-foreground mt-2 text-center'>
-												{eventCount * 5} of {TOTAL_EVENTS * 5} events fired
+												{t('debug.progress', { current: eventCount * eventsScale, total: totalTriggered })}
 											</p>
 										</div>
 									)}
@@ -272,7 +273,7 @@ const DebugMenu = () => {
 										onClick={handleStartStreaming}
 										disabled={isLoading || isStreaming}>
 										{isStreaming ? <Loader2 className='me-2 size-3.5 animate-spin' /> : <Rocket className='me-2 size-3.5' />}
-										{isLoading ? 'Loading...' : isStreaming ? 'Streaming...' : 'Start Streaming'}
+										{isLoading ? t('debug.loading') : isStreaming ? t('debug.streaming') : t('debug.startStreaming')}
 									</Button>
 								</>
 							)}

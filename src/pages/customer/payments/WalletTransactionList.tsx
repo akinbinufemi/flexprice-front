@@ -20,6 +20,7 @@ import { WALLET_TRANSACTION_REASON, WALLET_TRANSACTION_TYPE } from '@/models/Wal
 import { User } from '@/models/User';
 import { formatDateShort, getCurrencySymbol } from '@/utils/common/helper_functions';
 import { RouteNames } from '@/core/routes/Routes';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useCallback, useMemo } from 'react';
 import useAllUsers from '@/hooks/useAllUsers';
 import { cn } from '@/lib/utils';
@@ -273,7 +274,7 @@ const WalletTransactionList = () => {
 			emptyStateConfig={{
 				heading: t('payments.transactions.emptyHeading'),
 				description: t('payments.transactions.emptyDescription'),
-				tags: [t('payments.walletTransactions.emptyStateTag')],
+				tags: API_DOCS_TAGS.Payments,
 			}}
 		/>
 	);

@@ -154,7 +154,7 @@ const FilterAsyncMultiSelect = <T = any,>({
 					) : value.length === 1 ? (
 						<Chip label={selectedOptions[0]?.label || t('status.loading')} className='truncate bg-muted rounded-md' />
 					) : (
-						<Chip label={`${value.length} selected`} className='truncate bg-muted rounded-md' />
+						<Chip label={t('queryBuilder.selectedCount', { count: value.length })} className='truncate bg-muted rounded-md' />
 					)}
 				</Button>
 			</PopoverTrigger>

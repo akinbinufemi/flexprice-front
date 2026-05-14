@@ -6,6 +6,7 @@ import CustomerApi from '@/api/CustomerApi';
 import { Page } from '@/components/atoms';
 import { cn } from '@/lib/utils';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { AlertCircle } from 'lucide-react';
 import { ENTITY_STATUS } from '@/models';
 import CustomerHeader from '@/components/molecules/Customer/CustomerHeader';
@@ -86,7 +87,7 @@ const CustomerProfilePage = () => {
 
 	return (
 		<Page className='space-y-6'>
-			<ApiDocsContent tags={['Customers']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Customers} />
 			<CustomerHeader customerId={customerId!} />
 
 			{isArchived && (

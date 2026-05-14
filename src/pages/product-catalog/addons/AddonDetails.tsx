@@ -1,6 +1,14 @@
 import { ActionButton, Button, CardHeader, Chip, Loader, Page, Spacer, NoDataCard } from '@/components/atoms';
-import { ApiDocsContent, ColumnData, FlexpriceTable, AddonDrawer, AddEntitlementDrawer, RedirectCell } from '@/components/molecules';
-import { DetailsCard } from '@/components/molecules';
+import {
+	ApiDocsContent,
+	ColumnData,
+	FlexpriceTable,
+	AddonDrawer,
+	AddEntitlementDrawer,
+	RedirectCell,
+	DetailsCard,
+} from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { RouteNames } from '@/core/routes/Routes';
 import { Price } from '@/models/Price';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
@@ -264,7 +272,7 @@ const AddonDetails = () => {
 				onOpenChange={(value) => setEntitlementDrawerOpen(value)}
 				refetchQueryKeys={['fetchAddon', 'fetchEntitlements']}
 			/>
-			<ApiDocsContent tags={['Addons']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Addons} />
 			<div className='space-y-6'>
 				<DetailsCard variant='stacked' title={t('catalog:addons.details.title')} data={addonDetails} />
 

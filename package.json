@@ -16,7 +16,12 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "test:ui": "vitest --ui",
-    "validate:i18n": "node scripts/validate-i18n-locales.mjs"
+    "validate:i18n": "node scripts/validate-i18n-locales.mjs",
+    "lint": "eslint src vite.config.ts vitest.config.ts .storybook",
+    "lint:report": "eslint src vite.config.ts vitest.config.ts .storybook -f json -o scripts/.eslint-i18n-report.json",
+    "lint:i18n-audit": "node scripts/eslint-i18n-audit.mjs",
+    "lint:i18n-audit:ui": "node scripts/eslint-i18n-audit.mjs --ui --write-summary=docs/superpowers/reports/i18n-audit-ui-summary.json",
+    "lint:i18n-audit:tests": "node scripts/eslint-i18n-audit.mjs --with-tests"
   },
   "dependencies": {
     "@csvbox/react": "^1.1.11",

@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- Demo-only illustrative UI copy */
 import React, { useState } from 'react';
 import CustomPopover from './CustomPopover';
 import { Button } from '@/components/ui/button';

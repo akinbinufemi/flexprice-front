@@ -7,6 +7,7 @@ import usePagination from '@/hooks/usePagination';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { EmptyPage } from '@/components/organisms';
 import GUIDES from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 const CreditNotesPage = () => {
 	const { limit, offset, page } = usePagination();
@@ -40,7 +41,7 @@ const CreditNotesPage = () => {
 		return (
 			<EmptyPage
 				heading='Credit Notes'
-				tags={['Credit Notes']}
+				tags={API_DOCS_TAGS.CreditNotes}
 				tutorials={GUIDES.creditNotes?.tutorials || []}
 				emptyStateCard={{
 					heading: 'Issue A Credit Note',
@@ -52,7 +53,7 @@ const CreditNotesPage = () => {
 
 	return (
 		<Page heading='Credit Notes'>
-			<ApiDocsContent tags={['Credit Notes']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotes} />
 			<div className='px-0'>
 				<CreditNoteTable data={creditNoteData?.items || []} />
 				<Spacer className='!h-4' />

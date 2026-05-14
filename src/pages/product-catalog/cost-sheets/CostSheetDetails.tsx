@@ -1,8 +1,7 @@
 import { Button, CardHeader, Chip, Loader, Page, ShortPagination, Spacer, NoDataCard } from '@/components/atoms';
-import { ApiDocsContent, ColumnData, FlexpriceTable, CostSheetDrawer } from '@/components/molecules';
-import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
+import { ApiDocsContent, ColumnData, FlexpriceTable, CostSheetDrawer, DetailsCard } from '@/components/molecules';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
-import { DetailsCard } from '@/components/molecules';
+import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import { RouteNames } from '@/core/routes/Routes';
 import { Price } from '@/models/Price';
 import { ENTITY_STATUS } from '@/models';
@@ -217,7 +216,7 @@ const CostSheetDetails = () => {
 				onOpenChange={setCostSheetDrawerOpen}
 				refetchQueryKeys={['fetchCostSheet', 'costSheetCharges']}
 			/>
-			<ApiDocsContent tags={[...API_DOCS_TAGS.Costs]} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
 				<DetailsCard variant='stacked' title={t('catalog:costSheets.details.title')} data={costSheetDetails} />
 

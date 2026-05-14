@@ -9,6 +9,7 @@ import { Plus, Loader, Bot } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { EmptyPage } from '@/components/organisms';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import ServiceAccountDrawer from '@/components/molecules/ServiceAccountDrawer/ServiceAccountDrawer';
 import { useTranslation } from 'react-i18next';
 
@@ -100,7 +101,7 @@ const ServiceAccountsPage = () => {
 
 	return (
 		<div>
-			<ApiDocsContent tags={['Users']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Users} />
 			<ServiceAccountDrawer isOpen={isServiceAccountDrawerOpen} onOpenChange={setIsServiceAccountDrawerOpen} />
 
 			{serviceAccountsResponse?.items.length === 0 && (
@@ -113,7 +114,7 @@ const ServiceAccountsPage = () => {
 						buttonLabel: t('serviceAccounts.emptyCard.button'),
 						buttonAction: handleAddServiceAccount,
 					}}
-					tags={['Users']}
+					tags={API_DOCS_TAGS.Users}
 				/>
 			)}
 			{(serviceAccountsResponse?.items.length || 0) > 0 && (

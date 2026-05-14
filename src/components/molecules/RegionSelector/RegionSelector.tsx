@@ -11,7 +11,7 @@ import { Info } from 'lucide-react';
 import { config } from '@/config/config';
 
 const RegionSelectorImpl: React.FC = () => {
-	const { t } = useTranslation('common');
+	const { t } = useTranslation('settings');
 	const { regions } = config.regions;
 	const [selectedRegion, setSelectedRegion] = useState<RegionOption | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -30,8 +30,8 @@ const RegionSelectorImpl: React.FC = () => {
 	return (
 		<div className='space-y-2'>
 			<div className='flex items-center gap-1'>
-				<label className='block text-sm font-medium text-gray-700'>{t('labels.dataRegion')}</label>
-				<Tooltip content='Click to learn more about regions'>
+				<label className='block text-sm font-medium text-gray-700'>{t('region.dataRegion')}</label>
+				<Tooltip content={t('region.tooltipLearnMore')}>
 					<button type='button' onClick={() => setIsDialogOpen(true)} className='text-sm text-[#0E5AC9] cursor-pointer'>
 						<Info size={16} className='text-grey' />
 					</button>
@@ -50,7 +50,7 @@ const RegionSelectorImpl: React.FC = () => {
 							);
 						})()
 					) : (
-						<SelectValue placeholder={t('labels.selectARegion')} />
+						<SelectValue placeholder={t('region.selectPlaceholder')} />
 					)}
 				</SelectTrigger>
 				<SelectContent>

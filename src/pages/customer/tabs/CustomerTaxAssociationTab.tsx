@@ -2,6 +2,7 @@ import { useParams, useOutletContext } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardHeader, AddButton, Loader, NoDataCard, ShortPagination } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import TaxApi from '@/api/TaxApi';
 import { TAXRATE_ENTITY_TYPE } from '@/models';
 import usePagination from '@/hooks/usePagination';
@@ -79,7 +80,7 @@ const CustomerTaxAssociationTab = () => {
 	if (!taxAssociationsData?.items?.length) {
 		return (
 			<div>
-				<ApiDocsContent tags={['Tax Associations']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.TaxAssociations} />
 				<TaxAssociationDialog
 					open={dialogOpen}
 					onOpenChange={setDialogOpen}
@@ -99,7 +100,7 @@ const CustomerTaxAssociationTab = () => {
 
 	return (
 		<div className='space-y-6'>
-			<ApiDocsContent tags={['Tax Associations']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxAssociations} />
 			<Card variant='notched'>
 				<CardHeader
 					title={t('tabPanels.tax.associationsTitle')}

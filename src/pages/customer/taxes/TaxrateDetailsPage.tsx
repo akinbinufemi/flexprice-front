@@ -1,6 +1,6 @@
 import { Button, CardHeader, Chip, Loader, Page, Spacer, Card } from '@/components/atoms';
-import { ApiDocsContent } from '@/components/molecules';
-import { DetailsCard } from '@/components/molecules';
+import { ApiDocsContent, DetailsCard } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { RouteNames } from '@/core/routes/Routes';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import TaxApi from '@/api/TaxApi';
@@ -150,7 +150,7 @@ const TaxrateDetailsPage = () => {
 				</>
 			}>
 			<TaxDrawer data={taxData as TaxRate} open={taxDrawerOpen} onOpenChange={setTaxDrawerOpen} refetchQueryKeys={['fetchTaxRate']} />
-			<ApiDocsContent tags={['Taxes', 'Tax', 'Tax Rates']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxRates} />
 
 			<div className='space-y-6'>
 				<DetailsCard variant='stacked' title={t('taxes.taxRateDetails')} data={taxDetails} />

@@ -1,5 +1,6 @@
 import { Button, Card, CardHeader, Chip, Loader, Page, Spacer } from '@/components/atoms';
 import { ApiDocsContent, ColumnData, DetailsCard, FlexpriceTable, TooltipCell } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
@@ -126,7 +127,7 @@ const WorkflowDetailsPage = () => {
 				</Button>
 			</div>
 
-			<ApiDocsContent tags={['Workflows']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Workflows} />
 
 			<div className='space-y-6'>
 				<DetailsCard variant='stacked' title={t('workflowDetail.summaryTitle')} data={summaryData} />

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, GripVertical, ListFilter, X } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -89,6 +90,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 	propertyFilters,
 	onResetCallback,
 }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 
 	const handleAddFilter = useCallback(() => {
@@ -136,7 +138,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 
 			const commonProps = {
 				className: 'min-w-0 flex-1',
-				placeholder: 'Enter value...',
+				placeholder: t('queryBuilder.enterValue'),
 			};
 
 			const inputProps = {
@@ -177,7 +179,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 						{...inputProps}
 						popoverContentClassName='w-full !z-[110]'
 						className={cn(inputProps.className, 'h-9 min-w-[182px] text-xs')}
-						placeholder='Select date'
+						placeholder={t('queryBuilder.selectDate')}
 					/>
 				),
 				[FilterFieldType.RADIO]: (
@@ -214,7 +216,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 						options={field.options?.map((opt) => ({ value: opt.value, label: opt.label })) || []}
 						value={filter.valueArray || []}
 						onChange={(value) => handleFilterUpdate(filter.id, { valueArray: value })}
-						placeholder='Select options'
+						placeholder={t('queryBuilder.selectOptions')}
 						className={cn(inputProps.className, 'h-9 text-sm overflow-hidden')}
 					/>
 				),
@@ -227,7 +229,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 						value={filter.valueString || ''}
 						searchFn={field.asyncConfig.searchFn}
 						onChange={(value) => handleFilterUpdate(filter.id, { valueString: value })}
-						placeholder='Search...'
+						placeholder={t('queryBuilder.searchShort')}
 						initialOptions={field.asyncConfig.initialOptions}
 						debounceTime={field.asyncConfig.debounceTime}
 						className={cn(inputProps.className, 'h-9 text-sm')}
@@ -241,7 +243,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 						value={filter.valueArray || []}
 						searchFn={field.asyncConfig.searchFn}
 						onChange={(value) => handleFilterUpdate(filter.id, { valueArray: value })}
-						placeholder='Search...'
+						placeholder={t('queryBuilder.searchShort')}
 						initialOptions={field.asyncConfig.initialOptions}
 						debounceTime={field.asyncConfig.debounceTime}
 						className={cn(inputProps.className, 'h-9 text-sm overflow-hidden')}
@@ -257,7 +259,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 			const component = valueComponents[nonAsyncFieldType];
 			return component || valueComponents[FilterFieldType.INPUT];
 		},
-		[fields, handleFilterUpdate],
+		[fields, handleFilterUpdate, t],
 	);
 
 	const gridTemplateColumns = useMemo(
@@ -287,7 +289,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 			<PopoverTrigger asChild>
 				<Button variant='outline' size='default' className={cn('flex items-center gap-2', className)}>
 					<ListFilter className='size-5' />
-					<span>Filter</span>
+					<span>{t('queryBuilder.filter')}</span>
 					{appliedFilters > 0 && (
 						<Badge variant='secondary' className='ms-1 h-5 rounded px-1.5 font-mono text-xs'>
 							{appliedFilters}
@@ -304,8 +306,8 @@ const PropertyFilterPopover: React.FC<Props> = ({
 						<div className='flex flex-col gap-2 p-2'>
 							<div className='flex justify-between items-start'>
 								<div className='flex flex-col gap-1'>
-									<h4 className='text-base font-medium leading-none'>No filters applied</h4>
-									<p className='text-muted-foreground text-sm'>Add filters to refine your data.</p>
+									<h4 className='text-base font-medium leading-none'>{t('queryBuilder.noFiltersTitle')}</h4>
+									<p className='text-muted-foreground text-sm'>{t('queryBuilder.noFiltersDescription')}</p>
 								</div>
 								<Button variant='ghost' size='icon' className='h-7 w-7 -me-1' onClick={() => setIsOpen(false)}>
 									<X className='h-3.5 w-3.5' />
@@ -313,7 +315,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 							</div>
 							<div className='flex items-center gap-2 mt-2'>
 								<Button size='sm' onClick={handleAddFilter} className='w-fit h-9 text-sm px-2.5'>
-									Add filter
+									{t('queryBuilder.addFilter')}
 								</Button>
 								{(onResetCallback != null || propertyFilters != null) && (
 									<Button
@@ -325,7 +327,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 											onResetCallback?.();
 										}}
 										className='h-9 text-sm px-2.5'>
-										Reset filters
+										{t('queryBuilder.resetFilters')}
 									</Button>
 								)}
 							</div>
@@ -333,7 +335,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 					) : (
 						<div className='flex flex-col gap-1.5 !z-50'>
 							<div className='flex justify-between items-center'>
-								<h4 className='text-sm font-medium leading-none'>Filter by</h4>
+								<h4 className='text-sm font-medium leading-none'>{t('queryBuilder.filterBy')}</h4>
 								<Button variant='ghost' size='icon' className='h-7 w-7 -me-1' onClick={() => setIsOpen(false)}>
 									<X className='h-3.5 w-3.5' />
 								</Button>
@@ -356,15 +358,17 @@ const PropertyFilterPopover: React.FC<Props> = ({
 															'w-full rounded hover:bg-accent/40 transition-colors',
 														)}
 														style={gridTemplateColumns}>
-														<span className='text-xs text-muted-foreground'>{index > 0 ? 'And' : 'Where'}</span>
+														<span className='text-xs text-muted-foreground'>
+															{index > 0 ? t('queryBuilder.and') : t('queryBuilder.where')}
+														</span>
 														<Combobox
 															options={fieldOptions}
 															value={filter.field}
 															onChange={(value) => handleFieldChange(filter.id, value)}
-															placeholder='Select field'
+															placeholder={t('queryBuilder.selectField')}
 															width='100%'
 															triggerClassName='h-9 text-sm overflow-hidden'
-															searchPlaceholder='Search fields...'
+															searchPlaceholder={t('queryBuilder.searchFieldsPlaceholder')}
 															contentClassName='!z-[110]'
 														/>
 
@@ -380,7 +384,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 																}))}
 															value={filter.operator}
 															onChange={(value) => handleFilterUpdate(filter.id, { operator: value as FilterOperator })}
-															placeholder='Select operator'
+															placeholder={t('queryBuilder.selectOperator')}
 															className='h-9 text-sm'
 															contentClassName='!z-[110]'
 														/>
@@ -424,13 +428,13 @@ const PropertyFilterPopover: React.FC<Props> = ({
 
 								{propertyFilters ? (
 									<div className='pt-3 mt-2 border-t border-border flex flex-col gap-1.5'>
-										<h4 className='text-sm font-medium leading-none'>Property filters</h4>
+										<h4 className='text-sm font-medium leading-none'>{t('queryBuilder.propertyFiltersHeading')}</h4>
 										<div className='space-y-3'>
 											{propertyFilters.rows.map((row) => (
 												<div key={row.id} className='flex gap-2 items-end flex-wrap'>
 													<div className='flex-1 min-w-[120px]'>
 														<Input
-															placeholder='Key'
+															placeholder={t('queryBuilder.metadataKey')}
 															value={row.key}
 															onChange={(e) =>
 																propertyFilters.setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, key: e.target.value } : r)))
@@ -440,7 +444,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 													</div>
 													<div className='flex-1 min-w-[120px]'>
 														<Input
-															placeholder='Value'
+															placeholder={t('queryBuilder.metadataValue')}
 															value={row.value}
 															onChange={(e) =>
 																propertyFilters.setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, value: e.target.value } : r)))
@@ -455,7 +459,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 														onClick={() =>
 															propertyFilters.setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.id !== row.id) : prev))
 														}
-														aria-label='Remove property filter'>
+														aria-label={t('queryBuilder.removePropertyFilterAria')}>
 														<Trash2 className='h-3.5 w-3.5' />
 													</Button>
 												</div>
@@ -467,7 +471,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 
 							<div className='flex items-center gap-2 pt-2 px-2 shrink-0 border-t border-border/50'>
 								<Button size='sm' onClick={handleAddFilter} className='h-9 text-sm px-2.5 flex items-center gap-1'>
-									Add filter
+									{t('queryBuilder.addFilter')}
 								</Button>
 								{propertyFilters && (
 									<Button
@@ -475,7 +479,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 										size='sm'
 										className='h-9 text-sm px-2.5 flex items-center gap-1'
 										onClick={() => propertyFilters.setRows((prev) => [...prev, propertyFilters.createEmpty()])}>
-										Add Property filter
+										{t('queryBuilder.addPropertyFilter')}
 									</Button>
 								)}
 								<Button
@@ -487,7 +491,7 @@ const PropertyFilterPopover: React.FC<Props> = ({
 										onResetCallback?.();
 									}}
 									className='h-9 text-sm px-2.5'>
-									Reset filters
+									{t('queryBuilder.resetFilters')}
 								</Button>
 							</div>
 						</div>

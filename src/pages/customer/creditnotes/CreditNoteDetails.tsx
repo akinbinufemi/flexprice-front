@@ -1,5 +1,6 @@
 import { Spacer, Divider, Loader, Card, Page } from '@/components/atoms';
 import { ApiDocsContent, CreditNoteLineItemTable } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import formatDate from '@/utils/common/format_date';
@@ -74,7 +75,7 @@ const CreditNoteDetails: FC<Props> = ({ credit_note_id, breadcrumb_index }) => {
 
 	return (
 		<Page className='space-y-6 '>
-			<ApiDocsContent tags={['Credit Notes', 'Features']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotesWithFeatures} />
 			{/* Main Credit Note Card */}
 			<div ref={creditNoteRef} className='rounded-xl border border-gray-300 p-6'>
 				<div className='p-4'>
