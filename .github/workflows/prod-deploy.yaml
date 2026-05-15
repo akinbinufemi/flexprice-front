@@ -1,13 +1,16 @@
 # White-label deployment workflow — completely separate from prod-in/prod-us.
 #
-# The deployment list lives in one GitHub secret: DEPLOYMENTS_CONFIG
+# Tenants are listed in one GitHub secret: DEPLOYMENTS_CONFIG
 # Add / remove tenants by editing that secret — no code change needed.
 #
-# DEPLOYMENTS_CONFIG format — a JSON array (minified one line is most reliable):
+# Deployments run sequentially (one tenant after another) in a single job.
+# Slower than a parallel matrix but avoids job-output / fromJSON issues.
+#
+# DEPLOYMENTS_CONFIG format — JSON array (minified one line is most reliable):
 #   [{"name":"flexprice-in","vercel_project_id":"prj_xxxx","vercel_token":"","vercel_org_id":""}]
 #
 # Store as a repository **Secret** named DEPLOYMENTS_CONFIG (not a Variable).
-# Pretty-printed JSON with newlines also works; the setup job normalizes it.
+# Pretty-printed JSON with newlines also works.
 #
 # Required GitHub secrets:
 #   DEPLOYMENTS_CONFIG, VERCEL_TOKEN, VERCEL_ORG_ID, SENTRY_AUTH_TOKEN
@@ -20,19 +23,32 @@ on:
       - develop
 
 jobs:
-  # Bridges DEPLOYMENTS_CONFIG secret into a matrix.
-  # (strategy.matrix cannot access the secrets context directly)
-  setup:
+  deploy:
+    name: White-label production deploy
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set.outputs.matrix }}
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      DEPLOYMENTS_CONFIG: ${{ secrets.DEPLOYMENTS_CONFIG || vars.DEPLOYMENTS_CONFIG }}
+      VERCEL_TOKEN_FB: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID_FB: ${{ secrets.VERCEL_ORG_ID }}
+
     steps:
-      - id: set
+      - uses: actions/checkout@v3
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Install dependencies
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          npm install
+
+      - name: Deploy each tenant sequentially
         run: |
           set -euo pipefail
 
           config="${DEPLOYMENTS_CONFIG:-}"
-          config="${config//$'\r'/}" # strip CR if pasted from Windows
+          config="${config//$'\r'/}"
 
           if [ -z "${config//[[:space:]]/}" ]; then
             echo "::error::DEPLOYMENTS_CONFIG is empty. Create a repository **Secret** (not Variable) named DEPLOYMENTS_CONFIG under Settings → Secrets and variables → Actions."
@@ -41,25 +57,24 @@ jobs:
 
           echo "DEPLOYMENTS_CONFIG length: ${#config} characters"
 
-          # Unwrap once if the whole value was saved as a JSON string.
           if jq -e 'type == "string"' <<<"$config" >/dev/null 2>&1; then
             config="$(jq -r '.' <<<"$config")"
           fi
 
-          matrix_json="$(jq -c '
+          normalized="$(jq -c '
             if type == "array" then .
             elif type == "object" and (.deployments | type == "array") then .deployments
             else empty
             end
           ' <<<"$config" 2>/dev/null || true)"
 
-          if [ -z "$matrix_json" ] || [ "$matrix_json" = "null" ]; then
+          if [ -z "$normalized" ] || [ "$normalized" = "null" ]; then
             jq_err="$(jq -c . <<<"$config" 2>&1 || true)"
             echo "::error::DEPLOYMENTS_CONFIG must be a non-empty JSON array. jq: ${jq_err:-invalid JSON}"
             exit 1
           fi
 
-          count="$(jq 'length' <<<"$matrix_json")"
+          count="$(jq 'length' <<<"$normalized")"
           if [ "$count" -lt 1 ]; then
             echo "::error::DEPLOYMENTS_CONFIG array is empty — add at least one deployment object."
             exit 1
@@ -67,67 +82,24 @@ jobs:
 
           echo "DEPLOYMENTS_CONFIG deployments: $count"
 
-          # Single-line JSON avoids multiline job-output / fromJSON issues.
-          echo "matrix=${matrix_json}" >> "$GITHUB_OUTPUT"
-        env:
-          # Prefer Secret; allow Variable only as a fallback (Variables are not masked).
-          DEPLOYMENTS_CONFIG: ${{ secrets.DEPLOYMENTS_CONFIG || vars.DEPLOYMENTS_CONFIG }}
+          while IFS= read -r deployment; do
+            name="$(jq -r '.name' <<<"$deployment")"
+            token="$(jq -r '.vercel_token // ""' <<<"$deployment")"
+            org="$(jq -r '.vercel_org_id // ""' <<<"$deployment")"
+            project_id="$(jq -r '.vercel_project_id' <<<"$deployment")"
 
-  deploy:
-    needs: setup
-    name: Deploy / ${{ matrix.deployment.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        deployment: ${{ fromJSON(needs.setup.outputs.matrix) }}
+            echo "::group::Deploy ${name}"
+            [ -n "$token" ] && echo "::add-mask::${token}"
+            [ -n "$org" ]   && echo "::add-mask::${org}"
 
-    env:
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+            export VERCEL_TOKEN="${token:-$VERCEL_TOKEN_FB}"
+            export VERCEL_ORG_ID="${org:-$VERCEL_ORG_ID_FB}"
+            export VERCEL_PROJECT_ID="$project_id"
 
-    steps:
-      - uses: actions/checkout@v3
-
-      # Must be first: registers per-deployment credentials as masked so they
-      # never appear in plain text in any subsequent step log or error output.
-      - name: Mask deployment secrets
-        env:
-          _TOKEN: ${{ matrix.deployment.vercel_token }}
-          _ORG: ${{ matrix.deployment.vercel_org_id }}
-        run: |
-          [ -n "$_TOKEN" ] && echo "::add-mask::$_TOKEN"
-          [ -n "$_ORG"   ] && echo "::add-mask::$_ORG"
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-
-      - name: Resolve Vercel credentials
-        env:
-          _TOKEN: ${{ matrix.deployment.vercel_token }}
-          _ORG: ${{ matrix.deployment.vercel_org_id }}
-          _PROJECT_ID: ${{ matrix.deployment.vercel_project_id }}
-          _FB_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          _FB_ORG: ${{ secrets.VERCEL_ORG_ID }}
-        run: |
-          echo "VERCEL_TOKEN=${_TOKEN:-$_FB_TOKEN}"     >> "$GITHUB_ENV"
-          echo "VERCEL_ORG_ID=${_ORG:-$_FB_ORG}"       >> "$GITHUB_ENV"
-          echo "VERCEL_PROJECT_ID=$_PROJECT_ID"         >> "$GITHUB_ENV"
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
-
-      - name: Install dependencies
-        run: |
-          export NODE_OPTIONS="--max-old-space-size=4096"
-          npm install
-
-      - name: Generate Version Meta
-        run: npm run generate-meta
-
-      - name: Build Project Artifacts
-        run: |
-          export NODE_OPTIONS="--max-old-space-size=4096"
-          vercel build --prod --token=${{ env.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts
-        run: vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
+            vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+            npm run generate-meta
+            export NODE_OPTIONS="--max-old-space-size=4096"
+            vercel build --prod --token="$VERCEL_TOKEN"
+            vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+            echo "::endgroup::"
+          done < <(jq -c '.[]' <<<"$normalized")
