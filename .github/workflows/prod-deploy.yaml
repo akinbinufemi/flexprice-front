@@ -3,15 +3,11 @@
 # The deployment list lives in one GitHub secret: DEPLOYMENTS_CONFIG
 # Add / remove tenants by editing that secret — no code change needed.
 #
-# DEPLOYMENTS_CONFIG format (JSON array):
-#   [
-#     {
-#       "name": "flexprice-in",
-#       "vercel_project_id": "prj_xxxx",
-#       "vercel_token": "",        <- empty = fall back to shared VERCEL_TOKEN
-#       "vercel_org_id": ""        <- empty = fall back to shared VERCEL_ORG_ID
-#     },
-#   ]
+# DEPLOYMENTS_CONFIG format — a JSON array (minified one line is most reliable):
+#   [{"name":"flexprice-in","vercel_project_id":"prj_xxxx","vercel_token":"","vercel_org_id":""}]
+#
+# Store as a repository **Secret** named DEPLOYMENTS_CONFIG (not a Variable).
+# Pretty-printed JSON with newlines also works; the setup job normalizes it.
 #
 # Required GitHub secrets:
 #   DEPLOYMENTS_CONFIG, VERCEL_TOKEN, VERCEL_ORG_ID, SENTRY_AUTH_TOKEN
@@ -32,36 +28,59 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - id: set
-        # Pretty-printed JSON contains newlines — must use multiline GITHUB_OUTPUT
-        # syntax or only the first line is captured and the rest breaks parsing.
         run: |
-          if [ -z "${DEPLOYMENTS_CONFIG// }" ]; then
-            echo "::error::DEPLOYMENTS_CONFIG secret is empty or not set. Add it under Settings → Secrets and variables → Actions."
+          set -euo pipefail
+
+          config="${DEPLOYMENTS_CONFIG:-}"
+          config="${config//$'\r'/}" # strip CR if pasted from Windows
+
+          if [ -z "${config//[[:space:]]/}" ]; then
+            echo "::error::DEPLOYMENTS_CONFIG is empty. Create a repository **Secret** (not Variable) named DEPLOYMENTS_CONFIG under Settings → Secrets and variables → Actions."
             exit 1
           fi
-          if ! echo "$DEPLOYMENTS_CONFIG" | jq -e 'type == "array" and length > 0' > /dev/null 2>&1; then
-            echo "::error::DEPLOYMENTS_CONFIG must be a non-empty JSON array (see workflow header comment)."
+
+          echo "DEPLOYMENTS_CONFIG length: ${#config} characters"
+
+          # Unwrap once if the whole value was saved as a JSON string.
+          if jq -e 'type == "string"' <<<"$config" >/dev/null 2>&1; then
+            config="$(jq -r '.' <<<"$config")"
+          fi
+
+          matrix_json="$(jq -c '
+            if type == "array" then .
+            elif type == "object" and (.deployments | type == "array") then .deployments
+            else empty
+            end
+          ' <<<"$config" 2>/dev/null || true)"
+
+          if [ -z "$matrix_json" ] || [ "$matrix_json" = "null" ]; then
+            jq_err="$(jq -c . <<<"$config" 2>&1 || true)"
+            echo "::error::DEPLOYMENTS_CONFIG must be a non-empty JSON array. jq: ${jq_err:-invalid JSON}"
             exit 1
           fi
-          delimiter='DEPLOYMENTS_MATRIX_JSON_EOF'
-          {
-            echo "matrix<<${delimiter}"
-            echo "$DEPLOYMENTS_CONFIG"
-            echo "${delimiter}"
-          } >> "$GITHUB_OUTPUT"
+
+          count="$(jq 'length' <<<"$matrix_json")"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::DEPLOYMENTS_CONFIG array is empty — add at least one deployment object."
+            exit 1
+          fi
+
+          echo "DEPLOYMENTS_CONFIG deployments: $count"
+
+          # Single-line JSON avoids multiline job-output / fromJSON issues.
+          echo "matrix=${matrix_json}" >> "$GITHUB_OUTPUT"
         env:
-          DEPLOYMENTS_CONFIG: ${{ secrets.DEPLOYMENTS_CONFIG }}
+          # Prefer Secret; allow Variable only as a fallback (Variables are not masked).
+          DEPLOYMENTS_CONFIG: ${{ secrets.DEPLOYMENTS_CONFIG || vars.DEPLOYMENTS_CONFIG }}
 
   deploy:
     needs: setup
-    if: ${{ needs.setup.result == 'success' && needs.setup.outputs.matrix != '' && needs.setup.outputs.matrix != '[]' }}
     name: Deploy / ${{ matrix.deployment.name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # Fallback avoids "fromJSON: empty input" when setup fails or output is unset.
-        deployment: ${{ fromJSON(needs.setup.outputs.matrix != '' && needs.setup.outputs.matrix || '[]') }}
+        deployment: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     env:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
