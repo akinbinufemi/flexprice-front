@@ -20,7 +20,7 @@ name: White-Label Production Deployment
 on:
   push:
     branches:
-      - develop
+      - private
 
 jobs:
   deploy:
