@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card, Loader, Select, ShortPagination } from '@/components/atoms';
@@ -9,6 +10,7 @@ import usePagination from '@/hooks/usePagination';
 import EmptyState from '../EmptyState';
 
 const WalletTransactionsWidget = () => {
+	const { t } = useTranslation('customer-portal');
 	const { limit, offset } = usePagination();
 	const [selectedWalletId, setSelectedWalletId] = useState<string>('');
 
@@ -41,12 +43,12 @@ const WalletTransactionsWidget = () => {
 	});
 
 	useEffect(() => {
-		if (walletsError) toast.error('Failed to load wallets');
-	}, [walletsError]);
+		if (walletsError) toast.error(t('errors.loadWallets'));
+	}, [walletsError, t]);
 
 	useEffect(() => {
-		if (transactionsError) toast.error('Failed to load transactions');
-	}, [transactionsError]);
+		if (transactionsError) toast.error(t('errors.loadTransactions'));
+	}, [transactionsError, t]);
 
 	if (walletsLoading) {
 		return (
@@ -61,12 +63,15 @@ const WalletTransactionsWidget = () => {
 			<Card
 				className='rounded-xl p-6'
 				style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
-				<EmptyState title='No wallet' description='No wallet has been set up for this account' />
+				<EmptyState title={t('wallet.emptyTitle')} description={t('wallet.emptyDescription')} />
 			</Card>
 		);
 	}
 
-	const walletOptions = wallets.map((w) => ({ value: w.id, label: w.name || `Wallet ${w.id.slice(0, 8)}` }));
+	const walletOptions = wallets.map((w) => ({
+		value: w.id,
+		label: w.name || t('wallet.fallbackName', { id: w.id.slice(0, 8) }),
+	}));
 
 	return (
 		<div className='space-y-6'>
@@ -79,13 +84,12 @@ const WalletTransactionsWidget = () => {
 				/>
 			)}
 
-			{/* Transactions */}
 			<Card
 				className='rounded-xl overflow-hidden'
 				style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
 				<div className='p-6' style={{ borderBottom: '1px solid var(--portal-border, #E9E9E9)' }}>
 					<h3 className='text-base font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-						Transaction History
+						{t('wallet.transactionHistory')}
 					</h3>
 				</div>
 				<div className='p-6'>
@@ -101,7 +105,7 @@ const WalletTransactionsWidget = () => {
 							<ShortPagination unit='transactions' totalItems={transactionsData.pagination?.total || 0} />
 						</>
 					) : (
-						<EmptyState title='No transactions' description='Your transaction history will appear here' />
+						<EmptyState title={t('wallet.noTransactionsTitle')} description={t('wallet.noTransactionsDescription')} />
 					)}
 				</div>
 			</Card>

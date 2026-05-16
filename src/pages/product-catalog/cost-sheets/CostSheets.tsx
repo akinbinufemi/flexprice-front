@@ -1,10 +1,10 @@
 import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
 import { ApiDocsContent, CostSheetDrawer } from '@/components/molecules';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import CostSheet from '@/models/CostSheet';
-import GUIDES from '@/constants/guides';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState, useMemo } from 'react';
 import CostSheetApi from '@/api/CostSheetApi';
 import {
@@ -20,61 +20,8 @@ import {
 import { ENTITY_STATUS } from '@/models';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'lookup_key',
-		label: 'Lookup Key',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-];
+import { useTranslation } from 'react-i18next';
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -93,18 +40,83 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
 const CostSheetsPage = () => {
+	const { t } = useTranslation('catalog');
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const [activeCostSheet, setActiveCostSheet] = useState<CostSheet | null>(null);
 	const [costSheetDrawerOpen, setCostSheetDrawerOpen] = useState(false);
 	const navigate = useNavigate();
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('costSheets.listPage.sortLabels.name'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'created_at',
+				label: t('costSheets.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('costSheets.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('costSheets.listPage.filterLabels.name'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'lookup_key',
+				label: t('costSheets.listPage.filterLabels.lookupKey'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'created_at',
+				label: t('costSheets.listPage.filterLabels.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'status',
+				label: t('costSheets.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('costSheets.listPage.filterStatus.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('costSheets.listPage.filterStatus.inactive') },
+				],
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('costSheets.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
 
 	const handleOnAdd = () => {
 		setActiveCostSheet(null);
@@ -120,21 +132,22 @@ const CostSheetsPage = () => {
 		() => [
 			{
 				fieldName: 'name',
-				title: 'Cost Sheet Name',
+				title: t('costSheets.table.costSheetName'),
 			},
 			{
 				fieldName: 'lookup_key',
-				title: 'Lookup Key',
+				title: t('costSheets.table.lookupKey'),
 			},
 			{
-				title: 'Status',
+				title: t('costSheets.table.status'),
 				render: (row) => {
-					const label = formatChips(row?.status);
-					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+					const isActive = row?.status === ENTITY_STATUS.PUBLISHED;
+					const label = isActive ? t('costSheets.listPage.filterStatus.active') : t('costSheets.listPage.filterStatus.inactive');
+					return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
-				title: 'Updated At',
+				title: t('costSheets.table.updatedAt'),
 				render: (row) => {
 					return formatDate(row?.updated_at);
 				},
@@ -162,18 +175,18 @@ const CostSheetsPage = () => {
 				},
 			},
 		],
-		[],
+		[t],
 	);
 
 	return (
-		<Page heading='Cost Sheets' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('costSheets.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<CostSheetDrawer
 				data={activeCostSheet}
 				open={costSheetDrawerOpen}
 				onOpenChange={setCostSheetDrawerOpen}
 				refetchQueryKeys={['fetchCostSheets']}
 			/>
-			<ApiDocsContent tags={[...API_DOCS_TAGS.Costs]} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
 				<QueryableDataArea<CostSheet>
 					queryConfig={{
@@ -203,15 +216,15 @@ const CostSheetsPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Cost Sheets',
+						unit: t('costSheets.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						heading: 'Cost Sheets',
-						description: 'Create your first cost sheet to define pricing structures and charges.',
-						buttonLabel: 'Create Cost Sheet',
+						heading: t('costSheets.listPage.emptyState.heading'),
+						description: t('costSheets.listPage.emptyState.description'),
+						buttonLabel: t('costSheets.listPage.emptyState.createButton'),
 						buttonAction: handleOnAdd,
-						tags: [...API_DOCS_TAGS.Costs],
-						tutorials: GUIDES.features.tutorials,
+						tags: API_DOCS_TAGS.Costs,
+						tutorials: guides.features.tutorials,
 					}}
 				/>
 			</div>

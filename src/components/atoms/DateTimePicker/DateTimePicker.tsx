@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -28,6 +29,8 @@ interface Props {
 const pad = (n: number) => String(n).padStart(2, '0');
 
 export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, placeholder, title }) => {
+	const { t } = useTranslation('common');
+	const defaultPlaceholder = t('dateTime.placeholderFormat');
 	const [isOpen, setIsOpen] = React.useState(false);
 	const [timezone, setTimezone] = React.useState<CalendarTimezone>('local');
 	const tz = timezone as DateTimezone;
@@ -43,9 +46,9 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 			setMinuteInput('');
 			return;
 		}
-		const t = getTimeInZone(date, tz);
-		setHourInput(pad(t.hours));
-		setMinuteInput(pad(t.minutes));
+		const zt = getTimeInZone(date, tz);
+		setHourInput(pad(zt.hours));
+		setMinuteInput(pad(zt.minutes));
 	}, [date, tz]);
 
 	const applyTime = React.useCallback(
@@ -93,7 +96,7 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 	);
 
 	const displayDate = date ? toCalendarDisplayDate(date, tz) : undefined;
-	const displayLabel = date ? formatDateTimeInZone(date, tz) : (placeholder ?? 'Pick a date & time');
+	const displayLabel = date ? formatDateTimeInZone(date, tz) : (placeholder ?? defaultPlaceholder);
 
 	return (
 		<div className='space-y-1'>
@@ -104,9 +107,11 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 						type='button'
 						disabled={disabled}
 						className={cn(
-							'flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm text-left',
+							'flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm text-start',
 							'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
 							'disabled:cursor-not-allowed disabled:opacity-50',
+							date && 'border-primary-foreground',
+							disabled && 'bg-gray-100',
 							!date && 'text-muted-foreground',
 						)}>
 						<CalendarIcon className='h-4 w-4 shrink-0 text-muted-foreground' />
@@ -117,7 +122,7 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 					<Calendar mode='single' selected={displayDate} onSelect={handleDateSelect} initialFocus />
 					{/* Time + timezone row — no nested browser picker */}
 					<div className='border-t border-border px-3 py-3 flex items-center gap-2'>
-						<span className='text-xs text-muted-foreground font-medium w-10'>Time</span>
+						<span className='text-xs text-muted-foreground font-medium w-10'>{t('dateTime.timeLabel')}</span>
 						<div className='flex items-center gap-1 flex-1'>
 							<input
 								type='text'
@@ -127,7 +132,7 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 								onChange={(e) => setHourInput(e.target.value.replace(/\D/g, ''))}
 								onBlur={handleHourBlur}
 								onFocus={(e) => e.target.select()}
-								placeholder='HH'
+								placeholder={t('dateTime.hourPlaceholder')}
 								className={cn(
 									'w-10 h-8 rounded-md border border-input bg-transparent text-center text-sm',
 									'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
@@ -142,7 +147,7 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 								onChange={(e) => setMinuteInput(e.target.value.replace(/\D/g, ''))}
 								onBlur={handleMinuteBlur}
 								onFocus={(e) => e.target.select()}
-								placeholder='MM'
+								placeholder={t('dateTime.minutePlaceholder')}
 								className={cn(
 									'w-10 h-8 rounded-md border border-input bg-transparent text-center text-sm',
 									'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
@@ -154,8 +159,12 @@ export const DateTimePicker: React.FC<Props> = ({ date, setDate, disabled, place
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent align='end'>
-								<SelectItem value='local' className='text-xs'>Local</SelectItem>
-								<SelectItem value='utc' className='text-xs'>UTC</SelectItem>
+								<SelectItem value='local' className='text-xs'>
+									{t('dateTime.timezoneLocal')}
+								</SelectItem>
+								<SelectItem value='utc' className='text-xs'>
+									{t('dateTime.timezoneUtc')}
+								</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>

@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { useRouteError } from 'react-router';
 import { AlertCircle, ArrowLeft, Bug, Code, Github, Home, Linkedin, MessageSquare, RefreshCw } from 'lucide-react';
@@ -63,6 +64,7 @@ interface ErrorFallbackProps {
 
 // Error Fallback UI Component
 export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFallbackProps) => {
+	const { t } = useTranslation('common');
 	const [showDetails, setShowDetails] = useState(false);
 	const [animateIcon, setAnimateIcon] = useState(true);
 	const isDev = !config.app.isProd;
@@ -85,7 +87,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 			aria-labelledby='error-title'>
 			<div className='max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
 				{/* Left Side - Error Content */}
-				<div className='flex flex-col items-center lg:items-start text-center lg:text-left'>
+				<div className='flex flex-col items-center lg:items-start text-center lg:text-start'>
 					<div className='mb-8 relative'>
 						<div className='absolute inset-0 bg-blue-DEFAULT/10 rounded-full blur-2xl -z-10 scale-150'></div>
 						<div className={`absolute -top-4 -right-4 ${animateIcon ? 'animate-bounce' : 'animate-pulse'}`}>
@@ -97,25 +99,25 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 					</div>
 
 					<h1 id='error-title' className='text-4xl lg:text-5xl font-qanelas font-medium mb-6 tracking-tight' tabIndex={0}>
-						Something went wrong
+						{t('errorPage.title')}
 					</h1>
 
 					<p className='text-muted-foreground mb-8 text-lg max-w-lg' tabIndex={0}>
-						We're working on fixing this issue. Please try refreshing the page or return to the homepage.
+						{t('errorPage.description')}
 					</p>
 
 					{/* Error ID with copy button */}
 					{errorId && (
 						<div className='mb-8 w-full max-w-md'>
 							<div className='flex items-center gap-2 bg-muted/20 border border-muted/30 rounded-lg overflow-hidden'>
-								<div className='py-3 px-4 text-sm text-muted-foreground bg-muted/10'>Error ID</div>
+								<div className='py-3 px-4 text-sm text-muted-foreground bg-muted/10'>{t('errorPage.errorIdLabel')}</div>
 								<code className='text-sm font-mono flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2'>
 									{errorId}
 								</code>
 								<button
 									onClick={() => {
 										navigator.clipboard.writeText(errorId);
-										toast.success('Error ID copied!', {
+										toast.success(t('errorPage.errorIdCopied'), {
 											duration: 2000,
 											position: 'bottom-center',
 											style: {
@@ -125,8 +127,8 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 											},
 										});
 									}}
-									aria-label='Copy error ID to clipboard'
-									title='Copy error ID'
+									aria-label={t('errorPage.copyErrorIdAria')}
+									title={t('errorPage.copyErrorIdTitle')}
 									className='p-3 hover:bg-muted/30 transition-colors text-muted-foreground'>
 									<svg
 										xmlns='http://www.w3.org/2000/svg'
@@ -150,14 +152,14 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 					<div className='flex flex-col sm:flex-row gap-4 w-full max-w-md'>
 						<Button onClick={handleRefresh} className='flex-1 w-full' size='lg'>
 							<RefreshCw size={20} className='animate-spin-once' />
-							Try Again
+							{t('errorPage.tryAgain')}
 						</Button>
 
 						<div className='flex gap-3 flex-1'>
 							<Link to={RouteNames.home} className='flex-1'>
 								<Button variant='outline' className='w-full' size='lg'>
 									<Home size={18} />
-									Home
+									{t('errorPage.home')}
 								</Button>
 							</Link>
 
@@ -166,9 +168,9 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 								onClick={() => window.history.back()}
 								className='flex-1'
 								size='lg'
-								aria-label='Go back to previous page'>
+								aria-label={t('errorPage.goBackAria')}>
 								<ArrowLeft size={18} />
-								Back
+								{t('errorPage.back')}
 							</Button>
 						</div>
 					</div>
@@ -176,14 +178,14 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 
 				{/* Right Side - Support & Details */}
 				<div className='bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-muted/10 h-fit'>
-					<h2 className='text-xl font-qanelas font-medium mb-6 text-center'>Get Help</h2>
+					<h2 className='text-xl font-qanelas font-medium mb-6 text-center'>{t('errorPage.getHelp')}</h2>
 
 					{/* Contact Support Section */}
 					<div className='grid grid-cols-2 gap-4 mb-8'>
 						<a
 							href={`mailto:support@flexprice.io?subject=Error Report: ${errorId}&body=Hello Support Team,%0A%0AI encountered an error with the following reference ID: ${errorId}%0A%0APage URL: ${encodeURIComponent(window.location.href)}%0A%0APlease help resolve this issue.%0A%0AThank you.`}
 							className='flex flex-col items-center gap-3 p-4 rounded-lg border border-muted/20 hover:border-blue-DEFAULT/30 hover:bg-blue-DEFAULT/5 transition-all group'
-							aria-label='Email support with error details'>
+							aria-label={t('errorPage.emailSupportAria')}>
 							<div className='p-3 rounded-full bg-blue-DEFAULT/10 group-hover:bg-blue-DEFAULT/20 transition-colors'>
 								<svg
 									xmlns='http://www.w3.org/2000/svg'
@@ -201,8 +203,8 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 								</svg>
 							</div>
 							<div className='text-center'>
-								<div className='font-medium text-sm'>Email Support</div>
-								<div className='text-xs text-muted-foreground'>Get direct help</div>
+								<div className='font-medium text-sm'>{t('errorPage.emailSupport')}</div>
+								<div className='text-xs text-muted-foreground'>{t('errorPage.emailSupportSubtitle')}</div>
 							</div>
 						</a>
 
@@ -211,13 +213,13 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 							target='_blank'
 							rel='noopener noreferrer'
 							className='flex flex-col items-center gap-3 p-4 rounded-lg border border-muted/20 hover:border-blue-DEFAULT/30 hover:bg-blue-DEFAULT/5 transition-all group'
-							aria-label='Join our Slack community'>
+							aria-label={t('errorPage.slackAria')}>
 							<div className='p-3 rounded-full bg-blue-DEFAULT/10 group-hover:bg-blue-DEFAULT/20 transition-colors'>
 								<MessageSquare size={24} className='text-blue-DEFAULT' />
 							</div>
 							<div className='text-center'>
-								<div className='font-medium text-sm'>Slack Community</div>
-								<div className='text-xs text-muted-foreground'>Join discussion</div>
+								<div className='font-medium text-sm'>{t('errorPage.slackCommunity')}</div>
+								<div className='text-xs text-muted-foreground'>{t('errorPage.slackSubtitle')}</div>
 							</div>
 						</a>
 
@@ -226,13 +228,13 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 							target='_blank'
 							rel='noopener noreferrer'
 							className='flex flex-col items-center gap-3 p-4 rounded-lg border border-muted/20 hover:border-blue-DEFAULT/30 hover:bg-blue-DEFAULT/5 transition-all group'
-							aria-label='Report issue on GitHub'>
+							aria-label={t('errorPage.githubAria')}>
 							<div className='p-3 rounded-full bg-blue-DEFAULT/10 group-hover:bg-blue-DEFAULT/20 transition-colors'>
 								<Github size={24} className='text-blue-DEFAULT' />
 							</div>
 							<div className='text-center'>
-								<div className='font-medium text-sm'>GitHub Issues</div>
-								<div className='text-xs text-muted-foreground'>Report bugs</div>
+								<div className='font-medium text-sm'>{t('errorPage.githubIssues')}</div>
+								<div className='text-xs text-muted-foreground'>{t('errorPage.githubSubtitle')}</div>
 							</div>
 						</a>
 
@@ -241,13 +243,13 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 							target='_blank'
 							rel='noopener noreferrer'
 							className='flex flex-col items-center gap-3 p-4 rounded-lg border border-muted/20 hover:border-blue-DEFAULT/30 hover:bg-blue-DEFAULT/5 transition-all group'
-							aria-label='Connect on LinkedIn'>
+							aria-label={t('errorPage.linkedinAria')}>
 							<div className='p-3 rounded-full bg-blue-DEFAULT/10 group-hover:bg-blue-DEFAULT/20 transition-colors'>
 								<Linkedin size={24} className='text-blue-DEFAULT' />
 							</div>
 							<div className='text-center'>
-								<div className='font-medium text-sm'>LinkedIn</div>
-								<div className='text-xs text-muted-foreground'>Connect with us</div>
+								<div className='font-medium text-sm'>{t('errorPage.linkedin')}</div>
+								<div className='text-xs text-muted-foreground'>{t('errorPage.linkedinSubtitle')}</div>
 							</div>
 						</a>
 					</div>
@@ -259,15 +261,15 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 								onClick={() => setShowDetails(!showDetails)}
 								className='flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-blue-DEFAULT transition-colors w-full py-3 border-t border-muted/10'>
 								<Code size={16} />
-								{showDetails ? 'Hide' : 'Show'} Developer Details
+								{showDetails ? t('errorPage.hideDevDetails') : t('errorPage.showDevDetails')}
 							</button>
 
 							{showDetails && (
-								<div className='mt-4 text-left overflow-auto max-h-80 space-y-4'>
+								<div className='mt-4 text-start overflow-auto max-h-80 space-y-4'>
 									<div>
 										<h3 className='text-sm font-medium mb-2 text-muted-foreground flex items-center gap-2'>
 											<span className='inline-block w-2 h-2 rounded-full bg-destructive'></span>
-											Error Message
+											{t('errorPage.errorMessage')}
 										</h3>
 										<p className='text-sm font-mono text-destructive p-3 bg-muted/10 rounded-md border border-muted/20'>{error?.message}</p>
 									</div>
@@ -276,7 +278,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 										<div>
 											<h3 className='text-sm font-medium mb-2 text-muted-foreground flex items-center gap-2'>
 												<span className='inline-block w-2 h-2 rounded-full bg-blue-DEFAULT'></span>
-												Stack Trace
+												{t('errorPage.stackTrace')}
 											</h3>
 											<pre className='text-sm font-mono whitespace-pre-wrap overflow-auto p-3 bg-muted/10 rounded-md border border-muted/20 text-muted-foreground'>
 												{error.stack}
@@ -288,7 +290,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 										<div>
 											<h3 className='text-sm font-medium mb-2 text-muted-foreground flex items-center gap-2'>
 												<span className='inline-block w-2 h-2 rounded-full bg-blue-DEFAULT'></span>
-												Component Stack
+												{t('errorPage.componentStack')}
 											</h3>
 											<pre className='text-sm font-mono whitespace-pre-wrap overflow-auto p-3 bg-muted/10 rounded-md border border-muted/20 text-muted-foreground'>
 												{errorInfo.componentStack}
@@ -301,7 +303,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 					)}
 
 					{/* Keyboard accessibility tip */}
-					<p className='text-xs text-muted-foreground text-center mt-6 opacity-70'>Press Tab to navigate, Enter to select</p>
+					<p className='text-xs text-muted-foreground text-center mt-6 opacity-70'>{t('errorPage.keyboardTip')}</p>
 				</div>
 			</div>
 		</div>

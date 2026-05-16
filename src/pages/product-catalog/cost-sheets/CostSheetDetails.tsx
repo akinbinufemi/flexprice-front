@@ -1,8 +1,7 @@
 import { Button, CardHeader, Chip, Loader, Page, ShortPagination, Spacer, NoDataCard } from '@/components/atoms';
-import { ApiDocsContent, ColumnData, FlexpriceTable, CostSheetDrawer } from '@/components/molecules';
-import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
+import { ApiDocsContent, ColumnData, FlexpriceTable, CostSheetDrawer, DetailsCard } from '@/components/molecules';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
-import { DetailsCard } from '@/components/molecules';
+import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import { RouteNames } from '@/core/routes/Routes';
 import { Price } from '@/models/Price';
 import { ENTITY_STATUS } from '@/models';
@@ -13,8 +12,9 @@ import { PRICE_ENTITY_TYPE } from '@/models/Price';
 import { getPriceTypeLabel } from '@/utils/common/helper_functions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { EyeOff, Plus, Pencil } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { Card } from '@/components/atoms';
 import formatChips from '@/utils/common/format_chips';
@@ -58,7 +58,7 @@ type Params = {
 	id: string;
 };
 
-const chargeColumns: ColumnData<Price>[] = [
+const getChargeColumns = (naLabel: string): ColumnData<Price>[] => [
 	{
 		title: 'Charge Type',
 		render: (row) => {
@@ -68,7 +68,7 @@ const chargeColumns: ColumnData<Price>[] = [
 	{
 		title: 'Feature',
 		render(rowData) {
-			return <span>{rowData.meter?.name ?? '--'}</span>;
+			return <span>{rowData.meter?.name ?? naLabel}</span>;
 		},
 	},
 	{
@@ -92,6 +92,7 @@ const chargeColumns: ColumnData<Price>[] = [
 ];
 
 const CostSheetDetails = () => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const navigate = useNavigate();
 	const { id } = useParams<Params>();
 	const [costSheetDrawerOpen, setCostSheetDrawerOpen] = useState(false);
@@ -116,8 +117,8 @@ const CostSheetDetails = () => {
 			toast.success('Cost Sheet archived successfully');
 			navigate(RouteNames.costSheets);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to archive cost sheet');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to archive cost sheet');
 		},
 	});
 
@@ -156,6 +157,8 @@ const CostSheetDetails = () => {
 			updateBreadcrumb(2, costSheetData.name);
 		}
 	}, [costSheetData, updateBreadcrumb]);
+
+	const chargeColumns = useMemo(() => getChargeColumns(t('common:labels.na')), [t]);
 
 	if (isLoading) {
 		return <Loader />;
@@ -213,14 +216,14 @@ const CostSheetDetails = () => {
 				onOpenChange={setCostSheetDrawerOpen}
 				refetchQueryKeys={['fetchCostSheet', 'costSheetCharges']}
 			/>
-			<ApiDocsContent tags={[...API_DOCS_TAGS.Costs]} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
-				<DetailsCard variant='stacked' title='Cost Sheet Details' data={costSheetDetails} />
+				<DetailsCard variant='stacked' title={t('catalog:costSheets.details.title')} data={costSheetDetails} />
 
 				{/* cost sheet charges table (prices from Price API by cost sheet id) */}
 				{pricesLoading ? (
 					<Card variant='notched'>
-						<CardHeader title='Charges' />
+						<CardHeader title={t('catalog:costSheets.details.charges')} />
 						<div className='p-8 flex justify-center'>
 							<Loader />
 						</div>
@@ -228,7 +231,7 @@ const CostSheetDetails = () => {
 				) : (pricesResponse?.pagination?.total ?? 0) > 0 ? (
 					<Card variant='notched'>
 						<CardHeader
-							title='Charges'
+							title={t('catalog:costSheets.details.charges')}
 							cta={
 								<Button prefixIcon={<Plus />} onClick={() => navigate(`${RouteNames.costSheetCharges.replace(':costSheetId', id!)}`)}>
 									Add
@@ -244,7 +247,7 @@ const CostSheetDetails = () => {
 					</Card>
 				) : (
 					<NoDataCard
-						title='Charges'
+						title={t('catalog:costSheets.details.charges')}
 						subtitle='No charges added to the cost sheet yet'
 						cta={
 							<Button prefixIcon={<Plus />} onClick={() => navigate(`${RouteNames.costSheetCharges.replace(':costSheetId', id!)}`)}>
@@ -256,7 +259,7 @@ const CostSheetDetails = () => {
 
 				{costSheetData.metadata && Object.keys(costSheetData.metadata).length > 0 && (
 					<Card variant='notched'>
-						<CardHeader title='Metadata' />
+						<CardHeader title={t('catalog:costSheets.details.metadata')} />
 						<div className='p-4'>
 							<pre className='text-sm bg-gray-50 p-3 rounded overflow-auto'>{JSON.stringify(costSheetData.metadata, null, 2)}</pre>
 						</div>

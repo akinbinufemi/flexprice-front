@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { CreatePriceUnitRequest, UpdatePriceUnitRequest, PriceUnitResponse, CreatePriceUnitResponse } from '@/types/dto';
 import { currencyOptions } from '@/constants/constants';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: PriceUnit | null;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 
 	const [formData, setFormData] = useState<CreatePriceUnitRequest & { id?: string }>({
@@ -33,7 +35,7 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 
 	const { mutate: updatePriceUnit, isPending } = useMutation<
 		PriceUnitResponse | CreatePriceUnitResponse,
-		ServerError,
+		Error,
 		CreatePriceUnitRequest | (UpdatePriceUnitRequest & { id: string })
 	>({
 		mutationFn: (vars) => {
@@ -44,18 +46,17 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 			return PriceUnitApi.CreatePriceUnit(vars as CreatePriceUnitRequest);
 		},
 		onSuccess: () => {
-			toast.success(isEdit ? 'Price unit updated successfully' : 'Price unit created successfully');
+			toast.success(isEdit ? t('catalog:priceUnits.toast.updated') : t('catalog:priceUnits.toast.created'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || `Failed to ${isEdit ? 'update' : 'create'} price unit. Please try again.`);
+		onError: (error: Error) => {
+			toast.error(error.message || (isEdit ? t('catalog:priceUnits.toast.failedUpdate') : t('catalog:priceUnits.toast.failedCreate')));
 		},
 	});
 
 	useEffect(() => {
 		if (data) {
-			// Map PriceUnit to CreatePriceUnitRequest structure for form
 			setFormData({
 				id: data.id,
 				name: data.name || '',
@@ -83,52 +84,51 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 		const newErrors: Partial<Record<keyof CreatePriceUnitRequest, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('catalog:priceUnits.validation.nameRequired');
 		}
 
 		if (!formData.code?.trim()) {
-			newErrors.code = 'Code is required';
+			newErrors.code = t('catalog:priceUnits.validation.codeRequired');
 		}
 
 		if (formData.code?.trim().length !== 3) {
-			newErrors.code = 'Code must be exactly 3 characters';
+			newErrors.code = t('catalog:priceUnits.validation.codeLength');
 		}
 
 		if (!formData.symbol?.trim()) {
-			newErrors.symbol = 'Symbol is required';
+			newErrors.symbol = t('catalog:priceUnits.validation.symbolRequired');
 		}
 
 		if (!formData.base_currency?.trim()) {
-			newErrors.base_currency = 'Base currency is required';
+			newErrors.base_currency = t('catalog:priceUnits.validation.baseCurrencyRequired');
 		} else if (formData.base_currency.length !== 3) {
-			newErrors.base_currency = 'Base currency must be exactly 3 characters';
+			newErrors.base_currency = t('catalog:priceUnits.validation.baseCurrencyLength');
 		}
 
 		if (!formData.conversion_rate?.trim()) {
-			newErrors.conversion_rate = 'Conversion rate is required';
+			newErrors.conversion_rate = t('catalog:priceUnits.validation.conversionRateRequired');
 		} else {
 			const rate = parseFloat(formData.conversion_rate);
 			if (isNaN(rate)) {
-				newErrors.conversion_rate = 'Conversion rate must be a valid number';
+				newErrors.conversion_rate = t('catalog:priceUnits.validation.conversionRateNumber');
 			} else if (rate <= 0) {
-				newErrors.conversion_rate = 'Conversion rate must be greater than 0';
+				newErrors.conversion_rate = t('catalog:priceUnits.validation.conversionRatePositive');
 			}
 		}
 
-		// Only validate metadata in edit mode
 		if (isEdit && metadataString.trim()) {
 			try {
 				const parsed = JSON.parse(metadataString);
 				if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-					newErrors.metadata = 'Metadata must be a JSON object';
+					newErrors.metadata = t('catalog:shared.metadataMustBeObject');
 				} else {
 					const allStrings = Object.values(parsed).every((val) => typeof val === 'string');
 					if (!allStrings) {
-						newErrors.metadata = 'All metadata values must be strings';
+						newErrors.metadata = t('catalog:shared.metadataAllValuesStrings');
 					}
 				}
 			} catch {
-				newErrors.metadata = 'Invalid Metadata format';
+				newErrors.metadata = t('catalog:shared.metadataInvalidFormat');
 			}
 		}
 
@@ -158,7 +158,6 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 			};
 			updatePriceUnit(updateDto);
 		} else {
-			// Build CreatePriceUnitRequest DTO (metadata not included during creation)
 			const createDto: CreatePriceUnitRequest = {
 				name: formData.name.trim(),
 				code: formData.code.trim(),
@@ -181,13 +180,13 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Price Unit' : 'Create Price Unit'}
-			description={isEdit ? 'Enter price unit details to update the price unit.' : 'Enter price unit details to create a new price unit.'}
+			title={isEdit ? t('catalog:priceUnits.drawer.editTitle') : t('catalog:priceUnits.drawer.createTitle')}
+			description={isEdit ? t('catalog:priceUnits.drawer.descriptionEdit') : t('catalog:priceUnits.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Input
-				placeholder='Enter a name for the price unit'
-				description={'A descriptive name for this price unit (e.g., Bitcoin, Tokens, Credits).'}
-				label='Name'
+				placeholder={t('catalog:priceUnits.drawer.namePlaceholder')}
+				description={t('catalog:priceUnits.drawer.nameHelp')}
+				label={t('catalog:priceUnits.drawer.name')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -197,53 +196,51 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Code'
+				label={t('catalog:priceUnits.drawer.code')}
 				error={errors.code}
 				onChange={(e) => {
 					setFormData({ ...formData, code: e });
 				}}
 				value={formData.code}
-				placeholder='Enter a unique code for the price unit'
+				placeholder={t('catalog:priceUnits.drawer.codePlaceholder')}
 				disabled={isEdit}
 			/>
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Symbol'
+				label={t('catalog:priceUnits.drawer.symbol')}
 				error={errors.symbol}
 				onChange={(e) => {
 					setFormData({ ...formData, symbol: e });
 				}}
 				value={formData.symbol}
-				placeholder='Enter a symbol (e.g., ₿, €, tokens)'
-				description={'The display symbol for this price unit (e.g., ₿ for Bitcoin, € for Euro, "tokens" for tokens).'}
+				placeholder={t('catalog:priceUnits.drawer.symbolPlaceholder')}
+				description={t('catalog:priceUnits.drawer.symbolHelp')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Select
-				label='Base Currency'
+				label={t('catalog:priceUnits.drawer.baseCurrency')}
 				error={errors.base_currency}
 				onChange={(value) => {
 					setFormData({ ...formData, base_currency: value });
 				}}
 				value={formData.base_currency}
 				options={currencyOptions}
-				placeholder='Select base currency'
-				description={'The base currency code (3 letters, e.g., USD, EUR, GBP).'}
+				placeholder={t('catalog:priceUnits.drawer.selectBaseCurrency')}
+				description={t('catalog:priceUnits.drawer.baseCurrencyHelp')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Conversion Rate'
+				label={t('catalog:priceUnits.drawer.conversionRate')}
 				error={errors.conversion_rate}
 				onChange={(e) => {
 					setFormData({ ...formData, conversion_rate: e });
 				}}
 				value={formData.conversion_rate}
-				placeholder='0.01'
-				description={
-					'The exchange rate from this price unit to the base currency. Must be greater than 0. Example: 0.01 means 100 units = 1.00 USD.'
-				}
+				placeholder={t('catalog:priceUnits.drawer.conversionPlaceholder')}
+				description={t('catalog:priceUnits.drawer.conversionHelp')}
 				type='number'
 				step='any'
 			/>
@@ -261,16 +258,16 @@ const PriceUnitDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 						}}
 						error={errors.metadata}
 						className='min-h-[100px]'
-						placeholder='{"key": "value"}'
-						label='Metadata (Optional)'
-						description='Additional metadata as JSON. All values must be strings.'
+						placeholder={t('catalog:shared.metadataPlaceholder')}
+						label={t('catalog:shared.metadataOptional')}
+						description={t('catalog:shared.metadataJsonStringsOnly')}
 					/>
 				</>
 			)}
 
 			<Spacer height={'20px'} />
 			<Button isLoading={isPending} disabled={isPending || !isFormValid} onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create'}
+				{isEdit ? t('common:actions.save') : t('common:actions.create')}
 			</Button>
 		</Sheet>
 	);

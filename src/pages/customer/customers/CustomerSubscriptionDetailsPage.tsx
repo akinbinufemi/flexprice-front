@@ -11,6 +11,8 @@ import { CustomerApi, SubscriptionApi, TaxApi } from '@/api';
 import { formatDateShort, getCurrencySymbol } from '@/utils/common/helper_functions';
 import { useQuery } from '@tanstack/react-query';
 import { FC, useEffect, useMemo, useState } from 'react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { useParams, Link } from 'react-router';
 import { INVOICE_TYPE } from '@/models/Invoice';
@@ -25,6 +27,8 @@ import formatDate from '@/utils/common/format_date';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { ExternalLink } from 'lucide-react';
 import { formatSubscriptionTypeDisplayLabel } from '@/utils/subscription/formatSubscriptionTypeDisplay';
+
+const DATE_NO_YEAR_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 
 type SubscriptionTypeChipProps =
 	| { variant: 'default' | 'success' | 'warning' | 'failed' | 'info' }
@@ -49,33 +53,35 @@ function getSubscriptionTypeChipProps(raw: string | null | undefined): Subscript
 	}
 }
 
-function getCommitmentPeriodLabel(subscription: SubscriptionType | undefined): string {
+function getCommitmentPeriodLabel(subscription: SubscriptionType | undefined, t: TFunction): string {
 	const period = subscription?.commitment_duration;
 	const count = subscription?.billing_period_count ?? 1;
+	const dash = () => t('usageTable.featureTypes.dash');
 
-	if (!period) return '--';
+	if (!period) return dash();
 
 	switch (period) {
 		case BILLING_PERIOD.ANNUAL:
-			return 'Annual';
+			return t('subscriptionDetail.commitment.annual');
 		case BILLING_PERIOD.MONTHLY:
-			if (count === 12) return 'Annual';
-			if (count === 1) return 'Monthly';
-			return `${count} months`;
+			if (count === 12) return t('subscriptionDetail.commitment.annual');
+			if (count === 1) return t('subscriptionDetail.commitment.monthly');
+			return t('subscriptionDetail.commitment.nMonths', { count });
 		case BILLING_PERIOD.QUARTERLY:
-			return 'Quarterly';
+			return t('subscriptionDetail.commitment.quarterly');
 		case BILLING_PERIOD.HALF_YEARLY:
-			return 'Half-Yearly';
+			return t('subscriptionDetail.commitment.halfYearly');
 		case BILLING_PERIOD.WEEKLY:
-			return 'Weekly';
+			return t('subscriptionDetail.commitment.weekly');
 		case BILLING_PERIOD.DAILY:
-			return 'Daily';
+			return t('subscriptionDetail.commitment.daily');
 		default:
-			return '--';
+			return dash();
 	}
 }
 
 const CustomerSubscriptionDetailsPage: FC = () => {
+	const { t } = useTranslation(['customers', 'common']);
 	const { subscription_id, id: customerId } = useParams();
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 	const { data: subscriptionDetails, isLoading: isSubscriptionDetailsLoading } = useQuery<SubscriptionType>({
@@ -190,13 +196,15 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 	const inheritedSubscriptionsColumns = useMemo<ColumnData<SubscriptionResponse>[]>(
 		() => [
 			{
-				title: 'Customer',
+				title: t('subscriptionDetail.columns.customer'),
 				render: (row) => (
-					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>{row.customer?.name ?? '—'}</RedirectCell>
+					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>
+						{row.customer?.name ?? t('usageTable.featureTypes.dash')}
+					</RedirectCell>
 				),
 			},
 			{
-				title: 'Type',
+				title: t('subscriptionDetail.columns.type'),
 				render: (row) => {
 					const chip = getSubscriptionTypeChipProps(row.subscription_type);
 					return (
@@ -211,23 +219,23 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				},
 			},
 			{
-				title: 'Plan',
+				title: t('subscriptionDetail.columns.plan'),
 				render: (row) => (
 					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}/subscription/${row.id}`}>
-						{row.plan?.name ?? '—'}
+						{row.plan?.name ?? t('usageTable.featureTypes.dash')}
 					</RedirectCell>
 				),
 			},
 			{
-				title: 'Start date',
+				title: t('subscriptionDetail.columns.startDate'),
 				render: (row) => <span className='text-muted-foreground'>{formatDate(row.start_date)}</span>,
 			},
 			{
-				title: 'Renewal date',
+				title: t('subscriptionDetail.columns.renewalDate'),
 				render: (row) => <span className='text-muted-foreground'>{formatDate(row.current_period_end)}</span>,
 			},
 		],
-		[],
+		[t],
 	);
 
 	useEffect(() => {
@@ -235,12 +243,12 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 			updateBreadcrumb(4, subscriptionDetails.plan.name);
 		}
 
-		updateBreadcrumb(3, 'Subscription', RouteNames.customers + '/' + customerId);
+		updateBreadcrumb(3, t('subscriptionDetail.breadcrumbSubscription'), RouteNames.customers + '/' + customerId);
 
 		if (customer?.external_id) {
 			updateBreadcrumb(2, customer.external_id);
 		}
-	}, [subscriptionDetails, updateBreadcrumb, customer, customerId]);
+	}, [subscriptionDetails, updateBreadcrumb, customer, customerId, t]);
 
 	// Load subscription first; show page as soon as subscription is ready (preview loads separately below)
 	if (isSubscriptionDetailsLoading) {
@@ -254,7 +262,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 	}
 
 	if (isError) {
-		toast.error('Something went wrong');
+		toast.error(t('subscriptionDetail.toast.genericError'));
 	}
 
 	// Determine if subscription is scheduled to cancel soon (within 15 days)
@@ -300,32 +308,40 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 	// Local formatter to show date without year (e.g., "Nov 12")
 	const formatDateNoYear = (dateString: string | Date) => {
 		const d = new Date(dateString);
-		if (isNaN(d.getTime())) return '--';
-		return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+		if (isNaN(d.getTime())) return t('usageTable.featureTypes.dash');
+		return d.toLocaleDateString('en-US', DATE_NO_YEAR_FORMAT);
 	};
 
 	return (
 		<div>
 			<Card className='card'>
 				<div className='flex justify-between items-center'>
-					<FormHeader title='Subscription details' variant='sub-header' titleClassName='font-semibold' />
+					<FormHeader title={t('subscriptionDetail.sectionTitle')} variant='sub-header' titleClassName='font-semibold' />
 					<SubscriptionActionButton subscription={subscriptionDetails!} />
 				</div>
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Subscription name</p>
-					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.plan.name ?? '--'}</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.subscriptionName')}</p>
+					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.plan.name ?? t('usageTable.featureTypes.dash')}</p>
 				</div>
 				<Spacer className='!my-4' />
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Status</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.status')}</p>
 					<div className='text-[#09090B] text-sm flex items-center gap-2'>
-						{getSubscriptionStatus(subscriptionDetails?.subscription_status ?? '')}
+						{getSubscriptionStatus(subscriptionDetails?.subscription_status ?? '', t)}
 						{showEndDateTag ? (
-							<Chip variant='default' label={`Cancels on ${formatDateNoYear(subscriptionDetails!.end_date)}`} />
+							<Chip
+								variant='default'
+								label={t('subscriptionDetail.cancelsOnDate', { date: formatDateNoYear(subscriptionDetails!.end_date) })}
+							/>
 						) : (
 							showCancelsByTag &&
 							cancellationEffectiveDate && (
-								<Chip variant='default' label={`Cancels by ${formatDateShort(cancellationEffectiveDate.toISOString())}`} />
+								<Chip
+									variant='default'
+									label={t('subscriptionDetail.cancelsByDate', {
+										date: formatDateShort(cancellationEffectiveDate.toISOString()),
+									})}
+								/>
 							)
 						)}
 					</div>
@@ -333,27 +349,27 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				<Spacer className='!my-4' />
 
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Billing cycle</p>
-					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.billing_cycle || '--'}</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.billingCycle')}</p>
+					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.billing_cycle || t('usageTable.featureTypes.dash')}</p>
 				</div>
 				<Spacer className='!my-4' />
 
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Commitment Period</p>
-					<p className='text-[#09090B] text-sm'>{getCommitmentPeriodLabel(subscriptionDetails)}</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.commitmentPeriod')}</p>
+					<p className='text-[#09090B] text-sm'>{getCommitmentPeriodLabel(subscriptionDetails, t)}</p>
 				</div>
 				<Spacer className='!my-4' />
 
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Payment terms</p>
-					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.payment_terms ?? '--'}</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.paymentTerms')}</p>
+					<p className='text-[#09090B] text-sm'>{subscriptionDetails?.payment_terms ?? t('usageTable.featureTypes.dash')}</p>
 				</div>
 				<Spacer className='!my-4' />
 
 				{subscriptionDetails?.invoicing_customer_id && (
 					<>
 						<div className='w-full flex justify-between items-center'>
-							<p className='text-[#71717A] text-sm'>Invoicing Customer</p>
+							<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.invoicingCustomer')}</p>
 							<Link
 								to={`${RouteNames.customers}/${subscriptionDetails.invoicing_customer_id}`}
 								className='inline-flex items-center text-sm gap-1.5 hover:underline transition-colors'>
@@ -368,7 +384,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				{subscriptionDetails?.parent_subscription_id && (
 					<>
 						<div className='w-full flex justify-between items-center'>
-							<p className='text-[#71717A] text-sm'>Parent customer</p>
+							<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.parentCustomer')}</p>
 							{isParentSubscriptionLoading || (parentCustomerId && isParentCustomerLoading) ? (
 								<Skeleton className='h-4 w-40' />
 							) : parentCustomerId ? (
@@ -379,7 +395,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 									<ExternalLink className='w-3.5 h-3.5' />
 								</Link>
 							) : (
-								<p className='text-[#09090B] text-sm'>--</p>
+								<p className='text-[#09090B] text-sm'>{t('usageTable.featureTypes.dash')}</p>
 							)}
 						</div>
 						<Spacer className='!my-4' />
@@ -388,17 +404,17 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 
 				{subscriptionDetails?.commitment_amount && (
 					<div className='w-full flex justify-between items-center'>
-						<p className='text-[#71717A] text-sm'>Commitment</p>
+						<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.commitment')}</p>
 						<p className='text-[#09090B] text-sm'>
 							{getCurrencySymbol(subscriptionDetails?.currency || '')} {subscriptionDetails?.commitment_amount || '0'}/{' '}
-							{getCommitmentPeriodLabel(subscriptionDetails)}
+							{getCommitmentPeriodLabel(subscriptionDetails, t)}
 						</p>
 					</div>
 				)}
 
 				{subscriptionDetails?.auto_invoice_threshold != null && (
 					<div className='w-full flex justify-between items-center'>
-						<p className='text-[#71717A] text-sm'>Auto invoice threshold</p>
+						<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.autoInvoiceThreshold')}</p>
 						<p className='text-[#09090B] text-sm'>
 							{getCurrencySymbol(subscriptionDetails?.currency || '')} {subscriptionDetails.auto_invoice_threshold}
 						</p>
@@ -408,14 +424,14 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 
 				{subscriptionDetails?.overage_factor && subscriptionDetails?.overage_factor > 1 && (
 					<div className='w-full flex justify-between items-center'>
-						<p className='text-[#71717A] text-sm'>Overage Factor</p>
+						<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.overageFactor')}</p>
 						<p className='text-[#09090B] text-sm'>{subscriptionDetails?.overage_factor}</p>
 					</div>
 				)}
 				<Spacer className='!my-4' />
 
 				<div className='w-full flex justify-between items-center'>
-					<p className='text-[#71717A] text-sm'>Start date</p>
+					<p className='text-[#71717A] text-sm'>{t('subscriptionDetail.startDate')}</p>
 					<p className='text-[#09090B] text-sm'>{formatDateShort(subscriptionDetails?.start_date ?? '')}</p>
 				</div>
 				<Spacer className='!my-4' />
@@ -423,7 +439,12 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 
 			{inheritedSubscriptionRows.length > 0 && (
 				<Card className='card mt-8'>
-					<FormHeader className='mb-0' title='Subscriptions Inheritance' variant='sub-header' titleClassName='font-semibold' />
+					<FormHeader
+						className='mb-0'
+						title={t('subscriptionDetail.subscriptionsInheritance')}
+						variant='sub-header'
+						titleClassName='font-semibold'
+					/>
 					<div className='mt-4 rounded-[6px] border border-gray-300'>
 						<FlexpriceTable data={inheritedSubscriptionRows} columns={inheritedSubscriptionsColumns} />
 					</div>
@@ -432,7 +453,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 
 			{subscriptionTaxAssociations?.items && subscriptionTaxAssociations.items.length > 0 && (
 				<Card className='card mt-8'>
-					<FormHeader title='Tax Associations' variant='sub-header' titleClassName='font-semibold' />
+					<FormHeader title={t('subscriptionDetail.taxAssociations')} variant='sub-header' titleClassName='font-semibold' />
 					<div className='mt-4'>
 						<TaxAssociationTable data={subscriptionTaxAssociations.items} />
 					</div>
@@ -442,7 +463,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 			{/* subscription schedule */}
 			{subscriptionDetails?.schedule?.phases?.length && subscriptionDetails?.schedule?.phases?.length > 0 && (
 				<Card className='card mt-8'>
-					<FormHeader title='Subscription Phases' variant='sub-header' titleClassName='font-semibold' />
+					<FormHeader title={t('subscriptionDetail.subscriptionPhases')} variant='sub-header' titleClassName='font-semibold' />
 					<div className='flex flex-col gap-4 pl-6'>
 						{subscriptionDetails?.schedule?.phases?.length ? (
 							subscriptionDetails.schedule.phases.map((phase, idx) => (
@@ -458,16 +479,18 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 									{/* Phase Card */}
 									<div className='flex-1'>
 										<div className='rounded-2xl border border-gray-100 bg-[#FAFAFA] px-8 py-5 flex flex-col gap-1'>
-											<div className='text-sm font-medium text-gray-400 mb-2'>Phase {idx + 1}</div>
+											<div className='text-sm font-medium text-gray-400 mb-2'>
+												{t('subscriptionDetail.phaseHeading', { index: idx + 1 })}
+											</div>
 											<div className='grid grid-cols-4 gap-8'>
 												<div>
-													<div className='text-xs text-gray-400'>Start</div>
+													<div className='text-xs text-gray-400'>{t('subscriptionDetail.phaseStart')}</div>
 													<div className='font-normal text-lg text-gray-900'>{formatDateShort(phase.start_date.toString())}</div>
 												</div>
 												<div>
-													<div className='text-xs text-gray-400'>End</div>
+													<div className='text-xs text-gray-400'>{t('subscriptionDetail.phaseEnd')}</div>
 													<div className='font-normal text-lg text-gray-900'>
-														{phase.end_date ? formatDateShort(phase.end_date.toString()) : '--'}
+														{phase.end_date ? formatDateShort(phase.end_date.toString()) : t('usageTable.featureTypes.dash')}
 													</div>
 												</div>
 												{/* Commitment and overage info removed - not available in SubscriptionPhase model */}
@@ -477,7 +500,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 								</div>
 							))
 						) : (
-							<span className='text-[#71717A] text-sm'>No phases found.</span>
+							<span className='text-[#71717A] text-sm'>{t('subscriptionDetail.noPhases')}</span>
 						)}
 					</div>
 				</Card>
@@ -493,8 +516,10 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 									variant='sub-header'
 									titleClassName='font-semibold text-gray-900'
 									subtitleClassName='text-sm text-gray-500 !mb-0 !mt-1'
-									title='Upcoming Invoices'
-									subtitle={`This is a preview of the invoice that will be billed on ${formatDateShort(subscriptionDetails?.current_period_end ?? '')}. It may change if subscription is updated.`}
+									title={t('subscriptionDetail.upcomingInvoicesTitle')}
+									subtitle={t('subscriptionDetail.upcomingInvoicesSubtitle', {
+										date: formatDateShort(subscriptionDetails?.current_period_end ?? ''),
+									})}
 								/>
 								<Spacer className='!my-4' />
 								<Skeleton className='h-64 w-full' />
@@ -512,8 +537,10 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 								currency={data?.currency}
 								amount_due={data?.amount_due}
 								tax={data?.total_tax}
-								title='Upcoming Invoices'
-								subtitle={`This is a preview of the invoice that will be billed on ${formatDateShort(subscriptionDetails?.current_period_end ?? '')}. It may change if subscription is updated.`}
+								title={t('subscriptionDetail.upcomingInvoicesTitle')}
+								subtitle={t('subscriptionDetail.upcomingInvoicesSubtitle', {
+									date: formatDateShort(subscriptionDetails?.current_period_end ?? ''),
+								})}
 								data={data?.line_items ?? []}
 								showZeroCharges={showZeroCharges}
 								onShowZeroChargesChange={setShowZeroCharges}
@@ -523,8 +550,10 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 								<FormHeader
 									variant='sub-header'
 									titleClassName='font-semibold text-gray-900'
-									title='Upcoming Invoices'
-									subtitle={`No line items for the period ending ${formatDateShort(subscriptionDetails?.current_period_end ?? '')}.`}
+									title={t('subscriptionDetail.upcomingInvoicesTitle')}
+									subtitle={t('subscriptionDetail.upcomingInvoicesEmpty', {
+										date: formatDateShort(subscriptionDetails?.current_period_end ?? ''),
+									})}
 								/>
 							</>
 						)}

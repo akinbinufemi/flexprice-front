@@ -41,3 +41,6 @@ vite.config.js
 # env files
 .env.*
 .claude/settings.local.json
+
+# Local scratch
+tmp-*.txt

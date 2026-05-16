@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FC, useMemo } from 'react';
 import { Card, AddButton, NoDataCard, ShortPagination, Spacer } from '@/components/atoms';
 import SubscriptionLineItemTable from '@/components/molecules/SubscriptionLineItemTable/SubscriptionLineItemTable';
@@ -49,6 +50,7 @@ const SubscriptionEditChargesSection: FC<SubscriptionEditChargesSectionProps> = 
 	readOnly = false,
 	commitmentInfo,
 }) => {
+	const { t } = useTranslation('common');
 	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
 		debounceTime: 300,
 	});
@@ -109,7 +111,7 @@ const SubscriptionEditChargesSection: FC<SubscriptionEditChargesSectionProps> = 
 	if (isEmpty && onAddCharge) {
 		return (
 			<NoDataCard
-				title='Charges'
+				title={t('labels.charges')}
 				subtitle='No charges found for this subscription yet'
 				cta={<AddButton onClick={onAddCharge} disabled={addDisabled} />}
 			/>

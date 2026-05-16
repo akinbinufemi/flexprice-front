@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
 import { PanelLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -209,7 +210,9 @@ Sidebar.displayName = 'Sidebar';
 
 const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.ComponentProps<typeof Button>>(
 	({ className, onClick, ...props }, ref) => {
+		const { t } = useTranslation('common');
 		const { toggleSidebar } = useSidebar();
+		const toggleLabel = t('sidebar.toggleSidebarAccessibilityLabel');
 
 		return (
 			<Button
@@ -224,7 +227,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
 				}}
 				{...props}>
 				<PanelLeft />
-				<span className='sr-only'>Toggle Sidebar</span>
+				<span className='sr-only'>{toggleLabel}</span>
 			</Button>
 		);
 	},
@@ -232,16 +235,18 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
 SidebarTrigger.displayName = 'SidebarTrigger';
 
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'button'>>(({ className, ...props }, ref) => {
+	const { t } = useTranslation('common');
 	const { toggleSidebar } = useSidebar();
+	const toggleLabel = t('sidebar.toggleSidebarAccessibilityLabel');
 
 	return (
 		<button
 			ref={ref}
 			data-sidebar='rail'
-			aria-label='Toggle Sidebar'
+			aria-label={toggleLabel}
 			tabIndex={-1}
 			onClick={toggleSidebar}
-			title='Toggle Sidebar'
+			title={toggleLabel}
 			className={cn(
 				'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
 				'[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
@@ -263,7 +268,7 @@ const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<'main
 			ref={ref}
 			className={cn(
 				'relative flex min-h-svh flex-1 flex-col bg-background',
-				'peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-[6px] md:peer-data-[variant=inset]:shadow',
+				'peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ms-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-[6px] md:peer-data-[variant=inset]:shadow',
 				className,
 			)}
 			{...props}
@@ -378,7 +383,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li
 SidebarMenuItem.displayName = 'SidebarMenuItem';
 
 const sidebarMenuButtonVariants = cva(
-	'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-[6px] py-0 px-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:!stroke-[1.5px]',
+	'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-[6px] py-0 px-2 text-start text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pe-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:!stroke-[1.5px]',
 	{
 		variants: {
 			variant: {
@@ -523,15 +528,12 @@ const SidebarMenuSub = React.forwardRef<HTMLUListElement, React.ComponentProps<'
 		data-sidebar='menu-sub'
 		className={cn('relative mx-3.5 flex min-w-0 flex-col gap-0.5 px-2.5 py-0.5', 'group-data-[collapsible=icon]:hidden', className)}
 		{...props}>
-		{/* Vertical line, centered with the icon */}
 		<div
-			className='absolute -left-1.5 top-0 bottom-0 flex items-center'
+			className='ltr:block rtl:hidden absolute -left-1.5 top-0 bottom-0 flex items-center'
 			aria-hidden='true'
-			style={{ width: '1.25rem' }} // matches icon area
-		>
+			style={{ width: '1.25rem' }}>
 			<div className='mx-auto h-full w-px bg-gray-300' style={{ minHeight: '32px' }} />
 		</div>
-		{/* Sub-menu items */}
 		{children}
 	</ul>
 ));
@@ -568,7 +570,7 @@ const SidebarMenuSubButton = React.forwardRef<
 			data-active={isActive}
 			className={cn(
 				// Base styles with proper vertical centering and consistent sizing
-				'flex min-w-0 -translate-x-px items-center justify-start gap-2 overflow-hidden rounded-[6px] ml-2 px-3 text-[14px] font-normal outline-none transition-colors duration-200',
+				'flex min-w-0 -translate-x-px items-center justify-start gap-2 overflow-hidden rounded-[6px] ms-2 px-3 text-[14px] font-normal outline-none transition-colors duration-200',
 				// Interactive states with consistent hover behavior using the same colors as reference UI
 				'hover:bg-[#F4F4F5] hover:text-[#18181B]',
 				'focus-visible:ring-2 focus-visible:ring-blue-600',

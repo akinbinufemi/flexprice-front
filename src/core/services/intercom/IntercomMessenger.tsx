@@ -1,10 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Intercom from '@intercom/messenger-js-sdk';
 import './index.css';
 import { BotMessageSquare } from 'lucide-react';
 import { Button } from '@/components/atoms';
 import { config } from '@/config/config';
-import { INTERCOM_MESSENGER_FLOW, isIntercomMessengerAvailable } from '@/config/intercomMessengerConfig';
+import { INTERCOM_MESSENGER_FLOW, isIntercomMessengerAvailable } from '@/config/intercom';
 import { getCommandPaletteActionEventName, CommandPaletteActionId } from '@/core/actions';
 import useUser from '@/hooks/useUser';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ import { refetchQueries } from '../tanstack/ReactQueryProvider';
 
 /** Mounted only when Intercom is enabled with an app id; owns SDK init and onboarding/help behavior. */
 const IntercomMessengerImpl = () => {
+	const { t } = useTranslation('common');
 	const { user } = useUser();
 	const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
 	const isInitialized = useRef(false);
@@ -59,7 +61,7 @@ const IntercomMessengerImpl = () => {
 			await refetchQueries(['user', 'tenant']);
 			toast.success(INTERCOM_MESSENGER_FLOW.toastSuccessMarkOnboarded);
 		},
-		onError: (error: unknown) => {
+		onError: (error: Error) => {
 			console.error('Failed to mark user as onboarded:', error);
 			toast.error(INTERCOM_MESSENGER_FLOW.toastErrorMarkOnboarded);
 		},
@@ -247,7 +249,7 @@ const IntercomMessengerImpl = () => {
 	return (
 		<Button size='sm' variant='outline' onClick={openIntercom}>
 			<BotMessageSquare absoluteStrokeWidth />
-			Help
+			{t('chrome.help')}
 		</Button>
 	);
 };

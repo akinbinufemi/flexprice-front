@@ -1,0 +1,972 @@
+{
+	"shared": {
+		"description": "Description",
+		"lookupKey": "Lookup Key",
+		"lookupKeyDescription": "A system identifier used for API calls and integrations.",
+		"enterDescription": "Enter description",
+		"metadataOptional": "Metadata (Optional)",
+		"metadataPlaceholder": "Enter JSON metadata with string keys and string values",
+		"metadataJsonStringsOnly": "Additional metadata as JSON. All values must be strings.",
+		"metadataJsonAdditional": "Additional metadata as JSON",
+		"metadataMustBeObject": "Metadata must be a JSON object",
+		"metadataAllValuesStrings": "All metadata values must be strings",
+		"metadataInvalidFormat": "Invalid Metadata format"
+	},
+	"costAnalytics": {
+		"table": {
+			"costAttribute": "Cost Attribute",
+			"totalQuantity": "Total Quantity",
+			"totalCost": "Total Cost"
+		}
+	},
+	"addons": {
+		"drawer": {
+			"editTitle": "Edit Addon",
+			"createTitle": "Create Addon",
+			"descriptionEdit": "Enter addon details to update the addon.",
+			"descriptionCreate": "Enter addon details to create a new addon.",
+			"namePlaceholder": "Enter a name for the addon",
+			"nameHelp": "A descriptive name for this addon.",
+			"addonName": "Addon Name",
+			"lookupPlaceholder": "Enter a slug for the addon",
+			"purposeDescription": "Helps your team to understand the purpose of this addon.",
+			"validation": {
+				"nameRequired": "Name is required",
+				"lookupKeyRequired": "Lookup key is required"
+			},
+			"toast": {
+				"updated": "Addon updated successfully",
+				"created": "Addon created successfully",
+				"failedUpdate": "Failed to update addon. Please try again.",
+				"failedCreate": "Failed to create addon. Please try again."
+			}
+		},
+		"table": {
+			"status": "Status",
+			"updatedAt": "Updated At",
+			"statusActive": "Active",
+			"statusInactive": "Inactive"
+		},
+		"details": {
+			"title": "Addon Details",
+			"charges": "Charges",
+			"entitlements": "Entitlements",
+			"metadata": "Metadata"
+		},
+		"subscriptionSheet": {
+			"editTitle": "Edit Addon",
+			"addTitle": "Add Addon",
+			"descriptionEdit": "Edit addon configuration",
+			"descriptionAdd": "Add an addon to the subscription",
+			"addonRequired": "Addon*",
+			"selectAddon": "Select addon",
+			"startDate": "Start Date",
+			"selectStartDate": "Select start date",
+			"updateAddAddon": "{{action}} Addon",
+			"update": "Update",
+			"add": "Add",
+			"addonRequiredError": "Addon is required",
+			"noDescription": "No description"
+		},
+		"listPage": {
+			"title": "Addons",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"lookupKey": "Lookup Key",
+				"createdAt": "Created At",
+				"status": "Status"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"columns": {
+				"addonName": "Addon Name",
+				"lookupKey": "Lookup Key",
+				"status": "Status",
+				"updatedAt": "Updated At"
+			},
+			"paginationUnit": "Addons",
+			"emptyState": {
+				"heading": "Addons",
+				"description": "Create your first addon to define additional services customers can purchase.",
+				"createButton": "Create Addon"
+			}
+		}
+	},
+	"costSheets": {
+		"listPage": {
+			"title": "Cost Sheets",
+			"paginationUnit": "Cost Sheets",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"lookupKey": "Lookup Key",
+				"createdAt": "Created At",
+				"status": "Status"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"emptyState": {
+				"heading": "Cost Sheets",
+				"description": "Create your first cost sheet to define pricing structures and charges.",
+				"createButton": "Create Cost Sheet"
+			}
+		},
+		"drawer": {
+			"editTitle": "Edit Cost Sheet",
+			"createTitle": "Create Cost Sheet",
+			"descriptionEdit": "Enter cost sheet details to update the cost sheet.",
+			"descriptionCreate": "Enter cost sheet details to create a new cost sheet.",
+			"namePlaceholder": "Enter a name for the cost sheet",
+			"nameHelp": "A descriptive name for this cost sheet.",
+			"costSheetName": "Cost Sheet Name",
+			"lookupPlaceholder": "Enter a slug for the cost sheet",
+			"purposeDescription": "Helps your team to understand the purpose of this cost sheet."
+		},
+		"details": {
+			"title": "Cost Sheet Details",
+			"charges": "Charges",
+			"metadata": "Metadata"
+		},
+		"toast": {
+			"updated": "Cost Sheet updated successfully",
+			"created": "Cost Sheet created successfully",
+			"failedUpdate": "Failed to update cost sheet. Please try again.",
+			"failedCreate": "Failed to create cost sheet. Please try again."
+		},
+		"validation": {
+			"nameRequired": "Name is required",
+			"lookupKeyRequired": "Lookup key is required"
+		},
+		"table": {
+			"costSheetName": "Cost Sheet Name",
+			"lookupKey": "Lookup Key",
+			"status": "Status",
+			"updatedAt": "Updated At"
+		}
+	},
+	"coupons": {
+		"listPage": {
+			"title": "Coupons",
+			"paginationUnit": "Coupons",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"status": "Status",
+				"type": "Type"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"emptyState": {
+				"heading": "Coupons",
+				"description": "Create your first coupon to offer discounts to customers.",
+				"createButton": "Create Coupon"
+			}
+		},
+		"drawer": {
+			"editTitle": "Edit Coupon",
+			"createTitle": "Create Coupon",
+			"descriptionEdit": "Enter coupon details to update the coupon.",
+			"descriptionCreate": "Enter coupon details to create a new coupon.",
+			"namePlaceholder": "Enter a name for the coupon",
+			"nameHelp": "A descriptive name for this coupon.",
+			"couponName": "Coupon Name",
+			"couponType": "Coupon Type",
+			"selectCouponType": "Select coupon type",
+			"couponTypeHelp": "Choose between fixed amount or percentage discount",
+			"amountOff": "Amount Off",
+			"amountPlaceholder": "0.00",
+			"amountHelp": "The fixed amount to discount",
+			"currency": "Currency",
+			"selectCurrency": "Select currency",
+			"percentageOff": "Percentage Off",
+			"percentagePlaceholder": "10",
+			"percentageHelp": "The percentage to discount (0-100)",
+			"cadence": "Cadence",
+			"selectCadence": "Select cadence",
+			"cadenceHelp": "How often this coupon can be used",
+			"redeemAfter": "Redeem After (Optional)",
+			"selectStartDate": "Select start date",
+			"redeemAfterHelp": "When the coupon becomes valid",
+			"redeemBefore": "Redeem Before (Optional)",
+			"selectExpiryDate": "Select expiry date",
+			"redeemBeforeHelp": "When the coupon expires",
+			"maxRedemptions": "Max Redemptions (Optional)",
+			"maxRedemptionsPlaceholder": "100",
+			"maxRedemptionsHelp": "Maximum number of times this coupon can be used",
+			"durationInPeriods": "Duration in Periods",
+			"durationPlaceholder": "3",
+			"durationHelp": "Number of billing periods the discount applies (required for repeated cadence)",
+			"fixedAmount": "Fixed Amount",
+			"percentage": "Percentage",
+			"cadenceOnce": "Once",
+			"cadenceRepeated": "Repeated",
+			"cadenceForever": "Forever",
+			"validation": {
+				"nameRequired": "Name is required",
+				"typeRequired": "Type is required",
+				"cadenceRequired": "Cadence is required",
+				"amountOffFixedRequired": "Amount off is required for fixed type coupons",
+				"percentageOffRequired": "Percentage off is required for percentage type coupons",
+				"currencyFixedRequired": "Currency is required for fixed type coupons",
+				"durationRepeatedRequired": "Duration in periods is required for repeated cadence",
+				"redeemBeforeAfter": "Redeem before date must be after redeem after date"
+			},
+			"toast": {
+				"updated": "Coupon updated successfully",
+				"created": "Coupon created successfully",
+				"failedUpdate": "Failed to update coupon. Please try again.",
+				"failedCreate": "Failed to create coupon. Please try again."
+			},
+			"invalidMetadata": "Invalid Metadata"
+		},
+		"table": {
+			"name": "Name",
+			"type": "Type",
+			"discount": "Discount",
+			"redemptions": "Redemptions",
+			"status": "Status",
+			"updatedAt": "Updated at",
+			"entityName": "Coupon",
+			"statusActive": "Active",
+			"statusInactive": "Inactive"
+		},
+		"modal": {
+			"selectCouponRequired": "Please select a coupon"
+		},
+		"details": {
+			"loadError": "Failed to load coupon details",
+			"detailsTitle": "Details"
+		}
+	},
+	"groups": {
+		"listPage": {
+			"title": "Groups",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"lookupKey": "Lookup Key",
+				"createdAt": "Created At",
+				"entityType": "Entity Type"
+			},
+			"paginationUnit": "Groups",
+			"emptyState": {
+				"heading": "Groups",
+				"description": "Create a group to organize your pricing entities.",
+				"createButton": "Create Group"
+			}
+		},
+		"drawer": {
+			"editTitle": "Edit Group",
+			"createTitle": "Create Group",
+			"descriptionEdit": "Enter group details to update the group.",
+			"descriptionCreate": "Enter group details to create a new group.",
+			"namePlaceholder": "Enter a name for the group",
+			"nameHelp": "A descriptive name for this group.",
+			"groupName": "Group Name",
+			"lookupPlaceholder": "Enter a slug for the group",
+			"entityType": "Entity Type",
+			"selectEntityType": "Select entity type",
+			"entityTypeHelp": "Choose the type of entity this group will contain.",
+			"createGroup": "Create Group",
+			"entityPrice": "Price",
+			"entityFeature": "Feature"
+		},
+		"profile": {
+			"notFound": "Group not found.",
+			"notFoundPageTitle": "Group",
+			"tabOverview": "Overview",
+			"tabInformation": "Information"
+		},
+		"information": {
+			"title": "Group Details",
+			"name": "Name",
+			"entityType": "Entity Type",
+			"externalId": "External ID"
+		},
+		"overview": {
+			"urlHintAdd": "Add",
+			"urlQueryPrice": "?entity_type=price",
+			"urlHintOr": "or",
+			"urlQueryFeature": "?entity_type=feature",
+			"urlHintSuffix": "to the URL to view charges or features in this group."
+		},
+		"toast": {
+			"updated": "Group updated successfully",
+			"created": "Group created successfully",
+			"failedUpdate": "Failed to update group. Please try again.",
+			"failedCreate": "Failed to create group. Please try again."
+		},
+		"validation": {
+			"nameRequired": "Name is required",
+			"lookupKeyRequired": "Lookup key is required"
+		},
+		"table": {
+			"name": "Name",
+			"lookupKey": "Lookup Key",
+			"entityType": "Entity Type",
+			"type": "Type",
+			"status": "Status",
+			"updatedAt": "Updated at",
+			"entityName": "Group"
+		}
+	},
+	"plans": {
+		"drawer": {
+			"editTitle": "Edit Plan",
+			"createTitle": "Create Plan",
+			"descriptionEdit": "Enter plan details to update the plan.",
+			"descriptionCreate": "Enter plan details to create a new plan.",
+			"namePlaceholder": "Enter a name for the plan",
+			"nameHelp": "A descriptive name for this pricing plan.",
+			"planName": "Plan Name",
+			"lookupPlaceholder": "Enter a slug for the plan",
+			"purposeDescription": "Helps your team to understand the purpose of this plan."
+		},
+		"duplicate": {
+			"title": "Duplicate plan",
+			"description": "Enter plan details for the duplicated plan. Entitlements, credit grants, and other settings will be copied.",
+			"duplicate": "Duplicate"
+		},
+		"archive": {
+			"title": "Archive plan",
+			"archiving": "Archiving…",
+			"confirmDescription": "Are you sure you want to archive \"{{name}}\"? This plan will no longer be available for new subscriptions."
+		},
+		"listPage": {
+			"title": "Plans",
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"lookupKey": "Lookup Key",
+				"status": "Status",
+				"createdAt": "Created At"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"columns": {
+				"name": "Name",
+				"status": "Status",
+				"updatedAt": "Updated at"
+			},
+			"entityName": "Plan",
+			"paginationUnit": "Pricing Plans",
+			"rowActions": {
+				"edit": "Edit",
+				"duplicate": "Duplicate",
+				"archive": "Archive"
+			},
+			"createWithAi": "Create with AI",
+			"emptyStateCustom": {
+				"heading": "Plans",
+				"description": "Create a plan to display pricing and start billing customers."
+			},
+			"toast": {
+				"archiveSuccess": "Plan archived successfully",
+				"archiveErrorFallback": "Failed to archive plan"
+			}
+		},
+		"tabs": {
+			"creditGrants": "Credit Grants",
+			"entitlements": "Entitlements"
+		},
+		"information": {
+			"loading": "Loading plan details...",
+			"planDetails": "Plan Details",
+			"metadata": "Metadata"
+		},
+		"pricing": {
+			"noWidget": "No Pricing Widget Exists",
+			"widgetsPageTitle": "Pricing Widgets"
+		},
+		"organisms": {
+			"chargeLabels": {
+				"fixedCharge": "Fixed charge",
+				"usageBasedCharge": "Usage Based Charge"
+			},
+			"setupCharges": {
+				"subtitle": "Set how customers are charged for this plan.",
+				"planCharges": "Plan Charges",
+				"choosePricingModel": "Choose a Pricing Model",
+				"fixedChargesTitle": "Fixed charges",
+				"usageBasedChargesTitle": "Usage Based Charges",
+				"addFixedCharge": "Add fixed charge",
+				"addUsageBasedCharges": "Add Usage Based Charges",
+				"subscriptionTypeFixed": "Fixed charge",
+				"subscriptionTypeUsage": "Usage Based",
+				"fixedPricingDescription": "Fixed pricing billed on a set schedule.",
+				"usagePricingDescription": "Charges based on actual consumption."
+			},
+			"recurringForm": {
+				"calculatorAria": "Open subscription duration calculator",
+				"perBilling": "per {{period}}",
+				"billingTiming": "Billing Timing",
+				"invoiceCadenceAdvance": "Advance",
+				"invoiceCadenceArrear": "Arrear",
+				"invoiceCadenceAdvanceDesc": "Charge at the start of each billing cycle.",
+				"invoiceCadenceArrearDesc": "Charge at the end of the billing cycle.",
+				"minQuantity": "Minimum Quantity",
+				"trialToggleTitle": "Start with a free trial",
+				"trialToggleHint": "Enable this option to add a free trial period for the subscription.",
+				"trialPeriodTitle": "Trial Period",
+				"trialDaysPlaceholder": "Number of trial days"
+			},
+			"usageForm": {
+				"feature": "Feature",
+				"selectMeteredFeature": "Select a metered feature",
+				"billingModel": "Billing Model",
+				"billingModelPlaceholder": "Billing Model",
+				"selectBillingPeriod": "Select The Billing Period",
+				"per": "per",
+				"amountPlaceholder": "0.00"
+			},
+			"priceForm": {
+				"displayName": "Display Name",
+				"enterDisplayName": "Enter display name",
+				"currency": "Currency",
+				"billingPeriod": "Billing Period",
+				"price": "Price",
+				"amountPlaceholderShort": "0",
+				"group": "Group",
+				"groupPlaceholder": "Select a group (optional)",
+				"groupDescription": "Assign this price to a group for better organization",
+				"startDateOptional": "Start Date (Optional)",
+				"selectStartDate": "Select start date"
+			},
+			"volumeTier": {
+				"from": "From",
+				"fromSuffix": "(>)",
+				"upTo": "Up to",
+				"upToSuffix": "(<=)",
+				"flatFee": "Flat fee",
+				"perUnitPrice": "Per unit price",
+				"addTier": "Add Tier",
+				"zeroPlaceholder": "0.00"
+			},
+			"planPriceTable": {
+				"start": "Start",
+				"end": "End",
+				"noDateInformation": "No date information",
+				"fallbackName": "--",
+				"charges": "Charges",
+				"queryBuilder": {
+					"displayName": "Display name",
+					"amount": "Amount",
+					"billingPeriod": "Billing period"
+				}
+			}
+		}
+	},
+	"priceUnits": {
+		"listPage": {
+			"title": "Price Units",
+			"paginationUnit": "Price Units",
+			"sortLabels": {
+				"name": "Name",
+				"code": "Code",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"code": "Code",
+				"baseCurrency": "Base Currency",
+				"status": "Status",
+				"createdAt": "Created At"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"emptyState": {
+				"heading": "Price Units",
+				"description": "Create a price unit to define custom currencies or tokens for pricing.",
+				"createButton": "Create Price Unit"
+			}
+		},
+		"drawer": {
+			"editTitle": "Edit Price Unit",
+			"createTitle": "Create Price Unit",
+			"descriptionEdit": "Enter price unit details to update the price unit.",
+			"descriptionCreate": "Enter price unit details to create a new price unit.",
+			"namePlaceholder": "Enter a name for the price unit",
+			"nameHelp": "A descriptive name for this price unit (e.g., Bitcoin, Tokens, Credits).",
+			"name": "Name",
+			"code": "Code",
+			"codePlaceholder": "Enter a unique code for the price unit",
+			"symbol": "Symbol",
+			"symbolPlaceholder": "Enter a symbol (e.g., ₿, €, tokens)",
+			"symbolHelp": "The display symbol for this price unit (e.g., ₿ for Bitcoin, € for Euro, \"tokens\" for tokens).",
+			"baseCurrency": "Base Currency",
+			"selectBaseCurrency": "Select base currency",
+			"baseCurrencyHelp": "The base currency code (3 letters, e.g., USD, EUR, GBP).",
+			"conversionRate": "Conversion Rate",
+			"conversionPlaceholder": "0.01",
+			"conversionHelp": "The exchange rate from this price unit to the base currency. Must be greater than 0. Example: 0.01 means 100 units = 1.00 USD."
+		},
+		"selector": {
+			"currency": "Currency",
+			"selectCurrency": "Select currency",
+			"custom": "Custom",
+			"standard": "Standard",
+			"errorLoading": "Error loading options",
+			"noOptions": "No options available"
+		},
+		"toast": {
+			"updated": "Price unit updated successfully",
+			"created": "Price unit created successfully",
+			"failedUpdate": "Failed to update price unit. Please try again.",
+			"failedCreate": "Failed to create price unit. Please try again."
+		},
+		"validation": {
+			"nameRequired": "Name is required",
+			"codeRequired": "Code is required",
+			"codeLength": "Code must be exactly 3 characters",
+			"symbolRequired": "Symbol is required",
+			"baseCurrencyRequired": "Base currency is required",
+			"baseCurrencyLength": "Base currency must be exactly 3 characters",
+			"conversionRateRequired": "Conversion rate is required",
+			"conversionRateNumber": "Conversion rate must be a valid number",
+			"conversionRatePositive": "Conversion rate must be greater than 0"
+		},
+		"table": {
+			"name": "Name",
+			"code": "Code",
+			"symbol": "Symbol",
+			"baseCurrency": "Base Currency",
+			"conversionRate": "Conversion Rate",
+			"status": "Status",
+			"updatedAt": "Updated At"
+		}
+	},
+	"prices": {
+		"updateDrawer": {
+			"title": "Edit Price Details",
+			"description": "Update non-critical price details such as display name, description, and metadata.",
+			"displayName": "Display Name",
+			"displayNamePlaceholder": "Enter display name",
+			"lookupKey": "Lookup Key",
+			"lookupKeyPlaceholder": "Enter lookup key",
+			"saveDetails": "Save Details",
+			"descriptionLabel": "Description",
+			"group": "Group",
+			"groupPlaceholder": "Select a group (optional)",
+			"toastSuccess": "Price details updated successfully",
+			"toastFailed": "Failed to update price details. Please try again."
+		}
+	},
+	"features": {
+		"listPage": {
+			"title": "Features",
+			"columns": {
+				"featureName": "Feature Name",
+				"group": "Group",
+				"type": "Type",
+				"status": "Status",
+				"updatedAt": "Updated At"
+			},
+			"sortLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"updatedAt": "Updated At"
+			},
+			"filterLabels": {
+				"name": "Name",
+				"createdAt": "Created At",
+				"status": "Status",
+				"type": "Type",
+				"group": "Group"
+			},
+			"filterStatus": {
+				"active": "Active",
+				"inactive": "Inactive"
+			},
+			"filterTypes": {
+				"metered": "Metered",
+				"boolean": "Boolean",
+				"static": "Static"
+			},
+			"typeChips": {
+				"metered": "Metered",
+				"boolean": "Boolean",
+				"static": "Static",
+				"unknown": "Unknown"
+			},
+			"emptyCell": "—",
+			"paginationUnit": "Features",
+			"emptyState": {
+				"heading": "Features",
+				"description": "Create your first feature to define what customers pay for.",
+				"createButton": "Create Feature"
+			}
+		},
+		"drawer": {
+			"editTitle": "Edit Feature",
+			"description": "Update feature details.",
+			"name": "Name",
+			"namePlaceholder": "Enter feature name",
+			"descriptionLabel": "Description",
+			"group": "Group",
+			"groupPlaceholder": "Select a group (optional)",
+			"unitSingular": "Unit Singular",
+			"unitPlural": "Unit Plural",
+			"unitSingularPh": "e.g., unit",
+			"unitPluralPh": "e.g., units",
+			"displayUnitSingular": "Display Unit Singular",
+			"displayUnitPlural": "Display Unit Plural",
+			"conversionFactor": "Display Unit Conversion Factor",
+			"conversionFactorPh": "e.g., 0.0000167",
+			"displayUnitPluralAutoSuffix": "s",
+			"saveFeature": "Save Feature"
+		},
+		"alerts": {
+			"dialogTitle": "Feature Alert Settings",
+			"enableTitle": "Enable Alerts",
+			"enableLabel": "Monitor feature usage against configured thresholds",
+			"enableDescription": "Get notified when usage crosses configured thresholds for this feature",
+			"criticalThreshold": "Critical Threshold",
+			"criticalHelp": "Alert when usage reaches critical level",
+			"warningThreshold": "Warning Threshold",
+			"warningHelp": "Alert when usage reaches warning level",
+			"infoThreshold": "Info Threshold",
+			"infoHelp": "Alert when usage reaches info level",
+			"remove": "Remove",
+			"add": "Add",
+			"thresholdValue": "Threshold Value",
+			"thresholdPlaceholder": "0.00",
+			"condition": "Condition",
+			"below": "Below",
+			"above": "Above",
+			"saveChanges": "Save Changes",
+			"saving": "Saving...",
+			"toastAtLeastOneThreshold": "Please configure at least one threshold level",
+			"toastInvalidCriticalThreshold": "Please enter a valid critical threshold value",
+			"toastInvalidWarningThreshold": "Please enter a valid warning threshold value",
+			"toastInvalidInfoThreshold": "Please enter a valid info threshold value"
+		},
+		"form": {
+			"name": "Name*",
+			"namePlaceholder": "Enter a name for the feature",
+			"type": "Type*",
+			"lookupKey": "Lookup Key",
+			"lookupKeyPlaceholder": "Enter a unique lookup key (optional)",
+			"unitName": "Unit Name",
+			"unitNameLower": "Unit name",
+			"displayUnitName": "Display Unit Name",
+			"displayUnitNameLower": "Display unit name",
+			"featureDescription": "Feature Description",
+			"featureDescriptionLower": "Feature description",
+			"addGroup": "Add Group",
+			"unitSingular": "Unit Singular",
+			"unitSingularPh": "millisecond",
+			"unitPlural": "Unit Plural",
+			"unitPluralPh": "milliseconds",
+			"displayUnitSingular": "Display Unit Singular",
+			"displayUnitSingularPh": "minute",
+			"displayUnitPlural": "Display Unit Plural",
+			"displayUnitPluralPh": "minutes",
+			"conversionFactor": "Unit Conversion Factor",
+			"conversionFactorPh": "(e.g. 60000)",
+			"conversionFormula": "Unit Value = Display Value * Conversion Factor",
+			"group": "Group",
+			"groupPlaceholder": "Select a group (optional)",
+			"featureDescriptionLabel": "Feature Description",
+			"descriptionPlaceholder": "Enter description",
+			"eventName": "Event Name*",
+			"eventNamePlaceholder": "tokens_total",
+			"eventNameHelp": "A unique identifier for the event used to filter and measure usage e.g. user_signup, api_calls, etc.",
+			"eventFilters": "Event filters",
+			"eventFiltersTitle": "Event Filters",
+			"eventFiltersSubtitle": "Filter events based on specific properties e.g., region, user type or custom attributes to refine tracking.",
+			"aggregationChoose": "Choose how values are aggregated.",
+			"aggregationFunction": "Aggregation Function*",
+			"aggregationFunctionPh": "SUM",
+			"aggregationField": "Aggregation Field*",
+			"aggregationFieldPh": "tokens",
+			"aggregationFieldHelp": "Specify the property in the event data that will be aggregated. e.g. tokens, messages_sent, storage_used.",
+			"aggregationMultiplier": "Aggregation Multiplier*",
+			"aggregationMultiplierPh": "1",
+			"aggregationMultiplierHelp": "Specify the multiplier for the aggregation. e.g. 1.5, 0.25, or 1000.",
+			"bucketSizeButton": "Bucket size",
+			"groupByButton": "Group by",
+			"bucketSize": "Bucket Size",
+			"bucketSizeHelp": "The size of the window to aggregate over. eg. 15MIN, 30MIN, HOUR, etc.",
+			"groupBy": "Group by",
+			"groupByPlaceholder": "e.g. user_id, tenant_id",
+			"groupByHelp": "Field to group aggregation by. Must be a string (e.g. event property name).",
+			"eventExample": "Event Example",
+			"pageTitle": "Create Feature",
+			"creating": "Creating Feature...",
+			"unitDefault": "unit",
+			"unitsDefault": "units"
+		},
+		"details": {
+			"charges": "Charges",
+			"entitlements": "Entitlements",
+			"eventDetails": "Event Details",
+			"eventName": "Event Name",
+			"eventFilters": "Event Filters",
+			"aggregationDetails": "Aggregation Details",
+			"type": "Type",
+			"value": "Value",
+			"unitName": "Unit Name",
+			"displayUnitName": "Display Unit Name",
+			"usageReset": "Usage Reset ",
+			"bucketSize": "Bucket Size",
+			"groupBy": "Group by"
+		}
+	},
+	"entityChargesPage": {
+		"addChargesPageTitle": "Add charges to {{name}}",
+		"entityTypeDisplay": {
+			"PLAN": "Plan",
+			"ADDON": "Addon",
+			"COSTSHEET": "Cost sheet"
+		},
+		"selectChargeTypeTitle": "Select Charge Type",
+		"addChargeOptionsGroupAria": "Add charge options",
+		"addFixedCharge": "Add fixed charge",
+		"addUsageBasedCharges": "Add Usage Based Charges",
+		"cannotSaveChargesAria": "Cannot save — complete all charge forms first",
+		"saveChargesAria": "Save {{entity}} charges",
+		"entityLabelsLower": {
+			"PLAN": "plan",
+			"ADDON": "addon",
+			"COST_SHEET": "cost sheet"
+		},
+		"subscriptionCalculator": {
+			"contractAmount": "Contract Amount",
+			"contractTerm": "Contract Term",
+			"displayAmount": "Display amount:",
+			"invalidAmountHint": "Enter a valid contract amount to see the calculation.",
+			"confirmApply": "OK",
+			"perPlanPeriodSuffix": {
+				"DAILY": " (per day)",
+				"WEEKLY": " (per week)",
+				"MONTHLY": " (per month)",
+				"QUARTERLY": " (per quarter)",
+				"HALF_YEARLY": " (per half-year)",
+				"ANNUAL": " (per year)"
+			},
+			"periodLabels": {
+				"DAILY": "Daily",
+				"WEEKLY": "Weekly",
+				"MONTHLY": "Monthly",
+				"QUARTERLY": "Quarterly",
+				"HALF_YEARLY": "Half-Yearly",
+				"ANNUAL": "Annual"
+			}
+		}
+	},
+	"chargeValue": {
+		"priceOverrideApplied": "Price Override Applied",
+		"tierDetectionPrefix": "Tier ",
+		"volume": "Volume",
+		"slab": "Slab",
+		"tierPricingTitle": "{{mode}} Tier Pricing",
+		"overridden": "(Overridden)",
+		"units": "units",
+		"perUnit": "per unit",
+		"flatFee": "flat fee",
+		"noCouponApplied": "No coupon applied",
+		"tierRangeWithUnits": "{{range}} units",
+		"perUnitLine": "{{symbol}}{{amount}} per unit",
+		"flatFeePlusLine": "+ {{symbol}}{{amount}} flat fee",
+		"override": {
+			"billingModelLine": "Billing Model: {{from}} → {{to}}",
+			"tierModeLine": "Tier Mode: {{from}} → {{to}}",
+			"amountLine": "Amount: {{from}} → {{to}}",
+			"quantityLine": "Quantity: 1 → {{to}}",
+			"packageSizeLine": "Package Size: {{from}} units → {{to}} units",
+			"tiersCountLine": "Tiers: {{from}} tiers → {{to}} tiers",
+			"tierStructureModified": "Tier structure modified",
+			"priceConfigurationModified": "Price configuration modified",
+			"tierDetailFrom": "From (>): {{from}} → {{to}}",
+			"tierDetailUpTo": "Up to (<=): {{from}} → {{to}}",
+			"tierDetailPerUnit": "Per unit price: {{from}} → {{to}}",
+			"tierDetailFlatFee": "Flat fee: {{from}} → {{to}}",
+			"tierHeader": "Tier {{n}}",
+			"tierLine": "{{header}}: {{details}}",
+			"tierAdded": "{{header}} added: {{details}}",
+			"tierAddedDetails": "From (>): {{from}}, Up to (<=): {{upTo}}, Per unit price: {{perUnit}}, Flat fee: {{flatFee}}",
+			"detailSep": ", "
+		}
+	},
+	"entitlements": {
+		"usageResetPeriod": {
+			"DAILY": "Daily",
+			"WEEKLY": "Weekly",
+			"MONTHLY": "Monthly",
+			"QUARTERLY": "Quarterly",
+			"HALF_YEARLY": "Half-Yearly",
+			"ANNUAL": "Yearly",
+			"NEVER": "Never"
+		},
+		"validation": {
+			"featureMeterRequired": "Feature must have an associated meter",
+			"usageLimitNegative": "Usage limit cannot be negative",
+			"usageLimitRequired": "Usage limit is required",
+			"usageResetRequired": "Usage reset period is required",
+			"staticValueRequired": "Value is required",
+			"staticValueNegative": "Value cannot be negative",
+			"staticValueEmpty": "Value cannot be empty",
+			"selectFeature": "Please select a feature",
+			"invalidFeatureType": "Invalid feature type",
+			"featureAlreadyAdded": "This feature is already added",
+			"addAtLeastOne": "Please add at least one entitlement"
+		},
+		"errors": {
+			"entityIdRequired": "Entity ID is required"
+		},
+		"toast": {
+			"addedSuccess": "Entitlements added successfully",
+			"addFailed": "Failed to add entitlements. Please try again."
+		},
+		"addDrawer": {
+			"title": "Add Entitlement",
+			"description": "Define the features that customers will be entitled to.",
+			"featuresLabel": "Features",
+			"selectFeaturePlaceholder": "Select feature",
+			"valueLabel": "Value",
+			"enterValuePlaceholder": "Enter value",
+			"setInfiniteLabel": "Set to infinite",
+			"usageResetLabel": "Usage reset",
+			"usageResetPlaceholder": "Select usage reset period",
+			"usageResetDescription": "The values get reset in the given interval",
+			"softLimitLabel": "Soft Limit",
+			"softLimitDescription": "If enabled, access is always granted, even if the limit is exceeded.",
+			"cancel": "Cancel",
+			"add": "Add",
+			"addAnotherFeature": "Add another feature",
+			"save": "Save",
+			"unlimitedDisplay": "Unlimited",
+			"calculatorAriaLabel": "Display value calculator",
+			"unitsFallback": "units"
+		},
+		"displayCalculator": {
+			"titleFallback": "Display value",
+			"noDisplayUnit": "No display unit configured for this feature.",
+			"title": "Set Entitlement in Display Units",
+			"description": "Enter a value in <strongDisplay>{{displayUnit}}</strongDisplay> to see the equivalent usage limit in <strongBase>{{baseUnit}}</strongBase>.",
+			"valueInDisplayUnitLabel": "Value in Display Unit",
+			"enterValuePlaceholder": "Enter Value",
+			"calculatedUsageLimit": "Calculated Usage Limit:",
+			"conversionFactor": "The conversion factor for this feature is set at <rate>{{rate}}</rate>.",
+			"emDash": "—",
+			"confirm": "OK"
+		},
+		"editDrawer": {
+			"title": "Edit Entitlement: {{name}}",
+			"unknownFeature": "Unknown",
+			"description": "Override entitlement values for this subscription",
+			"featureType": "Feature Type",
+			"usageLimit": "Usage Limit",
+			"enterUsageLimitPlaceholder": "Enter usage limit",
+			"originalPrefix": "Original:",
+			"resetsSuffix": " (resets {{period}})",
+			"setInfiniteLabel": "Set to infinite",
+			"staticValue": "Static Value",
+			"enterStaticPlaceholder": "Enter static value",
+			"notSet": "Not set",
+			"enabledLabel": "Enabled",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"originalBooleanPrefix": "Original:",
+			"cancel": "Cancel",
+			"resetToDefault": "Reset to Default",
+			"saveOverride": "Save Override"
+		},
+		"overridesTable": {
+			"columnFeatureName": "Feature Name",
+			"columnEntityType": "Entity Type",
+			"columnFeatureType": "Feature Type",
+			"columnValue": "Value",
+			"tooltipUsageLimit": "Usage Limit: {{from}} → {{to}}",
+			"tooltipStaticValue": "Static Value: {{from}} → {{to}}",
+			"tooltipStatus": "Status: {{from}} → {{to}}",
+			"valuePlaceholder": "--",
+			"perPeriodSuffix": " / {{period}}",
+			"featureTypeMetered": "Metered",
+			"featureTypeBoolean": "Boolean",
+			"featureTypeStatic": "Static",
+			"overrideAppliedTitle": "Entitlement Override Applied",
+			"edit": "Edit",
+			"noEntitlements": "No entitlements available",
+			"unlimited": "Unlimited",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"unknownFeature": "Unknown Feature"
+		}
+	},
+	"premiumFeature": {
+		"tooltip": "Premium feature",
+		"dialogTitle": "Premium Feature",
+		"dialogDescription": "This is a premium feature. You need to upgrade to a premium plan to use this feature.",
+		"contactUs": "Contact Us"
+	},
+	"priceDialogs": {
+		"billingModels": {
+			"flatFee": "Flat Fee",
+			"package": "Package",
+			"volumeTiered": "Volume Tiered",
+			"slabTiered": "Slab Tiered"
+		},
+		"originalPrice": "Original Price",
+		"billingModel": "Billing Model",
+		"selectBillingModel": "Select billing model",
+		"overrideAmountLabel": "Override Amount ({{unit}})",
+		"enterNewAmountOptional": "Enter new amount (optional)",
+		"tiers": "Tiers",
+		"packageConfiguration": "Package Configuration",
+		"unitsPerPackage": "Units per package",
+		"enterUnitsPerPackage": "Enter units per package",
+		"originalUnitsPerPackage": "Original: {{count}} units per package",
+		"effectiveFromOptional": "Effective From (Optional)",
+		"selectDateScheduledUpdate": "Select date for scheduled update",
+		"schedulePriceChangeHint": "Schedule this price change to take effect on a future date",
+		"priceOverriddenNotice": "This price has been overridden. Review the changes above.",
+		"cancel": "Cancel",
+		"reset": "Reset",
+		"modifyPricingDescription": "Modify the pricing configuration for {{name}}",
+		"updatePricingDescription": "Update the pricing configuration (amount, billing model, tiers) for {{name}}",
+		"thisChargeFallback": "this charge",
+		"overrideTitle": "Override Price Configuration",
+		"updateTitle": "Update Price",
+		"overridePrice": "Override Price",
+		"updateOverride": "Update Override",
+		"updatePrice": "Update Price",
+		"failedUpdateToast": "Failed to update price",
+		"toastScheduled": "{{name}} will be effective from {{date}}.",
+		"toastUpdated": "{{name}} has been updated successfully.",
+		"fallbackPriceName": "Price"
+	}
+}

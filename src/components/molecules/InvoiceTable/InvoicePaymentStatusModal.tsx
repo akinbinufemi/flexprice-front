@@ -3,9 +3,10 @@ import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { Invoice, INVOICE_STATUS } from '@/models/Invoice';
 import InvoiceApi from '@/api/InvoiceApi';
 import { useMutation } from '@tanstack/react-query';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { PAYMENT_STATUS } from '@/constants/payment';
+import { useTranslation } from 'react-i18next';
 interface Props {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -33,46 +34,51 @@ payment status
  */
 
 const InvoicePaymentStatusModal: FC<Props> = ({ isOpen, onOpenChange, invoice }) => {
-	const paymentOptions: CheckboxRadioGroupItem[] = [
-		{
-			label: 'Sucessful',
-			value: 'SUCCEEDED',
-			description: 'Marks the invoice as successfully paid.',
-			disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
-		},
-		{
-			label: 'Failed',
-			value: 'FAILED',
-			description: 'Indicates that the payment attempt was unsuccessful.',
-			disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
-		},
-		{
-			label: 'Pending',
-			value: 'PENDING',
-			description: 'Keeps the invoice in a pending state while awaiting payment.',
-			disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
-		},
-	];
+	const { t } = useTranslation(['billing', 'common']);
 
-	const [status, setstatus] = useState(paymentOptions.find((option) => option.value === invoice?.invoice_status) || paymentOptions[0]);
+	const paymentOptions: CheckboxRadioGroupItem[] = useMemo(
+		() => [
+			{
+				label: t('invoices.details.paymentStatusModal.succeededLabel'),
+				value: 'SUCCEEDED',
+				description: t('invoices.details.paymentStatusModal.succeededDescription'),
+				disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
+			},
+			{
+				label: t('invoices.details.paymentStatusModal.failedLabel'),
+				value: 'FAILED',
+				description: t('invoices.details.paymentStatusModal.failedDescription'),
+				disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
+			},
+			{
+				label: t('invoices.details.paymentStatusModal.pendingLabel'),
+				value: 'PENDING',
+				description: t('invoices.details.paymentStatusModal.pendingDescription'),
+				disabled: invoice?.payment_status === PAYMENT_STATUS.SUCCEEDED || invoice?.invoice_status === INVOICE_STATUS.VOIDED,
+			},
+		],
+		[invoice?.payment_status, invoice?.invoice_status, t],
+	);
+
+	const [status, setstatus] = useState(paymentOptions[0]);
 
 	useEffect(() => {
 		if (invoice) {
 			setstatus(paymentOptions.find((option) => option.value === invoice?.payment_status) || paymentOptions[0]);
 		}
-	}, [invoice]);
+	}, [invoice, invoice?.payment_status, paymentOptions, t]);
 
 	const { mutate: updatePayment, isPending } = useMutation({
-		mutationFn: async ({ invoiceId, status }: { invoiceId: string; status: string }) => {
-			return await InvoiceApi.updateInvoicePaymentStatus(invoiceId, { payment_status: status });
+		mutationFn: async ({ invoiceId, status: nextStatus }: { invoiceId: string; status: string }) => {
+			return await InvoiceApi.updateInvoicePaymentStatus(invoiceId, { payment_status: nextStatus });
 		},
 		async onSuccess() {
-			toast.success('Payment status updated successfully');
+			toast.success(t('invoices.details.paymentStatusModal.toastSuccess'));
 			await refetchQueries(['fetchInvoices']);
 			await refetchQueries(['fetchInvoice']);
 		},
-		onError(error: ServerError) {
-			toast.error(error.error.message || 'Failed to update payment status');
+		onError(error: Error) {
+			toast.error(error.message || t('invoices.details.paymentStatusModal.toastError'));
 		},
 	});
 
@@ -80,9 +86,9 @@ const InvoicePaymentStatusModal: FC<Props> = ({ isOpen, onOpenChange, invoice })
 		<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
 			<div className='card bg-white max-w-lg'>
 				<FormHeader
-					title='Update Payment Status'
+					title={t('invoices.details.updatePaymentStatus')}
 					variant='sub-header'
-					subtitle='Changing the payment status of this invoice will not initiate a payment collection attempt'
+					subtitle={t('invoices.details.paymentStatusModal.subtitle')}
 				/>
 				<Spacer className='!my-6' />
 				<Select
@@ -100,7 +106,7 @@ const InvoicePaymentStatusModal: FC<Props> = ({ isOpen, onOpenChange, invoice })
 						}}
 						variant={'outline'}
 						className='btn btn-primary'>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 
 					<Button
@@ -110,7 +116,7 @@ const InvoicePaymentStatusModal: FC<Props> = ({ isOpen, onOpenChange, invoice })
 							updatePayment({ invoiceId: invoice?.id || '', status: status.value });
 						}}
 						className='btn btn-primary'>
-						Update
+						{t('common:actions.update')}
 					</Button>
 				</div>
 			</div>

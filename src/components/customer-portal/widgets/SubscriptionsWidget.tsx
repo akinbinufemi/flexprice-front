@@ -2,6 +2,7 @@ import { Card, Chip } from '@/components/atoms';
 import { Subscription, SUBSCRIPTION_STATUS } from '@/models/Subscription';
 import { formatDateShort } from '@/utils/common/helper_functions';
 import { Calendar, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import EmptyState from '../EmptyState';
 
 interface SubscriptionsWidgetProps {
@@ -9,19 +10,22 @@ interface SubscriptionsWidgetProps {
 	label?: string;
 }
 
-const getStatusChip = (status: SUBSCRIPTION_STATUS) => {
-	const statusConfig: Record<SUBSCRIPTION_STATUS, { label: string; variant: 'success' | 'warning' | 'info' | 'default' | 'failed' }> = {
-		[SUBSCRIPTION_STATUS.ACTIVE]: { label: 'Active', variant: 'success' },
-		[SUBSCRIPTION_STATUS.TRIALING]: { label: 'Trialing', variant: 'info' },
-		[SUBSCRIPTION_STATUS.CANCELLED]: { label: 'Cancelled', variant: 'failed' },
-		[SUBSCRIPTION_STATUS.INCOMPLETE]: { label: 'Incomplete', variant: 'warning' },
-		[SUBSCRIPTION_STATUS.DRAFT]: { label: 'Draft', variant: 'default' },
-	};
-	const config = statusConfig[status] || { label: status, variant: 'default' as const };
-	return <Chip label={config.label} variant={config.variant} />;
+const SUBSCRIPTION_CHIP_VARIANT: Record<SUBSCRIPTION_STATUS, 'success' | 'warning' | 'info' | 'default' | 'failed'> = {
+	[SUBSCRIPTION_STATUS.ACTIVE]: 'success',
+	[SUBSCRIPTION_STATUS.TRIALING]: 'info',
+	[SUBSCRIPTION_STATUS.CANCELLED]: 'failed',
+	[SUBSCRIPTION_STATUS.INCOMPLETE]: 'warning',
+	[SUBSCRIPTION_STATUS.DRAFT]: 'default',
 };
 
 const SubscriptionsWidget = ({ subscriptions, label }: SubscriptionsWidgetProps) => {
+	const { t } = useTranslation('customer-portal');
+
+	const getStatusChip = (status: SUBSCRIPTION_STATUS) => {
+		const variant = SUBSCRIPTION_CHIP_VARIANT[status] ?? 'default';
+		return <Chip label={t(`subscriptionStatus.${status}`)} variant={variant} />;
+	};
+
 	const activeSubscriptions =
 		subscriptions?.filter(
 			(sub) => sub.subscription_status === SUBSCRIPTION_STATUS.ACTIVE || sub.subscription_status === SUBSCRIPTION_STATUS.TRIALING,
@@ -32,7 +36,7 @@ const SubscriptionsWidget = ({ subscriptions, label }: SubscriptionsWidgetProps)
 			<Card
 				className='rounded-xl p-6'
 				style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
-				<EmptyState title='No active subscriptions' description='You do not have any active subscriptions at the moment' />
+				<EmptyState title={t('subscriptions.emptyTitle')} description={t('subscriptions.emptyDescription')} />
 			</Card>
 		);
 	}
@@ -43,7 +47,7 @@ const SubscriptionsWidget = ({ subscriptions, label }: SubscriptionsWidgetProps)
 			style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
 			<div className='p-6' style={{ borderBottom: '1px solid var(--portal-border, #E9E9E9)' }}>
 				<h3 className='text-base font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-					{label || 'Subscriptions'}
+					{label || t('subscriptions.title')}
 				</h3>
 			</div>
 			<div className='p-6 space-y-4'>
@@ -55,7 +59,7 @@ const SubscriptionsWidget = ({ subscriptions, label }: SubscriptionsWidgetProps)
 						<div className='flex items-start justify-between mb-3'>
 							<div>
 								<h4 className='text-sm font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-									{subscription.plan?.name || 'Unknown Plan'}
+									{subscription.plan?.name || t('subscriptions.unknownPlan')}
 								</h4>
 								{subscription.plan?.description && (
 									<p className='text-xs mt-0.5 line-clamp-1' style={{ color: 'var(--portal-text-secondary, #71717a)' }}>
@@ -75,13 +79,13 @@ const SubscriptionsWidget = ({ subscriptions, label }: SubscriptionsWidgetProps)
 							{subscription.subscription_status === SUBSCRIPTION_STATUS.ACTIVE && (
 								<div className='flex items-center gap-1.5'>
 									<Clock className='h-3.5 w-3.5' />
-									<span>Next billing: {formatDateShort(subscription.current_period_end)}</span>
+									<span>{t('subscriptions.nextBilling', { date: formatDateShort(subscription.current_period_end) })}</span>
 								</div>
 							)}
 							{subscription.subscription_status === SUBSCRIPTION_STATUS.TRIALING && subscription.trial_end && (
 								<div className='flex items-center gap-1.5 text-blue-600'>
 									<Clock className='h-3.5 w-3.5' />
-									<span>Trial ends: {formatDateShort(subscription.trial_end)}</span>
+									<span>{t('subscriptions.trialEnds', { date: formatDateShort(subscription.trial_end) })}</span>
 								</div>
 							)}
 						</div>

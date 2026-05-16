@@ -18,6 +18,7 @@ import InvoiceTaxAssociationTable from '@/components/molecules/InvoiceTaxAssocia
 import { TaxRateOverride } from '@/types/dto/tax';
 import TaxApi from '@/api/TaxApi';
 import { EXPAND } from '@/models/expand';
+import { useTranslation } from 'react-i18next';
 import { TAXRATE_ENTITY_TYPE } from '@/models/Tax';
 
 interface LineItem {
@@ -27,6 +28,7 @@ interface LineItem {
 }
 
 const CreateInvoicePage: FC = () => {
+	const { t } = useTranslation(['billing', 'common']);
 	const { customerId } = useParams();
 	const navigate = useNavigate();
 	const { data: customer, isLoading } = useQuery({
@@ -165,8 +167,8 @@ const CreateInvoicePage: FC = () => {
 			toast.success('Invoice created successfully');
 			navigate(`${RouteNames.customers}/${customerId}/invoice/${data.id}`);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to create invoice');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to create invoice');
 		},
 	});
 
@@ -209,19 +211,24 @@ const CreateInvoicePage: FC = () => {
 		: '--';
 
 	return (
-		<Page heading='Create One-off Invoice'>
+		<Page heading={t('createInvoice.pageTitle')}>
 			<div className='space-y-6'>
 				<div className='rounded-xl border border-gray-300 p-6'>
 					<div className='p-4'>
-						<FormHeader title='Invoice Details' variant='sub-header' titleClassName='font-semibold' />
+						<FormHeader title={t('createInvoice.invoiceDetails')} variant='sub-header' titleClassName='font-semibold' />
 						<Spacer className='!my-6' />
 						<div className='w-full grid grid-cols-3 gap-4'>
+							<p className='text-[#71717A] text-sm'>{t('createInvoice.issueDate')}</p>
 							<p></p>
-							<p></p>
-							<p className='text-[#71717A] text-sm'>Currency</p>
+							<p className='text-[#71717A] text-sm'>{t('createInvoice.currency')}</p>
 						</div>
 						<div className='w-full grid grid-cols-3 gap-4'>
-							<DateTimePicker title='Issue Date' date={issueDate} setDate={setIssueDate} placeholder='Select issue date' />
+							<DateTimePicker
+								title={t('createInvoice.issueDate')}
+								date={issueDate}
+								setDate={setIssueDate}
+								placeholder={t('createInvoice.issueDatePlaceholder')}
+							/>
 							<p></p>
 							<Select value={currency} options={currencyOptions} onChange={setCurrency} />
 						</div>
@@ -238,9 +245,9 @@ const CreateInvoicePage: FC = () => {
 						</div>
 
 						<div>
-							<FormHeader className='!mb-2' title='Bill to' variant='sub-header' titleClassName='font-semibold' />
-							<p className='text-sm text-[#71717A] mb-[2px]'>{customer?.name || '--'}</p>
-							<p className='text-sm text-[#71717A] mb-[2px]'>{customer?.email || '--'}</p>
+							<FormHeader className='!mb-2' title={t('createInvoice.billTo')} variant='sub-header' titleClassName='font-semibold' />
+							<p className='text-sm text-[#71717A] mb-[2px]'>{customer?.name || t('common:labels.na')}</p>
+							<p className='text-sm text-[#71717A] mb-[2px]'>{customer?.email || t('common:labels.na')}</p>
 							<p className='text-sm text-[#71717A] mb-[2px]'>{customerAddress}</p>
 						</div>
 					</div>
@@ -248,21 +255,21 @@ const CreateInvoicePage: FC = () => {
 					<Divider />
 
 					<div className='p-4'>
-						<FormHeader title='Order Details' variant='sub-header' titleClassName='font-semibold' />
+						<FormHeader title={t('createInvoice.orderDetails')} variant='sub-header' titleClassName='font-semibold' />
 						<div className='mt-6 min-w-0'>
 							{lineItems.map((item, index) => (
 								<div key={index} className='mb-4 grid grid-cols-12 items-end gap-3 min-w-0'>
 									<div className='col-span-12 min-w-0 sm:col-span-5'>
 										<Input
-											label={index === 0 ? 'Item Name' : ''}
+											label={index === 0 ? t('createInvoice.itemName') : ''}
 											value={item.display_name}
 											onChange={(value) => handleLineItemChange(index, 'display_name', value)}
-											placeholder='Enter item name'
+											placeholder={t('createInvoice.itemNamePlaceholder')}
 										/>
 									</div>
 									<div className='col-span-4 min-w-0 sm:col-span-2'>
 										<Input
-											label={index === 0 ? 'Quantity' : ''}
+											label={index === 0 ? t('createInvoice.quantity') : ''}
 											value={item.quantity}
 											onChange={(value) => handleLineItemChange(index, 'quantity', value)}
 											variant='integer'
@@ -271,22 +278,22 @@ const CreateInvoicePage: FC = () => {
 									</div>
 									<div className='col-span-4 min-w-0 sm:col-span-2'>
 										<Input
-											label={index === 0 ? 'Amount' : ''}
+											label={index === 0 ? t('createInvoice.amount') : ''}
 											value={item.amount}
 											onChange={(value) => handleLineItemChange(index, 'amount', value)}
 											variant='formatted-number'
 											inputPrefix={getCurrencySymbol(currency)}
-											placeholder='0.00'
+											placeholder={t('creditNotes.amountPlaceholder')}
 										/>
 									</div>
 									<div className='col-span-3 min-w-0 sm:col-span-2'>
 										<Input
-											label={index === 0 ? 'Total' : ''}
+											label={index === 0 ? t('createInvoice.total') : ''}
 											value={`${(parseFloat(item.amount || '0') * parseFloat(item.quantity || '0')).toFixed(2)}`}
 											disabled
 											variant='formatted-number'
 											inputPrefix={getCurrencySymbol(currency)}
-											placeholder='0.00'
+											placeholder={t('creditNotes.amountPlaceholder')}
 										/>
 									</div>
 									<div className='col-span-1 flex items-end justify-end'>
@@ -297,7 +304,7 @@ const CreateInvoicePage: FC = () => {
 								</div>
 							))}
 
-							<AddChargesButton onClick={handleAddLineItem} label='Add Line Item' />
+							<AddChargesButton onClick={handleAddLineItem} label={t('createInvoice.addLineItem')} />
 						</div>
 					</div>
 
@@ -305,14 +312,14 @@ const CreateInvoicePage: FC = () => {
 
 					{/* Tax Section */}
 					<div className='p-4'>
-						<FormHeader title='Taxes' variant='sub-header' titleClassName='font-semibold' />
+						<FormHeader title={t('createInvoice.taxes')} variant='sub-header' titleClassName='font-semibold' />
 						<InvoiceTaxAssociationTable data={taxOverrides} onChange={setTaxOverrides} defaultCurrency={currency} />
 					</div>
 
 					<Divider />
 
 					<div className='p-4'>
-						<FormHeader title='Coupons' variant='sub-header' titleClassName='font-semibold' />
+						<FormHeader title={t('createInvoice.coupons')} variant='sub-header' titleClassName='font-semibold' />
 						{/* <CouponAssociation
 							data={disc}
 							onChange={setCoupons}
@@ -323,22 +330,22 @@ const CreateInvoicePage: FC = () => {
 					<div className='flex justify-end mt-8'>
 						<div className='text-sm text-gray-800 space-y-4 w-1/3 px-2'>
 							<div className='flex justify-between'>
-								<span>Subtotal</span>
+								<span>{t('invoices.details.lineItemsTable.subtotal')}</span>
 								<span>{`${getCurrencySymbol(currency)}${calculateSubtotal().toFixed(2)}`}</span>
 							</div>
 							{calculatedDiscount > 0 && (
 								<div className='flex justify-between text-green-600'>
-									<span>Coupon Discount</span>
+									<span>{t('createInvoice.couponDiscount')}</span>
 									<span>-{`${getCurrencySymbol(currency)}${calculatedDiscount.toFixed(2)}`}</span>
 								</div>
 							)}
 							<div className='flex justify-between'>
-								<span>Tax</span>
+								<span>{t('invoices.details.lineItemsTable.tax')}</span>
 								<span>-</span>
 							</div>
 							<div className='border-t'></div>
 							<div className='flex justify-between font-bold'>
-								<span>Total Amount</span>
+								<span>{t('creditNotes.totalAmountLabel')}</span>
 								<span>{`${getCurrencySymbol(currency)}${(finalTotal - calculatedDiscount).toFixed(2)}`}</span>
 							</div>
 						</div>
@@ -347,10 +354,10 @@ const CreateInvoicePage: FC = () => {
 
 				<div className='flex justify-end p-4'>
 					<Button variant='outline' className='mr-4' onClick={handleCancel}>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={handleSubmit} disabled={isPending}>
-						{isPending ? 'Creating...' : 'Create Invoice'}
+						{isPending ? t('createInvoice.creating') : t('createInvoice.createInvoice')}
 					</Button>
 				</div>
 			</div>

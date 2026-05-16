@@ -4,35 +4,34 @@ import { Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/atoms';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface JsonCodeBlockProps {
-	value: any;
+	value: unknown;
 	title?: string;
 	onCopy?: () => void;
 	className?: string;
 }
 
 const JsonCodeBlock: FC<JsonCodeBlockProps> = ({ value, title, onCopy, className }) => {
+	const { t } = useTranslation(['developers', 'common']);
+
 	const handleCopy = () => {
 		if (onCopy) {
 			onCopy();
 		} else {
 			navigator.clipboard.writeText(JSON.stringify(value ?? {}, null, 2));
-			toast.success('Copied to clipboard!');
+			toast.success(t('common:toast.copySuccess'));
 		}
 	};
 
 	return (
 		<div className={cn('rounded-lg overflow-hidden border border-gray-200 bg-gray-50', className)}>
 			<div className='px-4 py-2 border-b border-gray-200 bg-white flex items-center justify-between'>
-				{title ? (
-					<p className='text-xs font-medium text-foreground'>{title}</p>
-				) : (
-					<p className='text-xs font-medium text-foreground'>Payload</p>
-				)}
+				<p className='text-xs font-medium text-foreground'>{title || t('common:labels.payload')}</p>
 				<Button onClick={handleCopy} variant='ghost' size='sm' className='h-7'>
-					<Copy size={12} className='mr-1' />
-					<span className='text-xs'>Copy</span>
+					<Copy size={12} className='me-1' />
+					<span className='text-xs'>{t('common:actions.copy')}</span>
 				</Button>
 			</div>
 			<div className='relative'>

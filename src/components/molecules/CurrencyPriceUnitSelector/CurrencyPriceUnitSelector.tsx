@@ -15,9 +15,10 @@ import { ENTITY_STATUS } from '@/models';
 import { cn } from '@/lib/utils';
 import { Loader } from '@/components/atoms';
 import { Coins, Layers } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-	value?: string; // Currency code or price unit code
+	value?: string;
 	onChange?: (selection: CurrencyPriceUnitSelection) => void;
 	label?: string;
 	description?: string;
@@ -27,17 +28,11 @@ interface Props {
 	className?: string;
 }
 
-const CurrencyPriceUnitSelector: FC<Props> = ({
-	value,
-	onChange,
-	label = 'Currency',
-	description,
-	error,
-	placeholder = 'Select currency',
-	disabled = false,
-	className,
-}) => {
-	// Fetch price units (only published/active ones)
+const CurrencyPriceUnitSelector: FC<Props> = ({ value, onChange, label, description, error, placeholder, disabled = false, className }) => {
+	const { t } = useTranslation(['catalog', 'common']);
+	const resolvedLabel = label ?? t('catalog:priceUnits.selector.currency');
+	const resolvedPlaceholder = placeholder ?? t('catalog:priceUnits.selector.selectCurrency');
+
 	const {
 		data: priceUnitsData,
 		isLoading,
@@ -53,14 +48,12 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 		},
 	});
 
-	// Combine currencies and price units into unified options (price units first)
 	const allOptions: CurrencyPriceUnitOption[] = useMemo(() => {
 		const currencyOpts = currencyOptions.map(currencyToOption);
 		const priceUnitOpts = (priceUnitsData?.items || []).map(priceUnitToOption);
 		return [...priceUnitOpts, ...currencyOpts];
 	}, [priceUnitsData]);
 
-	// Separate into currencies and price units for grouped display
 	const currencyOptionsList = useMemo(() => {
 		return allOptions.filter(isCurrencyOption);
 	}, [allOptions]);
@@ -69,7 +62,6 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 		return allOptions.filter(isPriceUnitOption);
 	}, [allOptions]);
 
-	// Find the selected option
 	const selectedOption = useMemo(() => {
 		if (!value) return null;
 		return allOptions.find((opt) => opt.value === value) || null;
@@ -91,17 +83,16 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 
 	return (
 		<div className={cn('space-y-1', className)}>
-			{/* Label */}
-			{label && (
+			{resolvedLabel && (
 				<label className={cn('block text-sm font-medium text-zinc break-words', disabled ? 'text-zinc-500' : 'text-zinc-950')}>
-					{label}
+					{resolvedLabel}
 				</label>
 			)}
 
 			<Select value={value || ''} onValueChange={handleValueChange} disabled={disabled || isLoading}>
 				<SelectTrigger className={cn(disabled && 'cursor-not-allowed')}>
 					<span className={cn('truncate', value ? '' : 'text-muted-foreground')}>
-						{isLoading ? 'Loading...' : selectedOption ? selectedOption.label : placeholder}
+						{isLoading ? t('common:table.loading') : selectedOption ? selectedOption.label : resolvedPlaceholder}
 					</span>
 				</SelectTrigger>
 				<SelectContent>
@@ -111,14 +102,13 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 						</div>
 					) : isError ? (
 						<SelectItem value='error' disabled>
-							Error loading options
+							{t('common:search.errorLoadingOptions')}
 						</SelectItem>
 					) : (
 						<>
-							{/* Custom Currencies Group */}
 							{priceUnitOptionsList.length > 0 && (
 								<SelectGroup>
-									<SelectLabel>Custom</SelectLabel>
+									<SelectLabel>{t('catalog:priceUnits.selector.custom')}</SelectLabel>
 									{priceUnitOptionsList.map((option) => (
 										<SelectItem key={option.value} value={option.value}>
 											<div className='flex items-center gap-2'>
@@ -138,7 +128,7 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 							{currencyOptionsList.length > 0 &&
 								(priceUnitOptionsList.length > 0 ? (
 									<SelectGroup>
-										<SelectLabel>Standard</SelectLabel>
+										<SelectLabel>{t('catalog:priceUnits.selector.standard')}</SelectLabel>
 										{currencyOptionsList.map((option) => (
 											<SelectItem key={option.value} value={option.value}>
 												<div className='flex items-center gap-2'>
@@ -156,10 +146,9 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 									))
 								))}
 
-							{/* No options */}
 							{currencyOptionsList.length === 0 && priceUnitOptionsList.length === 0 && (
 								<SelectItem value='no-options' disabled>
-									No options available
+									{t('common:search.noOptionsAvailable')}
 								</SelectItem>
 							)}
 						</>
@@ -167,10 +156,8 @@ const CurrencyPriceUnitSelector: FC<Props> = ({
 				</SelectContent>
 			</Select>
 
-			{/* Description */}
 			{description && <p className='text-sm text-muted-foreground break-words'>{description}</p>}
 
-			{/* Error Message */}
 			{error && <p className='text-sm text-destructive break-words'>{error}</p>}
 		</div>
 	);

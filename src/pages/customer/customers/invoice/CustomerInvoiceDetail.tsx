@@ -22,12 +22,15 @@ import { getPaymentStatusChip } from '@/components/molecules/InvoiceTable/Invoic
 import { INVOICE_STATUS, INVOICE_TYPE } from '@/models/Invoice';
 import { getTypographyClass } from '@/lib/typography';
 import RedirectCell from '@/components/molecules/Table/RedirectCell';
+import { useTranslation } from 'react-i18next';
 interface Props {
 	invoice_id: string;
 	breadcrumb_index: number;
 }
 
 const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
+	const { t } = useTranslation(['billing', 'common']);
+	const na = t('common:labels.na');
 	// const { invoice_id } = useParams<{ invoice_id: string }>();
 	const [state, setState] = useState({
 		isPaymentModalOpen: false,
@@ -69,8 +72,8 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 		onSuccess: () => {
 			toast.success('Invoice downloaded');
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error?.message || 'Unable to download invoice');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Unable to download invoice');
 		},
 	});
 
@@ -171,27 +174,27 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 				<div ref={invoiceref} className=' rounded-xl border border-gray-300 p-6'>
 					<div className='p-4'>
 						<div className='w-full flex justify-between items-center'>
-							<p className={cn(getTypographyClass('section-title'), 'text-xl mb-0')}>Invoice Details</p>
+							<p className={cn(getTypographyClass('section-title'), 'text-xl mb-0')}>{t('createInvoice.invoiceDetails')}</p>
 							<div className='flex gap-4 items-center'>
 								<Button data-html2canvas-ignore='true' onClick={() => setIsDownloadFormatOpen(true)}>
 									<Download />
-									<span>Download</span>
+									<span>{t('common:actions.download')}</span>
 								</Button>
 								<InvoiceTableMenu data={data} />
 							</div>
 						</div>
 						<Spacer className='!my-10' />
 						<div className='w-full grid grid-cols-4 gap-4 text-[#09090B] text-sm font-medium'>
-							<p>Invoice Number</p>
-							<p>Date of Issue</p>
-							<p>Date Due</p>
-							<p>Payment Status</p>
+							<p>{t('creditNotes.detailPage.invoiceNumber')}</p>
+							<p>{t('invoices.detailLabels.dateOfIssue')}</p>
+							<p>{t('invoices.detailLabels.dateDue')}</p>
+							<p>{t('invoices.detailLabels.paymentStatus')}</p>
 						</div>
 						<div className='w-full grid grid-cols-4 gap-4 text-[#71717A] text-sm'>
 							<p>{data?.invoice_number}</p>
 							<p>{formatDate(data?.issue_date ?? data?.created_at ?? '')}</p>
-							<p>{data?.due_date ? formatDate(data?.due_date ?? '') : '--'}</p>
-							<p>{getPaymentStatusChip(data?.payment_status ?? '')}</p>
+							<p>{data?.due_date ? formatDate(data?.due_date ?? '') : na}</p>
+							<p>{getPaymentStatusChip(data?.payment_status ?? '', t)}</p>
 						</div>
 					</div>
 					<div className='my-3 mx-3'>
@@ -203,30 +206,35 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 							<FormHeader className='!mb-2' title={user?.tenant.name} variant='sub-header' titleClassName='font-semibold' />
 							<p className={customerInfoClass}>{user?.tenant.name}</p>
 							<p className={customerInfoClass}>{user?.email}</p>
-							<p className={cn(customerInfoClass, 'max-w-xs')}>{tenantAddress || '--'}</p>
+							<p className={cn(customerInfoClass, 'max-w-xs')}>{tenantAddress || na}</p>
 						</div>
 
 						<div>
 							<FormHeader
 								className='!mb-2'
-								title={hasSubscriptionCustomer ? 'Billing Entity' : 'Bill to'}
+								title={hasSubscriptionCustomer ? t('invoices.detailLabels.billingEntity') : t('createInvoice.billTo')}
 								variant='sub-header'
 								titleClassName='font-semibold'
 							/>
 							<RedirectCell redirectUrl={`${RouteNames.customers}/${data?.customer?.id}`}>
-								<p className={customerInfoClass}>{data?.customer?.name || '--'}</p>
+								<p className={customerInfoClass}>{data?.customer?.name || na}</p>
 							</RedirectCell>
-							<p className={customerInfoClass}>{data?.customer?.email || '--'}</p>
-							<p className={customerInfoClass}>{customerAddress || '--'}</p>
+							<p className={customerInfoClass}>{data?.customer?.email || na}</p>
+							<p className={customerInfoClass}>{customerAddress || na}</p>
 						</div>
 
 						{hasSubscriptionCustomer && (
 							<div>
-								<FormHeader className='!mb-2' title='Subscription Customer' variant='sub-header' titleClassName='font-semibold' />
+								<FormHeader
+									className='!mb-2'
+									title={t('invoices.detailLabels.subscriptionCustomer')}
+									variant='sub-header'
+									titleClassName='font-semibold'
+								/>
 								<RedirectCell redirectUrl={`${RouteNames.customers}/${subscriptionCustomer?.id ?? data?.subscription_customer_id}`}>
-									<p className={customerInfoClass}>{subscriptionCustomer?.name || '--'}</p>
+									<p className={customerInfoClass}>{subscriptionCustomer?.name || na}</p>
 								</RedirectCell>
-								<p className={customerInfoClass}>{subscriptionCustomer?.email || '--'}</p>
+								<p className={customerInfoClass}>{subscriptionCustomer?.email || na}</p>
 								<p className={customerInfoClass}>
 									{subscriptionCustomer
 										? [
@@ -238,14 +246,14 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 												subscriptionCustomer.address_country,
 											]
 												.filter(Boolean)
-												.join(' ') || '--'
-										: '--'}
+												.join(' ') || na
+										: na}
 								</p>
 							</div>
 						)}
 					</div>
 					<InvoiceLineItemTable
-						title='Order Details'
+						title={t('createInvoice.orderDetails')}
 						subtotal={data?.subtotal}
 						total={data?.total}
 						total_prepaid_credits_applied={data?.total_prepaid_credits_applied}
@@ -265,7 +273,7 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 			{/* applied taxes if exists */}
 			{data?.taxes?.length && data?.taxes?.length > 0 && (
 				<Card>
-					<CardHeader title='Applied Taxes' />
+					<CardHeader title={t('invoices.detailLabels.appliedTaxes')} />
 					<div className='p-4'>
 						<AppliedTaxesTable data={data.taxes} />
 					</div>
@@ -275,13 +283,13 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 			{/* metadata section - only show if metadata exists */}
 			{metadata && Object.keys(metadata).length > 0 && (
 				<Card>
-					<CardHeader title='Metadata' />
+					<CardHeader title={t('taxes.metadata')} />
 					<div className='p-4'>
 						<table className='w-full table-fixed'>
 							<thead>
 								<tr className='border-b border-gray-200'>
-									<th className='text-left py-3 px-4 text-sm font-large text-[#09090B] w-1/3'>Key</th>
-									<th className='text-left py-3 px-4 text-sm font-large text-[#09090B] w-2/3'>Value</th>
+									<th className='text-left py-3 px-4 text-sm font-large text-[#09090B] w-1/3'>{t('common:form.key')}</th>
+									<th className='text-left py-3 px-4 text-sm font-large text-[#09090B] w-2/3'>{t('common:form.value')}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -291,7 +299,7 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 											{key}
 										</td>
 										<td className='py-3 px-4 text-sm text-[#71717A] break-words align-top' title={value}>
-											{value || '--'}
+											{value || na}
 										</td>
 									</tr>
 								))}

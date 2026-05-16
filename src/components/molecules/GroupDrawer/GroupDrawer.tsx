@@ -1,12 +1,13 @@
 import { Button, Input, Sheet, Spacer, Select } from '@/components/atoms';
 import { Group } from '@/models/Group';
 import { GROUP_ENTITY_TYPE } from '@/models/Group';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { GroupApi } from '@/api/GroupApi';
 import toast from 'react-hot-toast';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { CreateGroupRequest, UpdateGroupRequest, GroupResponse } from '@/types/dto';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: Group | null;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const GroupDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 
 	const [formData, setFormData] = useState<CreateGroupRequest & { id?: string }>({
@@ -28,27 +30,25 @@ const GroupDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 
 	const [errors, setErrors] = useState<Partial<Record<keyof CreateGroupRequest, string>>>({});
 
-	const { mutate: updateGroup, isPending } = useMutation<
-		GroupResponse,
-		ServerError,
-		(CreateGroupRequest | UpdateGroupRequest) & { id?: string }
-	>({
-		mutationFn: (vars) => {
-			const { id, ...rest } = vars;
-			if (isEdit && id) {
-				return GroupApi.updateGroup(id, rest as UpdateGroupRequest);
-			}
-			return GroupApi.createGroup(rest as CreateGroupRequest);
+	const { mutate: updateGroup, isPending } = useMutation<GroupResponse, Error, (CreateGroupRequest | UpdateGroupRequest) & { id?: string }>(
+		{
+			mutationFn: (vars) => {
+				const { id, ...rest } = vars;
+				if (isEdit && id) {
+					return GroupApi.updateGroup(id, rest as UpdateGroupRequest);
+				}
+				return GroupApi.createGroup(rest as CreateGroupRequest);
+			},
+			onSuccess: () => {
+				toast.success(isEdit ? t('catalog:groups.toast.updated') : t('catalog:groups.toast.created'));
+				onOpenChange?.(false);
+				refetchQueries(refetchQueryKeys);
+			},
+			onError: (error: Error) => {
+				toast.error(error.message || (isEdit ? t('catalog:groups.toast.failedUpdate') : t('catalog:groups.toast.failedCreate')));
+			},
 		},
-		onSuccess: () => {
-			toast.success(isEdit ? 'Group updated successfully' : 'Group created successfully');
-			onOpenChange?.(false);
-			refetchQueries(refetchQueryKeys);
-		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || `Failed to ${isEdit ? 'update' : 'create'} group. Please try again.`);
-		},
-	});
+	);
 
 	useEffect(() => {
 		if (data) {
@@ -72,11 +72,11 @@ const GroupDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 		const newErrors: Partial<Record<keyof CreateGroupRequest, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('catalog:groups.validation.nameRequired');
 		}
 
 		if (!formData.lookup_key?.trim()) {
-			newErrors.lookup_key = 'Lookup key is required';
+			newErrors.lookup_key = t('catalog:groups.validation.lookupKeyRequired');
 		}
 
 		setErrors(newErrors);
@@ -97,23 +97,26 @@ const GroupDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 		updateGroup(payload);
 	};
 
-	const entityTypeOptions = [
-		{ value: GROUP_ENTITY_TYPE.PRICE, label: 'Price' },
-		{ value: GROUP_ENTITY_TYPE.FEATURE, label: 'Feature' },
-	];
+	const entityTypeOptions = useMemo(
+		() => [
+			{ value: GROUP_ENTITY_TYPE.PRICE, label: t('catalog:groups.drawer.entityPrice') },
+			{ value: GROUP_ENTITY_TYPE.FEATURE, label: t('catalog:groups.drawer.entityFeature') },
+		],
+		[t],
+	);
 
 	return (
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Group' : 'Create Group'}
-			description={isEdit ? 'Enter group details to update the group.' : 'Enter group details to create a new group.'}
+			title={isEdit ? t('catalog:groups.drawer.editTitle') : t('catalog:groups.drawer.createTitle')}
+			description={isEdit ? t('catalog:groups.drawer.descriptionEdit') : t('catalog:groups.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter a name for the group'
-				description={'A descriptive name for this group.'}
-				label='Group Name'
+				placeholder={t('catalog:groups.drawer.namePlaceholder')}
+				description={t('catalog:groups.drawer.nameHelp')}
+				label={t('catalog:groups.drawer.groupName')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -127,28 +130,28 @@ const GroupDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Lookup Key'
+				label={t('catalog:shared.lookupKey')}
 				disabled={isEdit}
 				error={errors.lookup_key}
 				onChange={(e) => setFormData({ ...formData, lookup_key: e })}
 				value={formData.lookup_key}
-				placeholder='Enter a slug for the group'
-				description={'A system identifier used for API calls and integrations.'}
+				placeholder={t('catalog:groups.drawer.lookupPlaceholder')}
+				description={t('catalog:shared.lookupKeyDescription')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Select
-				label='Entity Type'
+				label={t('catalog:groups.drawer.entityType')}
 				value={formData.entity_type}
 				onChange={(value) => setFormData({ ...formData, entity_type: value as GROUP_ENTITY_TYPE })}
 				options={entityTypeOptions}
-				placeholder='Select entity type'
-				description='Choose the type of entity this group will contain.'
+				placeholder={t('catalog:groups.drawer.selectEntityType')}
+				description={t('catalog:groups.drawer.entityTypeHelp')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Button isLoading={isPending} disabled={isPending || !formData.name?.trim() || !formData.lookup_key?.trim()} onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create Group'}
+				{isEdit ? t('common:actions.save') : t('catalog:groups.drawer.createGroup')}
 			</Button>
 		</Sheet>
 	);

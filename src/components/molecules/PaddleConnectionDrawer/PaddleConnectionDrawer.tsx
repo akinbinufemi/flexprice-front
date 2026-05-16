@@ -1,5 +1,6 @@
 import { config } from '@/config/config';
 import { FC, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 import { useUser } from '@/hooks/UserContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -37,7 +38,10 @@ interface PaddleFormData {
 	redirect_url: string;
 }
 
+const PADDLE_PROVIDER = 'Paddle';
+
 const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
+	const { t } = useTranslation('settings');
 	const { user } = useUser();
 	const { activeEnvironment } = useEnvironment();
 
@@ -90,23 +94,23 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 		const newErrors: Record<string, string> = {};
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'Connection name is required';
+			newErrors.name = t('connection.validation.nameRequired');
 		}
 
 		if (!connection) {
 			if (!formData.api_key.trim()) {
-				newErrors.api_key = 'API key is required';
+				newErrors.api_key = t('connection.validation.apiKeyRequired');
 			}
 			if (!formData.webhook_secret.trim()) {
-				newErrors.webhook_secret = 'Webhook secret is required';
+				newErrors.webhook_secret = t('connection.validation.webhookSecretRequired');
 			}
 			if (!formData.client_side_token.trim()) {
-				newErrors.client_side_token = 'Client-side token is required';
+				newErrors.client_side_token = t('connection.validation.clientSideTokenRequired');
 			}
 		}
 
 		if (formData.redirect_url.trim() && !/^https?:\/\/.+/.test(formData.redirect_url.trim())) {
-			newErrors.redirect_url = 'Must be a valid URL starting with http:// or https://';
+			newErrors.redirect_url = t('connection.validation.redirectUrlInvalid');
 		}
 
 		setErrors(newErrors);
@@ -133,13 +137,13 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 			return await ConnectionApi.Create(payload as Parameters<typeof ConnectionApi.Create>[0]);
 		},
 		onSuccess: (response) => {
-			toast.success('Paddle connection created successfully');
+			toast.success(t('connection.toast.created', { provider: PADDLE_PROVIDER }));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const message = error instanceof Error ? error.message : undefined;
-			toast.error(message || 'Failed to create connection');
+		onError: (error: Error) => {
+			const message = error.message;
+			toast.error(message || t('connection.toast.failedToCreate'));
 		},
 	});
 
@@ -153,13 +157,13 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 			return await ConnectionApi.Update(connection!.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('Paddle connection updated successfully');
+			toast.success(t('connection.toast.updated', { provider: PADDLE_PROVIDER }));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const message = error instanceof Error ? error.message : undefined;
-			toast.error(message || 'Failed to update connection');
+		onError: (error: Error) => {
+			const message = error.message;
+			toast.error(message || t('connection.toast.failedToUpdate'));
 		},
 	});
 
@@ -179,7 +183,7 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 		if (webhookUrl) {
 			navigator.clipboard.writeText(webhookUrl);
 			setWebhookCopied(true);
-			toast.success('Webhook URL copied to clipboard!');
+			toast.success(t('connection.toast.webhookUrlCopied'));
 			setTimeout(() => setWebhookCopied(false), 2000);
 		}
 	};
@@ -188,77 +192,81 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? 'Edit Paddle Connection' : 'Connect to Paddle'}
-			description='Configure your Paddle integration with the required credentials.'
+			title={
+				connection
+					? t('integrationDrawer.title.edit', { providerName: PADDLE_PROVIDER })
+					: t('integrationDrawer.title.connect', { providerName: PADDLE_PROVIDER })
+			}
+			description={t('connection.paddle.description')}
 			size='lg'>
 			<div className='space-y-6 mt-4'>
 				<Input
-					label='Connection Name'
-					placeholder='e.g., Paddle Production, Paddle Sandbox'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('connection.paddle.connectionPlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
-					description='A friendly name to identify this Paddle connection'
+					description={t('connection.paddle.connectionHint')}
 				/>
 
 				{!connection && (
 					<>
 						<Input
-							label='API Key'
-							placeholder='Enter your Paddle API key'
+							label={t('connection.labels.apiKey')}
+							placeholder={t('connection.paddle.apiKeyPlaceholder')}
 							type='password'
 							value={formData.api_key}
 							onChange={(value) => handleChange('api_key', value)}
 							error={errors.api_key}
-							description='Your Paddle API key from Developer Tools > Authentication'
+							description={t('connection.paddle.apiKeyHint')}
 						/>
 
 						<Input
-							label='Client-Side Token'
-							placeholder='live_... or test_...'
+							label={t('connection.paddle.clientSideToken')}
+							placeholder={t('connection.paddle.clientSidePlaceholder')}
 							type='password'
 							value={formData.client_side_token}
 							onChange={(value) => handleChange('client_side_token', value)}
 							error={errors.client_side_token}
-							description='Paddle client-side token from Developer Tools > Authentication. Used to initialize Paddle.js on the checkout page.'
+							description={t('connection.paddle.clientSideHint')}
 						/>
 					</>
 				)}
 
 				<Input
-					label='Redirect URL'
-					placeholder='https://your-app.com/payment-success'
+					label={t('connection.paddle.redirectUrl')}
+					placeholder={t('connection.paddle.redirectUrlPlaceholder')}
 					value={formData.redirect_url}
 					onChange={(value) => handleChange('redirect_url', value)}
 					error={errors.redirect_url}
-					description='URL customers are redirected to after a successful payment (optional)'
+					description={t('connection.paddle.redirectUrlHint')}
 				/>
 
 				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-blue-800 mb-3'>Webhook Configuration</h3>
+					<h3 className='text-sm font-medium text-blue-800 mb-3'>{t('connection.webhook.sectionTitle')}</h3>
 
 					{!connection && (
 						<div className='mb-4'>
 							<Input
-								label='Webhook Secret'
-								placeholder='pdl_ntfset_...'
+								label={t('connection.webhook.secretLabel')}
+								placeholder={t('connection.paddle.webhookSecretPlaceholder')}
 								type='password'
 								value={formData.webhook_secret}
 								onChange={(value) => handleChange('webhook_secret', value)}
 								error={errors.webhook_secret}
-								description='The webhook secret for verifying webhook authenticity'
+								description={t('connection.webhook.secretDescription')}
 							/>
 						</div>
 					)}
 
 					<div className='mb-4'>
-						<label className='text-sm font-medium text-blue-800 mb-2 block'>Webhook URL</label>
-						<p className='text-xs text-blue-700 mb-3'>Set up this webhook URL in your Paddle dashboard to receive event notifications:</p>
+						<label className='text-sm font-medium text-blue-800 mb-2 block'>{t('connection.webhook.url')}</label>
+						<p className='text-xs text-blue-700 mb-3'>{t('connection.paddle.webhookIntro')}</p>
 						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md'>
 							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{webhookUrl}</code>
 							<Button type='button' size='xs' variant='outline' onClick={handleCopyWebhookUrl} className='flex items-center gap-1'>
 								{webhookCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-								{webhookCopied ? 'Copied!' : 'Copy'}
+								{webhookCopied ? t('connection.webhook.copied') : t('connection.webhook.copy')}
 							</Button>
 						</div>
 					</div>
@@ -269,16 +277,16 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 							onClick={() => setIsWebhookEventsExpanded(!isWebhookEventsExpanded)}
 							className='flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-900 mb-2'>
 							{isWebhookEventsExpanded ? <ChevronDown className='w-4 h-4' /> : <ChevronRight className='w-4 h-4' />}
-							Webhook Events to Subscribe
+							{t('connection.webhook.eventsToSubscribe')}
 						</button>
 
 						{isWebhookEventsExpanded && (
 							<div className='mt-2 p-3 bg-white border border-blue-200 rounded-md'>
-								<p className='text-xs text-blue-700 mb-3'>Subscribe to these events in your Paddle dashboard:</p>
+								<p className='text-xs text-blue-700 mb-3'>{t('connection.paddle.webhookEventsIntro')}</p>
 								<div className='space-y-1'>
 									<div className='flex items-center gap-2 text-xs text-blue-700'>
 										<div className='w-1.5 h-1.5 bg-blue-500 rounded-full'></div>
-										<code className='font-mono'>transactions.completed</code>
+										<code className='font-mono'>{t('connection.paddle.webhookEventTransactionsCompleted')}</code>
 									</div>
 								</div>
 							</div>
@@ -290,7 +298,7 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 
 				<div className='flex gap-2'>
 					<Button type='button' variant='outline' onClick={() => onOpenChange(false)} className='flex-1' disabled={isPending}>
-						Cancel
+						{t('connection.buttons.cancel')}
 					</Button>
 					<Button
 						type='button'
@@ -302,7 +310,7 @@ const PaddleConnectionDrawer: FC<PaddleConnectionDrawerProps> = ({ isOpen, onOpe
 						className='flex-1'
 						isLoading={isPending}
 						disabled={isPending}>
-						{connection ? 'Update Connection' : 'Create Connection'}
+						{connection ? t('connection.buttons.updateConnection') : t('connection.buttons.createConnection')}
 					</Button>
 				</div>
 			</div>

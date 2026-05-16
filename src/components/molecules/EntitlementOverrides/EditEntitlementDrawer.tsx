@@ -3,6 +3,7 @@ import { Sheet, Label, Input, Button, Checkbox } from '@/components/atoms';
 import { Switch } from '@/components/ui/switch';
 import { FEATURE_TYPE } from '@/models';
 import { EntitlementOverrideRequest } from '@/types/dto/Subscription';
+import { useTranslation } from 'react-i18next';
 
 interface EditEntitlementDrawerProps {
 	isOpen: boolean;
@@ -13,6 +14,7 @@ interface EditEntitlementDrawerProps {
 }
 
 const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenChange, entitlement, onSave, onReset }) => {
+	const { t } = useTranslation('catalog');
 	const [usageLimit, setUsageLimit] = useState<string>('');
 	const [isInfinite, setIsInfinite] = useState<boolean>(false);
 	const [staticValue, setStaticValue] = useState<string>('');
@@ -20,8 +22,6 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 
 	useEffect(() => {
 		if (entitlement) {
-			// Set values from display fields (which include overrides) if available, otherwise use original values
-			// Use 'displayUsageLimit' in entitlement to check if the property exists (including null for unlimited)
 			const currentLimit = 'displayUsageLimit' in entitlement ? entitlement.displayUsageLimit : entitlement.usage_limit;
 			const isCurrentlyInfinite = currentLimit === null;
 
@@ -39,10 +39,8 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 			entitlement_id: entitlement.id,
 		};
 
-		// Only include fields that are relevant to the feature type
 		if (entitlement.feature_type === FEATURE_TYPE.METERED) {
 			if (isInfinite) {
-				// Set to null for infinite/unlimited
 				override.usage_limit = null;
 			} else {
 				const parsedLimit = parseInt(usageLimit, 10);
@@ -66,7 +64,6 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 	const handleReset = () => {
 		if (!entitlement || !onReset) return;
 
-		// Reset to original values
 		const originalLimit = entitlement.usage_limit;
 		const isOriginallyInfinite = originalLimit === null;
 
@@ -75,7 +72,6 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 		setStaticValue(entitlement.static_value || '');
 		setIsEnabled(entitlement.is_enabled ?? true);
 
-		// Remove the override
 		onReset(entitlement.id);
 		onOpenChange(false);
 	};
@@ -83,8 +79,6 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 	const handleOpenChange = (open: boolean) => {
 		onOpenChange(open);
 		if (!open) {
-			// Reset form when closing - use display values if available
-			// Use 'displayUsageLimit' in entitlement to check if the property exists (including null for unlimited)
 			const currentLimit = entitlement && 'displayUsageLimit' in entitlement ? entitlement.displayUsageLimit : entitlement?.usage_limit;
 			const isCurrentlyInfinite = currentLimit === null;
 
@@ -97,39 +91,43 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 
 	if (!entitlement) return null;
 
+	const featureName = entitlement.feature?.name || t('entitlements.editDrawer.unknownFeature');
+
 	return (
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={handleOpenChange}
-			title={`Edit Entitlement: ${entitlement.feature?.name || 'Unknown'}`}
-			description='Override entitlement values for this subscription'
+			title={t('entitlements.editDrawer.title', { name: featureName })}
+			description={t('entitlements.editDrawer.description')}
 			size='md'>
 			<div className='space-y-5 p-6'>
 				<div className='space-y-2'>
-					<Label label='Feature Type' />
+					<Label label={t('entitlements.editDrawer.featureType')} />
 					<div className='text-sm text-gray-600 capitalize'>{entitlement.feature_type?.toLowerCase()}</div>
 				</div>
 
 				{entitlement.feature_type === FEATURE_TYPE.METERED && (
 					<div className='space-y-4'>
 						<div className='space-y-3'>
-							<Label label='Usage Limit' />
+							<Label label={t('entitlements.editDrawer.usageLimit')} />
 							<Input
 								type='number'
-								value={isInfinite ? 'Unlimited' : usageLimit}
+								value={isInfinite ? t('entitlements.addDrawer.unlimitedDisplay') : usageLimit}
 								onChange={(value) => setUsageLimit(value)}
-								placeholder='Enter usage limit'
+								placeholder={t('entitlements.editDrawer.enterUsageLimitPlaceholder')}
 								disabled={isInfinite}
 							/>
 							<div className='text-xs text-gray-500'>
-								Original: {entitlement.usage_limit === null ? 'Unlimited' : entitlement.usage_limit}
-								{entitlement.usage_reset_period && ` (resets ${entitlement.usage_reset_period.toLowerCase()})`}
+								{t('entitlements.editDrawer.originalPrefix')}{' '}
+								{entitlement.usage_limit === null ? t('entitlements.addDrawer.unlimitedDisplay') : entitlement.usage_limit}
+								{entitlement.usage_reset_period &&
+									t('entitlements.editDrawer.resetsSuffix', { period: entitlement.usage_reset_period.toLowerCase() })}
 							</div>
 						</div>
 
 						<Checkbox
 							id='set-infinite'
-							label='Set to infinite'
+							label={t('entitlements.editDrawer.setInfiniteLabel')}
 							checked={isInfinite}
 							onCheckedChange={(checked) => {
 								setIsInfinite(checked);
@@ -143,33 +141,42 @@ const EditEntitlementDrawer: FC<EditEntitlementDrawerProps> = ({ isOpen, onOpenC
 
 				{entitlement.feature_type === FEATURE_TYPE.STATIC && (
 					<div className='space-y-2'>
-						<Label label='Static Value' />
-						<Input value={staticValue} onChange={(value) => setStaticValue(value)} placeholder='Enter static value' />
-						<div className='text-xs text-gray-500'>Original: {entitlement.static_value || 'Not set'}</div>
+						<Label label={t('entitlements.editDrawer.staticValue')} />
+						<Input
+							value={staticValue}
+							onChange={(value) => setStaticValue(value)}
+							placeholder={t('entitlements.editDrawer.enterStaticPlaceholder')}
+						/>
+						<div className='text-xs text-gray-500'>
+							{t('entitlements.editDrawer.originalPrefix')} {entitlement.static_value || t('entitlements.editDrawer.notSet')}
+						</div>
 					</div>
 				)}
 
 				{entitlement.feature_type === FEATURE_TYPE.BOOLEAN && (
 					<div className='space-y-2'>
-						<Label label='Enabled' />
+						<Label label={t('entitlements.editDrawer.enabledLabel')} />
 						<div className='flex items-center gap-2'>
 							<Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
-							<span className='text-sm'>{isEnabled ? 'Enabled' : 'Disabled'}</span>
+							<span className='text-sm'>{isEnabled ? t('entitlements.editDrawer.enabled') : t('entitlements.editDrawer.disabled')}</span>
 						</div>
-						<div className='text-xs text-gray-500'>Original: {entitlement.is_enabled ? 'Enabled' : 'Disabled'}</div>
+						<div className='text-xs text-gray-500'>
+							{t('entitlements.editDrawer.originalBooleanPrefix')}{' '}
+							{entitlement.is_enabled ? t('entitlements.editDrawer.enabled') : t('entitlements.editDrawer.disabled')}
+						</div>
 					</div>
 				)}
 
 				<div className='flex justify-end gap-3 mt-4'>
 					<Button variant='outline' onClick={handleCancel}>
-						Cancel
+						{t('entitlements.editDrawer.cancel')}
 					</Button>
 					{entitlement.hasOverride && onReset && (
 						<Button variant='outline' onClick={handleReset}>
-							Reset to Default
+							{t('entitlements.editDrawer.resetToDefault')}
 						</Button>
 					)}
-					<Button onClick={handleSave}>Save Override</Button>
+					<Button onClick={handleSave}>{t('entitlements.editDrawer.saveOverride')}</Button>
 				</div>
 			</div>
 		</Sheet>

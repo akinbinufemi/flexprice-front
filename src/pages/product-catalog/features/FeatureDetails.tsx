@@ -25,6 +25,7 @@ import {
 	DropdownMenuOption,
 	FeatureDrawer,
 } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { FilterOperator, DataType } from '@/types/common/QueryBuilder';
 import { FeatureAlertDialog } from '@/components/molecules/FeatureAlertDialog';
 
@@ -48,6 +49,7 @@ import { AlertSettings } from '@/models/Feature';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import { EXPAND } from '@/models/expand';
 import { GetPriceResponse } from '@/types/dto/Price';
+import { useTranslation } from 'react-i18next';
 
 export const formatAggregationType = (data: string): string => {
 	const aggregationTypeMap: Record<string, string> = {
@@ -99,6 +101,7 @@ const priceColumns: ColumnData<GetPriceResponse>[] = [
 
 const FeatureDetails = () => {
 	const { id: featureId } = useParams() as { id: string };
+	const { t } = useTranslation(['catalog', 'common']);
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 	const [showAlertDialog, setShowAlertDialog] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -167,8 +170,8 @@ const FeatureDetails = () => {
 			refetchQueries(['fetchFeatureDetails', featureId]);
 			toast.success('Feature archived successfully');
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to archive feature');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to archive feature');
 		},
 	});
 
@@ -195,51 +198,62 @@ const FeatureDetails = () => {
 		[],
 	);
 
-	const columns: ColumnData<EntitlementResponse>[] = [
-		{
-			title: 'Plan / Addon',
-			render: (rowData) => {
-				if (rowData.entity_type === ENTITLEMENT_ENTITY_TYPE.ADDON) {
-					return <RedirectCell redirectUrl={`${RouteNames.addons}/${rowData.entity_id}`}>{rowData.addon?.name ?? '—'}</RedirectCell>;
-				}
-				return <RedirectCell redirectUrl={`${RouteNames.plan}/${rowData.entity_id}`}>{rowData.plan?.name ?? '—'}</RedirectCell>;
-			},
-		},
-		{
-			title: 'Status',
-			render: (rowData) => {
-				const rawStatus = rowData.entity_type === ENTITLEMENT_ENTITY_TYPE.ADDON ? rowData.addon?.status : rowData.plan?.status;
-				const label = formatChips(rawStatus || '');
-				return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
-			},
-		},
-		{
-			title: 'Value',
-			align: 'right',
-			render: (rowData) => {
-				if (rowData.feature_type === FEATURE_TYPE.BOOLEAN) {
-					return rowData.is_enabled ? 'Yes' : 'No';
-				}
-				if (rowData.feature_type === FEATURE_TYPE.STATIC) {
-					return rowData.static_value || '0';
-				}
-				if (rowData.feature_type === FEATURE_TYPE.METERED) {
-					const usageLimit = rowData.usage_limit ? formatAmount(rowData.usage_limit.toString()) : 'Unlimited';
-					const unit =
-						rowData.usage_limit === null || rowData.usage_limit > 1
-							? rowData.feature?.unit_plural || 'units'
-							: rowData.feature?.unit_singular || 'unit';
+	const columns: ColumnData<EntitlementResponse>[] = useMemo(
+		() => [
+			{
+				title: 'Plan / Addon',
+				render: (rowData) => {
+					if (rowData.entity_type === ENTITLEMENT_ENTITY_TYPE.ADDON) {
+						return (
+							<RedirectCell redirectUrl={`${RouteNames.addons}/${rowData.entity_id}`}>
+								{rowData.addon?.name ?? t('common:labels.na')}
+							</RedirectCell>
+						);
+					}
 					return (
-						<span className='text-right'>
-							{usageLimit}
-							<span className='text-muted-foreground text-sm font-sans ml-2'>{unit}</span>
-						</span>
+						<RedirectCell redirectUrl={`${RouteNames.plan}/${rowData.entity_id}`}>
+							{rowData.plan?.name ?? t('common:labels.na')}
+						</RedirectCell>
 					);
-				}
-				return <span className='text-muted-foreground'>--</span>;
+				},
 			},
-		},
-	];
+			{
+				title: 'Status',
+				render: (rowData) => {
+					const rawStatus = rowData.entity_type === ENTITLEMENT_ENTITY_TYPE.ADDON ? rowData.addon?.status : rowData.plan?.status;
+					const label = formatChips(rawStatus || '');
+					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+				},
+			},
+			{
+				title: 'Value',
+				align: 'right',
+				render: (rowData) => {
+					if (rowData.feature_type === FEATURE_TYPE.BOOLEAN) {
+						return rowData.is_enabled ? t('common:labels.yes') : t('common:labels.no');
+					}
+					if (rowData.feature_type === FEATURE_TYPE.STATIC) {
+						return rowData.static_value || '0';
+					}
+					if (rowData.feature_type === FEATURE_TYPE.METERED) {
+						const usageLimit = rowData.usage_limit ? formatAmount(rowData.usage_limit.toString()) : t('common:labels.unlimited');
+						const unit =
+							rowData.usage_limit === null || rowData.usage_limit > 1
+								? rowData.feature?.unit_plural || t('catalog:features.form.unitsDefault')
+								: rowData.feature?.unit_singular || t('catalog:features.form.unitDefault');
+						return (
+							<span className='text-right'>
+								{usageLimit}
+								<span className='text-muted-foreground text-sm font-sans ml-2'>{unit}</span>
+							</span>
+						);
+					}
+					return <span className='text-muted-foreground'>{t('common:labels.na')}</span>;
+				},
+			},
+		],
+		[t],
+	);
 
 	const staticDate = useMemo(() => {
 		const start = new Date(2020, 0, 1);
@@ -296,7 +310,7 @@ const FeatureDetails = () => {
 						onClick={() => archiveFeature()}
 						className='flex gap-1 px-3'>
 						<EyeOff className='w-4 h-4' />
-						{isArchiving ? 'Archiving...' : 'Archive'}
+						{isArchiving ? t('catalog:plans.archive.archiving') : t('common:actions.archive')}
 					</Button>
 					<DropdownMenu
 						options={dropdownOptions}
@@ -311,7 +325,7 @@ const FeatureDetails = () => {
 					{data?.id && <CopyIdButton id={data.id} entityType='Feature' />}
 				</div>
 			}>
-			<ApiDocsContent tags={['Features']} snippets={data?.type === FEATURE_TYPE.METERED ? snippets : undefined} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Features} snippets={data?.type === FEATURE_TYPE.METERED ? snippets : undefined} />
 
 			{/* Feature Alert Dialog */}
 			<FeatureAlertDialog
@@ -340,31 +354,31 @@ const FeatureDetails = () => {
 					<div>
 						{linkedPrices?.items?.length && linkedPrices?.items?.length > 0 ? (
 							<Card variant='notched'>
-								<CardHeader title='Charges' />
+								<CardHeader title={t('catalog:features.details.charges')} />
 								<FlexpriceTable showEmptyRow columns={priceColumns} data={linkedPrices?.items ?? []} variant='no-bordered' />
 							</Card>
 						) : (
-							<NoDataCard title='Charges' subtitle='No charges linked to the feature yet' />
+							<NoDataCard title={t('catalog:features.details.charges')} subtitle='No charges linked to the feature yet' />
 						)}
 					</div>
 				)}
 
 				{planOrAddonEntitlements.length > 0 ? (
 					<Card variant='notched'>
-						<CardHeader title='Entitlements' />
+						<CardHeader title={t('catalog:features.details.entitlements')} />
 						<FlexpriceTable showEmptyRow columns={columns} data={planOrAddonEntitlements} variant='no-bordered' />
 					</Card>
 				) : (
-					<NoDataCard title='Entitlements' subtitle='No entitlements linked to the feature yet' />
+					<NoDataCard title={t('catalog:features.details.entitlements')} subtitle='No entitlements linked to the feature yet' />
 				)}
 
 				{data?.type === FEATURE_TYPE.METERED && (
 					<Card variant='notched'>
 						<div className='!space-y-6'>
-							<CardHeader title='Event Details' className='!p-0 !mb-2' />
+							<CardHeader title={t('catalog:features.details.eventDetails')} className='!p-0 !mb-2' />
 							<div>
 								<div className='grid grid-cols-[200px_1fr] items-center'>
-									<span className='text-gray-500 text-sm'>Event Name</span>
+									<span className='text-gray-500 text-sm'>{t('catalog:features.details.eventName')}</span>
 									<span className='text-gray-800 text-sm'>{data?.meter?.event_name}</span>
 								</div>
 							</div>
@@ -374,7 +388,7 @@ const FeatureDetails = () => {
 							{data?.meter?.filters && data.meter.filters.length > 0 && (
 								<>
 									<div className='space-y-4'>
-										<span className='text-gray-500 text-sm font-medium block'>Event Filters</span>
+										<span className='text-gray-500 text-sm font-medium block'>{t('catalog:features.details.eventFilters')}</span>
 										<div className='space-y-3'>
 											{data?.meter?.filters?.map((filter) => {
 												return (
@@ -395,46 +409,50 @@ const FeatureDetails = () => {
 							)}
 
 							<div className='space-y-4'>
-								<span className='text-gray-500 text-sm font-medium block'>Aggregation Details</span>
+								<span className='text-gray-500 text-sm font-medium block'>{t('catalog:features.details.aggregationDetails')}</span>
 								<div className='space-y-3'>
 									{/* <div className='grid grid-cols-[200px_1fr] items-center'>
 										<span className='text-gray-500 text-sm'>Aggregation</span>
 										<span className='text-gray-800 text-sm'>{toSentenceCase(data?.meter?.aggregation.type || '--')}</span>
 									</div> */}
 									<div className='grid grid-cols-[200px_1fr] items-center'>
-										<span className='text-gray-500 text-sm'>Type</span>
-										<span className='text-gray-800 text-sm'>{formatAggregationType(data?.meter?.aggregation.type || '--')}</span>
+										<span className='text-gray-500 text-sm'>{t('catalog:features.details.type')}</span>
+										<span className='text-gray-800 text-sm'>
+											{formatAggregationType(data?.meter?.aggregation.type || t('common:labels.na'))}
+										</span>
 									</div>
 									<div className='grid grid-cols-[200px_1fr] items-center'>
-										<span className='text-gray-500 text-sm'>Value</span>
-										<span className='text-gray-800 text-sm'>{data?.meter?.aggregation.field || '--'}</span>
+										<span className='text-gray-500 text-sm'>{t('catalog:features.details.value')}</span>
+										<span className='text-gray-800 text-sm'>{data?.meter?.aggregation.field || t('common:labels.na')}</span>
 									</div>
 
 									<div className='grid grid-cols-[200px_1fr] items-center'>
-										<span className='text-gray-500 text-sm'>Unit Name</span>
-										<span className='text-gray-800 text-sm'>{`${data?.unit_singular || 'unit'} / ${data?.unit_plural || 'units'}`}</span>
+										<span className='text-gray-500 text-sm'>{t('catalog:features.details.unitName')}</span>
+										<span className='text-gray-800 text-sm'>{`${data?.unit_singular || t('catalog:features.form.unitDefault')} / ${data?.unit_plural || t('catalog:features.form.unitsDefault')}`}</span>
 									</div>
 									{data?.reporting_unit && (
 										<div className='grid grid-cols-[200px_1fr] items-center'>
-											<span className='text-gray-500 text-sm'>Display Unit Name</span>
-											<span className='text-gray-800 text-sm'>{`${data.reporting_unit.unit_singular || '--'} / ${data.reporting_unit.unit_plural || '--'}`}</span>
+											<span className='text-gray-500 text-sm'>{t('catalog:features.details.displayUnitName')}</span>
+											<span className='text-gray-800 text-sm'>{`${data.reporting_unit.unit_singular || t('common:labels.na')} / ${data.reporting_unit.unit_plural || t('common:labels.na')}`}</span>
 										</div>
 									)}
 									<div className='grid grid-cols-[200px_1fr] items-center'>
-										<span className='text-gray-500 text-sm'>Usage Reset </span>
-										<span className='text-gray-800 text-sm'>{formatMeterUsageResetPeriodToDisplay(data?.meter?.reset_usage || '--')}</span>
+										<span className='text-gray-500 text-sm'>{t('catalog:features.details.usageReset')}</span>
+										<span className='text-gray-800 text-sm'>
+											{formatMeterUsageResetPeriodToDisplay(data?.meter?.reset_usage || t('common:labels.na'))}
+										</span>
 									</div>
 									{(data?.meter?.aggregation?.type === METER_AGGREGATION_TYPE.MAX ||
 										data?.meter?.aggregation?.type === METER_AGGREGATION_TYPE.SUM) &&
 										data?.meter?.aggregation?.bucket_size && (
 											<div className='grid grid-cols-[200px_1fr] items-center'>
-												<span className='text-gray-500 text-sm'>Bucket Size</span>
-												<span className='text-gray-800 text-sm'>{data?.meter?.aggregation.bucket_size || '--'}</span>
+												<span className='text-gray-500 text-sm'>{t('catalog:features.details.bucketSize')}</span>
+												<span className='text-gray-800 text-sm'>{data?.meter?.aggregation.bucket_size || t('common:labels.na')}</span>
 											</div>
 										)}
 									{data?.meter?.aggregation?.group_by && (
 										<div className='grid grid-cols-[200px_1fr] items-center'>
-											<span className='text-gray-500 text-sm'>Group by</span>
+											<span className='text-gray-500 text-sm'>{t('catalog:features.details.groupBy')}</span>
 											<span className='text-gray-800 text-sm'>{data.meter.aggregation.group_by}</span>
 										</div>
 									)}

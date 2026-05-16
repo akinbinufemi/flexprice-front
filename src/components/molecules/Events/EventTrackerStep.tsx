@@ -2,11 +2,12 @@ import { FC } from 'react';
 import { CheckCircle2, XCircle, Circle } from 'lucide-react';
 import { DebugTrackerStatus, EventDebugStatus } from '@/types/dto';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface EventTrackerStepProps {
 	title: string;
 	status?: DebugTrackerStatus | EventDebugStatus;
-	value: any;
+	value: unknown;
 	stepKey: string;
 	timestamp?: string;
 	isIngested?: boolean;
@@ -22,6 +23,8 @@ const EventTrackerStep: FC<EventTrackerStepProps> = ({
 	isAttributed = false,
 	overallStatus,
 }) => {
+	const { t } = useTranslation(['developers', 'common']);
+
 	const renderStepIcon = () => {
 		if (isIngested) {
 			return <CheckCircle2 className='h-5 w-5 text-emerald-500' />;
@@ -47,24 +50,29 @@ const EventTrackerStep: FC<EventTrackerStepProps> = ({
 	};
 
 	const renderStepStatusText = () => {
+		const ps = t('events.tracker.stepStatus.processing');
+		const failed = t('events.tracker.stepStatus.failed');
+		const successful = t('events.tracker.stepStatus.successful');
+		const skipped = t('events.tracker.stepStatus.skipped');
+
 		if (isIngested) return null;
 		if (isAttributed) {
-			return overallStatus === 'processing' ? 'Processing' : 'Failed';
+			return overallStatus === 'processing' ? ps : failed;
 		}
 
 		switch (status) {
 			case 'processing':
-				return 'Processing';
+				return ps;
 			case 'failed':
-				return 'Failed';
+				return failed;
 			case 'found':
-				return 'Successful';
+				return successful;
 			case 'not_found':
-				return 'Failed';
+				return failed;
 			case 'error':
-				return 'Failed';
+				return failed;
 			default:
-				return 'Skipped';
+				return skipped;
 		}
 	};
 
@@ -79,7 +87,6 @@ const EventTrackerStep: FC<EventTrackerStepProps> = ({
 					? 'text-red-600'
 					: 'text-slate-500';
 
-	// Format timestamp in human-readable format with local timezone
 	const formatTimestamp = (ts?: string) => {
 		if (!ts) return null;
 		try {

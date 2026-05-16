@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui';
 import { useBreadcrumbsStore } from '@/store';
 import InvoiceApi from '@/api/InvoiceApi';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { CreditNote } from '@/models';
 import { CreateCreditNoteLineItemRequest, CreateCreditNoteParams, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE } from '@/types';
@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
 import { PremiumFeatureIcon } from '@/components/molecules/PremiumFeature/PremiumFeature';
+import { useTranslation } from 'react-i18next';
 
 interface LineItemForm {
 	id: string;
@@ -31,6 +32,7 @@ interface CreditNotePreview {
 }
 
 const AddCreditNotePage = () => {
+	const { t } = useTranslation(['billing', 'common']);
 	const { invoice_id } = useParams<{ invoice_id: string }>();
 	const { updateBreadcrumb, setSegmentLoading } = useBreadcrumbsStore();
 	const navigate = useNavigate();
@@ -76,35 +78,38 @@ const AddCreditNotePage = () => {
 					id: item.id,
 					amount: 0, // Initialize with 0 as requested
 					max_amount: item.amount, // Use original line item amount as max
-					display_name: item.display_name || 'Unnamed Item',
+					display_name: item.display_name || t('creditNotes.unnamedLineItem'),
 					quantity: item.quantity,
 					unit_price: unit_price,
 				};
 			});
 			setLineItems(initialLineItems);
 		}
-	}, [invoice]);
+	}, [invoice, t]);
 
 	// Update breadcrumbs when invoice data is loaded
 	useEffect(() => {
 		setSegmentLoading(2, true);
 
 		if (invoice) {
-			updateBreadcrumb(2, invoice.customer?.external_id || 'Customer');
+			updateBreadcrumb(2, invoice.customer?.external_id || t('creditNotes.fallbackCustomerName'));
 			updateBreadcrumb(4, invoice.invoice_number);
-			updateBreadcrumb(5, 'Issue Credit Note');
+			updateBreadcrumb(5, t('creditNotes.issuePageTitle'));
 		}
-	}, [invoice, updateBreadcrumb, setSegmentLoading]);
+	}, [invoice, updateBreadcrumb, setSegmentLoading, t]);
 
-	const reasonOptions: SelectOption[] = [
-		{ label: 'Duplicate', value: CREDIT_NOTE_REASON.DUPLICATE },
-		{ label: 'Fraudulent', value: CREDIT_NOTE_REASON.FRAUDULENT },
-		{ label: 'Order Change', value: CREDIT_NOTE_REASON.ORDER_CHANGE },
-		{ label: 'Unsatisfactory', value: CREDIT_NOTE_REASON.UNSATISFACTORY },
-		{ label: 'Service Issue', value: CREDIT_NOTE_REASON.SERVICE_ISSUE },
-		{ label: 'Billing Error', value: CREDIT_NOTE_REASON.BILLING_ERROR },
-		{ label: 'Subscription Cancellation', value: CREDIT_NOTE_REASON.SUBSCRIPTION_CANCELLATION },
-	];
+	const reasonOptions: SelectOption[] = useMemo(
+		() => [
+			{ label: t('creditNotes.reasons.duplicate'), value: CREDIT_NOTE_REASON.DUPLICATE },
+			{ label: t('creditNotes.reasons.fraudulent'), value: CREDIT_NOTE_REASON.FRAUDULENT },
+			{ label: t('creditNotes.reasons.orderChange'), value: CREDIT_NOTE_REASON.ORDER_CHANGE },
+			{ label: t('creditNotes.reasons.unsatisfactory'), value: CREDIT_NOTE_REASON.UNSATISFACTORY },
+			{ label: t('creditNotes.reasons.serviceIssue'), value: CREDIT_NOTE_REASON.SERVICE_ISSUE },
+			{ label: t('creditNotes.reasons.billingError'), value: CREDIT_NOTE_REASON.BILLING_ERROR },
+			{ label: t('creditNotes.reasons.subscriptionCancellation'), value: CREDIT_NOTE_REASON.SUBSCRIPTION_CANCELLATION },
+		],
+		[t],
+	);
 
 	// Create credit note mutation
 	const createCreditNoteMutation = useMutation({
@@ -113,8 +118,8 @@ const AddCreditNotePage = () => {
 			queryClient.invalidateQueries({ queryKey: ['creditNotes'] });
 			navigate(`${RouteNames.creditNotes}/${data.id}`);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to create credit note');
+		onError: (error: Error) => {
+			toast.error(error.message || t('creditNotes.createError'));
 		},
 	});
 
@@ -122,8 +127,7 @@ const AddCreditNotePage = () => {
 	const validLineItems = lineItems.filter((item) => item.amount > 0);
 	const totalCreditAmount = validLineItems.reduce((sum, item) => sum + item.amount, 0);
 
-	// Generate credit note preview
-	const getCreditNotePreview = (): CreditNotePreview => {
+	const creditNotePreview = useMemo((): CreditNotePreview => {
 		if (!invoice) {
 			return {
 				type: CREDIT_NOTE_TYPE.ADJUSTMENT,
@@ -139,11 +143,11 @@ const AddCreditNotePage = () => {
 		let settlementDescription = '';
 
 		if (creditNoteType === CREDIT_NOTE_TYPE.REFUND) {
-			effectDescription = 'This credit note will process a refund for the paid amount.';
-			settlementDescription = "The refunded amount will be credited to the customer's original payment method or wallet balance.";
+			effectDescription = t('creditNotes.preview.refundEffect');
+			settlementDescription = t('creditNotes.preview.refundSettlement');
 		} else {
-			effectDescription = 'This credit note will adjust the current invoice amount.';
-			settlementDescription = 'The adjustment will be applied to the current billing period, reducing the amount due.';
+			effectDescription = t('creditNotes.preview.adjustmentEffect');
+			settlementDescription = t('creditNotes.preview.adjustmentSettlement');
 		}
 
 		return {
@@ -152,7 +156,7 @@ const AddCreditNotePage = () => {
 			effectDescription,
 			settlementDescription,
 		};
-	};
+	}, [invoice, totalCreditAmount, t]);
 
 	// Handle amount change
 	const handleAmountChange = (itemId: string, value: string) => {
@@ -195,25 +199,25 @@ const AddCreditNotePage = () => {
 		);
 	}
 
-	const creditNotePreview = getCreditNotePreview();
+	const invoiceCurrency = invoice?.currency ?? 'USD';
 
 	return (
 		<Page>
 			{/* Confirmation Dialog */}
-			<Dialog isOpen={showConfirmModal} onOpenChange={setShowConfirmModal} title='Confirm Credit Note'>
+			<Dialog isOpen={showConfirmModal} onOpenChange={setShowConfirmModal} title={t('creditNotes.confirmDialogTitle')}>
 				<div className='space-y-6 mt-6'>
 					{/* Summary */}
 					<div className='p-4 bg-gray-50 rounded-lg space-y-3'>
 						<div className='flex justify-between items-center'>
-							<span className='text-sm text-gray-600'>Credit Note Type</span>
+							<span className='text-sm text-gray-600'>{t('creditNotes.creditNoteType')}</span>
 							<Chip
 								label={toSentenceCase(creditNotePreview.type)}
 								variant={creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND ? 'success' : 'info'}
 							/>
 						</div>
 						<div className='flex justify-between items-center'>
-							<span className='text-sm text-gray-600'>Total Amount</span>
-							<span className='text-sm font-medium'>{formatCurrency(creditNotePreview.totalAmount, invoice?.currency || 'USD')}</span>
+							<span className='text-sm text-gray-600'>{t('creditNotes.totalAmountLabel')}</span>
+							<span className='text-sm font-medium'>{formatCurrency(creditNotePreview.totalAmount, invoiceCurrency)}</span>
 						</div>
 					</div>
 					<div className=' border border-blue-200 rounded-lg p-4'>
@@ -223,7 +227,7 @@ const AddCreditNotePage = () => {
 					{/* Actions */}
 					<div className='flex justify-end gap-3 pt-4'>
 						<Button onClick={() => setShowConfirmModal(false)} variant='outline'>
-							Cancel
+							{t('common:actions.cancel')}
 						</Button>
 						<Button
 							onClick={() => {
@@ -231,7 +235,7 @@ const AddCreditNotePage = () => {
 								handleSubmit();
 							}}
 							disabled={createCreditNoteMutation.isPending}>
-							{createCreditNoteMutation.isPending ? 'Creating...' : 'Create Credit Note'}
+							{createCreditNoteMutation.isPending ? t('createInvoice.creating') : t('creditNotes.createCreditNoteCta')}
 						</Button>
 					</div>
 				</div>
@@ -242,7 +246,7 @@ const AddCreditNotePage = () => {
 				{/* Header */}
 				<div className='flex items-center gap-2'>
 					<PremiumFeatureIcon />
-					<h1 className='text-xl font-medium'>Issue Credit Note</h1>
+					<h1 className='text-xl font-medium'>{t('creditNotes.issuePageTitle')}</h1>
 					<Chip
 						label={toSentenceCase(creditNotePreview.type)}
 						variant={creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND ? 'success' : 'info'}
@@ -254,15 +258,15 @@ const AddCreditNotePage = () => {
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
 						<div>
 							<div className='text-sm font-medium'>{invoice?.invoice_number}</div>
-							<div className='text-sm text-gray-500'>Invoice Number</div>
+							<div className='text-sm text-gray-500'>{t('creditNotes.invoiceNumberLabel')}</div>
 						</div>
 						<div>
-							<div className='text-sm font-medium'>{formatCurrency(invoice?.amount_paid || 0, invoice?.currency || 'USD')}</div>
-							<div className='text-sm text-gray-500'>Amount Paid</div>
+							<div className='text-sm font-medium'>{formatCurrency(invoice?.amount_paid || 0, invoiceCurrency)}</div>
+							<div className='text-sm text-gray-500'>{t('creditNotes.amountPaid')}</div>
 						</div>
 						<div>
-							<div className='text-sm font-medium'>{formatCurrency(Number(invoice?.amount_remaining), invoice?.currency || 'USD')}</div>
-							<div className='text-sm text-gray-500'>Amount Remaining</div>
+							<div className='text-sm font-medium'>{formatCurrency(Number(invoice?.amount_remaining), invoiceCurrency)}</div>
+							<div className='text-sm text-gray-500'>{t('creditNotes.amountRemaining')}</div>
 						</div>
 					</div>
 				</div>
@@ -270,25 +274,25 @@ const AddCreditNotePage = () => {
 				<div className='flex flex-col gap-4 bg-white border rounded-lg p-6'>
 					{/* Reason */}
 					<div className='flex flex-col gap-4'>
-						<h3 className='text-sm font-semibold'>Reason for credit note</h3>
+						<h3 className='text-sm font-semibold'>{t('creditNotes.reasonSectionTitle')}</h3>
 						<Select
 							options={reasonOptions}
 							value={selectedReason}
 							onChange={(value) => setSelectedReason(value as CREDIT_NOTE_REASON)}
-							placeholder='Select a reason'
+							placeholder={t('creditNotes.selectAReason')}
 							className='max-w-md'
 						/>
 					</div>
 
 					{/* Memo */}
 					<div className=''>
-						{!showMemo && <AddChargesButton onClick={() => setShowMemo(!showMemo)} label='Add Memo' />}
+						{!showMemo && <AddChargesButton onClick={() => setShowMemo(!showMemo)} label={t('creditNotes.addMemo')} />}
 						{showMemo && (
 							<Textarea
-								label='Memo (optional)'
+								label={t('creditNotes.memoOptional')}
 								value={memo}
 								onChange={(value) => setMemo(value)}
-								placeholder='This will appear on the credit note'
+								placeholder={t('creditNotes.memoNote')}
 								rows={3}
 								className='resize-none mt-4'
 							/>
@@ -301,15 +305,15 @@ const AddCreditNotePage = () => {
 					{/* Line Items */}
 					<div className='p-6'>
 						<div className='flex justify-between items-center mb-4'>
-							<h3 className='text-sm font-semibold'>Line items to credit</h3>
-							<span className='text-sm text-gray-500'>Credit amount</span>
+							<h3 className='text-sm font-semibold'>{t('creditNotes.lineItemsToCredit')}</h3>
+							<span className='text-sm text-gray-500'>{t('creditNotes.creditAmount')}</span>
 						</div>
 						<div className='space-y-4'>
 							{lineItems.map((item) => (
 								<div key={item.id} className='flex items-center justify-between'>
 									<div className='flex-1'>
 										<div className='text-sm font-normal'>{item.display_name}</div>
-										<div className='text-sm text-gray-500'>{formatCurrency(item.unit_price, invoice?.currency || 'USD')}</div>
+										<div className='text-sm text-gray-500'>{formatCurrency(item.unit_price, invoiceCurrency)}</div>
 									</div>
 									<div className='ml-4'>
 										<Input
@@ -317,11 +321,11 @@ const AddCreditNotePage = () => {
 											value={item.amount.toString()}
 											onChange={(value) => handleAmountChange(item.id, value)}
 											min={0}
-											inputPrefix={getCurrencySymbol(invoice?.currency || 'USD')}
+											inputPrefix={getCurrencySymbol(invoiceCurrency)}
 											max={item.max_amount}
 											step={0.01}
 											className='max-w-40'
-											placeholder='0.00'
+											placeholder={t('creditNotes.amountPlaceholder')}
 										/>
 									</div>
 								</div>
@@ -335,18 +339,18 @@ const AddCreditNotePage = () => {
 							<div className='w-80 space-y-2'>
 								{/* Total amount to credit */}
 								<div className='flex justify-between items-center py-1'>
-									<span className='text-sm text-gray-600'>Total amount to credit</span>
-									<span className='text-sm text-gray-900 font-medium'>{formatCurrency(totalCreditAmount, invoice?.currency || 'USD')}</span>
+									<span className='text-sm text-gray-600'>{t('creditNotes.totalAmountToCredit')}</span>
+									<span className='text-sm text-gray-900 font-medium'>{formatCurrency(totalCreditAmount, invoiceCurrency)}</span>
 								</div>
 
 								{/* Final total with different styling */}
 								<div className='flex justify-between items-center py-3 border-t border-gray-200'>
 									<span className='text-base font-medium text-gray-900'>
-										{creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND ? 'Amount to be refunded' : 'Amount to be adjusted'}
+										{creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND
+											? t('creditNotes.amountToBeRefunded')
+											: t('creditNotes.amountToBeAdjusted')}
 									</span>
-									<span className='text-base font-semibold text-gray-900'>
-										{formatCurrency(totalCreditAmount, invoice?.currency || 'USD')}
-									</span>
+									<span className='text-base font-semibold text-gray-900'>{formatCurrency(totalCreditAmount, invoiceCurrency)}</span>
 								</div>
 							</div>
 						</div>
@@ -359,7 +363,7 @@ const AddCreditNotePage = () => {
 						isLoading={createCreditNoteMutation.isPending}
 						onClick={() => setShowConfirmModal(true)}
 						disabled={!selectedReason || validLineItems.length === 0 || createCreditNoteMutation.isPending}>
-						Create Credit Note
+						{t('creditNotes.createCreditNoteCta')}
 					</Button>
 				</div>
 			</div>

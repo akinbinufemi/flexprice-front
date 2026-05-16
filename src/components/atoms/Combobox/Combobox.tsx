@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface ComboboxOption {
 	value: string;
@@ -31,9 +32,9 @@ const Combobox = ({
 	options,
 	value,
 	onChange,
-	placeholder = 'Select an option',
-	emptyText = 'No options found.',
-	searchPlaceholder = 'Search...',
+	placeholder,
+	emptyText,
+	searchPlaceholder,
 	triggerClassName,
 	contentClassName,
 	disabled = false,
@@ -42,6 +43,10 @@ const Combobox = ({
 	onOpenChange,
 	renderOption,
 }: ComboboxProps) => {
+	const { t } = useTranslation('common');
+	const ph = placeholder ?? t('selectUi.selectAnOption');
+	const empty = emptyText ?? t('selectUi.noResultsFound');
+	const searchPh = searchPlaceholder ?? t('search.placeholderShort');
 	const [open, setOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 
@@ -85,8 +90,8 @@ const Combobox = ({
 					aria-expanded={open}
 					disabled={disabled}
 					className={cn('justify-between', typeof width === 'number' ? `w-[${width}px]` : `w-[${width}]`, triggerClassName)}>
-					<p className='font-normal'>{selectedOption?.label || placeholder}</p>
-					<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+					<p className='font-normal'>{selectedOption?.label || ph}</p>
+					<ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
@@ -95,9 +100,9 @@ const Combobox = ({
 					width: typeof width === 'number' ? `${width}px` : width,
 				}}>
 				<Command>
-					<CommandInput placeholder={searchPlaceholder} value={searchQuery} onValueChange={setSearchQuery} />
+					<CommandInput placeholder={searchPh} value={searchQuery} onValueChange={setSearchQuery} />
 					<CommandList style={{ maxHeight }}>
-						<CommandEmpty>{emptyText}</CommandEmpty>
+						<CommandEmpty>{empty}</CommandEmpty>
 						<CommandGroup>
 							{filteredOptions.map((option) => (
 								<CommandItem key={option.value} value={option.value} onSelect={handleSelect}>
@@ -105,7 +110,7 @@ const Combobox = ({
 										renderOption(option)
 									) : (
 										<div className='flex items-center gap-2 '>
-											<Check className={cn('mr-2 h-4 w-4', value === option.value ? 'opacity-100' : 'opacity-0')} />
+											<Check className={cn('me-2 h-4 w-4', value === option.value ? 'opacity-100' : 'opacity-0')} />
 											{option.label}
 										</div>
 									)}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, Button, Input, Toggle, Select } from '@/components/atoms';
 import toast from 'react-hot-toast';
 import { AlertSettings, AlertThreshold, AlertLevel } from '@/models/Feature';
+import { useTranslation } from 'react-i18next';
 
 interface FeatureAlertDialogProps {
 	open: boolean;
@@ -11,6 +12,7 @@ interface FeatureAlertDialogProps {
 }
 
 const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSettings, onSave, onClose }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const [localAlertSettings, setLocalAlertSettings] = useState<AlertSettings>({
 		alert_enabled: false,
 		critical: null,
@@ -78,25 +80,31 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 			const hasAnyThreshold = localAlertSettings.critical || localAlertSettings.warning || localAlertSettings.info;
 
 			if (!hasAnyThreshold) {
-				toast.error('Please configure at least one threshold level');
+				toast.error(t('catalog:features.alerts.toastAtLeastOneThreshold'));
 				return;
 			}
 
 			// Validate threshold values - only check if they exist and are valid numbers
-			const validateValue = (threshold: AlertThreshold | null | undefined, name: string): boolean => {
+			const validateValue = (
+				threshold: AlertThreshold | null | undefined,
+				messageKey:
+					| 'catalog:features.alerts.toastInvalidCriticalThreshold'
+					| 'catalog:features.alerts.toastInvalidWarningThreshold'
+					| 'catalog:features.alerts.toastInvalidInfoThreshold',
+			): boolean => {
 				if (threshold) {
 					const value = parseFloat(threshold.threshold);
 					if (isNaN(value)) {
-						toast.error(`Please enter a valid ${name} threshold value`);
+						toast.error(t(messageKey));
 						return false;
 					}
 				}
 				return true;
 			};
 
-			if (!validateValue(localAlertSettings.critical, 'critical')) return;
-			if (!validateValue(localAlertSettings.warning, 'warning')) return;
-			if (!validateValue(localAlertSettings.info, 'info')) return;
+			if (!validateValue(localAlertSettings.critical, 'catalog:features.alerts.toastInvalidCriticalThreshold')) return;
+			if (!validateValue(localAlertSettings.warning, 'catalog:features.alerts.toastInvalidWarningThreshold')) return;
+			if (!validateValue(localAlertSettings.info, 'catalog:features.alerts.toastInvalidInfoThreshold')) return;
 		}
 
 		// COMPLETE OVERWRITE - send exactly what's in the form
@@ -190,11 +198,11 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 					</div>
 					{threshold ? (
 						<Button variant='ghost' size='sm' onClick={() => handleRemoveThreshold(level)} disabled={isSaving}>
-							Remove
+							{t('catalog:features.alerts.remove')}
 						</Button>
 					) : (
 						<Button variant='outline' size='sm' onClick={() => handleAddThreshold(level)} disabled={isSaving}>
-							Add
+							{t('catalog:features.alerts.add')}
 						</Button>
 					)}
 				</div>
@@ -202,9 +210,9 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 				{threshold && (
 					<div className='grid grid-cols-2 gap-3'>
 						<div className='space-y-1'>
-							<label className='text-xs font-medium text-gray-700'>Threshold Value</label>
+							<label className='text-xs font-medium text-gray-700'>{t('catalog:features.alerts.thresholdValue')}</label>
 							<Input
-								placeholder='0.00'
+								placeholder={t('catalog:features.alerts.thresholdPlaceholder')}
 								value={threshold.threshold}
 								onChange={(value) => handleThresholdChange(level, 'threshold', value)}
 								type='number'
@@ -213,11 +221,11 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 							/>
 						</div>
 						<div className='space-y-1'>
-							<label className='text-xs font-medium text-gray-700'>Condition</label>
+							<label className='text-xs font-medium text-gray-700'>{t('catalog:features.alerts.condition')}</label>
 							<Select
 								options={[
-									{ label: 'Below', value: 'below' },
-									{ label: 'Above', value: 'above' },
+									{ label: t('catalog:features.alerts.below'), value: 'below' },
+									{ label: t('catalog:features.alerts.above'), value: 'above' },
 								]}
 								value={threshold.condition}
 								onChange={(value) => handleThresholdChange(level, 'condition', value)}
@@ -242,14 +250,14 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 			onOpenChange={(isOpen) => {
 				if (!isOpen) handleClose();
 			}}
-			title='Feature Alert Settings'
+			title={t('catalog:features.alerts.dialogTitle')}
 			showCloseButton>
 			<div className='flex flex-col gap-6 min-w-[600px]'>
 				{/* Alert Toggle */}
 				<Toggle
-					title='Enable Alerts'
-					label='Monitor feature usage against configured thresholds'
-					description='Get notified when usage crosses configured thresholds for this feature'
+					title={t('catalog:features.alerts.enableTitle')}
+					label={t('catalog:features.alerts.enableLabel')}
+					description={t('catalog:features.alerts.enableDescription')}
 					checked={localAlertSettings.alert_enabled || false}
 					onChange={handleToggleChange}
 					disabled={isSaving}
@@ -258,19 +266,27 @@ const FeatureAlertDialog: React.FC<FeatureAlertDialogProps> = ({ open, alertSett
 				{/* Alert Configuration */}
 				{localAlertSettings.alert_enabled && (
 					<div className='space-y-4'>
-						{renderThresholdInput(AlertLevel.CRITICAL, 'Critical Threshold', 'Alert when usage reaches critical level')}
-						{renderThresholdInput(AlertLevel.WARNING, 'Warning Threshold', 'Alert when usage reaches warning level')}
-						{renderThresholdInput(AlertLevel.INFO, 'Info Threshold', 'Alert when usage reaches info level')}
+						{renderThresholdInput(
+							AlertLevel.CRITICAL,
+							t('catalog:features.alerts.criticalThreshold'),
+							t('catalog:features.alerts.criticalHelp'),
+						)}
+						{renderThresholdInput(
+							AlertLevel.WARNING,
+							t('catalog:features.alerts.warningThreshold'),
+							t('catalog:features.alerts.warningHelp'),
+						)}
+						{renderThresholdInput(AlertLevel.INFO, t('catalog:features.alerts.infoThreshold'), t('catalog:features.alerts.infoHelp'))}
 					</div>
 				)}
 
 				{/* Action Buttons */}
 				<div className='flex justify-end gap-2 mt-6'>
 					<Button variant='outline' onClick={handleClose} disabled={isSaving}>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} disabled={isSaving}>
-						{isSaving ? 'Saving...' : 'Save Changes'}
+						{isSaving ? t('catalog:features.alerts.saving') : t('catalog:features.alerts.saveChanges')}
 					</Button>
 				</div>
 			</div>

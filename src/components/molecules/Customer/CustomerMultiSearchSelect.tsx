@@ -2,6 +2,7 @@ import React from 'react';
 import AsyncMultiSearchableSelect, { AsyncMultiSearchableSelectProps } from '@/components/atoms/Select/AsyncMultiSearchableSelect';
 import CustomerApi from '@/api/CustomerApi';
 import { Customer } from '@/models';
+import { useTranslation } from 'react-i18next';
 
 export interface CustomerMultiSearchSelectProps extends Omit<AsyncMultiSearchableSelectProps<Customer>, 'search' | 'extractors'> {
 	/** Maximum number of results per request (default: 50) */
@@ -19,11 +20,14 @@ export interface CustomerMultiSearchSelectProps extends Omit<AsyncMultiSearchabl
  */
 const CustomerMultiSearchSelect: React.FC<CustomerMultiSearchSelectProps> = ({
 	limit = 50,
-	searchPlaceholder = 'Search for customers...',
+	searchPlaceholder,
 	excludeId,
 	fetchOnEmptyQuery = true,
 	...props
 }) => {
+	const { t } = useTranslation('customers');
+	const resolvedPlaceholder = searchPlaceholder ?? t('select.searchCustomers');
+
 	const searchFn = async (query: string) => {
 		const response = await CustomerApi.searchCustomers(query, limit);
 		const excludeIds = excludeId ? (Array.isArray(excludeId) ? excludeId : [excludeId]) : [];
@@ -41,7 +45,7 @@ const CustomerMultiSearchSelect: React.FC<CustomerMultiSearchSelectProps> = ({
 			{...props}
 			search={{
 				searchFn,
-				placeholder: searchPlaceholder,
+				placeholder: resolvedPlaceholder,
 				fetchOnEmptyQuery,
 			}}
 			extractors={{

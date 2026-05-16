@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Page, Spacer, Loader, ShortPagination, AddButton } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
 import { useQuery } from '@tanstack/react-query';
@@ -6,13 +6,18 @@ import toast from 'react-hot-toast';
 import usePagination from '@/hooks/usePagination';
 import TaxApi from '@/api/TaxApi';
 import { EmptyPage } from '@/components/organisms';
-import GUIDES from '@/constants/guides';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import TaxTable from '@/components/molecules/TaxTable/TaxTable';
 import TaxDrawer from '@/components/molecules/TaxDrawer/TaxDrawer';
 import { TaxRateResponse } from '@/types/dto/tax';
 import { TaxRate } from '@/models/Tax';
+import { useTranslation } from 'react-i18next';
 
 const TaxPage = () => {
+	const { t } = useTranslation('billing');
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const { limit, offset, page } = usePagination();
 	const [taxDrawerOpen, setTaxDrawerOpen] = useState(false);
 	const [activeTax, setActiveTax] = useState<TaxRateResponse | null>(null);
@@ -48,21 +53,21 @@ const TaxPage = () => {
 	}
 
 	if (isError) {
-		toast.error('Error fetching tax rates');
+		toast.error(t('taxes.toast.fetchListError'));
 	}
 
 	if ((taxData?.items ?? []).length === 0) {
 		return (
 			<EmptyPage
-				heading='Tax Rates'
-				tags={['Taxes', 'Tax', 'Tax Rates']}
+				heading={t('taxes.list.pageHeading')}
+				tags={API_DOCS_TAGS.TaxRates}
 				emptyStateCard={{
-					heading: 'Create Your First Tax Rate',
-					description: 'Set up tax rates to automatically calculate taxes on invoices and ensure compliance with local regulations.',
-					buttonLabel: 'Create Tax Rate',
+					heading: t('taxes.list.emptyHeading'),
+					description: t('taxes.list.emptyDescription'),
+					buttonLabel: t('taxes.list.createTaxRate'),
 					buttonAction: handleCreateNew,
 				}}
-				tutorials={GUIDES.taxes.tutorials}
+				tutorials={guides.taxes.tutorials}
 				onAddClick={handleCreateNew}>
 				<TaxDrawer
 					data={activeTax as TaxRate | null}
@@ -75,12 +80,12 @@ const TaxPage = () => {
 	}
 
 	return (
-		<Page heading='Tax Rates' headingCTA={<AddButton onClick={handleCreateNew} />}>
-			<ApiDocsContent tags={['Taxes', 'Tax', 'Tax Rates']} />
+		<Page heading={t('taxes.list.pageHeading')} headingCTA={<AddButton onClick={handleCreateNew} />}>
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxRates} />
 			<div className='px-0'>
 				<TaxTable data={taxData?.items || []} onEdit={handleEdit} />
 				<Spacer className='!h-4' />
-				<ShortPagination unit='Tax Rates' totalItems={taxData?.pagination.total ?? 0} />
+				<ShortPagination unit={t('taxes.list.paginationUnit')} totalItems={taxData?.pagination.total ?? 0} />
 			</div>
 			<TaxDrawer
 				data={activeTax as TaxRate | null}

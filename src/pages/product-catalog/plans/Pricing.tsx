@@ -12,6 +12,7 @@ import { PlanResponse, PriceResponse, EntitlementResponse } from '@/types';
 import { GetAllPlansResponse } from '@/api/PlanApi';
 import { PricingCard, type PricingCardProps } from '@/components/molecules';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { PlanDrawer } from '@/components/molecules';
 import {
 	Price,
@@ -28,6 +29,7 @@ import {
 import CreditGrantApi from '@/api/CreditGrantApi';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import { EXPAND } from '@/models/expand';
+import { useTranslation } from 'react-i18next';
 
 type PriceType = {
 	currency: string;
@@ -172,6 +174,7 @@ const findBestPriceCombination = (
 };
 
 const PricingPage = () => {
+	const { t } = useTranslation(['catalog']);
 	const { limit, offset, page } = usePagination();
 	const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('');
 	const [selectedCurrency, setSelectedCurrency] = useState<string>('');
@@ -557,7 +560,7 @@ const PricingPage = () => {
 		return (
 			<div className='space-y-6'>
 				<Page
-					heading='Pricing Widgets'
+					heading={t('plans.pricing.widgetsPageTitle')}
 					headingCTA={
 						<AddButton
 							onClick={() => {
@@ -565,7 +568,7 @@ const PricingPage = () => {
 							}}
 						/>
 					}>
-					<ApiDocsContent tags={['Plans', 'Prices']} />
+					<ApiDocsContent tags={API_DOCS_TAGS.PlansAndPrices} />
 					<div className='flex flex-col items-center mt-6'>
 						{/* 3 Dotted Placeholder Boxes */}
 						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full mb-16'>
@@ -579,7 +582,9 @@ const PricingPage = () => {
 
 						{/* Empty State Message and Button */}
 						<div className='flex flex-col items-center'>
-							<h2 className='font-regular text-[16px] leading-normal text-gray-600 text-center mb-8'>No Pricing Widget Exists</h2>
+							<h2 className='font-regular text-[16px] leading-normal text-gray-600 text-center mb-8'>
+								{t('catalog:plans.pricing.noWidget')}
+							</h2>
 						</div>
 					</div>
 				</Page>
@@ -591,7 +596,7 @@ const PricingPage = () => {
 	return (
 		<Page
 			headingClassName='items-center'
-			heading='Pricing Widgets'
+			heading={t('plans.pricing.widgetsPageTitle')}
 			headingCTA={
 				<div className='w-full flex justify-start gap-4'>
 					<Select
@@ -610,7 +615,7 @@ const PricingPage = () => {
 					/>
 				</div>
 			}>
-			<ApiDocsContent tags={['Plans', 'Prices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.PlansAndPrices} />
 			{/* filters */}
 
 			<div className='flex flex-col'>

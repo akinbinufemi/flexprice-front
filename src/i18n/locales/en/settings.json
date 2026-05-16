@@ -1,0 +1,1116 @@
+{
+	"page": {
+		"settings": "Settings",
+		"billing": "Billing"
+	},
+	"members": {
+		"roleAdmin": "Admin",
+		"errors": {
+			"userLimitReached": "User limit reached for this organization.",
+			"userAlreadyExists": "A user with this email already exists!",
+			"failedToAddUser": "Failed to add user",
+			"failedToLoadMembers": "Failed to load members",
+			"enterEmail": "Enter an email address",
+			"emailInvalid": "Please enter a valid email address",
+			"copyFailed": "Could not copy to clipboard",
+			"loginLinkCopied": "Login link copied – share it securely with the user.",
+			"credentialsCopied": "Credentials copied to clipboard.",
+			"credentialsDownloaded": "Credentials downloaded.",
+			"loadError": "Failed to load members. Please try again."
+		},
+		"columns": {
+			"email": "Email",
+			"role": "Role"
+		},
+		"cardTitle": "Members",
+		"addMember": {
+			"title": "Add member",
+			"description": "Invite a new team member by email.",
+			"emailLabel": "Email",
+			"emailPlaceholder": "user@example.com",
+			"addUser": "Add user"
+		},
+		"credentials": {
+			"title": "Login Credentials",
+			"description": "Share these with the new user so they can sign in.",
+			"emailCopied": "Email copied",
+			"copyEmail": "Copy email",
+			"password": "Password",
+			"hidePassword": "Hide password",
+			"showPassword": "Show password",
+			"copyPassword": "Copy password",
+			"oneClickHint": "One-click sign-in link – share this with the user.",
+			"copyLoginLink": "Copy login link",
+			"downloadCsv": "Download CSV",
+			"copyAll": "Copy all",
+			"passwordResetNote": "This password can be reset later.",
+			"signInMethodsNote": "User can sign in with email/password or Google.",
+			"csvHeader": "email,password,login_link",
+			"copyBlockEmailLine": "Email: {{email}}",
+			"copyBlockPasswordLine": "Password: {{password}}",
+			"copyBlockLoginLine": "Login link: {{url}}"
+		},
+		"tabs": {
+			"team": "Team"
+		},
+		"unitMembers": "members"
+	},
+	"billingPage": {
+		"errorFetchBilling": "Error fetching billing details",
+		"labels": {
+			"name": "Name",
+			"billingEmail": "Billing Email",
+			"billingAddress": "Billing Address",
+			"billingCity": "Billing City",
+			"billingState": "Billing State",
+			"billingCountry": "Billing Country",
+			"billingPostalCode": "Billing Postal Code"
+		},
+		"tabs": {
+			"usage": "Usage",
+			"subscriptions": "Subscriptions",
+			"general": "General"
+		},
+		"cards": {
+			"usage": "Usage",
+			"subscriptions": "Subscriptions",
+			"billingDetails": "Billing Details"
+		}
+	},
+	"tenant": {
+		"validation": {
+			"organizationNameRequired": "Organization name is required"
+		},
+		"errors": {
+			"tenantIdRequired": "Tenant ID is required",
+			"updateFailed": "Failed to update tenant details. Please try again."
+		},
+		"toast": {
+			"updated": "Tenant details updated successfully"
+		},
+		"drawer": {
+			"title": "Update Tenant Details",
+			"description": "Update your billing address details.",
+			"organizationName": "Organization Name",
+			"organizationNamePlaceholder": "Enter your organization name",
+			"billingSection": "Billing Details",
+			"country": "Country",
+			"selectCountry": "Select Country",
+			"noCountries": "No countries Available",
+			"addressLine1": "Address Line 1",
+			"addressLine1Placeholder": "Street address, P.O. box, company name, c/o",
+			"addressLine2": "Address Line 2",
+			"addressLine2Placeholder": "Apartment, suite, unit, building, floor, etc.",
+			"state": "State",
+			"selectState": "Select State",
+			"noStates": "No states Available",
+			"city": "City",
+			"selectCity": "Select City",
+			"noCities": "No cities Available",
+			"postalCode": "Postal Code",
+			"postalCodePlaceholder": "Enter Postal Code",
+			"saving": "Saving...",
+			"saveChanges": "Save Changes"
+		}
+	},
+	"integrationDrawer": {
+		"validation": {
+			"nameRequired": "Connection name is required",
+			"apiSecretRequired": "API secret key is required"
+		},
+		"title": {
+			"edit": "Edit {{providerName}} Connection",
+			"connect": "Connect to {{providerName}}"
+		},
+		"description": "Enter connection details. Click save when you're done.",
+		"connectionName": "Connection Name",
+		"connectionNamePlaceholder": "Enter Name",
+		"connectionNameHint": "A dummy name for this integration",
+		"apiSecretKey": "API Secret Key",
+		"apiSecretPlaceholder": "Enter API Secret Key",
+		"apiSecretHint": "Your API secret key from the provider"
+	},
+	"import": {
+		"entityTypes": {
+			"events": "Events",
+			"customers": "Customers",
+			"features": "Features",
+			"prices": "Prices"
+		},
+		"fileTypes": {
+			"csv": "Csv",
+			"json": "Json"
+		},
+		"taskTypes": {
+			"import": "Import",
+			"export": "Export"
+		},
+		"taskStatus": {
+			"successful": "Successful",
+			"failed": "Failed",
+			"queued": "Queued"
+		},
+		"detailLabels": {
+			"type": "Type",
+			"status": "Status",
+			"importStartedAt": "Import Started at",
+			"importCompletedAt": "Import Completed at"
+		},
+		"rowStats": {
+			"totalRows": "Total Rows",
+			"failedRows": "Failed Rows",
+			"successfulRows": "Successful Rows"
+		},
+		"validation": {
+			"uploadFile": "Please upload a file",
+			"selectEntityType": "Please select an entity type"
+		},
+		"toast": {
+			"uploadSuccess": "{{filename}} uploaded successfully",
+			"uploadFailed": "{{filename}} upload failed"
+		},
+		"importFileLabel": "Import file",
+		"chooseFile": "Choose File to Upload"
+	},
+	"bulkImports": {
+		"title": "Bulk Imports",
+		"columns": {
+			"fileName": "File Name",
+			"entityType": "Entity Type",
+			"status": "Status",
+			"startedAt": "Started At",
+			"updatedAt": "Updated At"
+		},
+		"errors": {
+			"fetchFailed": "Failed to fetch data"
+		},
+		"empty": {
+			"readyTitle": "Ready to Import Data?",
+			"readyDescription": "Upload your first import file to bring in customer or events data.",
+			"createTaskButton": "Create Import Task"
+		},
+		"importFile": "Import File",
+		"paginationUnit": "Import Tasks",
+		"placeholders": {
+			"noFileName": "--"
+		}
+	},
+	"exportDrawer": {
+		"validation": {
+			"bucketRequired": "S3 bucket name is required",
+			"regionRequired": "AWS region is required",
+			"keyPrefixRequired": "Key prefix is required",
+			"metadataFieldKeys": "All metadata fields must have a field key"
+		},
+		"toast": {
+			"created": "Export task created successfully",
+			"updated": "Export task updated successfully",
+			"createFailed": "Failed to create export task",
+			"updateFailed": "Failed to update export task"
+		},
+		"title": {
+			"edit": "Edit Export Task",
+			"create": "Create Export Task"
+		},
+		"description": "Configure the export settings for your S3 data pipeline. Click save when you're done.",
+		"entityType": "Entity Type",
+		"entityTypeHint": "Select the type of data to export",
+		"entityTypes": {
+			"events": "Events",
+			"invoice": "Invoice",
+			"creditTopups": "Credit Topups",
+			"creditUsage": "Credit Usage",
+			"usageAnalytics": "Usage Analytics"
+		},
+		"interval": {
+			"label": "Export Interval",
+			"hint": "How often to run the export",
+			"hourly": "Hourly",
+			"daily": "Daily"
+		},
+		"s3": {
+			"bucket": "S3 Bucket Name",
+			"bucketPlaceholder": "Enter S3 bucket name",
+			"bucketHint": "The name of your S3 bucket",
+			"region": "AWS Region",
+			"regionPlaceholder": "Enter AWS region",
+			"regionHint": "The AWS region where your S3 bucket is located",
+			"keyPrefix": "Key Prefix",
+			"keyPrefixPlaceholder": "Enter key prefix",
+			"keyPrefixHint": "The prefix for files in your S3 bucket"
+		},
+		"compression": {
+			"label": "Compression",
+			"hint": "Compression format for exported files",
+			"none": "None",
+			"gzip": "GZIP"
+		},
+		"encryption": {
+			"label": "Encryption",
+			"hint": "Encryption method for exported files",
+			"aes256": "AES256"
+		},
+		"metadata": {
+			"title": "Additional Metadata Fields",
+			"optional": "(Optional)",
+			"tooltip": "Export custom metadata fields as additional CSV columns. If the same field key exists on multiple entity types, use Column Name to give each a unique header.",
+			"columnName": "Column Name",
+			"summary": "{{count}} field configured",
+			"summaryPlural": "{{count}} fields configured",
+			"emptyHint": "Click to add metadata fields to export",
+			"entityTypeCol": "Entity Type",
+			"fieldKeyCol": "Field Key *",
+			"fieldKeyPlaceholder": "e.g. account_id",
+			"columnNamePlaceholder": "CSV column header, e.g. Account ID",
+			"setColumnName": "+ set column name",
+			"addField": "Add Metadata Field",
+			"entityTypes": {
+				"customer": "Customer",
+				"wallet": "Wallet"
+			}
+		},
+		"endpoint": {
+			"label": "Endpoint URL (Optional)",
+			"placeholder": "Enter custom S3 endpoint URL",
+			"description": "Custom endpoint URL for S3-compatible storage (e.g., MinIO, DigitalOcean Spaces)"
+		},
+		"flexpriceManaged": {
+			"title": "Flexprice Managed Storage",
+			"body": "Your exports will be automatically stored in Flexprice-managed S3 buckets. No additional export configuration required. Download the exported files from the respective task runs table."
+		},
+		"enabled": "Enable this export task",
+		"buttons": {
+			"create": "Create"
+		}
+	},
+	"exportRuns": {
+		"emptyTitle": "No Export Runs",
+		"emptyDescription": "This export task hasn't run yet.",
+		"recentTitle": "Recent Export Runs",
+		"notStarted": "Not started",
+		"started": "Started: {{time}}",
+		"completed": "Completed: {{time}}",
+		"errorPrefix": "Error:",
+		"processed": "processed",
+		"exported": "exported",
+		"sizeUnits": {
+			"bytes": "Bytes",
+			"kb": "KB",
+			"mb": "MB",
+			"gb": "GB"
+		},
+		"notAvailable": "N/A",
+		"runStatus": {
+			"completed": "Completed",
+			"failed": "Failed",
+			"running": "Running",
+			"pending": "Pending",
+			"cancelled": "Cancelled"
+		}
+	},
+	"connection": {
+		"validation": {
+			"nameRequired": "Connection name is required",
+			"awsAccessKeyRequired": "AWS Access Key ID is required",
+			"awsSecretRequired": "AWS Secret Access Key is required",
+			"accessTokenRequired": "Access token is required",
+			"clientSecretRequired": "Client secret is required",
+			"apiKeyRequired": "API key is required",
+			"apiKeyRequiredUpper": "API Key is required",
+			"siteRequired": "Site is required",
+			"webhookUsernameRequired": "Webhook username is required",
+			"webhookPasswordRequired": "Webhook password is required",
+			"secretKeyRequired": "Secret key is required",
+			"webhookSecretRequired": "Webhook secret is required",
+			"keyIdRequired": "Key ID is required",
+			"clientSideTokenRequired": "Client-side token is required",
+			"organizationIdRequired": "Organization ID is required",
+			"accountsServerRequired": "Accounts server is required",
+			"clientIdRequired": "Client ID is required",
+			"redirectUrlInvalid": "Must be a valid URL starting with http:// or https://"
+		},
+		"toast": {
+			"created": "{{provider}} connection created successfully",
+			"updated": "{{provider}} connection updated successfully",
+			"failedToCreate": "Failed to create connection",
+			"failedToUpdate": "Failed to update connection",
+			"webhookUrlCopied": "Webhook URL copied to clipboard!",
+			"redirectUriCopied": "Redirect URI copied to clipboard!",
+			"failedOAuth": "Failed to initiate OAuth",
+			"failedZohoOAuth": "Failed to initiate Zoho OAuth",
+			"oauthGeneric": "Failed to initiate OAuth"
+		},
+		"buttons": {
+			"createConnection": "Create Connection",
+			"updateConnection": "Update Connection",
+			"cancel": "Cancel"
+		},
+		"sync": {
+			"title": "Sync Configuration",
+			"description": "Configure what data to sync between {{partner}} and Flexprice",
+			"pushTo": "Push to {{partner}}",
+			"pushToHubSpot": "Push to HubSpot",
+			"inboundWebhook": "Inbound sync (webhook configuration required)"
+		},
+		"labels": {
+			"invoices": "Invoices",
+			"deals": "Deals",
+			"quotes": "Quotes",
+			"payments": "Payments",
+			"environment": "Environment",
+			"apiKey": "API Key",
+			"secretKey": "Secret Key"
+		},
+		"webhook": {
+			"sectionTitle": "Webhook Configuration",
+			"url": "Webhook URL",
+			"eventsToSubscribe": "Webhook Events to Subscribe",
+			"setupInstructions": "Setup Instructions:",
+			"copy": "Copy",
+			"copied": "Copied!",
+			"secretLabel": "Webhook Secret",
+			"secretPlaceholder": "Enter webhook secret",
+			"secretDescription": "The webhook secret for verifying webhook authenticity"
+		},
+		"scopes": {
+			"requiredScopes": "Required Scopes",
+			"hubspotHint": "Based on your sync configuration, ensure these scopes are enabled in your HubSpot app:"
+		},
+		"hubSpot": {
+			"description": "Configure your HubSpot integration with the required credentials.",
+			"connectionNamePlaceholder": "e.g., Production HubSpot, Test HubSpot",
+			"connectionNameHint": "A friendly name to identify this HubSpot connection",
+			"accessToken": "Access Token",
+			"accessTokenPlaceholder": "pat-...",
+			"accessTokenHint": "Your HubSpot private app access token",
+			"clientSecret": "Client Secret",
+			"clientSecretPlaceholder": "Enter your client secret",
+			"clientSecretHint": "Your HubSpot app client secret",
+			"webhookIntro": "Set up this webhook URL in your HubSpot legacy app dashboard to receive event notifications:",
+			"webhookEventsIntro": "Subscribe to these events in your HubSpot webhook configuration:"
+		},
+		"s3": {
+			"titleEdit": "Edit S3 Connection",
+			"titleConnect": "Connect to Amazon S3",
+			"description": "Enter your AWS credentials to connect to S3. Click save when you're done.",
+			"connectionNameHint": "A descriptive name for this S3 connection",
+			"connectionNamePlaceholder": "Enter connection name",
+			"flexpriceManaged": "Flexprice Managed Storage",
+			"flexpriceManagedHint": "No AWS configuration required",
+			"awsAccessKey": "AWS Access Key ID",
+			"awsAccessKeyPlaceholder": "Enter AWS Access Key ID",
+			"awsAccessKeyHint": "Your AWS Access Key ID",
+			"awsSecretKey": "AWS Secret Access Key",
+			"awsSecretKeyPlaceholder": "Enter AWS Secret Access Key",
+			"awsSecretKeyHint": "Your AWS Secret Access Key",
+			"sessionToken": "AWS Session Token (Optional)",
+			"sessionTokenPlaceholder": "Enter AWS Session Token",
+			"sessionTokenHint": "Required only for temporary credentials",
+			"securityNote": "Security Note",
+			"securityFlexprice": "Your data will be stored securely in Flexprice-managed S3 buckets. Files are encrypted at rest and accessible via secure download links.",
+			"securityAws": "Your AWS credentials are encrypted and stored securely. We recommend using IAM roles with minimal required permissions for S3 access."
+		},
+		"zohoBooks": {
+			"description": "Configure your Zoho Books integration and authorize via OAuth.",
+			"connectionPlaceholder": "e.g., Zoho Books Production",
+			"clientIdPlaceholder": "Zoho OAuth Client ID",
+			"clientSecretPlaceholder": "Zoho OAuth Client Secret",
+			"organizationId": "Organization ID",
+			"organizationIdPlaceholder": "Zoho Books organization_id",
+			"organizationIdHint": "Required for Zoho Books API operations.",
+			"accountsServer": "Accounts Server",
+			"accountsServerPlaceholder": "https://accounts.zoho.in",
+			"accountsServerHint": "Default is India (.in). Use another region if needed (e.g. accounts.zoho.com, accounts.zoho.eu).",
+			"webhookSection": "Webhook configuration",
+			"webhookBody": "In Zoho Books, create Invoice and Contact webhooks and set this URL on each. Use the same secret here and in Zoho so Flexprice can verify X-Zoho-Webhook-Signature.",
+			"webhookSecret": "Webhook secret",
+			"webhookSecretPlaceholderEdit": "Leave blank to keep existing secret, or enter a new secret to rotate",
+			"webhookSecretPlaceholderCreate": "Same value as in Zoho Books webhook settings",
+			"webhookSecretDescEdit": "Stored encrypted. Leave blank to keep the current secret when updating.",
+			"webhookSecretDescCreate": "Required. Must match the secret in Zoho Books so Flexprice can verify X-Zoho-Webhook-Signature. Stored encrypted with your connection.",
+			"oauthRedirectTitle": "OAuth Redirect URI",
+			"oauthRedirectBody": "This URI must exactly match your Zoho app Authorized Redirect URI and backend oauth redirect configuration.",
+			"webhookBodyHtml": "In Zoho Books, create Invoice and Contact webhooks and set this URL on each. Use the same secret here and in Zoho so Flexprice can verify <header>X-Zoho-Webhook-Signature</header>.",
+			"credentialsHidden": "OAuth credentials are encrypted and hidden. To update credentials, delete the connection and create a new one.",
+			"selectTenantForUrl": "Select tenant and environment to generate URL",
+			"toastUpdated": "Zoho Books connection updated successfully"
+		},
+		"quickBooks": {
+			"descriptionEdit": "Update your QuickBooks connection settings.",
+			"descriptionCreate": "Configure your QuickBooks integration. You will be redirected to QuickBooks to authorize the connection.",
+			"connectionNamePlaceholder": "e.g., QuickBooks Production, QuickBooks Sandbox",
+			"connectionNameHint": "A friendly name to identify this QuickBooks connection",
+			"clientId": "Client ID",
+			"clientIdPlaceholder": "Enter your QuickBooks OAuth Client ID",
+			"clientIdHint": "Your QuickBooks OAuth Client ID from the Developer Dashboard (Keys & Credentials tab)",
+			"qbClientSecret": "Client Secret",
+			"qbClientSecretPlaceholder": "Enter your QuickBooks OAuth Client Secret",
+			"qbClientSecretHint": "Your QuickBooks OAuth Client Secret from the Developer Dashboard (Keys & Credentials tab)",
+			"incomeAccountOptional": "Income Account ID (Optional)",
+			"incomeAccountPlaceholder": "79",
+			"incomeAccountHint": "QuickBooks Income Account ID for Items. If left blank, it defaults to QuickBooks' standard income account (ID: 79).",
+			"pushToQb": "Push to QuickBooks",
+			"webhookPaymentEnabled": "Configure webhooks in your QuickBooks app to enable payment reconciliation from QuickBooks to Flexprice.",
+			"webhookPaymentDisabled": "Enable payment sync to configure webhook integration for payment reconciliation.",
+			"webhookVerifierOptional": "Webhook Verifier Token (Optional)",
+			"webhookVerifierPlaceholder": "Enter webhook verifier token from QuickBooks",
+			"webhookVerifierHint": "The webhook verifier token from Intuit Developer Portal for signature verification (recommended for production)",
+			"qbWebhookIntro": "Set up this webhook URL in your QuickBooks app (Intuit Developer Portal) to receive payment notifications:",
+			"qbWebhookEventsIntro": "Subscribe to this event in your QuickBooks app (Intuit Developer Portal):",
+			"oauthTitle": "🔒 OAuth Authorization Required",
+			"oauthBody": "After clicking Create Connection, you will be redirected to QuickBooks to authorize this connection.",
+			"oauthClientReady": "Make sure you have the Client ID and Client Secret ready from your QuickBooks Dashboard.",
+			"oauthImportant": "IMPORTANT: You must configure this redirect URI in your QuickBooks' app settings.",
+			"oauthImportantRich": "<important>IMPORTANT:</important> You must configure this redirect URI in your QuickBooks app settings.",
+			"noteEditing": "Note: OAuth credentials are encrypted and not displayed for security. To update credentials, delete this connection and create a new one.",
+			"qbSetupStep1": "Go to your QuickBooks app in Intuit Developer Portal",
+			"qbSetupStep2": "Navigate to Webhooks section",
+			"qbSetupStep3": "Add the webhook URL above",
+			"qbSetupStep4": "Subscribe to Payment entity events (Create/Update)",
+			"qbSetupStep5Optional": "Copy the webhook verifier token and paste it above (optional but recommended)"
+		},
+		"chargebee": {
+			"description": "Configure your Chargebee integration with the required credentials.",
+			"connectionNamePlaceholder": "e.g., Production Chargebee, Test Chargebee",
+			"connectionNameHint": "A friendly name to identify this Chargebee connection",
+			"apiKeyHint": "Your Chargebee API key from the API keys section",
+			"site": "Site",
+			"sitePlaceholder": "e.g., flexpriceio-test",
+			"siteHint": "Your Chargebee site name",
+			"webhookUsername": "Webhook Username",
+			"webhookUsernamePlaceholder": "Enter webhook username",
+			"webhookUsernameHint": "The webhook username for authenticating webhook requests",
+			"webhookPassword": "Webhook Password",
+			"webhookPasswordPlaceholder": "Enter webhook password",
+			"webhookPasswordHint": "The webhook password for authenticating webhook requests",
+			"pushToChargebee": "Push to Chargebee",
+			"webhookIntro": "Set up this webhook URL in your Chargebee dashboard to receive event notifications:",
+			"webhookEventsIntro": "Subscribe to these events in your Chargebee dashboard:"
+		},
+		"nomod": {
+			"description": "Configure your Nomod integration for payment links and invoice sync.",
+			"apiKey": "API Key",
+			"connectionPlaceholder": "e.g., Nomod Production, Nomod Test",
+			"connectionHint": "A friendly name to identify this Nomod connection",
+			"webhookSecret": "Webhook Secret",
+			"webhookSecretPlaceholder": "Enter webhook secret",
+			"apiKeyPlaceholder": "Enter your API key",
+			"apiKeyHint": "Your Nomod API key (e.g., sk_live_...)",
+			"pushToNomod": "Push to Nomod",
+			"webhookIntro": "Use this webhook URL in your Zapier webhook if needed:",
+			"webhookSecretHint": "The webhook secret for verifying webhook authenticity"
+		},
+		"moyasar": {
+			"description": "Configure your Moyasar integration with the required credentials.",
+			"connectionPlaceholder": "e.g., Moyasar Production, Moyasar Test",
+			"connectionHint": "A friendly name to identify this Moyasar connection",
+			"secretKey": "Secret Key",
+			"secretKeyPlaceholder": "sk_...",
+			"secretKeyHint": "Your Moyasar secret key from the API keys section",
+			"webhookIntro": "Set up this webhook URL in your Moyasar dashboard to receive event notifications:",
+			"webhookEventsIntro": "Subscribe to these events in your Moyasar dashboard:",
+			"webhookEventPaymentPaid": "payment_paid"
+		},
+		"razorpay": {
+			"description": "Configure your Razorpay integration with the required credentials.",
+			"connectionPlaceholder": "e.g., Production Razorpay, Test Razorpay",
+			"connectionHint": "A friendly name to identify this Razorpay connection",
+			"keyId": "Key ID",
+			"keyIdHint": "Your Razorpay Key ID from the API keys section",
+			"secretKeyPlaceholder": "Enter your secret key",
+			"secretKeyHint": "Your Razorpay secret key from the API keys section",
+			"pushToRazorpay": "Push to Razorpay",
+			"webhookIntro": "Set up this webhook URL in your Razorpay dashboard to receive event notifications:",
+			"webhookEventsIntro": "Subscribe to these events in your Razorpay dashboard:"
+		},
+		"paddle": {
+			"description": "Configure your Paddle integration with the required credentials.",
+			"connectionPlaceholder": "e.g., Paddle Production, Paddle Sandbox",
+			"connectionHint": "A friendly name to identify this Paddle connection",
+			"apiKeyPlaceholder": "Enter your Paddle API key",
+			"apiKeyHint": "Your Paddle API key from Developer Tools > Authentication",
+			"clientSideToken": "Client-Side Token",
+			"clientSidePlaceholder": "live_... or test_...",
+			"clientSideHint": "Paddle client-side token from Developer Tools > Authentication. Used to initialize Paddle.js on the checkout page.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlPlaceholder": "https://your-app.com/payment-success",
+			"redirectUrlHint": "URL customers are redirected to after a successful payment (optional)",
+			"webhookSecretPlaceholder": "pdl_ntfset_...",
+			"webhookIntro": "Set up this webhook URL in your Paddle dashboard to receive event notifications:",
+			"webhookEventsIntro": "Subscribe to these events in your Paddle dashboard:",
+			"webhookEventTransactionsCompleted": "transactions.completed"
+		}
+	},
+	"insightsTools": {
+		"exports": {
+			"pageHeading": "Data Exports",
+			"s3PageHeading": "S3 Data Exports",
+			"exportNotFound": "Export Not Found",
+			"exportNotFoundDescription": "The requested export task could not be found or has been deleted.",
+			"backToExports": "Back to Exports",
+			"backToS3Connections": "Back to S3 Connections",
+			"pause": "Pause",
+			"resume": "Resume",
+			"manualExport": "Manual Export",
+			"overviewTab": "Overview",
+			"runsTab": "Runs",
+			"basicInformation": "Basic Information",
+			"statusLabel": "Status",
+			"intervalLabel": "Interval",
+			"connectionLabel": "Connection",
+			"s3Configuration": "S3 Configuration",
+			"bucketLabel": "Bucket",
+			"regionLabel": "Region",
+			"keyPrefixLabel": "Key Prefix",
+			"compressionLabel": "Compression",
+			"encryptionLabel": "Encryption",
+			"fallbackEncryptionDisplay": "AES256",
+			"timestamps": "Timestamps",
+			"createdAt": "Created At",
+			"lastUpdated": "Last Updated",
+			"exportTasksTitle": "Export Tasks",
+			"entityExportSuffix": "{{entity}} Export",
+			"exportDetailsDocumentTitle": "Export Details - {{entity}} Export",
+			"exportManagementDocumentTitle": "Export Management - {{name}}",
+			"fallbackS3ConnectionName": "S3 Connection",
+			"noExportTasks": "No Export Tasks",
+			"noExportTasksHint": "Create your first export task to start syncing data to S3.",
+			"addExportTask": "Add Export Task",
+			"connectionsTitle": "Connections",
+			"providerS3Suffix": "S3",
+			"exportCountSingular": "{{count}} export",
+			"exportCountPlural": "{{count}} exports",
+			"viewExports": "View Exports",
+			"noS3Connections": "No S3 Connections",
+			"noS3ConnectionsHint": "Create your first S3 connection to start exporting data.",
+			"addS3Connection": "Add S3 Connection",
+			"s3FeaturesTitle": "S3 Export Features",
+			"s3FeatureDataExportTitle": "Data Export",
+			"s3FeatureDataExportBody": "Automatically export events, invoices, and other Flexprice data to your S3 bucket on a scheduled basis.",
+			"s3FeatureSchedulingTitle": "Flexible Scheduling",
+			"s3FeatureSchedulingBody": "Choose between hourly or daily export schedules to match your data processing needs.",
+			"s3FeatureSecureTitle": "Secure Storage",
+			"s3FeatureSecureBody": "Your data is encrypted and securely stored in your own S3 bucket with configurable encryption options.",
+			"s3FeatureFormatsTitle": "Data Format Options",
+			"s3FeatureFormatsBody": "Export data in various formats with configurable compression and file size limits for optimal storage efficiency.",
+			"overviewSectionTitle": "Overview",
+			"overviewIntro": "Export your Flexprice data to external storage systems for data warehousing, analytics, and backup purposes. Configure automated exports with flexible scheduling and secure data transfer.",
+			"highlightAutomatedExportsTitle": "Automated Exports",
+			"highlightAutomatedExportsBody": "Schedule regular data exports",
+			"highlightMultipleFormatsTitle": "Multiple Formats",
+			"highlightMultipleFormatsBody": "Export in various data formats",
+			"highlightSecureStorageTitle": "Secure Storage",
+			"highlightSecureStorageBody": "Encrypted data transfer and storage",
+			"exportProvidersTitle": "Export Providers",
+			"providerAmazonS3Name": "Amazon S3",
+			"providerAmazonS3Description": "Export your Flexprice data to Amazon S3 for data warehousing, analytics, and backup purposes.",
+			"tagStorage": "Storage",
+			"tagDataWarehouse": "Data Warehouse",
+			"tagAnalytics": "Analytics",
+			"premiumBadge": "Premium",
+			"taskRunsHeading": "Task Runs",
+			"backToExportDetails": "Back to Export Details"
+		},
+		"integrations": {
+			"pageHeading": "Integrations",
+			"availableSection": "Available",
+			"premiumAddonsSection": "Premium add-ons",
+			"previewConnectionName": "Preview connection",
+			"badgeConnected": "Connected",
+			"badgePremium": "Premium",
+			"docsLink": "Docs",
+			"openDocsTitle": "Open {{name}} docs",
+			"disconnectTitle": "Disconnect {{name}}?",
+			"disconnectDescription": "This will remove the connection. You can reconnect from the integrations page at any time.",
+			"disconnect": "Disconnect",
+			"disconnecting": "Disconnecting…",
+			"notFound": "Integration not found",
+			"comingSoon": "Coming Soon",
+			"addConnection": "Add a connection",
+			"connectedAccountsTitle": "Connected Accounts",
+			"deleteConnectionConfirmTitle": "Are you sure you want to delete the connection \"{{name}}\"?",
+			"deleteConnectionIrreversible": "This action cannot be undone.",
+			"deleteConnection": "Delete Connection",
+			"toastDisconnected": "{{name}} disconnected",
+			"toastDisconnectFailed": "Failed to disconnect",
+			"toastPreviewDisconnectMock": "Preview only — this is a mock connected state.",
+			"toastConnectionDeleted": "Connection deleted successfully",
+			"toastConnectionDeleteFailed": "Failed to delete connection",
+			"catalog": {
+				"tags": {
+					"payments": "Payments",
+					"invoices": "Invoices",
+					"crm": "CRM",
+					"sales": "Sales",
+					"marketing": "Marketing",
+					"customerService": "Customer Service",
+					"accounting": "Accounting",
+					"payment": "Payment",
+					"invoiceCustomer": "Invoice Customer"
+				},
+				"mode": {
+					"test": "Test Mode"
+				},
+				"stripe": {
+					"name": "Stripe",
+					"description": "Send invoices, calculate tax, and collect payments using our native connector to Stripe.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": ["The Flexprice Stripe app enables invoicing, tax collection, and payment via Stripe."]
+						},
+						"stripeInvoicing": {
+							"title": "Stripe Invoicing",
+							"paragraphs": [
+								"Create and send invoices through Stripe Invoicing directly from Flexprice and automatically collect payments."
+							]
+						},
+						"automaticTax": {
+							"title": "Automatic Tax Calculations",
+							"paragraphs": [
+								"Leverage Stripe Tax to handle complex tax rules and rates for any region. The integration ensures accurate, up-to-date tax calculations for each invoice, removing the guesswork and reducing compliance risks."
+							]
+						},
+						"securePayments": {
+							"title": "Secure and Flexible Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Stripe's trusted payment gateway. Your customers can choose from various payment methods - credit card, ACH, and more - to improve the overall customer experience and speed up cash flow."
+							]
+						}
+					}
+				},
+				"razorpay": {
+					"name": "Razorpay",
+					"description": "Accept, process and disburse payments using our native connector to Razorpay.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Razorpay app enables invoicing, tax calculations, and payment collection directly through Razorpay. Integrate it seamlessly with Flexprice (or your billing engine) to streamline your payment workflows."
+							]
+						},
+						"razorpayInvoicing": {
+							"title": "Razorpay Invoicing",
+							"paragraphs": [
+								"Create and send invoices with a few clicks - right from Flexprice - using Razorpay's invoicing capabilities. Payment collection can be automated, reducing manual follow-ups."
+							]
+						},
+						"automaticTax": {
+							"title": "Automatic Tax Calculations",
+							"paragraphs": [
+								"Leverage Razorpay's support for regional tax rules (e.g., GST in India). This integration ensures accurate, up-to-date tax rates for each invoice, minimizing compliance risks and manual calculations."
+							]
+						},
+						"securePayments": {
+							"title": "Secure and Flexible Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Razorpay's trusted payment gateway. Your customers can choose from various methods - credit cards, debit cards, net banking, UPI, and wallets - enhancing the payment experience and accelerating cash flow."
+							]
+						}
+					}
+				},
+				"chargebee": {
+					"name": "Chargebee",
+					"description": "Sync invoices and charges/prices between Flexprice and Chargebee for seamless billing operations.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Chargebee app enables seamless synchronization of invoices and charges/prices between Flexprice and Chargebee. Integrate it to streamline your billing workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Sync invoices from Flexprice to Chargebee, ensuring your billing system stays up to date with the latest invoice data."
+							]
+						},
+						"chargePriceSync": {
+							"title": "Charge and Price Sync",
+							"paragraphs": [
+								"Synchronize charges and prices between Flexprice and Chargebee to maintain consistency across your billing platform."
+							]
+						}
+					}
+				},
+				"hubspot": {
+					"name": "Hubspot",
+					"description": "Hubspot is a CRM, sales, marketing and customer service platform.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice HubSpot app enables seamless syncing of deals, invoices, customers, and payments between HubSpot and Flexprice."
+							]
+						},
+						"dealLineItems": {
+							"title": "Deal Line Items Sync",
+							"paragraphs": [
+								"Automatically sync deal line items from HubSpot to Flexprice, ensuring accurate revenue tracking and billing."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": ["Push invoices from Flexprice to HubSpot to keep your CRM up to date with billing information."]
+						},
+						"customerSync": {
+							"title": "Customer Sync",
+							"paragraphs": [
+								"Sync customer data between HubSpot and Flexprice to maintain a single source of truth for customer information."
+							]
+						},
+						"paymentsSync": {
+							"title": "Payments Sync",
+							"paragraphs": ["Keep payment records synchronized between both platforms for accurate financial reporting."]
+						},
+						"revenueReporting": {
+							"title": "Revenue Calculations on HubSpot",
+							"paragraphs": ["Leverage HubSpot's reporting capabilities with accurate revenue data synced from Flexprice."]
+						}
+					}
+				},
+				"salesforce": {
+					"name": "Salesforce",
+					"description": "Salesforce is a customer relationship management (CRM) platform."
+				},
+				"paypal": {
+					"name": "PayPal",
+					"description": "PayPal is an online payment system that supports online money transfers."
+				},
+				"zoho": {
+					"name": "Zoho",
+					"description": "The Zoho Books integration lets you manage critical accounting tasks directly from Flexprice.",
+					"sections": {
+						"createCustomer": {
+							"title": "Create Customer in Zoho Books",
+							"paragraphs": [
+								"Automatically create or update customers in Zoho Books whenever a new customer is added or modified in Flexprice."
+							]
+						},
+						"createInvoice": {
+							"title": "Create Invoice in Zoho Books",
+							"paragraphs": ["Generate Zoho Books invoices seamlessly from Flexprice usage data or billing triggers, reducing manual work."]
+						},
+						"transformInvoice": {
+							"title": "Transform Flexprice Invoice to Zoho Books Invoice",
+							"paragraphs": [
+								"Convert a Flexprice invoice object into Zoho Books' invoice format - streamlining data flow and ensuring accuracy."
+							]
+						}
+					}
+				},
+				"quickbooks": {
+					"name": "QuickBooks",
+					"description": "Sync plans, customers, and invoices from Flexprice to QuickBooks Online for seamless accounting operations.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice QuickBooks integration enables one-way sync from Flexprice to QuickBooks Online. Automatically sync plans, customers, and invoices to keep your accounting system up to date."
+							]
+						},
+						"planPriceSync": {
+							"title": "Plan/Price Sync",
+							"paragraphs": [
+								"Automatically create QuickBooks Items (Service type) when plans are created in Flexprice. Each price is mapped to a QuickBooks Item for accurate invoice line items."
+							]
+						},
+						"customerSync": {
+							"title": "Customer Sync",
+							"paragraphs": [
+								"Customers are automatically created in QuickBooks when invoices are synced. Customer data including name, email, and billing address is synchronized."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Automatically sync invoices from Flexprice to QuickBooks Online. Invoice line items are mapped to QuickBooks Items, ensuring accurate accounting records."
+							]
+						},
+						"tokenRefresh": {
+							"title": "Automatic Token Refresh",
+							"paragraphs": [
+								"OAuth tokens are automatically refreshed by the backend when they expire, ensuring uninterrupted sync operations without manual intervention."
+							]
+						}
+					}
+				},
+				"nomod": {
+					"name": "Nomod",
+					"description": "Send invoices and collect payments using payment links through Nomod integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Nomod app enables invoicing and payment collection through Nomod payment links. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices with payment links through Nomod directly from Flexprice. Payment collection can be automated through Nomod payment links."
+							]
+						},
+						"paymentLinks": {
+							"title": "Payment Links",
+							"paragraphs": [
+								"Generate secure payment links for your invoices using Nomod. Your customers can pay quickly and securely through various payment methods supported by Nomod."
+							]
+						},
+						"webhooks": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about invoice and payment link events through webhooks. Stay updated on payment status, invoice creation, and more."
+							]
+						}
+					}
+				},
+				"moyasar": {
+					"name": "Moyasar",
+					"description": "Send invoices and collect payments using Moyasar payment gateway integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Moyasar app enables invoicing and payment collection through Moyasar payment gateway. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices through Moyasar directly from Flexprice. Payment collection can be automated through Moyasar payment gateway."
+							]
+						},
+						"securePayments": {
+							"title": "Secure Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Moyasar payment gateway. Your customers can choose from various payment methods to improve the overall customer experience and speed up cash flow."
+							]
+						},
+						"webhooks": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about payment events through webhooks. Subscribe to payment_paid event to stay updated on payment status."
+							]
+						}
+					}
+				},
+				"paddle": {
+					"name": "Paddle",
+					"description": "Send invoices and collect payments using Paddle payment gateway integration.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Paddle app enables invoicing and payment collection through Paddle payment gateway. Integrate it seamlessly with Flexprice to streamline your payment workflows."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"Create and send invoices through Paddle directly from Flexprice. Payment collection can be automated through Paddle payment gateway."
+							]
+						},
+						"securePayments": {
+							"title": "Secure Payments",
+							"paragraphs": [
+								"Collect payments quickly and securely via Paddle payment gateway. Your customers can choose from various payment methods to improve the overall customer experience and speed up cash flow."
+							]
+						},
+						"webhooksPaddle": {
+							"title": "Webhook Integration",
+							"paragraphs": [
+								"Receive real-time notifications about payment events through webhooks. Subscribe to transactions.completed event to stay updated on payment status."
+							]
+						}
+					}
+				}
+			}
+		},
+		"oauthCallback": {
+			"authorizationFailed": "❌ Authorization Failed",
+			"redirectingToIntegrations": "Redirecting back to integrations...",
+			"completingAuthorization": "Completing {{provider}} authorization...",
+			"exchangingTokens": "🔒 Securely exchanging authorization code for tokens"
+		},
+		"revenue": {
+			"pageHeading": "Revenue",
+			"metricNetRevenue": "Net Revenue",
+			"metricContractRevenue": "Contract Revenue",
+			"metricUsageRevenue": "Usage Revenue",
+			"metricVoiceMinutes": "Voice Minutes",
+			"metricCostPerMinute": "Cost / Minute",
+			"emptyRangeTitle": "This range is empty",
+			"emptyRangeBody": "Not enough revenue data is available in the selected range to show this statistics.",
+			"viewLatestData": "View latest data",
+			"searchCustomersPlaceholder": "Search customers...",
+			"colCustomer": "Customer",
+			"noSearchMatches": "No customers match your search.",
+			"loadingEllipsis": "...",
+			"filterThisMonth": "This month",
+			"filterThisQuarter": "This quarter",
+			"filterThisYear": "This year",
+			"filterLastMonth": "Last month",
+			"filterLastQuarter": "Last quarter",
+			"filterLastYear": "Last year"
+		}
+	},
+	"integrations": {
+		"stripe": {
+			"description": "Configure your Stripe integration with the required credentials.",
+			"connectionPlaceholder": "e.g., Production Stripe, Test Stripe",
+			"connectionNameHint": "A friendly name to identify this Stripe connection",
+			"secretKeyLabel": "Secret Key",
+			"secretKeyPlaceholder": "sk_...",
+			"secretKeyHint": "Your Stripe secret key from the API keys section",
+			"pullFromStripe": "Pull from Stripe",
+			"pushToStripe": "Push to Stripe",
+			"webhookSecretDescription": "The webhook secret provided by Stripe after setting up the webhook endpoint",
+			"webhookSecretPlaceholder": "whsec_...",
+			"webhookIntro": "Set up this webhook URL in your Stripe dashboard to receive event notifications:",
+			"webhookEventsIntro": "Based on your sync configuration, subscribe to these events in your Stripe dashboard:",
+			"labels": {
+				"plans": "Plans",
+				"invoices": "Invoices",
+				"subscriptions": "Subscriptions"
+			},
+			"toast": {
+				"stripeCreated": "Stripe connection created successfully",
+				"stripeUpdated": "Stripe connection updated successfully"
+			}
+		}
+	},
+	"environment": {
+		"types": {
+			"sandbox": "Sandbox",
+			"production": "Production",
+			"sandboxDescription": "For development and testing purposes",
+			"productionDescription": "For live production environment"
+		},
+		"copy": {
+			"title": "Copy Environment",
+			"fallbackDescription": "Copy all published configuration into an environment.",
+			"introBeforeBadge": "Copying from",
+			"intoNew": "into a new environment.",
+			"intoSelected": "into the selected environment.",
+			"cleanupTitle": "Clean up before copying",
+			"cleanupBodyLead": "All active features and plans will be copied as-is. Archive or remove anything you don't want carried over ",
+			"cleanupBefore": "before",
+			"cleanupBodyTrail": " proceeding.",
+			"copyIntoLabel": "Copy into",
+			"selectTargetPlaceholder": "Select target environment",
+			"createNewOption": "Create a new environment",
+			"createNewOptionDescription": "A new environment will be created for the copy",
+			"newEnvironmentName": "New Environment Name",
+			"namePlaceholder": "e.g. Staging, Production Clone",
+			"typeLabel": "Type",
+			"typePlaceholder": "Select environment type",
+			"whatCopiedHeading": "What will be copied",
+			"featuresTitle": "All active features",
+			"featuresDescription": "Static, Boolean & Metered features along with their associated meters",
+			"plansTitle": "All active plans",
+			"plansDescription": "Including all prices, entitlements, and credit grants attached to each plan",
+			"excludedLead": "Draft entities, archived entities, customers, subscriptions, invoices, and wallet balances are ",
+			"excludedBold": "not",
+			"excludedTail": " copied.",
+			"noteAsyncNewEnv": "The environment is created immediately. Features and plans are cloned in the background and may take a few seconds to appear.",
+			"noteAsyncOnly": "Features and plans are cloned in the background and may take a few seconds to appear.",
+			"copyingEllipsis": "Copying...",
+			"buttonCopy": "Copy Environment",
+			"toastStarted": "Environment clone started — features and plans are being copied in the background.",
+			"toastCloneFailed": "Failed to clone environment",
+			"errorNameRequired": "Environment name is required",
+			"errorNoSource": "No source environment selected"
+		},
+		"creator": {
+			"title": "Create Environment",
+			"description": "Create a new environment for your application",
+			"nameLabel": "Name",
+			"namePlaceholder": "Enter environment name",
+			"typeLabel": "Type",
+			"typePlaceholder": "Select environment type",
+			"sandboxCancellationNote": "Sandbox subscriptions are automatically cancelled after {{days}} days",
+			"productionBodyLine1": "Production environments require an approval.",
+			"productionContactPrompt": "Contact us to get started:",
+			"brandSlack": "Slack",
+			"brandEmail": "Email",
+			"bookACall": "Book a call",
+			"ariaSlackContact": "Contact Slack",
+			"ariaEmailContact": "Contact Email",
+			"ariaBookCall": "Book a call",
+			"slackAlt": "Slack",
+			"toastCreated": "Environment created successfully",
+			"toastCreateFailed": "Failed to create environment",
+			"errorNameRequired": "Environment name is required",
+			"errorCreateUnknown": "Failed to create environment",
+			"savingEllipsis": "Creating...",
+			"submitCreate": "Create Environment"
+		},
+		"editor": {
+			"title": "Rename Environment",
+			"description": "Update the name for this environment",
+			"nameLabel": "Name",
+			"namePlaceholder": "Enter environment name",
+			"savingEllipsis": "Saving...",
+			"submitSave": "Save",
+			"toastUpdated": "Environment updated successfully",
+			"toastUpdateFailed": "Failed to update environment",
+			"errorNameRequired": "Environment name is required",
+			"errorNoEnvironment": "No environment selected",
+			"errorUpdateUnknown": "Failed to update environment"
+		},
+		"selector": {
+			"noneAvailable": "No environments available",
+			"noEnvironment": "No environment",
+			"fallbackTenantLetters": "UN",
+			"unknownTenant": "Unknown",
+			"addEnvironment": "Add Environment",
+			"copyEnvironment": "Copy Environment",
+			"renameAria": "Rename {{name}}",
+			"suspendedTitle": "Environment suspended",
+			"suspendedDescription": "This environment is temporarily closed. Contact us to continue."
+		},
+		"restrictedBanner": {
+			"productionAccount": "production account",
+			"sandboxAccount": "sandbox",
+			"grace": "Your {{envType}} is active for the next {{count}} {{dayWord}}. To continue after that, ",
+			"dayWordOne": "day",
+			"dayWordPlural": "days",
+			"contactUs": "contact us",
+			"suspended": "Your {{envType}} is temporarily closed. To continue, "
+		}
+	},
+	"debug": {
+		"tooltipTitle": "Checkout usage based pricing in action",
+		"sampleEventsCreated": "Sample Events Created",
+		"loading": "Loading...",
+		"titleStreamSamples": "Stream Sample Events",
+		"noCustomers": "No customers found. Create one to get started.",
+		"needSubscriptionLead": "Assign a subscription to stream sample events to",
+		"eventsFiredSentence": "{{count}} events have been fired for ",
+		"eventsFiredMiddle": " for ",
+		"eventsFiredTrailing": " plan.",
+		"viewEvents": "View Events",
+		"streamAgain": "Stream Again",
+		"streamIntro": "Experience how metering, billing, and entitlements update in real time. Sample events will be triggered for ",
+		"planBridge": " under the ",
+		"planEnd": " plan.",
+		"progress": "{{current}} of {{total}} events fired",
+		"streaming": "Streaming...",
+		"startStreaming": "Start Streaming"
+	},
+	"region": {
+		"dataRegion": "Data region",
+		"selectPlaceholder": "Select a region",
+		"tooltipLearnMore": "Click to learn more about regions",
+		"dialogTitle": "Which region would you like to choose?",
+		"dialogDescription": "Please choose your region carefully. While migration to another region is possible, it requires manual intervention and cannot be changed automatically.",
+		"sectionUs": "US hosting",
+		"benefitUs1": "Faster if you and your users are based in the US",
+		"benefitUs2": "Easier to comply with some US regulations",
+		"benefitUs3": "Hosted in Oregon, USA (us-west-2)",
+		"sectionIndia": "India hosting",
+		"benefitIn1": "Faster if you and your users are based in India",
+		"benefitIn2": "Hosted in Mumbai, India (ap-south-1)"
+	}
+}

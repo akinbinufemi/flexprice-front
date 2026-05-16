@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { CustomAnalyticItem } from '@/types/dto/Events';
@@ -17,18 +18,6 @@ interface MetricCardsWidgetProps {
 	config?: MetricCardsConfig;
 }
 
-// ─── Custom metric display name map ──────────────────────────────────────────
-
-/**
- * Short display labels for known custom analytics metrics.
- * Key = item.id (slug) or item.name. Add entries as needed.
- */
-const CUSTOM_ANALYTICS_DISPLAY_NAMES: Record<string, string> = {
-	'revenue-per-minute': 'CPM',
-};
-
-// ─── Main Widget ──────────────────────────────────────────────────────────────
-
 const DEFAULT_CONFIG: MetricCardsConfig = {
 	show_custom_metrics: true,
 	show_revenue_metric: true,
@@ -45,6 +34,7 @@ const DEFAULT_CONFIG: MetricCardsConfig = {
  * auto-fill grid ensures all cards sit on one line at full width.
  */
 const MetricCardsWidget = ({ analyticsParams, config }: MetricCardsWidgetProps) => {
+	const { t } = useTranslation('customer-portal');
 	const mergedConfig: MetricCardsConfig = { ...DEFAULT_CONFIG, ...config };
 	const { show_custom_metrics: showCustom, show_revenue_metric: showRevenue, show_cost_metrics: showCost } = mergedConfig;
 	const { config: portalConfig } = usePortalConfig();
@@ -78,12 +68,12 @@ const MetricCardsWidget = ({ analyticsParams, config }: MetricCardsWidgetProps) 
 	});
 
 	useEffect(() => {
-		if (analyticsError) toast.error('Failed to load analytics');
-	}, [analyticsError]);
+		if (analyticsError) toast.error(t('errors.loadAnalytics'));
+	}, [analyticsError, t]);
 
 	useEffect(() => {
-		if (costError) toast.error('Failed to load cost analytics');
-	}, [costError]);
+		if (costError) toast.error(t('errors.loadCostAnalytics'));
+	}, [costError, t]);
 
 	const customItems: CustomAnalyticItem[] = analyticsData?.custom_analytics ?? [];
 	const isLoading = (showCustom && analyticsLoading) || ((showRevenue || showCost) && costLoading);
@@ -136,7 +126,7 @@ const MetricCardsWidget = ({ analyticsParams, config }: MetricCardsWidgetProps) 
 			{/* Revenue metric */}
 			{hasRevenueData && (
 				<PortalMetricWrapper hasTheme={hasTheme}>
-					<MetricCard title='Revenue' value={totalRevenue} currency={currency} />
+					<MetricCard title={t('metrics.revenue')} value={totalRevenue} currency={currency} />
 				</PortalMetricWrapper>
 			)}
 
@@ -144,13 +134,19 @@ const MetricCardsWidget = ({ analyticsParams, config }: MetricCardsWidgetProps) 
 			{hasCostData && (
 				<>
 					<PortalMetricWrapper hasTheme={hasTheme}>
-						<MetricCard title='Cost' value={totalCost} currency={currency} />
+						<MetricCard title={t('metrics.cost')} value={totalCost} currency={currency} />
 					</PortalMetricWrapper>
 					<PortalMetricWrapper hasTheme={hasTheme}>
-						<MetricCard title='Margin' value={margin} currency={currency} showChangeIndicator isNegative={margin < 0} />
+						<MetricCard title={t('metrics.margin')} value={margin} currency={currency} showChangeIndicator isNegative={margin < 0} />
 					</PortalMetricWrapper>
 					<PortalMetricWrapper hasTheme={hasTheme}>
-						<MetricCard title='Margin %' value={marginPercent} isPercent showChangeIndicator isNegative={marginPercent < 0} />
+						<MetricCard
+							title={t('metrics.marginPercent')}
+							value={marginPercent}
+							isPercent
+							showChangeIndicator
+							isNegative={marginPercent < 0}
+						/>
 					</PortalMetricWrapper>
 				</>
 			)}
@@ -158,7 +154,7 @@ const MetricCardsWidget = ({ analyticsParams, config }: MetricCardsWidgetProps) 
 			{hasCustomData &&
 				customItems.map((item) => {
 					const value = parseFloat(item.value);
-					const displayName = CUSTOM_ANALYTICS_DISPLAY_NAMES[item.id] ?? CUSTOM_ANALYTICS_DISPLAY_NAMES[item.name] ?? item.name;
+					const displayName = item.id === 'revenue-per-minute' || item.name === 'revenue-per-minute' ? t('metrics.cpm') : item.name;
 					const isCurrencyMetric = item.id === 'revenue-per-minute';
 					return (
 						<PortalMetricWrapper key={item.id} hasTheme={hasTheme}>

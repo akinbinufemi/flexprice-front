@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ArrowUpDown, GripVertical, Trash2, X } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Combobox, Button, Select } from '@/components/atoms';
 import { SortOption, SortDirection } from '@/types/common/QueryBuilder';
 import { sanitizeSortConditions } from '@/types/formatters/QueryBuilder';
@@ -24,6 +25,7 @@ const GRID_GAP = 'gap-2';
 const ITEM_PADDING = 'py-2 px-2';
 
 const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, className, disabled = false, maxSorts = 10 }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const allFieldsAdded = useMemo(() => {
 		const usedFields = new Set(value.map((v) => v.field));
@@ -88,9 +90,9 @@ const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, classNam
 			<PopoverTrigger disabled={disabled} asChild>
 				<Button variant='outline' size='default' className={cn('flex items-center gap-2 text-xs', className)}>
 					<ArrowUpDown className='size-5' />
-					<span>Sort</span>
+					<span>{t('queryBuilder.sort')}</span>
 					{appliedSorts > 0 && (
-						<Badge variant='secondary' className='ml-1 h-5 rounded px-1.5 font-mono text-xs'>
+						<Badge variant='secondary' className='ms-1 h-5 rounded px-1.5 font-mono text-xs'>
 							{appliedSorts}
 						</Badge>
 					)}
@@ -105,24 +107,24 @@ const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, classNam
 						<div className='flex flex-col gap-2 p-2'>
 							<div className='flex justify-between items-start'>
 								<div className='flex flex-col gap-1'>
-									<h4 className='text-base font-medium leading-none'>No sorting applied</h4>
-									<p className='text-muted-foreground text-sm'>Add sorting to organize your data.</p>
+									<h4 className='text-base font-medium leading-none'>{t('queryBuilder.noSortingTitle')}</h4>
+									<p className='text-muted-foreground text-sm'>{t('queryBuilder.noSortingDescription')}</p>
 								</div>
-								<Button variant='ghost' size='icon' className='h-7 w-7 -mr-1' onClick={() => setIsOpen(false)}>
+								<Button variant='ghost' size='icon' className='h-7 w-7 -me-1' onClick={() => setIsOpen(false)}>
 									<X className='h-3.5 w-3.5' />
 								</Button>
 							</div>
 							<div className='mt-2'>
 								<Button size='sm' onClick={handleSortAdd} className='w-fit h-9 text-sm px-2.5'>
-									Add sort
+									{t('queryBuilder.addSort')}
 								</Button>
 							</div>
 						</div>
 					) : (
 						<div className='flex flex-col gap-1.5'>
 							<div className='flex justify-between items-center'>
-								<h4 className='text-sm font-medium leading-none'>Sort by</h4>
-								<Button variant='ghost' size='icon' className='h-7 w-7 -mr-1' onClick={() => setIsOpen(false)}>
+								<h4 className='text-sm font-medium leading-none'>{t('queryBuilder.sortBy')}</h4>
+								<Button variant='ghost' size='icon' className='h-7 w-7 -me-1' onClick={() => setIsOpen(false)}>
 									<X className='h-3.5 w-3.5' />
 								</Button>
 							</div>
@@ -141,10 +143,10 @@ const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, classNam
 													}))}
 													value={sort.field}
 													onChange={(value) => handleSortUpdate(index, { field: value })}
-													placeholder='Select field'
+													placeholder={t('queryBuilder.selectField')}
 													width='100%'
 													triggerClassName='h-9 text-sm'
-													searchPlaceholder='Search fields...'
+													searchPlaceholder={t('queryBuilder.searchFieldsPlaceholder')}
 													contentClassName='!z-[110]'
 												/>
 
@@ -152,17 +154,17 @@ const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, classNam
 													options={[
 														{
 															value: SortDirection.ASC,
-															label: 'Asc',
+															label: t('queryBuilder.directionAsc'),
 														},
 														{
-															value: 'desc',
-															label: 'Desc',
+															value: SortDirection.DESC,
+															label: t('queryBuilder.directionDesc'),
 														},
 													]}
 													value={sort.direction}
 													onChange={(value) => handleSortUpdate(index, { direction: value as SortDirection })}
 													className='h-9 text-sm'
-													placeholder='Select direction'
+													placeholder={t('queryBuilder.selectDirection')}
 													contentClassName='!z-[110]'
 												/>
 
@@ -203,10 +205,10 @@ const SortDropdown: React.FC<Props> = ({ options, value = [], onChange, classNam
 									onClick={handleSortAdd}
 									disabled={value.length >= maxSorts || allFieldsAdded}
 									className='h-9 text-sm px-2.5 flex items-center gap-1'>
-									Add sort
+									{t('queryBuilder.addSort')}
 								</Button>
 								<Button variant='outline' size='sm' onClick={handleSortingReset} className='h-9 text-sm px-2.5'>
-									Reset sorting
+									{t('queryBuilder.resetSorting')}
 								</Button>
 							</div>
 						</div>

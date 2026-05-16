@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import CustomerMultiSearchSelect from '@/components/molecules/Customer/CustomerMultiSearchSelect';
 import type { Customer } from '@/models';
 import { SUBSCRIPTION_MODIFY_TYPE } from '@/models';
+import { useTranslation } from 'react-i18next';
 
 export interface SubscriptionEditInheritingCustomersSectionProps {
 	parentSubscriptionId: string;
@@ -28,6 +29,7 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 	isListLoading = false,
 	isAddDisabled = false,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [childToDetach, setChildToDetach] = useState<SubscriptionResponse | null>(null);
 	const [addDialogOpen, setAddDialogOpen] = useState(false);
 	const [selectedCustomers, setSelectedCustomers] = useState<Customer[]>([]);
@@ -37,12 +39,12 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 			return await SubscriptionApi.updateSubscription(childSubscriptionId, { parent_subscription_id: null });
 		},
 		onSuccess: async () => {
-			toast.success('Inheritance removed');
+			toast.success(t('subscriptions.inheritanceEdit.toastRemoved'));
 			setChildToDetach(null);
 			void refetchQueries(['subscriptionEdit', parentSubscriptionId]);
 		},
-		onError: (error: { error?: { message?: string } }) => {
-			toast.error(error?.error?.message || 'Failed to remove inheritance');
+		onError: (error: Error) => {
+			toast.error(error.message || t('subscriptions.inheritanceEdit.toastRemoveFailed'));
 		},
 	});
 
@@ -66,7 +68,7 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 					ext = full.external_id?.trim();
 				}
 				if (!ext) {
-					throw new Error(`Customer "${c.name || c.id}" must have an external ID`);
+					throw new Error(t('subscriptions.inheritanceEdit.externalIdRequired', { name: c.name || c.id }));
 				}
 				resolvedExternalIds.push(ext);
 			}
@@ -79,14 +81,13 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 			});
 		},
 		onSuccess: () => {
-			toast.success('Customers added to inherit');
+			toast.success(t('subscriptions.inheritanceEdit.toastAdded'));
 			setAddDialogOpen(false);
 			setSelectedCustomers([]);
 			void refetchQueries(['subscriptionEdit', parentSubscriptionId]);
 		},
-		onError: (error: unknown) => {
-			const e = error as { error?: { message?: string }; message?: string } | undefined;
-			toast.error(e?.error?.message || e?.message || 'Failed to add inheriting customers');
+		onError: (error: Error) => {
+			toast.error(error.message || t('subscriptions.inheritanceEdit.toastAddFailed'));
 		},
 	});
 
@@ -98,13 +99,13 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 	const columns: ColumnData<SubscriptionResponse>[] = useMemo(
 		() => [
 			{
-				title: 'Customer',
+				title: t('subscriptions.inheritanceEdit.columnCustomer'),
 				render: (row) => (
 					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>{row.customer?.name ?? '—'}</RedirectCell>
 				),
 			},
 			{
-				title: 'Plan',
+				title: t('subscriptions.inheritanceEdit.columnPlan'),
 				render: (row) => (
 					<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}/subscription/${row.id}`}>
 						{row.plan?.name ?? '—'}
@@ -112,22 +113,31 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 				),
 			},
 			{
-				title: 'Start date',
+				title: t('subscriptions.inheritanceEdit.columnStartDate'),
 				render: (row) => <span className='text-muted-foreground'>{formatDate(row.start_date)}</span>,
 			},
 			{
-				title: 'Renewal date',
+				title: t('subscriptions.inheritanceEdit.columnRenewalDate'),
 				render: (row) => <span className='text-muted-foreground'>{formatDate(row.current_period_end)}</span>,
 			},
 		],
-		[],
+		[t],
 	);
 
-	const detachTitle = childToDetach ? `Remove inheritance for ${childToDetach.customer?.name ?? 'this customer'}?` : '';
+	const detachTitle = childToDetach
+		? t('subscriptions.inheritanceEdit.detachConfirmTitle', {
+				name: childToDetach.customer?.name ?? t('subscriptions.inheritanceEdit.detachFallbackCustomer'),
+			})
+		: '';
 
 	const headerRow = (
 		<div className='flex items-center justify-between mb-4'>
-			<FormHeader title='Inheriting customers' variant='sub-header' titleClassName='text-lg font-semibold text-gray-900' className='mb-0' />
+			<FormHeader
+				title={t('subscriptions.inheritingCustomers')}
+				variant='sub-header'
+				titleClassName='text-lg font-semibold text-gray-900'
+				className='mb-0'
+			/>
 			<AddButton onClick={handleAddClick} disabled={isAddDisabled} />
 		</div>
 	);
@@ -140,7 +150,7 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 					setAddDialogOpen(open);
 					if (!open) setSelectedCustomers([]);
 				}}
-				title='Add customers to inherit'
+				title={t('subscriptions.addCustomersToInherit')}
 				className='max-w-2xl sm:max-w-[42rem] w-[calc(100vw-2rem)]'
 				descriptionClassName='mt-3'
 				showCloseButton={!isAddingInheritance}>
@@ -150,10 +160,10 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 						onChange={setSelectedCustomers}
 						excludeId={excludeCustomerIds}
 						limit={50}
-						searchPlaceholder='Search customers by name...'
+						searchPlaceholder={t('subscriptions.inheritanceEdit.searchPlaceholder')}
 						display={{
-							label: 'Customers',
-							placeholder: 'Select customers',
+							label: t('subscriptions.inheritanceEdit.multiSelectLabel'),
+							placeholder: t('subscriptions.inheritanceEdit.multiSelectPlaceholder'),
 							className: 'min-w-0',
 							triggerClassName: 'min-h-11',
 						}}
@@ -162,13 +172,17 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 					/>
 					<div className='flex justify-end gap-2 pt-2'>
 						<Button type='button' variant='outline' onClick={() => setAddDialogOpen(false)} disabled={isAddingInheritance}>
-							Cancel
+							{t('common:actions.cancel')}
 						</Button>
 						<Button
 							type='button'
 							onClick={handleConfirmAdd}
 							disabled={isAddDisabled || isAddingInheritance || selectedCustomers.length === 0}>
-							{isAddingInheritance ? 'Adding…' : `Add${selectedCustomers.length > 0 ? ` (${selectedCustomers.length})` : ''}`}
+							{isAddingInheritance
+								? t('subscriptions.inheritanceEdit.adding')
+								: selectedCustomers.length > 0
+									? t('subscriptions.inheritanceEdit.addWithCount', { count: selectedCustomers.length })
+									: t('subscriptions.inheritanceEdit.add')}
 						</Button>
 					</div>
 				</div>
@@ -177,7 +191,7 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 			{inheritingSubscriptions.length === 0 && isListLoading ? (
 				<Card variant='notched'>
 					{headerRow}
-					<div className='py-8 text-center text-sm text-muted-foreground'>Loading…</div>
+					<div className='py-8 text-center text-sm text-muted-foreground'>{t('common:status.loading')}</div>
 				</Card>
 			) : inheritingSubscriptions.length > 0 ? (
 				<Card variant='notched'>
@@ -189,7 +203,7 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 			) : (
 				<Card variant='notched'>
 					{headerRow}
-					<p className='text-sm text-gray-500'>No customers inherit this subscription yet</p>
+					<p className='text-sm text-gray-500'>{t('subscriptions.inheritanceEdit.emptyState')}</p>
 				</Card>
 			)}
 
@@ -197,15 +211,15 @@ const SubscriptionEditInheritingCustomersSection: FC<SubscriptionEditInheritingC
 				isOpen={childToDetach !== null}
 				onOpenChange={(open) => !open && setChildToDetach(null)}
 				title={detachTitle}
-				description='The subscription stays on the customer as a standalone subscription; it will no longer mirror this parent.'
+				description={t('subscriptions.inheritanceNote')}
 				titleClassName='text-lg font-normal text-gray-800'
 				showCloseButton={!isDetaching}>
 				<div className='flex justify-end gap-3 pt-2'>
 					<Button variant='outline' onClick={() => setChildToDetach(null)} disabled={isDetaching}>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={() => childToDetach && removeInheritance(childToDetach.id)} disabled={isDetaching || !childToDetach}>
-						{isDetaching ? 'Removing…' : 'Remove inheritance'}
+						{isDetaching ? t('subscriptions.inheritanceEdit.removing') : t('subscriptions.removeInheritance')}
 					</Button>
 				</div>
 			</Dialog>

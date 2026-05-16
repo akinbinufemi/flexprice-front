@@ -3,6 +3,7 @@ import Dialog from '@/components/atoms/Dialog';
 import { Coupon } from '@/models/Coupon';
 import formatCouponName from '@/utils/common/format_coupon_name';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	isOpen: boolean;
@@ -18,6 +19,7 @@ interface FormErrors {
 }
 
 const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, coupons, selectedCouponId }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [selectedCoupon, setSelectedCoupon] = useState<string>(selectedCouponId || '');
 
@@ -25,14 +27,14 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 		const newErrors: FormErrors = {};
 
 		if (!selectedCoupon) {
-			newErrors.couponId = 'Please select a coupon';
+			newErrors.couponId = t('coupons.modal.selectCouponRequired');
 		}
 
 		return {
 			isValid: Object.keys(newErrors).length === 0,
 			errors: newErrors,
 		};
-	}, [selectedCoupon]);
+	}, [selectedCoupon, t]);
 
 	const handleSave = useCallback(() => {
 		const validation = validateForm();
@@ -71,12 +73,12 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 	}));
 
 	return (
-		<Dialog isOpen={isOpen} showCloseButton={false} onOpenChange={onOpenChange} title='Link Coupon' className='sm:max-w-[500px]'>
+		<Dialog isOpen={isOpen} showCloseButton={false} onOpenChange={onOpenChange} title={t('labels.linkCoupon')} className='sm:max-w-[500px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2'>
 					<Select
-						label='Select Coupon'
-						placeholder='Choose a coupon to link'
+						label={t('labels.selectCoupon')}
+						placeholder={t('labels.chooseACoupon')}
 						options={couponOptions}
 						value={selectedCoupon}
 						onChange={handleCouponChange}
@@ -87,9 +89,9 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={handleCancel}>
-					Cancel
+					{t('actions.cancel')}
 				</Button>
-				<Button onClick={handleSave}>Add</Button>
+				<Button onClick={handleSave}>{t('actions.add')}</Button>
 			</div>
 		</Dialog>
 	);

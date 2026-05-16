@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { portalInvoicesQueryKey } from '@/components/customer-portal/queryKeys';
@@ -14,30 +15,30 @@ import { Input } from '@/components/ui';
 import EmptyState from './EmptyState';
 import { downloadInvoiceLineItemsCsv } from '@/utils/invoices/downloadInvoiceLineItemsCsv';
 
-const getStatusChip = (invoice: Invoice) => {
-	// Check payment status first
-	if (invoice.payment_status === PAYMENT_STATUS.SUCCEEDED) {
-		return <Chip label='Paid' variant='success' />;
-	}
-
-	if (invoice.invoice_status === INVOICE_STATUS.VOIDED) {
-		return <Chip label='Voided' variant='default' />;
-	}
-
-	if (invoice.invoice_status === INVOICE_STATUS.DRAFT) {
-		return <Chip label='Draft' variant='default' />;
-	}
-
-	// Check if overdue (we already know payment is not SUCCEEDED at this point)
-	const isOverdue = new Date(invoice.due_date) < new Date();
-	if (isOverdue) {
-		return <Chip label='Overdue' variant='failed' />;
-	}
-
-	return <Chip label='Pending' variant='warning' />;
-};
-
 const InvoicesTab = () => {
+	const { t } = useTranslation('customer-portal');
+
+	const getStatusChip = (invoice: Invoice) => {
+		if (invoice.payment_status === PAYMENT_STATUS.SUCCEEDED) {
+			return <Chip label={t('invoiceChip.paid')} variant='success' />;
+		}
+
+		if (invoice.invoice_status === INVOICE_STATUS.VOIDED) {
+			return <Chip label={t('invoiceChip.voided')} variant='default' />;
+		}
+
+		if (invoice.invoice_status === INVOICE_STATUS.DRAFT) {
+			return <Chip label={t('invoiceChip.draft')} variant='default' />;
+		}
+
+		const isOverdue = new Date(invoice.due_date) < new Date();
+		if (isOverdue) {
+			return <Chip label={t('invoiceChip.overdue')} variant='failed' />;
+		}
+
+		return <Chip label={t('invoiceChip.pending')} variant='warning' />;
+	};
+
 	const [searchQuery, setSearchQuery] = useState('');
 	const [downloadTarget, setDownloadTarget] = useState<Invoice | null>(null);
 	const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
@@ -55,15 +56,15 @@ const InvoicesTab = () => {
 	const { mutateAsync: downloadPortalPdfAsync, isPending: isPdfDownloadPending } = useMutation({
 		mutationFn: (invoiceId: string) => CustomerPortalApi.downloadInvoicePdf(invoiceId),
 		onSuccess: () => {
-			toast.success('Invoice downloaded');
+			toast.success(t('toast.invoiceDownloaded'));
 		},
 		onError: () => {
-			toast.error('Failed to download invoice');
+			toast.error(t('errors.downloadInvoice'));
 		},
 	});
 
 	if (isError) {
-		toast.error('Failed to load invoices');
+		toast.error(t('errors.loadInvoices'));
 	}
 
 	if (isLoading) {
@@ -139,7 +140,7 @@ const InvoicesTab = () => {
 	if (invoices.length === 0) {
 		return (
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-				<EmptyState title='No invoices' description='No invoices have been generated yet' />
+				<EmptyState title={t('invoices.emptyTitle')} description={t('invoices.emptyDescription')} />
 			</Card>
 		);
 	}
@@ -167,12 +168,12 @@ const InvoicesTab = () => {
 						const full = downloadTarget.line_items?.length ? downloadTarget : await CustomerPortalApi.getInvoice(downloadTarget.id);
 						const rows = downloadInvoiceLineItemsCsv(full);
 						if (rows === 0) {
-							toast.error('No billable line items to export');
+							toast.error(t('toast.noBillableLineItems'));
 						} else {
-							toast.success('Invoice CSV downloaded');
+							toast.success(t('toast.invoiceCsvDownloaded'));
 						}
 					} catch {
-						toast.error('Failed to export invoice');
+						toast.error(t('errors.exportInvoice'));
 					} finally {
 						setIsCsvExportPending(false);
 					}
@@ -212,10 +213,10 @@ const InvoicesTab = () => {
 			<div className='relative'>
 				<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400' />
 				<Input
-					placeholder='Search invoices...'
+					placeholder={t('invoices.searchPlaceholder')}
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className='pl-10 bg-white border-[#E9E9E9]'
+					className='ps-10 bg-white border-[#E9E9E9]'
 				/>
 			</div>
 
@@ -225,11 +226,21 @@ const InvoicesTab = () => {
 					<table className='w-full'>
 						<thead>
 							<tr className='border-b border-[#E9E9E9] bg-zinc-50'>
-								<th className='text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>Date</th>
-								<th className='text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>Invoice #</th>
-								<th className='text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>Status</th>
-								<th className='text-right px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>Amount</th>
-								<th className='text-center px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>Download</th>
+								<th className='text-start px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>
+									{t('invoices.columnDate')}
+								</th>
+								<th className='text-start px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>
+									{t('invoices.columnInvoiceNumber')}
+								</th>
+								<th className='text-start px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>
+									{t('invoices.columnStatus')}
+								</th>
+								<th className='text-end px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>
+									{t('invoices.columnAmount')}
+								</th>
+								<th className='text-center px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'>
+									{t('invoices.columnDownload')}
+								</th>
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-[#E9E9E9]'>
@@ -239,10 +250,10 @@ const InvoicesTab = () => {
 										{invoice.finalized_at ? formatDateShort(invoice.finalized_at) : formatDateShort(invoice.created_at)}
 									</td>
 									<td className='px-4 py-3 text-sm text-zinc-900 font-medium'>
-										{invoice.invoice_number || `INV-${invoice.id.slice(0, 8)}`}
+										{invoice.invoice_number || t('invoices.numberPrefix', { id: invoice.id.slice(0, 8) })}
 									</td>
 									<td className='px-4 py-3'>{getStatusChip(invoice)}</td>
-									<td className='px-4 py-3 text-sm text-zinc-900 text-right font-medium'>
+									<td className='px-4 py-3 text-sm text-zinc-900 text-end font-medium'>
 										{currencySymbol}
 										{formatAmount(String(invoice.total ?? 0))}
 									</td>
@@ -268,7 +279,7 @@ const InvoicesTab = () => {
 
 				{filteredInvoices.length === 0 && (
 					<div className='py-8'>
-						<EmptyState title='No invoices found' description='No invoices match your search criteria' />
+						<EmptyState title={t('invoices.noMatchTitle')} description={t('invoices.noMatchDescription')} />
 					</div>
 				)}
 			</Card>

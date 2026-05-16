@@ -3,9 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { Loader, Page } from '@/components/atoms';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import OAuthApi from '@/api/OAuthApi';
 
 const QuickBooksOAuthCallback = () => {
+	const { t } = useTranslation('settings');
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const [error, setError] = useState<string | null>(null);
@@ -122,9 +124,9 @@ const QuickBooksOAuthCallback = () => {
 			toast.success(`${providerName} connected successfully!`);
 			navigate(providerRoute);
 		},
-		onError: (error: unknown) => {
+		onError: (error: Error) => {
 			cleanupSession();
-			const errorMessage = error instanceof Error ? error.message : 'Failed to complete OAuth';
+			const errorMessage = error.message || 'Failed to complete OAuth';
 			setError(errorMessage);
 			toast.error(errorMessage);
 			setTimeout(() => {
@@ -151,9 +153,9 @@ const QuickBooksOAuthCallback = () => {
 		return (
 			<Page>
 				<div className='flex flex-col items-center justify-center min-h-[400px]'>
-					<div className='text-red-600 text-lg font-semibold mb-2'>❌ Authorization Failed</div>
+					<div className='text-red-600 text-lg font-semibold mb-2'>{t('insightsTools.oauthCallback.authorizationFailed')}</div>
 					<div className='text-gray-600 mb-4'>{error}</div>
-					<div className='text-sm text-gray-500'>Redirecting back to integrations...</div>
+					<div className='text-sm text-gray-500'>{t('insightsTools.oauthCallback.redirectingToIntegrations')}</div>
 				</div>
 			</Page>
 		);
@@ -163,8 +165,8 @@ const QuickBooksOAuthCallback = () => {
 		<Page>
 			<div className='flex flex-col items-center justify-center min-h-[400px]'>
 				<Loader />
-				<div className='mt-4 text-gray-600'>Completing {providerName} authorization...</div>
-				<div className='mt-2 text-sm text-gray-500'>🔒 Securely exchanging authorization code for tokens</div>
+				<div className='mt-4 text-gray-600'>{t('insightsTools.oauthCallback.completingAuthorization', { provider: providerName })}</div>
+				<div className='mt-2 text-sm text-gray-500'>{t('insightsTools.oauthCallback.exchangingTokens')}</div>
 			</div>
 		</Page>
 	);

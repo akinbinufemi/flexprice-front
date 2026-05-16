@@ -1,0 +1,972 @@
+{
+	"shared": {
+		"description": "الوصف",
+		"lookupKey": "مفتاح البحث",
+		"lookupKeyDescription": "معرّف نظامي يُستخدم في استدعاءات API والتكاملات.",
+		"enterDescription": "أدخل الوصف",
+		"metadataOptional": "بيانات وصفية (اختياري)",
+		"metadataPlaceholder": "أدخل بيانات وصفية بصيغة JSON بمفاتيح نصية وقيم نصية",
+		"metadataJsonStringsOnly": "بيانات وصفية إضافية بصيغة JSON. يجب أن تكون جميع القيم نصوصًا.",
+		"metadataJsonAdditional": "بيانات وصفية إضافية بصيغة JSON",
+		"metadataMustBeObject": "يجب أن تكون البيانات الوصفية كائن JSON",
+		"metadataAllValuesStrings": "يجب أن تكون جميع قيم البيانات الوصفية نصوصًا",
+		"metadataInvalidFormat": "تنسيق بيانات وصفية غير صالح"
+	},
+	"costAnalytics": {
+		"table": {
+			"costAttribute": "خاصية التكلفة",
+			"totalQuantity": "إجمالي الكمية",
+			"totalCost": "إجمالي التكلفة"
+		}
+	},
+	"addons": {
+		"drawer": {
+			"editTitle": "تعديل الإضافة",
+			"createTitle": "إنشاء إضافة",
+			"descriptionEdit": "أدخل تفاصيل الإضافة لتحديثها.",
+			"descriptionCreate": "أدخل تفاصيل الإضافة لإنشاء إضافة جديدة.",
+			"namePlaceholder": "أدخل اسم الإضافة",
+			"nameHelp": "اسم وصفي لهذه الإضافة.",
+			"addonName": "اسم الإضافة",
+			"lookupPlaceholder": "أدخل معرّفًا مختصرًا للإضافة",
+			"purposeDescription": "يساعد فريقك على فهم الغرض من هذه الإضافة.",
+			"validation": {
+				"nameRequired": "الاسم مطلوب",
+				"lookupKeyRequired": "مفتاح البحث مطلوب"
+			},
+			"toast": {
+				"updated": "تم تحديث الإضافة بنجاح",
+				"created": "تم إنشاء الإضافة بنجاح",
+				"failedUpdate": "فشل تحديث الإضافة. يُرجى المحاولة مجددًا.",
+				"failedCreate": "فشل إنشاء الإضافة. يُرجى المحاولة مجددًا."
+			}
+		},
+		"table": {
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث",
+			"statusActive": "نشط",
+			"statusInactive": "غير نشط"
+		},
+		"details": {
+			"title": "تفاصيل الإضافة",
+			"charges": "الرسوم",
+			"entitlements": "الاستحقاقات",
+			"metadata": "البيانات الوصفية"
+		},
+		"subscriptionSheet": {
+			"editTitle": "تعديل الإضافة",
+			"addTitle": "إضافة إضافة",
+			"descriptionEdit": "تعديل إعدادات الإضافة",
+			"descriptionAdd": "إضافة إضافة إلى الاشتراك",
+			"addonRequired": "الإضافة*",
+			"selectAddon": "اختر إضافة",
+			"startDate": "تاريخ البدء",
+			"selectStartDate": "اختر تاريخ البدء",
+			"updateAddAddon": "{{action}} إضافة",
+			"update": "تحديث",
+			"add": "إضافة",
+			"addonRequiredError": "الإضافة مطلوبة",
+			"noDescription": "لا يوجد وصف"
+		},
+		"listPage": {
+			"title": "الإضافات",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"columns": {
+				"addonName": "اسم الإضافة",
+				"lookupKey": "مفتاح البحث",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"paginationUnit": "إضافات",
+			"emptyState": {
+				"heading": "الإضافات",
+				"description": "أنشئ أول إضافة لتحديد خدمات إضافية يمكن للعملاء شراؤها.",
+				"createButton": "إنشاء إضافة"
+			}
+		}
+	},
+	"costSheets": {
+		"listPage": {
+			"title": "أوراق التكلفة",
+			"paginationUnit": "أوراق التكلفة",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"emptyState": {
+				"heading": "أوراق التكلفة",
+				"description": "أنشئ أول ورقة تكلفة لتعريف هياكل التسعير والرسوم.",
+				"createButton": "إنشاء ورقة تكلفة"
+			}
+		},
+		"drawer": {
+			"editTitle": "تعديل جدول التكلفة",
+			"createTitle": "إنشاء جدول تكلفة",
+			"descriptionEdit": "أدخل تفاصيل جدول التكلفة لتحديثه.",
+			"descriptionCreate": "أدخل تفاصيل جدول التكلفة لإنشاء جدول جديد.",
+			"namePlaceholder": "أدخل اسم جدول التكلفة",
+			"nameHelp": "اسم وصفي لجدول التكلفة هذا.",
+			"costSheetName": "اسم جدول التكلفة",
+			"lookupPlaceholder": "أدخل معرّفًا مختصرًا لجدول التكلفة",
+			"purposeDescription": "يساعد فريقك على فهم الغرض من جدول التكلفة هذا."
+		},
+		"details": {
+			"title": "تفاصيل جدول التكلفة",
+			"charges": "الرسوم",
+			"metadata": "البيانات الوصفية"
+		},
+		"toast": {
+			"updated": "تم تحديث جدول التكلفة بنجاح",
+			"created": "تم إنشاء جدول التكلفة بنجاح",
+			"failedUpdate": "فشل تحديث جدول التكلفة. يُرجى المحاولة مجددًا.",
+			"failedCreate": "فشل إنشاء جدول التكلفة. يُرجى المحاولة مجددًا."
+		},
+		"validation": {
+			"nameRequired": "الاسم مطلوب",
+			"lookupKeyRequired": "مفتاح البحث مطلوب"
+		},
+		"table": {
+			"costSheetName": "اسم جدول التكلفة",
+			"lookupKey": "مفتاح البحث",
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث"
+		}
+	},
+	"coupons": {
+		"listPage": {
+			"title": "الكوبونات",
+			"paginationUnit": "الكوبونات",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة",
+				"type": "النوع"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"emptyState": {
+				"heading": "الكوبونات",
+				"description": "أنشئ أول قسيمة لتقديم خصومات للعملاء.",
+				"createButton": "إنشاء قسيمة"
+			}
+		},
+		"drawer": {
+			"editTitle": "تعديل القسيمة",
+			"createTitle": "إنشاء قسيمة",
+			"descriptionEdit": "أدخل تفاصيل القسيمة لتحديثها.",
+			"descriptionCreate": "أدخل تفاصيل القسيمة لإنشاء قسيمة جديدة.",
+			"namePlaceholder": "أدخل اسم القسيمة",
+			"nameHelp": "اسم وصفي لهذه القسيمة.",
+			"couponName": "اسم القسيمة",
+			"couponType": "نوع القسيمة",
+			"selectCouponType": "اختر نوع القسيمة",
+			"couponTypeHelp": "اختر بين خصم بمبلغ ثابت أو بنسبة مئوية",
+			"amountOff": "مبلغ الخصم",
+			"amountPlaceholder": "0.00",
+			"amountHelp": "المبلغ الثابت للخصم",
+			"currency": "العملة",
+			"selectCurrency": "اختر العملة",
+			"percentageOff": "نسبة الخصم",
+			"percentagePlaceholder": "10",
+			"percentageHelp": "نسبة الخصم (0–100)",
+			"cadence": "إيقاع الاستخدام",
+			"selectCadence": "اختر الإيقاع",
+			"cadenceHelp": "معدل إمكانية استخدام هذه القسيمة",
+			"redeemAfter": "صالحة بعد (اختياري)",
+			"selectStartDate": "اختر تاريخ البدء",
+			"redeemAfterHelp": "متى تصبح القسيمة صالحة",
+			"redeemBefore": "صالحة قبل (اختياري)",
+			"selectExpiryDate": "اختر تاريخ الانتهاء",
+			"redeemBeforeHelp": "متى تنتهي صلاحية القسيمة",
+			"maxRedemptions": "أقصى مرات الاستخدام (اختياري)",
+			"maxRedemptionsPlaceholder": "100",
+			"maxRedemptionsHelp": "الحد الأقصى لمرات استخدام هذه القسيمة",
+			"durationInPeriods": "المدة بعدد الفترات",
+			"durationPlaceholder": "3",
+			"durationHelp": "عدد فترات الفوترة التي يسري فيها الخصم (مطلوب للإيقاع المتكرر)",
+			"fixedAmount": "مبلغ ثابت",
+			"percentage": "نسبة مئوية",
+			"cadenceOnce": "مرة واحدة",
+			"cadenceRepeated": "متكرر",
+			"cadenceForever": "دائم",
+			"validation": {
+				"nameRequired": "الاسم مطلوب",
+				"typeRequired": "النوع مطلوب",
+				"cadenceRequired": "الإيقاع مطلوب",
+				"amountOffFixedRequired": "مبلغ الخصم مطلوب لقسائم النوع الثابت",
+				"percentageOffRequired": "نسبة الخصم مطلوبة لقسائم النوع النسبي",
+				"currencyFixedRequired": "العملة مطلوبة لقسائم النوع الثابت",
+				"durationRepeatedRequired": "المدة بعدد الفترات مطلوبة للإيقاع المتكرر",
+				"redeemBeforeAfter": "يجب أن يكون تاريخ الانتهاء بعد تاريخ بدء الصلاحية"
+			},
+			"toast": {
+				"updated": "تم تحديث القسيمة بنجاح",
+				"created": "تم إنشاء القسيمة بنجاح",
+				"failedUpdate": "فشل تحديث القسيمة. يُرجى المحاولة مجددًا.",
+				"failedCreate": "فشل إنشاء القسيمة. يُرجى المحاولة مجددًا."
+			},
+			"invalidMetadata": "بيانات وصفية غير صالحة"
+		},
+		"table": {
+			"name": "الاسم",
+			"type": "النوع",
+			"discount": "الخصم",
+			"redemptions": "مرات الاستخدام",
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث",
+			"entityName": "قسيمة",
+			"statusActive": "نشط",
+			"statusInactive": "غير نشط"
+		},
+		"modal": {
+			"selectCouponRequired": "يُرجى اختيار قسيمة"
+		},
+		"details": {
+			"loadError": "فشل تحميل تفاصيل القسيمة",
+			"detailsTitle": "التفاصيل"
+		}
+	},
+	"groups": {
+		"listPage": {
+			"title": "المجموعات",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"createdAt": "تاريخ الإنشاء",
+				"entityType": "نوع الكيان"
+			},
+			"paginationUnit": "مجموعات",
+			"emptyState": {
+				"heading": "المجموعات",
+				"description": "أنشئ مجموعة لتنظيم كيانات التسعير.",
+				"createButton": "إنشاء مجموعة"
+			}
+		},
+		"drawer": {
+			"editTitle": "تعديل المجموعة",
+			"createTitle": "إنشاء مجموعة",
+			"descriptionEdit": "أدخل تفاصيل المجموعة لتحديثها.",
+			"descriptionCreate": "أدخل تفاصيل المجموعة لإنشاء مجموعة جديدة.",
+			"namePlaceholder": "أدخل اسم المجموعة",
+			"nameHelp": "اسم وصفي لهذه المجموعة.",
+			"groupName": "اسم المجموعة",
+			"lookupPlaceholder": "أدخل معرّفًا مختصرًا للمجموعة",
+			"entityType": "نوع الكيان",
+			"selectEntityType": "اختر نوع الكيان",
+			"entityTypeHelp": "اختر نوع الكيانات التي ستضمّها هذه المجموعة.",
+			"createGroup": "إنشاء مجموعة",
+			"entityPrice": "سعر",
+			"entityFeature": "ميزة"
+		},
+		"profile": {
+			"notFound": "المجموعة غير موجودة.",
+			"notFoundPageTitle": "مجموعة",
+			"tabOverview": "نظرة عامة",
+			"tabInformation": "المعلومات"
+		},
+		"information": {
+			"title": "تفاصيل المجموعة",
+			"name": "الاسم",
+			"entityType": "نوع الكيان",
+			"externalId": "المعرّف الخارجي"
+		},
+		"overview": {
+			"urlHintAdd": "أضف",
+			"urlQueryPrice": "?entity_type=price",
+			"urlHintOr": "أو",
+			"urlQueryFeature": "?entity_type=feature",
+			"urlHintSuffix": "إلى عنوان URL لعرض الرسوم أو الميزات في هذه المجموعة."
+		},
+		"toast": {
+			"updated": "تم تحديث المجموعة بنجاح",
+			"created": "تم إنشاء المجموعة بنجاح",
+			"failedUpdate": "فشل تحديث المجموعة. يُرجى المحاولة مجددًا.",
+			"failedCreate": "فشل إنشاء المجموعة. يُرجى المحاولة مجددًا."
+		},
+		"validation": {
+			"nameRequired": "الاسم مطلوب",
+			"lookupKeyRequired": "مفتاح البحث مطلوب"
+		},
+		"table": {
+			"name": "الاسم",
+			"lookupKey": "مفتاح البحث",
+			"entityType": "نوع الكيان",
+			"type": "النوع",
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث",
+			"entityName": "مجموعة"
+		}
+	},
+	"plans": {
+		"drawer": {
+			"editTitle": "تعديل الخطة",
+			"createTitle": "إنشاء خطة",
+			"descriptionEdit": "أدخل تفاصيل الخطة لتحديثها.",
+			"descriptionCreate": "أدخل تفاصيل الخطة لإنشاء خطة جديدة.",
+			"namePlaceholder": "أدخل اسم الخطة",
+			"nameHelp": "اسم وصفي لخطة التسعير هذه.",
+			"planName": "اسم الخطة",
+			"lookupPlaceholder": "أدخل معرّفًا مختصرًا للخطة",
+			"purposeDescription": "يساعد فريقك على فهم الغرض من هذه الخطة."
+		},
+		"duplicate": {
+			"title": "نسخ الخطة",
+			"description": "أدخل تفاصيل الخطة المنسوخة. ستُنسخ الاستحقاقات ومنح الرصيد والإعدادات الأخرى.",
+			"duplicate": "نسخ"
+		},
+		"archive": {
+			"title": "أرشفة الخطة",
+			"archiving": "جاري الأرشفة…",
+			"confirmDescription": "هل أنت متأكد أنك تريد أرشفة «{{name}}»؟ لن تكون هذه الخطة متاحة للاشتراكات الجديدة."
+		},
+		"listPage": {
+			"title": "الخطط",
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"lookupKey": "مفتاح البحث",
+				"status": "الحالة",
+				"createdAt": "تاريخ الإنشاء"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"columns": {
+				"name": "الاسم",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"entityName": "خطة",
+			"paginationUnit": "خطط التسعير",
+			"rowActions": {
+				"edit": "تعديل",
+				"duplicate": "نسخ",
+				"archive": "أرشفة"
+			},
+			"createWithAi": "إنشاء بالذكاء الاصطناعي",
+			"emptyStateCustom": {
+				"heading": "الخطط",
+				"description": "أنشئ خطة لعرض التسعير والبدء بفوترة العملاء."
+			},
+			"toast": {
+				"archiveSuccess": "تمت أرشفة الخطة بنجاح",
+				"archiveErrorFallback": "تعذّرت أرشفة الخطة"
+			}
+		},
+		"tabs": {
+			"creditGrants": "منح الرصيد",
+			"entitlements": "الاستحقاقات"
+		},
+		"information": {
+			"loading": "جاري تحميل تفاصيل الخطة…",
+			"planDetails": "تفاصيل الخطة",
+			"metadata": "البيانات الوصفية"
+		},
+		"pricing": {
+			"noWidget": "لا يوجد عنصر واجهة للتسعير",
+			"widgetsPageTitle": "عناصر التسعير"
+		},
+		"organisms": {
+			"chargeLabels": {
+				"fixedCharge": "رسوم ثابتة",
+				"usageBasedCharge": "رسوم حسب الاستخدام"
+			},
+			"setupCharges": {
+				"subtitle": "حدد كيف يُحسب على العملاء مقابل هذه الخطة.",
+				"planCharges": "رسوم الخطة",
+				"choosePricingModel": "اختر نموذج التسعير",
+				"fixedChargesTitle": "الرسوم الثابتة",
+				"usageBasedChargesTitle": "الرسوم حسب الاستخدام",
+				"addFixedCharge": "إضافة رسوم ثابتة",
+				"addUsageBasedCharges": "إضافة رسوم حسب الاستخدام",
+				"subscriptionTypeFixed": "رسوم ثابتة",
+				"subscriptionTypeUsage": "حسب الاستخدام",
+				"fixedPricingDescription": "تسعير ثابت يُفوتر وفق جدول محدد.",
+				"usagePricingDescription": "رسوم تعتمد على الاستهلاك الفعلي."
+			},
+			"recurringForm": {
+				"calculatorAria": "فتح حاسبة مدة الاشتراك",
+				"perBilling": "لكل {{period}}",
+				"billingTiming": "توقيت الفوترة",
+				"invoiceCadenceAdvance": "مقدّمًا",
+				"invoiceCadenceArrear": "مؤخرًا",
+				"invoiceCadenceAdvanceDesc": "تحصيل الرسوم في بداية كل دورة فوترة.",
+				"invoiceCadenceArrearDesc": "تحصيل الرسوم في نهاية دورة الفوترة.",
+				"minQuantity": "الحد الأدنى للكمية",
+				"trialToggleTitle": "البدء بتجربة مجانية",
+				"trialToggleHint": "فعّل هذا الخيار لإضافة فترة تجربة مجانية للاشتراك.",
+				"trialPeriodTitle": "فترة التجربة",
+				"trialDaysPlaceholder": "عدد أيام التجربة"
+			},
+			"usageForm": {
+				"feature": "الميزة",
+				"selectMeteredFeature": "اختر ميزة تقاس بالاستخدام",
+				"billingModel": "نموذج الفوترة",
+				"billingModelPlaceholder": "نموذج الفوترة",
+				"selectBillingPeriod": "اختر فترة الفوترة",
+				"per": "لكل",
+				"amountPlaceholder": "0.00"
+			},
+			"priceForm": {
+				"displayName": "اسم العرض",
+				"enterDisplayName": "أدخل اسم العرض",
+				"currency": "العملة",
+				"billingPeriod": "فترة الفوترة",
+				"price": "السعر",
+				"amountPlaceholderShort": "0",
+				"group": "المجموعة",
+				"groupPlaceholder": "اختر مجموعة (اختياري)",
+				"groupDescription": "عيّن هذا السعر إلى مجموعة لتنظيم أفضل",
+				"startDateOptional": "تاريخ البدء (اختياري)",
+				"selectStartDate": "اختر تاريخ البدء"
+			},
+			"volumeTier": {
+				"from": "من",
+				"fromSuffix": "(>)",
+				"upTo": "حتى",
+				"upToSuffix": "(<=)",
+				"flatFee": "رسوم ثابتة",
+				"perUnitPrice": "سعر الوحدة",
+				"addTier": "إضافة شريحة",
+				"zeroPlaceholder": "0.00"
+			},
+			"planPriceTable": {
+				"start": "البداية",
+				"end": "النهاية",
+				"noDateInformation": "لا توجد معلومات عن التواريخ",
+				"fallbackName": "--",
+				"charges": "الرسوم",
+				"queryBuilder": {
+					"displayName": "اسم العرض",
+					"amount": "المبلغ",
+					"billingPeriod": "فترة الفوترة"
+				}
+			}
+		}
+	},
+	"priceUnits": {
+		"listPage": {
+			"title": "وحدات السعر",
+			"paginationUnit": "وحدات السعر",
+			"sortLabels": {
+				"name": "الاسم",
+				"code": "الرمز",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"code": "الرمز",
+				"baseCurrency": "العملة الأساسية",
+				"status": "الحالة",
+				"createdAt": "تاريخ الإنشاء"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"emptyState": {
+				"heading": "وحدات السعر",
+				"description": "أنشئ وحدة سعر لتعريف عملات مخصصة أو رموز للتسعير.",
+				"createButton": "إنشاء وحدة سعر"
+			}
+		},
+		"drawer": {
+			"editTitle": "تعديل وحدة السعر",
+			"createTitle": "إنشاء وحدة سعر",
+			"descriptionEdit": "أدخل تفاصيل وحدة السعر لتحديثها.",
+			"descriptionCreate": "أدخل تفاصيل وحدة السعر لإنشاء وحدة جديدة.",
+			"namePlaceholder": "أدخل اسم وحدة السعر",
+			"nameHelp": "اسم وصفي لوحدة السعر (مثل Bitcoin أو الرموز أو الأرصدة).",
+			"name": "الاسم",
+			"code": "الكود",
+			"codePlaceholder": "أدخل كودًا فريدًا لوحدة السعر",
+			"symbol": "الرمز المعروض",
+			"symbolPlaceholder": "أدخل رمز العرض (مثل ₿، €، tokens)",
+			"symbolHelp": "رمز العرض لوحدة السعر (مثل ₿ لبيتكوين، € لليورو، «tokens» للرموز).",
+			"baseCurrency": "العملة الأساسية",
+			"selectBaseCurrency": "اختر العملة الأساسية",
+			"baseCurrencyHelp": "رمز العملة الأساسية (3 أحرف، مثل USD، EUR، GBP).",
+			"conversionRate": "سعر التحويل",
+			"conversionPlaceholder": "0.01",
+			"conversionHelp": "سعر الصرف من وحدة السعر هذه إلى العملة الأساسية. يجب أن يكون أكبر من 0. مثال: 0.01 يعني 100 وحدة = 1.00 USD."
+		},
+		"selector": {
+			"currency": "العملة",
+			"selectCurrency": "اختر العملة",
+			"custom": "مخصص",
+			"standard": "قياسي",
+			"errorLoading": "خطأ في تحميل الخيارات",
+			"noOptions": "لا توجد خيارات متاحة"
+		},
+		"toast": {
+			"updated": "تم تحديث وحدة السعر بنجاح",
+			"created": "تم إنشاء وحدة السعر بنجاح",
+			"failedUpdate": "فشل تحديث وحدة السعر. يُرجى المحاولة مجددًا.",
+			"failedCreate": "فشل إنشاء وحدة السعر. يُرجى المحاولة مجددًا."
+		},
+		"validation": {
+			"nameRequired": "الاسم مطلوب",
+			"codeRequired": "الرمز مطلوب",
+			"codeLength": "يجب أن يتكون الرمز من 3 أحرف بالضبط",
+			"symbolRequired": "الرمز المعروض مطلوب",
+			"baseCurrencyRequired": "العملة الأساسية مطلوبة",
+			"baseCurrencyLength": "يجب أن تتكون العملة الأساسية من 3 أحرف بالضبط",
+			"conversionRateRequired": "سعر التحويل مطلوب",
+			"conversionRateNumber": "يجب أن يكون سعر التحويل رقمًا صالحًا",
+			"conversionRatePositive": "يجب أن يكون سعر التحويل أكبر من 0"
+		},
+		"table": {
+			"name": "الاسم",
+			"code": "الرمز",
+			"symbol": "الرمز المعروض",
+			"baseCurrency": "العملة الأساسية",
+			"conversionRate": "سعر التحويل",
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث"
+		}
+	},
+	"prices": {
+		"updateDrawer": {
+			"title": "تعديل تفاصيل السعر",
+			"description": "حدّث تفاصيل السعر غير الحرجة مثل اسم العرض والوصف والبيانات الوصفية.",
+			"displayName": "اسم العرض",
+			"displayNamePlaceholder": "أدخل اسم العرض",
+			"lookupKey": "مفتاح البحث",
+			"lookupKeyPlaceholder": "أدخل مفتاح البحث",
+			"saveDetails": "حفظ التفاصيل",
+			"descriptionLabel": "الوصف",
+			"group": "المجموعة",
+			"groupPlaceholder": "اختر مجموعة (اختياري)",
+			"toastSuccess": "تم تحديث تفاصيل السعر بنجاح",
+			"toastFailed": "فشل تحديث تفاصيل السعر. يُرجى المحاولة مجددًا."
+		}
+	},
+	"features": {
+		"listPage": {
+			"title": "الميزات",
+			"columns": {
+				"featureName": "اسم الميزة",
+				"group": "المجموعة",
+				"type": "النوع",
+				"status": "الحالة",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"sortLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			},
+			"filterLabels": {
+				"name": "الاسم",
+				"createdAt": "تاريخ الإنشاء",
+				"status": "الحالة",
+				"type": "النوع",
+				"group": "المجموعة"
+			},
+			"filterStatus": {
+				"active": "نشط",
+				"inactive": "غير نشط"
+			},
+			"filterTypes": {
+				"metered": "مُقاس",
+				"boolean": "منطقي",
+				"static": "ثابت"
+			},
+			"typeChips": {
+				"metered": "مُقاس",
+				"boolean": "منطقي",
+				"static": "ثابت",
+				"unknown": "غير معروف"
+			},
+			"emptyCell": "—",
+			"paginationUnit": "ميزات",
+			"emptyState": {
+				"heading": "الميزات",
+				"description": "أنشئ أول ميزة لتحديد ما يدفع العملاء مقابله.",
+				"createButton": "إنشاء ميزة"
+			}
+		},
+		"drawer": {
+			"editTitle": "تعديل الميزة",
+			"description": "تحديث تفاصيل الميزة.",
+			"name": "الاسم",
+			"namePlaceholder": "أدخل اسم الميزة",
+			"descriptionLabel": "الوصف",
+			"group": "المجموعة",
+			"groupPlaceholder": "اختر مجموعة (اختياري)",
+			"unitSingular": "المفرد للوحدة",
+			"unitPlural": "الجمع للوحدة",
+			"unitSingularPh": "مثل: وحدة",
+			"unitPluralPh": "مثل: وحدات",
+			"displayUnitSingular": "مفرد وحدة العرض",
+			"displayUnitPlural": "جمع وحدة العرض",
+			"conversionFactor": "معامل تحويل وحدة العرض",
+			"conversionFactorPh": "مثل: 0.0000167",
+			"displayUnitPluralAutoSuffix": "s",
+			"saveFeature": "حفظ الميزة"
+		},
+		"alerts": {
+			"dialogTitle": "إعدادات تنبيهات الميزة",
+			"enableTitle": "تفعيل التنبيهات",
+			"enableLabel": "مراقبة استخدام الميزة مقابل العتبات المحددة",
+			"enableDescription": "تلقي إشعار عند تجاوز الاستخدام للعتبات المحددة لهذه الميزة",
+			"criticalThreshold": "عتبة حرجة",
+			"criticalHelp": "تنبيه عند وصول الاستخدام إلى مستوى حرج",
+			"warningThreshold": "عتبة تحذير",
+			"warningHelp": "تنبيه عند وصول الاستخدام إلى مستوى تحذير",
+			"infoThreshold": "عتبة معلومات",
+			"infoHelp": "تنبيه عند وصول الاستخدام إلى مستوى معلومات",
+			"remove": "إزالة",
+			"add": "إضافة",
+			"thresholdValue": "قيمة العتبة",
+			"thresholdPlaceholder": "0.00",
+			"condition": "الشرط",
+			"below": "أقل من",
+			"above": "أعلى من",
+			"saveChanges": "حفظ التغييرات",
+			"saving": "جاري الحفظ…",
+			"toastAtLeastOneThreshold": "يُرجى ضبط مستوى عتبة واحد على الأقل",
+			"toastInvalidCriticalThreshold": "يُرجى إدخال قيمة عتبة حرجة صالحة",
+			"toastInvalidWarningThreshold": "يُرجى إدخال قيمة عتبة تحذير صالحة",
+			"toastInvalidInfoThreshold": "يُرجى إدخال قيمة عتبة معلومات صالحة"
+		},
+		"form": {
+			"name": "الاسم*",
+			"namePlaceholder": "أدخل اسم الميزة",
+			"type": "النوع*",
+			"lookupKey": "مفتاح البحث",
+			"lookupKeyPlaceholder": "أدخل مفتاح بحث فريد (اختياري)",
+			"unitName": "اسم الوحدة",
+			"unitNameLower": "اسم الوحدة",
+			"displayUnitName": "اسم وحدة العرض",
+			"displayUnitNameLower": "اسم وحدة العرض",
+			"featureDescription": "وصف الميزة",
+			"featureDescriptionLower": "وصف الميزة",
+			"addGroup": "إضافة مجموعة",
+			"unitSingular": "المفرد للوحدة",
+			"unitSingularPh": "مللي ثانية",
+			"unitPlural": "الجمع للوحدة",
+			"unitPluralPh": "مللي ثانية",
+			"displayUnitSingular": "مفرد وحدة العرض",
+			"displayUnitSingularPh": "دقيقة",
+			"displayUnitPlural": "جمع وحدة العرض",
+			"displayUnitPluralPh": "دقائق",
+			"conversionFactor": "معامل تحويل الوحدة",
+			"conversionFactorPh": "(مثل 60000)",
+			"conversionFormula": "قيمة الوحدة = قيمة العرض × معامل التحويل",
+			"group": "المجموعة",
+			"groupPlaceholder": "اختر مجموعة (اختياري)",
+			"featureDescriptionLabel": "وصف الميزة",
+			"descriptionPlaceholder": "أدخل الوصف",
+			"eventName": "اسم الحدث*",
+			"eventNamePlaceholder": "tokens_total",
+			"eventNameHelp": "معرّف فريد للحدث يُستخدم لتصفية وقياس الاستخدام، مثل user_signup وapi_calls وغيرها.",
+			"eventFilters": "مرشحات الحدث",
+			"eventFiltersTitle": "مرشحات الحدث",
+			"eventFiltersSubtitle": "صفِ الأحداث وفق خصائص محددة مثل المنطقة أو نوع المستخدم أو السمات المخصصة لتحسين التتبع.",
+			"aggregationChoose": "اختر كيفية تجميع القيم.",
+			"aggregationFunction": "دالة التجميع*",
+			"aggregationFunctionPh": "SUM",
+			"aggregationField": "حقل التجميع*",
+			"aggregationFieldPh": "tokens",
+			"aggregationFieldHelp": "حدد الخاصية في بيانات الحدث التي ستُجمَّع، مثل tokens وmessages_sent وstorage_used.",
+			"aggregationMultiplier": "مضاعف التجميع*",
+			"aggregationMultiplierPh": "1",
+			"aggregationMultiplierHelp": "حدد المضاعف للتجميع، مثل 1.5 أو 0.25 أو 1000.",
+			"bucketSizeButton": "حجم الدفعة",
+			"groupByButton": "تجميع حسب",
+			"bucketSize": "حجم الدفعة",
+			"bucketSizeHelp": "حجم النافذة للتجميع عليها، مثل 15MIN و30MIN وHOUR وغيرها.",
+			"groupBy": "تجميع حسب",
+			"groupByPlaceholder": "مثل user_id، tenant_id",
+			"groupByHelp": "الحقل لتجميع النتائج حسبه. يجب أن يكون نصًا (مثل اسم خاصية الحدث).",
+			"eventExample": "مثال للحدث",
+			"pageTitle": "إنشاء ميزة",
+			"creating": "جاري إنشاء الميزة…",
+			"unitDefault": "وحدة",
+			"unitsDefault": "وحدات"
+		},
+		"details": {
+			"charges": "الرسوم",
+			"entitlements": "الاستحقاقات",
+			"eventDetails": "تفاصيل الحدث",
+			"eventName": "اسم الحدث",
+			"eventFilters": "مرشحات الحدث",
+			"aggregationDetails": "تفاصيل التجميع",
+			"type": "النوع",
+			"value": "القيمة",
+			"unitName": "اسم الوحدة",
+			"displayUnitName": "اسم وحدة العرض",
+			"usageReset": "إعادة ضبط الاستخدام ",
+			"bucketSize": "حجم الدفعة",
+			"groupBy": "تجميع حسب"
+		}
+	},
+	"entityChargesPage": {
+		"addChargesPageTitle": "إضافة رسوم إلى {{name}}",
+		"entityTypeDisplay": {
+			"PLAN": "خطة",
+			"ADDON": "إضافة",
+			"COSTSHEET": "ورقة تكلفة"
+		},
+		"selectChargeTypeTitle": "اختر نوع الرسم",
+		"addChargeOptionsGroupAria": "خيارات إضافة رسم",
+		"addFixedCharge": "إضافة رسم ثابت",
+		"addUsageBasedCharges": "إضافة رسوم حسب الاستخدام",
+		"cannotSaveChargesAria": "لا يمكن الحفظ — أكمل جميع نماذج الرسوم أولًا",
+		"saveChargesAria": "حفظ رسوم {{entity}}",
+		"entityLabelsLower": {
+			"PLAN": "خطة",
+			"ADDON": "إضافة",
+			"COST_SHEET": "جدول تكلفة"
+		},
+		"subscriptionCalculator": {
+			"contractAmount": "مبلغ العقد",
+			"contractTerm": "مدة العقد",
+			"displayAmount": "المبلغ المعروض:",
+			"invalidAmountHint": "أدخل مبلغ عقد صالحًا لرؤية الحساب.",
+			"confirmApply": "موافق",
+			"perPlanPeriodSuffix": {
+				"DAILY": " (يوميًا)",
+				"WEEKLY": " (أسبوعيًا)",
+				"MONTHLY": " (شهريًا)",
+				"QUARTERLY": " (ربع سنوي)",
+				"HALF_YEARLY": " (نصف سنوي)",
+				"ANNUAL": " (سنوي)"
+			},
+			"periodLabels": {
+				"DAILY": "يومي",
+				"WEEKLY": "أسبوعي",
+				"MONTHLY": "شهري",
+				"QUARTERLY": "ربع سنوي",
+				"HALF_YEARLY": "نصف سنوي",
+				"ANNUAL": "سنوي"
+			}
+		}
+	},
+	"chargeValue": {
+		"priceOverrideApplied": "تم تطبيق تجاوز السعر",
+		"tierDetectionPrefix": "شريحة ",
+		"volume": "حجم",
+		"slab": "طبقة",
+		"tierPricingTitle": "تسعير {{mode}} بالشرائح",
+		"overridden": "(مُجاوَز)",
+		"units": "وحدات",
+		"perUnit": "لكل وحدة",
+		"flatFee": "رسوم ثابتة",
+		"noCouponApplied": "لم تُطبَّق قسيمة",
+		"tierRangeWithUnits": "{{range}} وحدة",
+		"perUnitLine": "{{symbol}}{{amount}} لكل وحدة",
+		"flatFeePlusLine": "+ {{symbol}}{{amount}} رسوم ثابتة",
+		"override": {
+			"billingModelLine": "نموذج الفوترة: {{from}} → {{to}}",
+			"tierModeLine": "وضع الشرائح: {{from}} → {{to}}",
+			"amountLine": "المبلغ: {{from}} → {{to}}",
+			"quantityLine": "الكمية: 1 → {{to}}",
+			"packageSizeLine": "حجم الحزمة: {{from}} وحدة → {{to}} وحدة",
+			"tiersCountLine": "الشرائح: {{from}} → {{to}}",
+			"tierStructureModified": "تم تعديل هيكل الشرائح",
+			"priceConfigurationModified": "تم تعديل إعداد السعر",
+			"tierDetailFrom": "من (>): {{from}} → {{to}}",
+			"tierDetailUpTo": "حتى (<=): {{from}} → {{to}}",
+			"tierDetailPerUnit": "سعر الوحدة: {{from}} → {{to}}",
+			"tierDetailFlatFee": "رسوم ثابتة: {{from}} → {{to}}",
+			"tierHeader": "شريحة {{n}}",
+			"tierLine": "{{header}}: {{details}}",
+			"tierAdded": "أُضيف {{header}}: {{details}}",
+			"tierAddedDetails": "من (>): {{from}}، حتى (<=): {{upTo}}، سعر الوحدة: {{perUnit}}، رسوم ثابتة: {{flatFee}}",
+			"detailSep": "، "
+		}
+	},
+	"entitlements": {
+		"usageResetPeriod": {
+			"DAILY": "يومي",
+			"WEEKLY": "أسبوعي",
+			"MONTHLY": "شهري",
+			"QUARTERLY": "ربع سنوي",
+			"HALF_YEARLY": "نصف سنوي",
+			"ANNUAL": "سنوي",
+			"NEVER": "أبدًا"
+		},
+		"validation": {
+			"featureMeterRequired": "يجب أن يكون للميزة عدّاد مرتبط",
+			"usageLimitNegative": "حد الاستخدام لا يمكن أن يكون سالبًا",
+			"usageLimitRequired": "حد الاستخدام مطلوب",
+			"usageResetRequired": "فترة إعادة ضبط الاستخدام مطلوبة",
+			"staticValueRequired": "القيمة مطلوبة",
+			"staticValueNegative": "القيمة لا يمكن أن تكون سالبة",
+			"staticValueEmpty": "القيمة لا يمكن أن تكون فارغة",
+			"selectFeature": "يُرجى اختيار ميزة",
+			"invalidFeatureType": "نوع الميزة غير صالح",
+			"featureAlreadyAdded": "هذه الميزة مضافة مسبقًا",
+			"addAtLeastOne": "يُرجى إضافة استحقاق واحد على الأقل"
+		},
+		"errors": {
+			"entityIdRequired": "معرّف الكيان مطلوب"
+		},
+		"toast": {
+			"addedSuccess": "تمت إضافة الاستحقاقات بنجاح",
+			"addFailed": "فشل إضافة الاستحقاقات. يُرجى المحاولة مجددًا."
+		},
+		"addDrawer": {
+			"title": "إضافة استحقاق",
+			"description": "حدّد الميزات التي سيحصل العملاء عليها.",
+			"featuresLabel": "الميزات",
+			"selectFeaturePlaceholder": "اختر ميزة",
+			"valueLabel": "القيمة",
+			"enterValuePlaceholder": "أدخل القيمة",
+			"setInfiniteLabel": "تعيين كغير محدود",
+			"usageResetLabel": "إعادة ضبط الاستخدام",
+			"usageResetPlaceholder": "اختر فترة إعادة الضبط",
+			"usageResetDescription": "تُعاد القيم ضمن الفاصل الزمني المحدد",
+			"softLimitLabel": "حد مرن",
+			"softLimitDescription": "عند التفعيل، يُمنح الوصول دائمًا حتى عند تجاوز الحد.",
+			"cancel": "إلغاء",
+			"add": "إضافة",
+			"addAnotherFeature": "إضافة ميزة أخرى",
+			"save": "حفظ",
+			"unlimitedDisplay": "غير محدود",
+			"calculatorAriaLabel": "آلة حاسبة للقيمة المعروضة",
+			"unitsFallback": "وحدات"
+		},
+		"displayCalculator": {
+			"titleFallback": "القيمة المعروضة",
+			"noDisplayUnit": "لم يُضبط وحدة عرض لهذه الميزة.",
+			"title": "تعيين الاستحقاق بوحدات العرض",
+			"description": "أدخل قيمة بـ <strongDisplay>{{displayUnit}}</strongDisplay> لمعرفة حد الاستخدام المكافئ بـ <strongBase>{{baseUnit}}</strongBase>.",
+			"valueInDisplayUnitLabel": "القيمة بوحدة العرض",
+			"enterValuePlaceholder": "أدخل القيمة",
+			"calculatedUsageLimit": "حد الاستخدام المحسوب:",
+			"conversionFactor": "عامل التحويل لهذه الميزة مضبوط على <rate>{{rate}}</rate>.",
+			"emDash": "—",
+			"confirm": "موافق"
+		},
+		"editDrawer": {
+			"title": "تعديل الاستحقاق: {{name}}",
+			"unknownFeature": "غير معروف",
+			"description": "تجاوز قيم الاستحقاق لهذا الاشتراك",
+			"featureType": "نوع الميزة",
+			"usageLimit": "حد الاستخدام",
+			"enterUsageLimitPlaceholder": "أدخل حد الاستخدام",
+			"originalPrefix": "الأصلي:",
+			"resetsSuffix": " (يعاد ضبطه {{period}})",
+			"setInfiniteLabel": "تعيين كغير محدود",
+			"staticValue": "قيمة ثابتة",
+			"enterStaticPlaceholder": "أدخل القيمة الثابتة",
+			"notSet": "غير مضبوط",
+			"enabledLabel": "مفعّل",
+			"enabled": "مفعّل",
+			"disabled": "معطّل",
+			"originalBooleanPrefix": "الأصلي:",
+			"cancel": "إلغاء",
+			"resetToDefault": "إعادة للافتراضي",
+			"saveOverride": "حفظ التجاوز"
+		},
+		"overridesTable": {
+			"columnFeatureName": "اسم الميزة",
+			"columnEntityType": "نوع الكيان",
+			"columnFeatureType": "نوع الميزة",
+			"columnValue": "القيمة",
+			"tooltipUsageLimit": "حد الاستخدام: {{from}} → {{to}}",
+			"tooltipStaticValue": "القيمة الثابتة: {{from}} → {{to}}",
+			"tooltipStatus": "الحالة: {{from}} → {{to}}",
+			"valuePlaceholder": "--",
+			"perPeriodSuffix": " / {{period}}",
+			"featureTypeMetered": "مقاس",
+			"featureTypeBoolean": "منطقي",
+			"featureTypeStatic": "ثابت",
+			"overrideAppliedTitle": "تم تطبيق تجاوز الاستحقاق",
+			"edit": "تعديل",
+			"noEntitlements": "لا توجد استحقاقات متاحة",
+			"unlimited": "غير محدود",
+			"enabled": "مفعّل",
+			"disabled": "معطّل",
+			"unknownFeature": "ميزة غير معروفة"
+		}
+	},
+	"premiumFeature": {
+		"tooltip": "ميزة مميزة",
+		"dialogTitle": "ميزة مميزة",
+		"dialogDescription": "هذه ميزة مميزة. تحتاج إلى ترقية الخطة لاستخدامها.",
+		"contactUs": "تواصل معنا"
+	},
+	"priceDialogs": {
+		"billingModels": {
+			"flatFee": "رسوم ثابتة",
+			"package": "حزمة",
+			"volumeTiered": "شرائح حجمية",
+			"slabTiered": "شرائح طبقية"
+		},
+		"originalPrice": "السعر الأصلي",
+		"billingModel": "نموذج الفوترة",
+		"selectBillingModel": "اختر نموذج الفوترة",
+		"overrideAmountLabel": "مبلغ التجاوز ({{unit}})",
+		"enterNewAmountOptional": "أدخل مبلغًا جديدًا (اختياري)",
+		"tiers": "الشرائح",
+		"packageConfiguration": "إعداد الحزمة",
+		"unitsPerPackage": "وحدات لكل حزمة",
+		"enterUnitsPerPackage": "أدخل وحدات لكل حزمة",
+		"originalUnitsPerPackage": "الأصلي: {{count}} وحدة لكل حزمة",
+		"effectiveFromOptional": "ساري من (اختياري)",
+		"selectDateScheduledUpdate": "اختر تاريخ التحديث المجدول",
+		"schedulePriceChangeHint": "جدولة سريان تغيير السعر في تاريخ مستقبلي",
+		"priceOverriddenNotice": "تم تجاوز هذا السعر. راجع التغييرات أعلاه.",
+		"cancel": "إلغاء",
+		"reset": "إعادة ضبط",
+		"modifyPricingDescription": "تعديل إعداد التسعير لـ {{name}}",
+		"updatePricingDescription": "تحديث إعداد التسعير (المبلغ، نموذج الفوترة، الشرائح) لـ {{name}}",
+		"thisChargeFallback": "هذا الرسم",
+		"overrideTitle": "تجاوز إعداد السعر",
+		"updateTitle": "تحديث السعر",
+		"overridePrice": "تجاوز السعر",
+		"updateOverride": "تحديث التجاوز",
+		"updatePrice": "تحديث السعر",
+		"failedUpdateToast": "فشل تحديث السعر",
+		"toastScheduled": "سيسري {{name}} اعتبارًا من {{date}}.",
+		"toastUpdated": "تم تحديث {{name}} بنجاح.",
+		"fallbackPriceName": "سعر"
+	}
+}

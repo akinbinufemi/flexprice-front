@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { FC, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import useQueryParam from '@/hooks/useQueryParam';
 
 interface TabItem {
@@ -15,6 +16,7 @@ interface FlatTabsProps {
 }
 
 const FlatTabs: FC<FlatTabsProps> = ({ tabs, defaultValue = tabs[0]?.value, className }) => {
+	const { t } = useTranslation('common');
 	// Validate that the tab value exists in the tabs array
 	const validateTab = useMemo(() => {
 		const validValues = new Set(tabs.map((tab) => tab.value));
@@ -35,7 +37,7 @@ const FlatTabs: FC<FlatTabsProps> = ({ tabs, defaultValue = tabs[0]?.value, clas
 		<div defaultValue={defaultValue} className={cn('w-full', className)}>
 			<div className=' space-x-3 bg-transparent'>
 				<div className='border-b border-border mt-4 mb-6'>
-					<nav className='flex space-x-4' aria-label='Tabs'>
+					<nav className='flex space-x-4' aria-label={t('labels.tabs')}>
 						{tabs.map((tab) => (
 							<button
 								key={tab.value}

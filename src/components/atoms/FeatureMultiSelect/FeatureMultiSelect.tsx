@@ -5,6 +5,7 @@ import FeatureApi from '@/api/FeatureApi';
 import { useQuery } from '@tanstack/react-query';
 import { Gauge, SquareCheckBig, Wrench, ChevronDown } from 'lucide-react';
 import React, { FC, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ENTITY_STATUS } from '@/models/base';
 import { Skeleton } from '@/components/ui';
 
@@ -43,15 +44,21 @@ const FeatureMultiSelect: FC<Props> = ({
 	onChange,
 	values = [],
 	error,
-	label: _label = 'Features',
-	placeholder = 'Select features',
+	label,
+	placeholder: placeholderProp,
 	description,
 	className,
 	disabledFeatures,
 	maxCount,
 	onFeaturesFetched,
 }) => {
+	const { t } = useTranslation('common');
+	const resolvedLabel = label ?? t('features.title');
+	const resolvedPlaceholder = placeholderProp ?? t('features.selectFeatures');
 	const [selectedCount, setSelectedCount] = React.useState(values.length);
+
+	const selectedSummary = (count: number) =>
+		count === 0 ? '' : t(count === 1 ? 'features.selectedSingular' : 'features.selectedPlural', { count });
 
 	const {
 		data: featuresData,
@@ -72,18 +79,18 @@ const FeatureMultiSelect: FC<Props> = ({
 	if (isLoading) {
 		return (
 			<div className={cn('w-full')}>
-				{_label && <Skeleton className='h-5 w-20 mb-1' />}
+				{resolvedLabel && <Skeleton className='h-5 w-20 mb-1' />}
 				<Skeleton className='h-10 w-full' />
 			</div>
 		);
 	}
 
 	if (isError) {
-		return <div>Error</div>;
+		return <div>{t('features.loadFailedShort')}</div>;
 	}
 
 	if (!featuresData) {
-		return <div>No Features found</div>;
+		return <div>{t('features.noneFoundFull')}</div>;
 	}
 
 	const options = featuresData.items
@@ -103,7 +110,7 @@ const FeatureMultiSelect: FC<Props> = ({
 
 	return (
 		<div className={cn('w-full')}>
-			{_label && <label className={cn('block text-sm font-medium text-zinc-950 mb-1')}>{_label}</label>}
+			{resolvedLabel && <label className={cn('block text-sm font-medium text-zinc-950 mb-1')}>{resolvedLabel}</label>}
 			<MultiSelect
 				options={options}
 				onValueChange={(selectedValues) => {
@@ -117,7 +124,7 @@ const FeatureMultiSelect: FC<Props> = ({
 					onChange(selectedFeatures);
 				}}
 				defaultValue={values}
-				placeholder={selectedCount > 0 ? `${selectedCount} ${selectedCount === 1 ? 'feature' : 'features'} selected` : placeholder}
+				placeholder={selectedCount > 0 ? selectedSummary(selectedCount) : resolvedPlaceholder}
 				maxCount={maxCount}
 				className={cn('h-10', className)}
 				triggerClassName='gap-2'
@@ -125,9 +132,7 @@ const FeatureMultiSelect: FC<Props> = ({
 					if (count === 0) return null;
 					return (
 						<div className='flex items-center justify-between w-full'>
-							<span className='text-sm text-gray-900 font-normal'>
-								{count} {count === 1 ? 'feature' : 'features'} selected
-							</span>
+							<span className='text-sm text-gray-900 font-normal'>{selectedSummary(count)}</span>
 							<ChevronDown className='h-4 w-4 text-gray-500 shrink-0' />
 						</div>
 					);

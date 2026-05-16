@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Button, Input, Loader, Select, SelectOption } from '@/components/atoms';
 import { RouteNames } from '@/core/routes/Routes';
@@ -9,7 +10,6 @@ import OnboardingApi from '@/api/OnboardingApi';
 import { TenantMetadataKey, type Tenant } from '@/models';
 import useUser from '@/hooks/useUser';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
-import { ServerError } from '@/core/axios/types';
 import flexpriceLogo from '../../../assets/comicon.png';
 
 /** URL check without validator dep: optional empty; no spaces; http(s) with host containing a dot (TLD). */
@@ -64,6 +64,7 @@ const roleOptions: SelectOption[] = [
 
 const OnboardingTenant = () => {
 	const navigate = useNavigate();
+	const { t } = useTranslation('common');
 	const { user, loading: userLoading } = useUser();
 	const [orgName, setOrgName] = useState('');
 	const [orgUrl, setOrgUrl] = useState('');
@@ -140,8 +141,8 @@ const OnboardingTenant = () => {
 			toast.success("You're all set!");
 			navigate(RouteNames.homeDashboard, { replace: true });
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error?.message || 'Failed to complete onboarding. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to complete onboarding. Please try again.');
 		},
 	});
 
@@ -208,7 +209,7 @@ const OnboardingTenant = () => {
 					className='relative flex min-h-[min(100vh,100dvh)] w-full flex-1 items-center justify-center'
 					role='status'
 					aria-busy='true'
-					aria-label='Loading workspace'>
+					aria-label={t('tenantSetup.loadingWorkspaceAria')}>
 					<Loader />
 				</div>
 			</div>
@@ -226,20 +227,18 @@ const OnboardingTenant = () => {
 			<div className='absolute inset-0 bg-white/30' aria-hidden />
 			<div className='relative my-8 w-full max-w-[480px] rounded-2xl bg-white p-8 shadow-lg'>
 				<div className='mb-6 flex justify-center'>
-					<img src={flexpriceLogo} alt='Flexprice' className='h-12' />
+					<img src={flexpriceLogo} alt={t('tenantSetup.flexpriceLogoAlt')} className='h-12' />
 				</div>
-				<h1 className='text-center text-2xl font-semibold text-zinc-900'>Welcome to Flexprice</h1>
-				<p className='mt-2 text-center text-sm text-zinc-500'>
-					Let&apos;s finish setting up your workspace, complete this form to get started.
-				</p>
+				<h1 className='text-center text-2xl font-semibold text-zinc-900'>{t('tenantSetup.welcomeHeading')}</h1>
+				<p className='mt-2 text-center text-sm text-zinc-500'>{t('tenantSetup.welcomeSubtext')}</p>
 				<div className='mt-6 space-y-4'>
 					<div className='space-y-1'>
 						<label className='block text-sm font-medium text-zinc-900' htmlFor='onboarding-org-name'>
-							Organization name <span className='text-destructive'>*</span>
+							{t('tenantSetup.orgNameLabel')} <span className='text-destructive'>*</span>
 						</label>
 						<Input
 							id='onboarding-org-name'
-							placeholder='Enter your organization name'
+							placeholder={t('tenantSetup.orgNamePlaceholder')}
 							value={orgName}
 							onChange={(v) => setOrgName(v)}
 							required
@@ -250,11 +249,11 @@ const OnboardingTenant = () => {
 					</div>
 					<div className='space-y-1'>
 						<label className='block text-sm font-medium text-zinc-900' htmlFor='onboarding-org-url'>
-							Website URL <span className='text-destructive'>*</span>
+							{t('tenantSetup.websiteUrlLabel')} <span className='text-destructive'>*</span>
 						</label>
 						<Input
 							id='onboarding-org-url'
-							placeholder='e.g. https://example.com'
+							placeholder={t('tenantSetup.websiteUrlPlaceholder')}
 							value={orgUrl}
 							onChange={(v) => {
 								setOrgUrl(v);
@@ -262,7 +261,7 @@ const OnboardingTenant = () => {
 							}}
 							onBlur={() => validateOrgUrl(orgUrl)}
 							type='text'
-							description='Enter your organization’s website link'
+							description={t('tenantSetup.websiteUrlDescription')}
 							error={errors.orgUrl}
 							required
 							className='rounded-lg border-zinc-200'
@@ -270,39 +269,39 @@ const OnboardingTenant = () => {
 						/>
 					</div>
 					<Select
-						label='What role do you perform in your organization?'
+						label={t('tenantSetup.roleQuestion')}
 						options={roleOptions}
 						value={role}
 						onChange={(v) => setRole(v)}
-						placeholder='Your role'
+						placeholder={t('tenantSetup.rolePlaceholder')}
 						required
 						error={errors.role}
 						disabled={isPending}
 					/>
 					<Select
-						label="What's your team size?"
+						label={t('tenantSetup.teamSizeQuestion')}
 						options={teamSizeOptions}
 						value={teamSize}
 						onChange={(v) => setTeamSize(v)}
-						placeholder='Team size'
+						placeholder={t('tenantSetup.teamSizePlaceholder')}
 						required={false}
 						disabled={isPending}
 					/>
 					<Select
-						label='What pricing model are you choosing for Flexprice?'
+						label={t('tenantSetup.pricingModelQuestion')}
 						options={pricingTypeOptions}
 						value={pricingType}
 						onChange={(v) => setPricingType(v)}
-						placeholder='How do you price today?'
+						placeholder={t('tenantSetup.pricingModelPlaceholder')}
 						required={false}
 						disabled={isPending}
 					/>
 					<Select
-						label='How did you find us?'
+						label={t('tenantSetup.referralQuestion')}
 						options={referralSourceOptions}
 						value={referralSource}
 						onChange={(v) => setReferralSource(v)}
-						placeholder='Where did you hear about us?'
+						placeholder={t('tenantSetup.referralPlaceholder')}
 						required
 						error={errors.referralSource}
 						disabled={isPending}
@@ -310,7 +309,7 @@ const OnboardingTenant = () => {
 				</div>
 				<div className='h-4' />
 				<Button onClick={handleContinue} className='mt-2 h-11 w-full rounded-lg' isLoading={isPending} disabled={isPending}>
-					Continue
+					{t('actions.continue')}
 				</Button>
 			</div>
 		</div>

@@ -14,36 +14,41 @@ import { ActionButton } from '@/components/atoms';
 import { Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
-
-const getFeatureValue = (entitlement: Entitlement) => {
-	const value = entitlement.usage_limit?.toFixed() || '';
-
-	switch (entitlement.feature_type) {
-		case FEATURE_TYPE.STATIC:
-			return entitlement.static_value;
-		case FEATURE_TYPE.METERED:
-			return (
-				<span className='flex items-end gap-1'>
-					{formatAmount(value || 'Unlimited')}
-					<span className='text-[#64748B] text-sm font-normal font-sans'>
-						{value
-							? Number(value) > 0
-								? entitlement.feature?.unit_plural || 'units'
-								: entitlement.feature?.unit_singular || 'unit'
-							: entitlement.feature?.unit_plural || 'units'}
-					</span>
-				</span>
-			);
-		case FEATURE_TYPE.BOOLEAN:
-			return entitlement.is_enabled ? 'Yes' : 'No';
-		default:
-			return '--';
-	}
-};
+import { useTranslation } from 'react-i18next';
 
 const PlanEntitlementsTab = () => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const { planId } = useParams<{ planId: string }>();
 	const [drawerOpen, setDrawerOpen] = useState(false);
+
+	const getFeatureValue = (entitlement: Entitlement) => {
+		const value = entitlement.usage_limit?.toFixed() || '';
+		const unlimited = t('common:labels.unlimited');
+		const unitLabel = t('catalog:features.form.unitDefault');
+		const unitsLabel = t('catalog:features.form.unitsDefault');
+
+		switch (entitlement.feature_type) {
+			case FEATURE_TYPE.STATIC:
+				return entitlement.static_value;
+			case FEATURE_TYPE.METERED:
+				return (
+					<span className='flex items-end gap-1'>
+						{formatAmount(value || unlimited)}
+						<span className='text-[#64748B] text-sm font-normal font-sans'>
+							{value
+								? Number(value) > 0
+									? entitlement.feature?.unit_plural || unitsLabel
+									: entitlement.feature?.unit_singular || unitLabel
+								: entitlement.feature?.unit_plural || unitsLabel}
+						</span>
+					</span>
+				);
+			case FEATURE_TYPE.BOOLEAN:
+				return entitlement.is_enabled ? t('common:labels.yes') : t('common:labels.no');
+			default:
+				return t('common:labels.na');
+		}
+	};
 
 	const {
 		data: entitlementsData,
@@ -140,7 +145,7 @@ const PlanEntitlementsTab = () => {
 				{entitlements.length > 0 ? (
 					<Card variant='notched'>
 						<CardHeader
-							title='Entitlements'
+							title={t('catalog:plans.tabs.entitlements')}
 							cta={
 								<Button prefixIcon={<Plus />} onClick={() => setDrawerOpen(true)}>
 									Add
@@ -151,7 +156,7 @@ const PlanEntitlementsTab = () => {
 					</Card>
 				) : (
 					<NoDataCard
-						title='Entitlements'
+						title={t('catalog:plans.tabs.entitlements')}
 						subtitle='No entitlements added to the plan yet'
 						cta={
 							<Button prefixIcon={<Plus />} onClick={() => setDrawerOpen(true)}>

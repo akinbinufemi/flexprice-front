@@ -1,6 +1,7 @@
 import CustomerApi from '@/api/CustomerApi';
 import { useQuery } from '@tanstack/react-query';
 import { CopyIdButton } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 
 const fetchCustomer = async (customerId: string) => {
 	return await CustomerApi.getCustomerById(customerId);
@@ -11,6 +12,7 @@ interface CustomerHeaderProps {
 }
 
 const CustomerHeader: React.FC<CustomerHeaderProps> = ({ customerId }) => {
+	const { t } = useTranslation('customers');
 	const { data: customer, isLoading } = useQuery({
 		queryKey: ['fetchCustomerDetails', customerId],
 		queryFn: () => fetchCustomer(customerId!),
@@ -48,7 +50,7 @@ const CustomerHeader: React.FC<CustomerHeaderProps> = ({ customerId }) => {
 				<div className='flex flex-col'>
 					<div className='flex items-center gap-2'>
 						<div className='text-xl font-normal text-gray-800'>{customer?.name}</div>
-						{customer?.id && <CopyIdButton id={customer.id} entityType='Customer' />}
+						{customer?.id && <CopyIdButton id={customer.id} entityType={t('list.entityName')} />}
 					</div>
 				</div>
 			</div>

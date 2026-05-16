@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { useRestrictedEnvs, EnvRestrictionState } from '@/hooks/useRestrictedEnvs';
 import useUser from '@/hooks/useUser';
@@ -21,15 +22,12 @@ function pickEnvToShow(
 	const envIdToType = (id: string) => environments?.find((e) => e.id === id)?.type;
 	const withType = entries.map((e) => ({ ...e, type: envIdToType(e.envId) }));
 	withType.sort((a, b) => {
-		// Prefer production over sandbox
 		const aProd = a.type === ENVIRONMENT_TYPE.PRODUCTION ? 1 : 0;
 		const bProd = b.type === ENVIRONMENT_TYPE.PRODUCTION ? 1 : 0;
 		if (bProd !== aProd) return bProd - aProd;
-		// Then prefer suspended over grace
 		const aSus = a.result.state === EnvRestrictionState.Suspended ? 1 : 0;
 		const bSus = b.result.state === EnvRestrictionState.Suspended ? 1 : 0;
 		if (bSus !== aSus) return bSus - aSus;
-		// Then nearest expiry first
 		const aExp = a.result.expiresAt ? new Date(a.result.expiresAt).getTime() : Infinity;
 		const bExp = b.result.expiresAt ? new Date(b.result.expiresAt).getTime() : Infinity;
 		return aExp - bExp;
@@ -38,6 +36,7 @@ function pickEnvToShow(
 }
 
 const RestrictedEnvBanner: React.FC = () => {
+	const { t } = useTranslation('settings');
 	const { user } = useUser();
 	const { environments } = useEnvironment();
 	const { isTenantRestricted, getRestrictionResultsForTenant } = useRestrictedEnvs();
@@ -57,7 +56,9 @@ const RestrictedEnvBanner: React.FC = () => {
 
 	const restriction = chosen.result;
 	const isProduction = chosen.type === ENVIRONMENT_TYPE.PRODUCTION;
-	const envLabel = isProduction ? 'production account' : 'sandbox';
+	const envTypeLabel = isProduction
+		? t('environment.restrictedBanner.productionAccount')
+		: t('environment.restrictedBanner.sandboxAccount');
 
 	if (restriction.state === EnvRestrictionState.Active) {
 		return null;
@@ -65,6 +66,7 @@ const RestrictedEnvBanner: React.FC = () => {
 
 	if (restriction.state === EnvRestrictionState.GracePeriod && restriction.expiresAt) {
 		const days = daysLeft(restriction.expiresAt);
+		const dayWord = days === 1 ? t('environment.restrictedBanner.dayWordOne') : t('environment.restrictedBanner.dayWordPlural');
 		return (
 			<>
 				<div
@@ -74,13 +76,13 @@ const RestrictedEnvBanner: React.FC = () => {
 						borderColor: '#E3ECFF',
 					}}>
 					<span className='text-sm' style={{ color: '#184FC7' }}>
-						Your {envLabel} is active for the next {days} day{days !== 1 ? 's' : ''}. To continue after that,{' '}
+						{t('environment.restrictedBanner.grace', { envType: envTypeLabel, count: days, dayWord })}{' '}
 						<button
 							type='button'
 							onClick={() => setIsContactDialogOpen(true)}
 							className='inline-flex items-center gap-1 underline hover:opacity-80'
 							style={{ color: '#184FC7' }}>
-							contact us
+							{t('environment.restrictedBanner.contactUs')}
 							<ExternalLink className='h-3.5 w-3.5 shrink-0' aria-hidden />
 						</button>
 						.
@@ -101,13 +103,13 @@ const RestrictedEnvBanner: React.FC = () => {
 						borderColor: '#FFDDDD',
 					}}>
 					<span className='text-sm' style={{ color: '#C81B1B' }}>
-						Your {envLabel} is temporarily closed. To continue,{' '}
+						{t('environment.restrictedBanner.suspended', { envType: envTypeLabel })}{' '}
 						<button
 							type='button'
 							onClick={() => setIsContactDialogOpen(true)}
 							className='inline-flex items-center gap-1 underline hover:opacity-80'
 							style={{ color: '#C81B1B' }}>
-							contact us
+							{t('environment.restrictedBanner.contactUs')}
 							<ExternalLink className='h-3.5 w-3.5 shrink-0' aria-hidden />
 						</button>
 						.

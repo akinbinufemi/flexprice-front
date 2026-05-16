@@ -1,5 +1,6 @@
 import { FormHeader, Loader, Page, Button } from '@/components/atoms';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Play, Pause, Trash2, RefreshCw } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -12,6 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui';
 import { formatEntityType } from '@/utils/common/helper_functions';
 
 const ExportDetails = () => {
+	const { t } = useTranslation('settings');
+	const { i18n } = useTranslation();
 	const { connectionId, exportId } = useParams<{ connectionId: string; exportId: string }>();
 	const navigate = useNavigate();
 	const [isForceRunDrawerOpen, setIsForceRunDrawerOpen] = useState(false);
@@ -42,8 +45,8 @@ const ExportDetails = () => {
 			toast.success('Export task updated successfully');
 			refetchExport();
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to update export task');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to update export task');
 		},
 	});
 
@@ -55,8 +58,8 @@ const ExportDetails = () => {
 			toast.success('Export task started successfully');
 			setIsForceRunDrawerOpen(false);
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to start export task');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to start export task');
 		},
 	});
 
@@ -67,8 +70,8 @@ const ExportDetails = () => {
 			toast.success('Export task deleted successfully');
 			navigate(`/tools/exports/s3/${connectionId}/export`);
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to delete export task');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to delete export task');
 		},
 	});
 
@@ -94,33 +97,37 @@ const ExportDetails = () => {
 		return <Loader />;
 	}
 
+	const entityLabel = formatEntityType(exportTask?.entity_type ?? '');
+	const exportDetailsTitle =
+		exportTask && exportTask.status !== ENTITY_STATUS.DELETED
+			? t('insightsTools.exports.exportDetailsDocumentTitle', { entity: entityLabel })
+			: t('insightsTools.exports.exportNotFound');
+
 	if (!exportTask || exportTask.status === ENTITY_STATUS.DELETED) {
 		return (
-			<Page heading='Export Not Found'>
+			<Page heading={t('insightsTools.exports.exportNotFound')}>
 				<div className='text-center py-12'>
-					<h3 className='text-lg font-medium text-gray-900 mb-2'>Export Not Found</h3>
-					<p className='text-gray-500 mb-4'>The requested export task could not be found or has been deleted.</p>
-					<Button onClick={() => navigate(`/tools/exports/s3/${connectionId}/export`)}>Back to Exports</Button>
+					<h3 className='text-lg font-medium text-gray-900 mb-2'>{t('insightsTools.exports.exportNotFound')}</h3>
+					<p className='text-gray-500 mb-4'>{t('insightsTools.exports.exportNotFoundDescription')}</p>
+					<Button onClick={() => navigate(`/tools/exports/s3/${connectionId}/export`)}>{t('insightsTools.exports.backToExports')}</Button>
 				</div>
 			</Page>
 		);
 	}
 
 	return (
-		<Page
-			documentTitle={`Export Details - ${formatEntityType(exportTask.entity_type)} Export`}
-			heading={`Export Details - ${formatEntityType(exportTask.entity_type)} Export`}>
+		<Page documentTitle={exportDetailsTitle} heading={exportDetailsTitle}>
 			{/* Back button and Action Buttons */}
 			<div className='mb-6 flex items-center justify-between'>
 				<Button variant='outline' onClick={() => navigate(`/tools/exports/s3/${connectionId}/export`)} className='flex items-center gap-2'>
 					<ArrowLeft className='w-4 h-4' />
-					Back to Exports
+					{t('insightsTools.exports.backToExports')}
 				</Button>
 
 				<div className='flex gap-2'>
 					<Button onClick={handleToggleTask} disabled={isTogglingTask} isLoading={isTogglingTask} className='flex items-center gap-2'>
 						{exportTask.enabled ? <Pause className='w-4 h-4' /> : <Play className='w-4 h-4' />}
-						{exportTask.enabled ? 'Pause' : 'Resume'}
+						{exportTask.enabled ? t('insightsTools.exports.pause') : t('insightsTools.exports.resume')}
 					</Button>
 					<Button
 						variant='outline'
@@ -129,7 +136,7 @@ const ExportDetails = () => {
 						isLoading={isForceRunning}
 						className='flex items-center gap-2'>
 						<RefreshCw className='w-4 h-4' />
-						Manual Export
+						{t('insightsTools.exports.manualExport')}
 					</Button>
 					<Button
 						variant='outline'
@@ -138,7 +145,7 @@ const ExportDetails = () => {
 						isLoading={isDeletingTask}
 						className='flex items-center gap-2 text-red-600 hover:text-red-700'>
 						<Trash2 className='w-4 h-4' />
-						Delete
+						{i18n.t('actions.delete', { ns: 'common' })}
 					</Button>
 				</div>
 			</div>
@@ -146,8 +153,8 @@ const ExportDetails = () => {
 			{/* Tabs */}
 			<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
 				<TabsList className='mb-6'>
-					<TabsTrigger value='overview'>Overview</TabsTrigger>
-					<TabsTrigger value='runs'>Runs</TabsTrigger>
+					<TabsTrigger value='overview'>{t('insightsTools.exports.overviewTab')}</TabsTrigger>
+					<TabsTrigger value='runs'>{t('insightsTools.exports.runsTab')}</TabsTrigger>
 				</TabsList>
 
 				{/* Overview Tab */}
@@ -156,53 +163,59 @@ const ExportDetails = () => {
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
 						{/* Basic Information */}
 						<div className='card'>
-							<FormHeader variant='form-component-title' title='Basic Information' />
+							<FormHeader variant='form-component-title' title={t('insightsTools.exports.basicInformation')} />
 							<div className='space-y-4'>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Status</label>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.statusLabel')}</label>
 									<div className='flex items-center gap-2 mt-1'>
 										<div className={`w-3 h-3 rounded-full ${exportTask.enabled ? 'bg-green-500' : 'bg-gray-400'}`} />
-										<span className='text-sm text-gray-600'>{exportTask.enabled ? 'Active' : 'Paused'}</span>
+										<span className='text-sm text-gray-600'>
+											{exportTask.enabled ? i18n.t('status.active', { ns: 'common' }) : i18n.t('status.paused', { ns: 'common' })}
+										</span>
 									</div>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Entity Type</label>
+									<label className='text-sm font-medium text-gray-900'>{t('exportDrawer.entityType')}</label>
 									<p className='text-sm text-gray-600 mt-1'>{formatEntityType(exportTask.entity_type)}</p>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Interval</label>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.intervalLabel')}</label>
 									<p className='text-sm text-gray-600 capitalize mt-1'>{exportTask.interval}</p>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Connection</label>
-									<p className='text-sm text-gray-600 mt-1'>{connection?.name || 'Unknown'}</p>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.connectionLabel')}</label>
+									<p className='text-sm text-gray-600 mt-1'>{connection?.name || i18n.t('labels.unknown', { ns: 'common' })}</p>
 								</div>
 							</div>
 						</div>
 
 						{/* S3 Configuration */}
 						<div className='card'>
-							<FormHeader variant='form-component-title' title='S3 Configuration' />
+							<FormHeader variant='form-component-title' title={t('insightsTools.exports.s3Configuration')} />
 							<div className='space-y-4'>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Bucket</label>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.bucketLabel')}</label>
 									<p className='text-sm text-gray-600 mt-1'>{exportTask.job_config.bucket}</p>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Region</label>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.regionLabel')}</label>
 									<p className='text-sm text-gray-600 mt-1'>{exportTask.job_config.region}</p>
 								</div>
 								<div className='min-w-0'>
-									<label className='text-sm font-medium text-gray-900'>Key Prefix</label>
-									<p className='text-sm text-gray-600 mt-1 break-all min-w-0'>{exportTask.job_config?.key_prefix ?? '—'}</p>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.keyPrefixLabel')}</label>
+									<p className='text-sm text-gray-600 mt-1 break-all min-w-0'>
+										{exportTask.job_config?.key_prefix ?? i18n.t('labels.na', { ns: 'common' })}
+									</p>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Compression</label>
-									<p className='text-sm text-gray-600 mt-1'>{exportTask.job_config.compression || 'None'}</p>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.compressionLabel')}</label>
+									<p className='text-sm text-gray-600 mt-1'>{exportTask.job_config.compression || t('exportDrawer.compression.none')}</p>
 								</div>
 								<div>
-									<label className='text-sm font-medium text-gray-900'>Encryption</label>
-									<p className='text-sm text-gray-600 mt-1'>{exportTask.job_config.encryption || 'AES256'}</p>
+									<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.encryptionLabel')}</label>
+									<p className='text-sm text-gray-600 mt-1'>
+										{exportTask.job_config.encryption || t('insightsTools.exports.fallbackEncryptionDisplay')}
+									</p>
 								</div>
 							</div>
 						</div>
@@ -210,14 +223,14 @@ const ExportDetails = () => {
 
 					{/* Timestamps */}
 					<div className='card mt-6'>
-						<FormHeader variant='form-component-title' title='Timestamps' />
+						<FormHeader variant='form-component-title' title={t('insightsTools.exports.timestamps')} />
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 							<div>
-								<label className='text-sm font-medium text-gray-900'>Created At</label>
+								<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.createdAt')}</label>
 								<p className='text-sm text-gray-600 mt-1'>{new Date(exportTask.created_at).toLocaleString()}</p>
 							</div>
 							<div>
-								<label className='text-sm font-medium text-gray-900'>Last Updated</label>
+								<label className='text-sm font-medium text-gray-900'>{t('insightsTools.exports.lastUpdated')}</label>
 								<p className='text-sm text-gray-600 mt-1'>{new Date(exportTask.updated_at).toLocaleString()}</p>
 							</div>
 						</div>

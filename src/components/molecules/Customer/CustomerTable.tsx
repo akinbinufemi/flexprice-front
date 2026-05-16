@@ -10,8 +10,10 @@ import { RouteNames } from '@/core/routes/Routes';
 import { ENTITY_STATUS } from '@/models';
 import { ExternalLink } from 'lucide-react';
 import { useCustomerPortalUrl } from '@/hooks/useCustomerPortalUrl';
+import { useTranslation } from 'react-i18next';
 
 const ActionButtonWithPortal: FC<{ customer: Customer; onEdit: (customer: Customer) => void }> = ({ customer, onEdit }) => {
+	const { t } = useTranslation('customers');
 	const { openInNewTab } = useCustomerPortalUrl(customer.external_id);
 
 	return (
@@ -19,7 +21,7 @@ const ActionButtonWithPortal: FC<{ customer: Customer; onEdit: (customer: Custom
 			id={customer.id}
 			deleteMutationFn={(id) => CustomerApi.deleteCustomerById(id)}
 			refetchQueryKey='fetchCustomers'
-			entityName='Customer'
+			entityName={t('list.entityName')}
 			edit={{
 				enabled: customer.status === ENTITY_STATUS.PUBLISHED,
 				path: `/billing/customers/edit-customer?id=${customer.id}`,
@@ -30,7 +32,7 @@ const ActionButtonWithPortal: FC<{ customer: Customer; onEdit: (customer: Custom
 			}}
 			customActions={[
 				{
-					text: 'Open Customer Portal',
+					text: t('list.openPortal'),
 					icon: <ExternalLink className='h-4 w-4' />,
 					onClick: openInNewTab,
 				},
@@ -46,14 +48,15 @@ export interface Props {
 
 const CustomerTable: FC<Props> = ({ data, onEdit }) => {
 	const navigate = useNavigate();
+	const { t } = useTranslation('customers');
 	const mappedData = data?.map((customer) => ({
 		...customer,
 	}));
 	const columns: ColumnData[] = [
-		{ fieldName: 'name', title: 'Name', width: '400px' },
-		{ fieldName: 'external_id', title: 'External ID' },
+		{ fieldName: 'name', title: t('list.columns.name'), width: '400px' },
+		{ fieldName: 'external_id', title: t('list.columns.externalId') },
 		{
-			title: 'Status',
+			title: t('list.columns.status'),
 
 			render: (row) => {
 				const label = formatChips(row.status);
@@ -61,7 +64,7 @@ const CustomerTable: FC<Props> = ({ data, onEdit }) => {
 			},
 		},
 		{
-			title: 'Updated at',
+			title: t('list.columns.updatedAt'),
 			render: (row) => {
 				return <>{formatDate(row.updated_at)}</>;
 			},

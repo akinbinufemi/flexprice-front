@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useBreadcrumbsStore } from '@/store';
 import { Page, Input, DateRangePicker, FeatureMultiSelect, Loader } from '@/components/atoms';
@@ -6,11 +7,12 @@ import CostSheetApi from '@/api/CostSheetApi';
 import toast from 'react-hot-toast';
 import { GetCostAnalyticsRequest } from '@/types';
 import { Feature } from '@/models';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent, MetricCard } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { CostDataTable } from '@/components/molecules';
 
 const CostAnalyticsPage: React.FC = () => {
+	const { t } = useTranslation('developers');
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 
 	// Filter states
@@ -97,15 +99,15 @@ const CostAnalyticsPage: React.FC = () => {
 	};
 
 	return (
-		<Page heading='Analytics'>
+		<Page heading={t('usage.costAnalytics.pageTitle')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Costs} />
 			<div className='space-y-6'>
 				{/* Filters Section */}
 				<div className='grid grid-cols-1 md:grid-cols-3 gap-3 w-full'>
 					<div>
 						<FeatureMultiSelect
-							label='Features'
-							placeholder='Select features'
+							label={t('usage.costAnalytics.featuresLabel')}
+							placeholder={t('usage.costAnalytics.selectFeaturesPlaceholder')}
 							values={selectedFeatures.map((f) => f.id)}
 							onChange={setSelectedFeatures}
 							onFeaturesFetched={setFetchedFeatures}
@@ -113,15 +115,21 @@ const CostAnalyticsPage: React.FC = () => {
 						/>
 					</div>
 					<div>
-						<Input label='Customer ID' placeholder='External customer ID' value={customerId} onChange={setCustomerId} className='text-sm' />
+						<Input
+							label={t('usage.costAnalytics.customerIdLabel')}
+							placeholder={t('usage.costAnalytics.externalCustomerIdPlaceholder')}
+							value={customerId}
+							onChange={setCustomerId}
+							className='text-sm'
+						/>
 					</div>
 					<div>
 						<DateRangePicker
 							startDate={startDate}
 							endDate={endDate}
 							onChange={handleDateRangeChange}
-							placeholder='Select date range'
-							title='Date Range'
+							placeholder={t('usage.costAnalytics.selectDateRangePlaceholder')}
+							title={t('usage.costAnalytics.dateRangeTitle')}
 							className='w-full'
 							popoverClassName='w-full'
 							popoverTriggerClassName='w-full'
@@ -147,17 +155,17 @@ const CostAnalyticsPage: React.FC = () => {
 
 									return (
 										<div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-											<MetricCard title='Revenue' value={totalRevenue} currency={costData.currency} />
-											<MetricCard title='Cost' value={totalCost} currency={costData.currency} />
+											<MetricCard title={t('usage.costAnalytics.revenueMetric')} value={totalRevenue} currency={costData.currency} />
+											<MetricCard title={t('usage.costAnalytics.costMetric')} value={totalCost} currency={costData.currency} />
 											<MetricCard
-												title='Margin'
+												title={t('usage.costAnalytics.marginMetric')}
 												value={margin}
 												currency={costData.currency}
 												showChangeIndicator={true}
 												isNegative={margin < 0}
 											/>
 											<MetricCard
-												title='Margin %'
+												title={t('usage.costAnalytics.marginPercentMetric')}
 												value={marginPercent}
 												isPercent={true}
 												showChangeIndicator={true}

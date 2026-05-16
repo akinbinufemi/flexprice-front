@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import React, { FC, useEffect } from 'react';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	eventFilters: EventFilterData[];
@@ -18,6 +19,7 @@ export interface EventFilterData {
 }
 
 const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled, orientation = 'horizontal' }) => {
+	const { t } = useTranslation(['developers', 'common']);
 	useEffect(() => {
 		if ((!eventFilters || eventFilters.length === 0) && !disabled) {
 			setEventFilters([{ key: '', values: [] }]);
@@ -25,15 +27,12 @@ const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled
 	}, [eventFilters, disabled, setEventFilters]);
 
 	const isHorizontal = orientation === 'horizontal';
-
-	// Safety check for eventFilters
 	const safeEventFilters = eventFilters || [];
 
 	return (
 		<div className='space-y-4'>
 			<div className={cn('flex flex-col', isHorizontal ? 'gap-4' : 'gap-6')}>
 				{safeEventFilters.map((eventFilter, index) => {
-					// Safety check for individual eventFilter
 					if (!eventFilter) {
 						return null;
 					}
@@ -43,11 +42,11 @@ const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled
 							key={index}
 							className={cn('relative', isHorizontal ? 'flex h-full w-full gap-4' : 'bg-white rounded-lg border border-input')}>
 							<div className={cn(isHorizontal ? 'flex-1 flex gap-4' : 'flex flex-col gap-4 p-6')}>
-								<div className={cn('w-full', !isHorizontal && 'relative pr-12')}>
+								<div className={cn('w-full', !isHorizontal && 'relative pe-12')}>
 									<Input
 										type='text'
-										label='Key'
-										placeholder='key'
+										label={t('common:form.key')}
+										placeholder={t('labels.placeholders.key')}
 										value={eventFilter.key || ''}
 										onChange={(e) => {
 											const newEventFilters = [...safeEventFilters];
@@ -71,8 +70,8 @@ const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled
 								</div>
 								<MultiChipInput
 									type='text'
-									label='Values'
-									placeholder='value'
+									label={t('labels.values')}
+									placeholder={t('labels.placeholders.value')}
 									value={eventFilter.values || []}
 									onChange={(e) => {
 										const newEventFilters = [...safeEventFilters];
@@ -99,7 +98,6 @@ const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled
 				})}
 			</div>
 
-			{/* Error Message */}
 			{error && <p className='text-sm text-destructive'>{error}</p>}
 
 			<div className='space-y-2'>
@@ -111,7 +109,7 @@ const EventFilter: FC<Props> = ({ eventFilters, setEventFilters, error, disabled
 					}}>
 					<span className='font-normal flex items-center gap-2'>
 						<Plus className='size-4' />
-						Event Filter
+						{t('labels.eventFilter')}
 					</span>
 				</Button>
 			</div>

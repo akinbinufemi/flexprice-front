@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Page, AddButton, Card, CardHeader, Loader, Button, Input, ShortPagination, Dialog } from '@/components/atoms';
 import { FlatTabs, FlexpriceTable } from '@/components/molecules';
@@ -10,34 +11,35 @@ import { AlertTriangle, Copy, Download, Eye, EyeOff, Info, Link2, Lock, Mail } f
 import { RouteNames } from '@/core/routes/Routes';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
+import type { HttpRejectedError } from '@/core/axios/types';
+import { toSentenceCase } from '@/utils/common/helper_functions';
 
 const MEMBERS_QUERY_KEY = ['settings-team-members'];
 const MEMBERS_PAGE_SIZE = 20;
 
-function getRoleDisplay(_user: User): string {
-	// Roles not supported yet; every user is admin
-	// TODO: Add support when rbac roles are supported for user accounts as well.
-	return 'Admin';
-}
-
-/** API error shape when add user fails (e.g. user limit reached, duplicate email) */
-function getAddUserErrorMessage(err: any): string {
-	const internal = err?.error?.internal_error ?? '';
-	const msg = err?.error?.message ?? err?.message ?? '';
-	if (typeof internal === 'string' && internal.toLowerCase().includes('user limit')) {
-		return 'User limit reached for this organization.';
-	}
-	if (typeof msg === 'string' && (msg.toLowerCase().includes('limit reached') || msg.toLowerCase().includes('maximum'))) {
-		return 'User limit reached for this organization.';
-	}
-	if (typeof msg === 'string' && msg.toLowerCase().includes('already exists')) {
-		return 'A user with this email already exists!';
-	}
-	if (typeof msg === 'string' && msg.length) return msg;
-	return 'Failed to add user';
-}
-
 function MembersSection() {
+	const { t } = useTranslation(['settings', 'common']);
+
+	/** API error shape when add user fails (e.g. user limit reached, duplicate email) */
+	const getAddUserErrorMessage = (err: Error): string => {
+		const c = (err as HttpRejectedError).cause;
+		const raw = c != null ? c : err;
+		const e = raw as { error?: { internal_error?: string; message?: string }; message?: string };
+		const internal = e?.error?.internal_error ?? '';
+		const msg = e?.error?.message ?? e?.message ?? '';
+		if (typeof internal === 'string' && internal.toLowerCase().includes('user limit')) {
+			return t('members.errors.userLimitReached');
+		}
+		if (typeof msg === 'string' && (msg.toLowerCase().includes('limit reached') || msg.toLowerCase().includes('maximum'))) {
+			return t('members.errors.userLimitReached');
+		}
+		if (typeof msg === 'string' && msg.toLowerCase().includes('already exists')) {
+			return t('members.errors.userAlreadyExists');
+		}
+		if (typeof msg === 'string' && msg.length) return msg;
+		return err.message || t('members.errors.failedToAddUser');
+	};
+
 	const [addOpen, setAddOpen] = useState(false);
 	const [email, setEmail] = useState('');
 	const [addError, setAddError] = useState<string | null>(null);
@@ -57,8 +59,8 @@ function MembersSection() {
 	});
 
 	useEffect(() => {
-		if (isError) toast.error('Failed to load members');
-	}, [isError]);
+		if (isError) toast.error(t('members.errors.failedToLoadMembers'));
+	}, [isError, t]);
 
 	const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value);
 
@@ -74,7 +76,7 @@ function MembersSection() {
 			setPasswordDialogOpen(true);
 			refetchQueries(MEMBERS_QUERY_KEY);
 		},
-		onError: (err: any) => {
+		onError: (err: Error) => {
 			const message = getAddUserErrorMessage(err);
 			setAddError(message);
 			toast.error(message);
@@ -86,12 +88,12 @@ function MembersSection() {
 		const trimmed = email.trim();
 		setAddError(null);
 		if (!trimmed) {
-			toast.error('Enter an email address');
+			toast.error(t('members.errors.enterEmail'));
 			return;
 		}
 		if (!isValidEmail(trimmed)) {
-			toast.error('Please enter a valid email address');
-			setAddError('Please enter a valid email address');
+			toast.error(t('members.errors.emailInvalid'));
+			setAddError(t('members.errors.emailInvalid'));
 			return;
 		}
 		createUser.mutate({ type: 'user', email: trimmed });
@@ -106,9 +108,9 @@ function MembersSection() {
 		if (!oneTimePassword) return;
 		try {
 			await navigator.clipboard.writeText(oneTimePassword);
-			toast.success('Copied to clipboard');
+			toast.success(t('common:toast.copySuccess'));
 		} catch {
-			toast.error('Could not copy to clipboard');
+			toast.error(t('members.errors.copyFailed'));
 		}
 	};
 
@@ -121,20 +123,25 @@ function MembersSection() {
 		if (!loginUrl) return;
 		try {
 			await navigator.clipboard.writeText(loginUrl);
-			toast.success('Login link copied – share it securely with the user.');
+			toast.success(t('members.errors.loginLinkCopied'));
 		} catch {
-			toast.error('Could not copy to clipboard');
+			toast.error(t('members.errors.copyFailed'));
 		}
 	};
 
 	const handleCopyAll = async () => {
 		if (!addedUserEmail || !oneTimePassword) return;
-		const block = `Email: ${addedUserEmail}\nPassword: ${oneTimePassword}${loginUrl ? `\nLogin link: ${loginUrl}` : ''}`;
+		const lines = [
+			t('members.credentials.copyBlockEmailLine', { email: addedUserEmail }),
+			t('members.credentials.copyBlockPasswordLine', { password: oneTimePassword }),
+		];
+		if (loginUrl) lines.push(t('members.credentials.copyBlockLoginLine', { url: loginUrl }));
+		const block = lines.join('\n');
 		try {
 			await navigator.clipboard.writeText(block);
-			toast.success('Credentials copied to clipboard.');
+			toast.success(t('members.errors.credentialsCopied'));
 		} catch {
-			toast.error('Could not copy to clipboard');
+			toast.error(t('members.errors.copyFailed'));
 		}
 	};
 
@@ -145,7 +152,7 @@ function MembersSection() {
 
 	const handleDownloadCsv = () => {
 		if (!addedUserEmail || !oneTimePassword) return;
-		const header = 'email,password,login_link';
+		const header = t('members.credentials.csvHeader');
 		const row = [escapeCsvCell(addedUserEmail), escapeCsvCell(oneTimePassword), escapeCsvCell(loginUrl)];
 		const csv = `${header}\r\n${row.join(',')}`;
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -155,7 +162,7 @@ function MembersSection() {
 		a.download = `flexprice-credentials-${addedUserEmail.replace(/@.*/, '').replace(/[^a-zA-Z0-9_-]/g, '_') || 'user'}.csv`;
 		a.click();
 		URL.revokeObjectURL(url);
-		toast.success('Credentials downloaded.');
+		toast.success(t('members.errors.credentialsDownloaded'));
 	};
 
 	const handleClosePasswordDialog = () => {
@@ -166,12 +173,18 @@ function MembersSection() {
 
 	const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
+	const getRoleDisplay = (row: User) => {
+		const r = row.roles?.[0];
+		if (!r) return t('members.roleAdmin');
+		return toSentenceCase(r);
+	};
+
 	const members: User[] = data?.items ?? [];
 	const totalMembers = data?.pagination?.total ?? 0;
 	const columns: ColumnData<User>[] = [
-		{ title: 'Email', fieldName: 'email' },
+		{ title: t('members.columns.email'), fieldName: 'email' },
 		{
-			title: 'Role',
+			title: t('members.columns.role'),
 			render: (row) => {
 				const role = getRoleDisplay(row);
 				return <span className='inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600'>{role}</span>;
@@ -183,16 +196,16 @@ function MembersSection() {
 		<>
 			<Card variant='default' className='rounded-xl border-gray-200 shadow-sm bg-white'>
 				<CardHeader
-					title='Members'
+					title={t('members.cardTitle')}
 					titleClassName='text-lg font-medium text-zinc-800'
-					cta={<AddButton label='Add' variant='outline' onClick={() => setAddOpen(true)} />}
+					cta={<AddButton label={t('common:actions.add')} variant='outline' onClick={() => setAddOpen(true)} />}
 				/>
 				{isLoading && <Loader />}
 				{!isLoading && isError && (
 					<div className='flex flex-col items-center justify-center gap-3 py-8 text-center'>
-						<p className='text-sm text-red-700'>Failed to load members. Please try again.</p>
+						<p className='text-sm text-red-700'>{t('members.errors.loadError')}</p>
 						<Button variant='outline' onClick={() => refetch()}>
-							Retry
+							{t('common:actions.retry')}
 						</Button>
 					</div>
 				)}
@@ -203,7 +216,7 @@ function MembersSection() {
 							<div className='text-zinc-500'>
 								<ShortPagination
 									prefix={PAGINATION_PREFIX.SETTINGS_MEMBERS}
-									unit='members'
+									unit={t('members.unitMembers')}
 									totalItems={totalMembers}
 									pageSize={MEMBERS_PAGE_SIZE}
 								/>
@@ -217,8 +230,8 @@ function MembersSection() {
 			<Dialog
 				isOpen={addOpen}
 				onOpenChange={handleAddDialogOpenChange}
-				title='Add member'
-				description='Invite a new team member by email.'
+				title={t('members.addMember.title')}
+				description={t('members.addMember.description')}
 				titleClassName='text-lg font-semibold text-zinc-900'
 				descriptionClassName='text-sm text-zinc-500'
 				className='sm:max-w-[425px] rounded-xl shadow-lg border border-gray-100'>
@@ -231,14 +244,14 @@ function MembersSection() {
 					)}
 					<div>
 						<label htmlFor='member-email' className='block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1'>
-							Email
+							{t('members.addMember.emailLabel')}
 						</label>
 						<div className='flex items-center gap-2 mb-4 rounded-md border border-gray-200 bg-white'>
 							<Mail className='h-4 w-4 text-zinc-400 flex-shrink-0 ml-3' />
 							<Input
 								id='member-email'
 								type='email'
-								placeholder='user@example.com'
+								placeholder={t('members.addMember.emailPlaceholder')}
 								value={email}
 								onChange={(value) => setEmail(value)}
 								onKeyDown={(e) => {
@@ -254,7 +267,7 @@ function MembersSection() {
 					</div>
 					<div className='flex justify-end'>
 						<Button onClick={handleAddUser} disabled={createUser.isPending} isLoading={createUser.isPending}>
-							Add user
+							{t('members.addMember.addUser')}
 						</Button>
 					</div>
 				</div>
@@ -264,14 +277,14 @@ function MembersSection() {
 			<Dialog
 				isOpen={passwordDialogOpen}
 				onOpenChange={(open) => (open ? setPasswordDialogOpen(true) : handleClosePasswordDialog())}
-				title='Login Credentials'
-				description='Share these with the new user so they can sign in.'
+				title={t('members.credentials.title')}
+				description={t('members.credentials.description')}
 				className='w-full max-w-[480px] rounded-xl shadow-lg border border-gray-100'>
 				<div className='space-y-4 mt-3'>
 					{/* Email row */}
 					{addedUserEmail && (
 						<div>
-							<span className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>Email</span>
+							<span className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>{t('members.addMember.emailLabel')}</span>
 							<div className='mt-1 flex items-center gap-2 rounded-md border border-gray-200 bg-zinc-50 px-3 py-2 min-h-[40px]'>
 								<Mail className='h-4 w-4 text-zinc-400 flex-shrink-0' />
 								<span className='flex-1 min-w-0 truncate text-sm text-zinc-900'>{addedUserEmail}</span>
@@ -279,11 +292,11 @@ function MembersSection() {
 									type='button'
 									onClick={() => {
 										navigator.clipboard.writeText(addedUserEmail);
-										toast.success('Email copied');
+										toast.success(t('members.credentials.emailCopied'));
 									}}
 									className='p-1.5 text-zinc-500 hover:text-zinc-700 rounded'
-									title='Copy email'
-									aria-label='Copy email'>
+									title={t('members.credentials.copyEmail')}
+									aria-label={t('members.credentials.copyEmail')}>
 									<Copy className='h-4 w-4' />
 								</button>
 							</div>
@@ -292,7 +305,7 @@ function MembersSection() {
 
 					{/* Password row */}
 					<div>
-						<span className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>Password</span>
+						<span className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>{t('members.credentials.password')}</span>
 						<div className='mt-1 relative flex items-center rounded-md border border-gray-200 bg-zinc-50 px-3 py-2 min-h-[40px]'>
 							<Lock className='h-4 w-4 text-zinc-400 flex-shrink-0' />
 							<Input
@@ -307,16 +320,16 @@ function MembersSection() {
 									type='button'
 									onClick={togglePasswordVisibility}
 									className='p-1.5 text-zinc-500 hover:text-zinc-700 rounded'
-									title={showPassword ? 'Hide password' : 'Show password'}
-									aria-label={showPassword ? 'Hide password' : 'Show password'}>
+									title={showPassword ? t('members.credentials.hidePassword') : t('members.credentials.showPassword')}
+									aria-label={showPassword ? t('members.credentials.hidePassword') : t('members.credentials.showPassword')}>
 									{showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
 								</button>
 								<button
 									type='button'
 									onClick={handleCopyPassword}
 									className='p-1.5 text-zinc-500 hover:text-zinc-700 rounded'
-									title='Copy password'
-									aria-label='Copy password'>
+									title={t('members.credentials.copyPassword')}
+									aria-label={t('members.credentials.copyPassword')}>
 									<Copy className='h-4 w-4' />
 								</button>
 							</div>
@@ -326,7 +339,7 @@ function MembersSection() {
 					{/* Login link (magic link) */}
 					{loginUrl && (
 						<div className='border-t border-gray-100 pt-4'>
-							<p className='text-xs text-zinc-500 mb-2'>One-click sign-in link – share this with the user.</p>
+							<p className='text-xs text-zinc-500 mb-2'>{t('members.credentials.oneClickHint')}</p>
 							<div className='flex items-center gap-2 rounded-md border border-gray-200 bg-zinc-50 px-3 py-2'>
 								<Link2 className='h-4 w-4 text-zinc-400 flex-shrink-0' />
 								<span className='flex-1 min-w-0 truncate text-sm text-zinc-600' title={loginUrl}>
@@ -340,15 +353,15 @@ function MembersSection() {
 					<div className='flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4'>
 						<Button onClick={handleCopyLoginLink} className='shrink-0'>
 							<Link2 className='h-3.5 w-3.5 mr-1.5' />
-							Copy login link
+							{t('members.credentials.copyLoginLink')}
 						</Button>
 						<Button variant='outline' size='sm' onClick={handleDownloadCsv} className='shrink-0'>
 							<Download className='h-3.5 w-3.5 mr-1.5' />
-							Download CSV
+							{t('members.credentials.downloadCsv')}
 						</Button>
 						<Button variant='outline' size='sm' onClick={handleCopyAll} className='shrink-0'>
 							<Copy className='h-3.5 w-3.5 mr-1.5' />
-							Copy all
+							{t('members.credentials.copyAll')}
 						</Button>
 					</div>
 
@@ -356,11 +369,11 @@ function MembersSection() {
 					<div className='flex flex-col gap-1.5 text-xs text-zinc-500'>
 						<div className='flex items-center gap-2'>
 							<AlertTriangle className='h-3.5 w-3.5 flex-shrink-0 text-amber-500' />
-							<span>This password can be reset later.</span>
+							<span>{t('members.credentials.passwordResetNote')}</span>
 						</div>
 						<div className='flex items-center gap-2'>
 							<Info className='h-3.5 w-3.5 flex-shrink-0 text-sky-500' />
-							<span>User can sign in with email/password or Google.</span>
+							<span>{t('members.credentials.signInMethodsNote')}</span>
 						</div>
 					</div>
 				</div>
@@ -370,14 +383,15 @@ function MembersSection() {
 }
 
 const SettingsDashboard = () => {
+	const { t } = useTranslation(['settings', 'common']);
 	return (
-		<Page heading='Settings' documentTitle='Settings' headingClassName='font-semibold text-2xl text-zinc-900'>
+		<Page heading={t('page.settings')} documentTitle={t('page.settings')} headingClassName='font-semibold text-2xl text-zinc-900'>
 			<FlatTabs
 				className='[&_.border-b]:border-gray-200'
 				tabs={[
 					{
 						value: 'team',
-						label: 'Team',
+						label: t('members.tabs.team'),
 						content: <MembersSection />,
 					},
 				]}

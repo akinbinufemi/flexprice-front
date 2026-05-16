@@ -1,22 +1,30 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link id="app-favicon" rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=0.9" />
+		<title>flexprice.io</title>
+		<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+		<!-- Start of Reo Javascript -->
+		<script type="text/javascript">
+			!(function () {
+				var e, t, n;
+				((e = '41fa2cc395aea7b'),
+					(t = function () {
+						Reo.init({ clientID: '41fa2cc395aea7b' });
+					}),
+					((n = document.createElement('script')).src = 'https://static.reo.dev/' + e + '/reo.js'),
+					(n.defer = !0),
+					(n.onload = t),
+					document.head.appendChild(n));
+			})();
+		</script>
+		<!-- End of Reo Javascript -->
+	</head>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.9" />
-  <title>flexprice.io</title>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
-  <!-- Start of Reo Javascript -->
-  <script type="text/javascript">
-    !function(){var e,t,n;e="41fa2cc395aea7b",t=function(){Reo.init({clientID:"41fa2cc395aea7b"})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();
-  </script>
-  <!-- End of Reo Javascript -->
-</head>
-
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
-
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>

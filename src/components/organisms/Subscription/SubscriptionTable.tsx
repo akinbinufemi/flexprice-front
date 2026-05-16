@@ -6,6 +6,8 @@ import { formatBillingPeriodForDisplay } from '@/utils/common/helper_functions';
 import formatDate from '@/utils/common/format_date';
 import SubscriptionActionButton from './SubscriptionActionButton';
 import { Info } from 'lucide-react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 export interface SubscriptionTableProps {
 	data: Subscription[];
@@ -15,68 +17,67 @@ export interface SubscriptionTableProps {
 }
 
 function subscriptionHierarchyKind(row: Subscription): SUBSCRIPTION_HIERARCHY_DISPLAY_KIND | null {
-	const t = row.subscription_type?.toLowerCase();
-	if (t === SUBSCRIPTION_TYPE.INHERITED) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.INHERITED;
-	if (t === SUBSCRIPTION_TYPE.PARENT) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.PARENT;
-	if (t === SUBSCRIPTION_TYPE.GROUPED_INVOICING) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.GROUPED_INVOICING;
-	if (t === SUBSCRIPTION_TYPE.DELEGATED_INVOICING) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.DELEGATED_INVOICING;
+	const subType = row.subscription_type?.toLowerCase();
+	if (subType === SUBSCRIPTION_TYPE.INHERITED) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.INHERITED;
+	if (subType === SUBSCRIPTION_TYPE.PARENT) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.PARENT;
+	if (subType === SUBSCRIPTION_TYPE.GROUPED_INVOICING) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.GROUPED_INVOICING;
+	if (subType === SUBSCRIPTION_TYPE.DELEGATED_INVOICING) return SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.DELEGATED_INVOICING;
 	return null;
 }
 
-export const getSubscriptionStatus = (status: string) => {
+export const getSubscriptionStatus = (status: string, t: TFunction) => {
 	switch (status) {
 		case SUBSCRIPTION_STATUS.ACTIVE:
-			return <Chip variant='success' label='Active' />;
+			return <Chip variant='success' label={t('common:status.active')} />;
 		case SUBSCRIPTION_STATUS.CANCELLED:
-			return <Chip variant='failed' label='Cancelled' />;
+			return <Chip variant='failed' label={t('common:status.cancelled')} />;
 		case SUBSCRIPTION_STATUS.INCOMPLETE:
-			return <Chip variant='warning' label='Incomplete' />;
+			return <Chip variant='warning' label={t('common:status.incomplete')} />;
 		case SUBSCRIPTION_STATUS.TRIALING:
-			return <Chip variant='warning' label='Trialing' />;
+			return <Chip variant='warning' label={t('common:status.trialing')} />;
 		case SUBSCRIPTION_STATUS.DRAFT:
-			return <Chip variant='warning' label='Draft' />;
+			return <Chip variant='warning' label={t('common:status.draft')} />;
 		default:
-			return <Chip variant='default' label='Inactive' />;
+			return <Chip variant='default' label={t('common:status.inactive')} />;
 	}
 };
 
-export const formatSubscriptionStatus = (status: string) => {
+export const formatSubscriptionStatus = (status: string, t: TFunction) => {
 	switch (status) {
 		case SUBSCRIPTION_STATUS.ACTIVE:
-			return 'Active';
+			return t('common:status.active');
 		case SUBSCRIPTION_STATUS.CANCELLED:
-			return 'Cancelled';
+			return t('common:status.cancelled');
 		case SUBSCRIPTION_STATUS.INCOMPLETE:
-			return 'Incomplete';
+			return t('common:status.incomplete');
 		case SUBSCRIPTION_STATUS.TRIALING:
-			return 'Trialing';
+			return t('common:status.trialing');
 		case SUBSCRIPTION_STATUS.DRAFT:
-			return 'Draft';
+			return t('common:status.draft');
 		default:
-			return 'Inactive';
+			return t('common:status.inactive');
 	}
 };
 
 const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allowRedirect = true, subscriptionOverrides }): JSX.Element => {
+	const { t } = useTranslation(['common', 'customers']);
 	const showHierarchyColumn = data.some((row) => subscriptionHierarchyKind(row) !== null);
 
 	const columns: ColumnData<Subscription>[] = useMemo(() => {
 		const hierarchyColumn: ColumnData<Subscription> = {
-			title: 'Hierarchy',
+			title: t('customers:organisms.subscriptionTable.hierarchyColumn'),
 			render: (row) => {
 				const kind = subscriptionHierarchyKind(row);
 				if (kind === SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.INHERITED) {
-					const chip = <Chip variant='info' label='Inherited' />;
+					const chip = <Chip variant='info' label={t('customers:organisms.subscriptionTable.chipInherited')} />;
 					return (
 						<Tooltip
 							delayDuration={0}
-							className='max-w-[320px] whitespace-normal text-left leading-relaxed'
+							className='max-w-[320px] whitespace-normal text-start leading-relaxed'
 							content={
 								<div className='space-y-1'>
-									<div className='font-semibold'>Inherited subscription</div>
-									<div className='text-sm font-normal opacity-90'>
-										This subscription mirrors charges from a parent subscription. Changes should be made on the parent.
-									</div>
+									<div className='font-semibold'>{t('customers:organisms.subscriptionTable.inheritedTitle')}</div>
+									<div className='text-sm font-normal opacity-90'>{t('customers:organisms.subscriptionTable.inheritedBody')}</div>
 								</div>
 							}>
 							<span className='inline-flex cursor-default'>{chip}</span>
@@ -86,18 +87,16 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 				if (kind === SUBSCRIPTION_HIERARCHY_DISPLAY_KIND.PARENT) {
 					return (
 						<Tooltip
-							className='max-w-[320px] whitespace-normal text-left leading-relaxed'
+							className='max-w-[320px] whitespace-normal text-start leading-relaxed'
 							content={
 								<div className='space-y-1'>
-									<div className='font-semibold'>Parent subscription</div>
-									<div className='text-sm font-normal opacity-90'>
-										Usage and charges from linked child subscriptions roll up into this subscription.
-									</div>
+									<div className='font-semibold'>{t('customers:organisms.subscriptionTable.parentTitle')}</div>
+									<div className='text-sm font-normal opacity-90'>{t('customers:organisms.subscriptionTable.parentBody')}</div>
 								</div>
 							}
 							delayDuration={0}>
 							<span className='inline-flex cursor-default'>
-								<Chip variant='default' label='Parent' />
+								<Chip variant='default' label={t('customers:organisms.subscriptionTable.chipParent')} />
 							</span>
 						</Tooltip>
 					);
@@ -106,17 +105,15 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 					return (
 						<Tooltip
 							delayDuration={0}
-							className='max-w-[320px] whitespace-normal text-left leading-relaxed'
+							className='max-w-[320px] whitespace-normal text-start leading-relaxed'
 							content={
 								<div className='space-y-1'>
-									<div className='font-semibold'>Grouped invoicing</div>
-									<div className='text-sm font-normal opacity-90'>
-										This subscription has its own charges; billing can be consolidated on the parent subscription invoice.
-									</div>
+									<div className='font-semibold'>{t('customers:organisms.subscriptionTable.groupedInvoicingTitle')}</div>
+									<div className='text-sm font-normal opacity-90'>{t('customers:organisms.subscriptionTable.groupedInvoicingBody')}</div>
 								</div>
 							}>
 							<span className='inline-flex cursor-default'>
-								<Chip variant='default' label='Grouped invoicing' />
+								<Chip variant='default' label={t('customers:organisms.subscriptionTable.chipGrouped')} />
 							</span>
 						</Tooltip>
 					);
@@ -125,22 +122,20 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 					return (
 						<Tooltip
 							delayDuration={0}
-							className='max-w-[320px] whitespace-normal text-left leading-relaxed'
+							className='max-w-[320px] whitespace-normal text-start leading-relaxed'
 							content={
 								<div className='space-y-1'>
-									<div className='font-semibold'>Delegated invoicing</div>
-									<div className='text-sm font-normal opacity-90'>
-										Charges accrue on this subscription, but invoices are issued to another customer (invoicing customer).
-									</div>
+									<div className='font-semibold'>{t('customers:organisms.subscriptionTable.delegatedInvoicingTitle')}</div>
+									<div className='text-sm font-normal opacity-90'>{t('customers:organisms.subscriptionTable.delegatedInvoicingBody')}</div>
 								</div>
 							}>
 							<span className='inline-flex cursor-default'>
-								<Chip variant='default' label='Delegated invoicing' />
+								<Chip variant='default' label={t('customers:organisms.subscriptionTable.chipDelegated')} />
 							</span>
 						</Tooltip>
 					);
 				}
-				return <span className='text-muted-foreground'>—</span>;
+				return <span className='text-muted-foreground'>{t('common:labels.na')}</span>;
 			},
 		};
 
@@ -149,17 +144,17 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 				title: 'Plan Name',
 				render: (row) => {
 					const hasOverride = subscriptionOverrides?.get(row.id);
-					const planName = row.plan?.name || row.plan_id || '—';
+					const planName = row.plan?.name || row.plan_id || t('common:labels.na');
 
 					return (
 						<div className='flex items-center gap-1.5'>
 							<span>{planName}</span>
 							{hasOverride && (
-								<Tooltip content='Plan modified' delayDuration={0}>
+								<Tooltip content={t('customers:organisms.subscriptionTable.planModifiedAria')} delayDuration={0}>
 									<span
 										tabIndex={0}
 										role='img'
-										aria-label='Plan modified'
+										aria-label={t('customers:organisms.subscriptionTable.planModifiedAria')}
 										className='inline-flex cursor-default rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'>
 										<Info className='h-4 w-4 shrink-0 text-muted-foreground hover:text-foreground transition-colors' />
 									</span>
@@ -176,7 +171,7 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 			},
 			{
 				title: 'Status',
-				render: (row) => getSubscriptionStatus(row.subscription_status),
+				render: (row) => getSubscriptionStatus(row.subscription_status, t),
 			},
 			{
 				title: 'Start Date',
@@ -197,7 +192,7 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 					]
 				: []),
 		];
-	}, [allowRedirect, showHierarchyColumn, subscriptionOverrides]);
+	}, [allowRedirect, showHierarchyColumn, subscriptionOverrides, t]);
 
 	return (
 		<FlexpriceTable

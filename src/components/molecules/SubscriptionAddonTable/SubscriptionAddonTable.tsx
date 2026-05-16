@@ -1,5 +1,7 @@
 import { AddAddonToSubscriptionRequest } from '@/types/dto/Addon';
 import React, { useCallback, useMemo, useState, memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { AddButton, FormHeader, ActionButton } from '@/components/atoms';
 import FlexpriceTable, { ColumnData } from '../Table';
 import SubscriptionAddonModal from './SubscriptionAddonModal';
@@ -25,8 +27,9 @@ const formatAddonCharges = (
 	prices: Price[] = [],
 	priceOverrides: Record<string, ExtendedPriceOverride> = {},
 	coupons: Coupon[] = [],
+	t: TFunction<'common'>,
 ): string => {
-	if (!prices || prices.length === 0) return '--';
+	if (!prices || prices.length === 0) return t('labels.na');
 
 	const recurringPrices = prices.filter((p) => p.type === PRICE_TYPE.FIXED);
 	const usagePrices = prices.filter((p) => p.type === PRICE_TYPE.USAGE);
@@ -34,7 +37,7 @@ const formatAddonCharges = (
 	const hasUsage = usagePrices.length > 0;
 
 	if (recurringPrices.length === 0) {
-		return hasUsage ? 'Depends on usage' : '--';
+		return hasUsage ? t('subscriptionAddon.dependsOnUsage') : t('labels.na');
 	}
 
 	// Calculate total recurring amount
@@ -61,6 +64,7 @@ const SubscriptionAddonTable: React.FC<Props> = ({
 	billingPeriod,
 	currency,
 }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedAddon, setSelectedAddon] = useState<ExtendedAddon | null>(null);
 	const extendedData = useMemo(() => {
@@ -132,18 +136,18 @@ const SubscriptionAddonTable: React.FC<Props> = ({
 	const columns: ColumnData<ExtendedAddon>[] = useMemo(
 		() => [
 			{
-				title: 'Name',
+				title: t('subscriptionAddon.columnName'),
 				render: (row) => {
 					const addonDetails = getAddonDetails(row.addon_id);
 					return addonDetails?.name || row.addon_id;
 				},
 			},
 			{
-				title: 'Charges',
+				title: t('subscriptionAddon.columnCharges'),
 				render: (row) => {
 					const addonDetails = getAddonDetails(row.addon_id);
 					const prices = addonDetails?.prices || [];
-					return <span>{formatAddonCharges(prices, priceOverrides, coupons)}</span>;
+					return <span>{formatAddonCharges(prices, priceOverrides, coupons, t)}</span>;
 				},
 			},
 			// {
@@ -171,14 +175,14 @@ const SubscriptionAddonTable: React.FC<Props> = ({
 							}}
 							archive={{
 								enabled: !disabled,
-								text: 'Remove',
+								text: t('subscriptionAddon.remove'),
 							}}
 						/>
 					);
 				},
 			},
 		],
-		[disabled, getAddonDetails, handleDelete, handleEdit, priceOverrides, coupons],
+		[disabled, getAddonDetails, handleDelete, handleEdit, priceOverrides, coupons, t],
 	);
 
 	return (
@@ -198,7 +202,7 @@ const SubscriptionAddonTable: React.FC<Props> = ({
 			/>
 			<div className='space-y-4'>
 				<div className='flex items-center justify-between'>
-					<FormHeader className='mb-0' title='Addons' variant='sub-header' />
+					<FormHeader className='mb-0' title={t('labels.addons')} variant='sub-header' />
 					<AddButton onClick={handleOpenCreate} disabled={disabled} />
 				</div>
 				<div className='rounded-[6px] border border-gray-300'>

@@ -1,4 +1,6 @@
+/* eslint-disable i18next/no-literal-string */
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BILLING_MODEL, Price, PRICE_TYPE, TIER_MODE, CreatePriceTier } from '@/models';
 import { PriceUnit } from '@/models/PriceUnit';
 import {
@@ -8,13 +10,13 @@ import {
 	getBillingModelLabel,
 	getTierModeLabel,
 	NormalizedPriceDisplay,
+	formatCouponName,
+	ExtendedPriceOverride,
 } from '@/utils';
 import { Info } from 'lucide-react';
 import { formatAmount } from '@/components/atoms/Input/Input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 import { Coupon } from '@/models';
-import { formatCouponName } from '@/utils';
-import { ExtendedPriceOverride } from '@/utils';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -23,11 +25,6 @@ interface Props {
 	priceOverride?: ExtendedPriceOverride;
 }
 
-// ===== SUB-COMPONENTS =====
-
-/**
- * Display discounted price with strikethrough original
- */
 const DiscountedPriceDisplay: FC<{
 	originalAmount: number;
 	discountedAmount: number;
@@ -58,38 +55,47 @@ const DiscountedPriceDisplay: FC<{
 	</div>
 );
 
-/**
- * Display override changes in a tooltip
- */
 const OverrideTooltip: FC<{
 	original: NormalizedPriceDisplay;
 	overridden: NormalizedPriceDisplay;
 	originalPrice: Price;
 }> = ({ original, overridden, originalPrice }) => {
+	const { t } = useTranslation(['catalog', 'common']);
+	const detailSep = t('catalog:chargeValue.override.detailSep');
 	const changes: string[] = [];
 
-	// Check for billing model changes
 	if (overridden.billingModel !== original.billingModel) {
-		changes.push(`Billing Model: ${getBillingModelLabel(original.billingModel)} → ${getBillingModelLabel(overridden.billingModel)}`);
+		changes.push(
+			t('catalog:chargeValue.override.billingModelLine', {
+				from: getBillingModelLabel(original.billingModel),
+				to: getBillingModelLabel(overridden.billingModel),
+			}),
+		);
 	}
 
-	// Check for tier mode changes
 	if (overridden.tierMode !== original.tierMode) {
-		changes.push(`Tier Mode: ${getTierModeLabel(original.tierMode)} → ${getTierModeLabel(overridden.tierMode)}`);
+		changes.push(
+			t('catalog:chargeValue.override.tierModeLine', {
+				from: getTierModeLabel(original.tierMode),
+				to: getTierModeLabel(overridden.tierMode),
+			}),
+		);
 	}
 
-	// Check for amount changes
 	if (overridden.amount !== original.amount) {
-		changes.push(`Amount: ${original.symbol}${formatAmount(original.amount)} → ${overridden.symbol}${formatAmount(overridden.amount)}`);
+		changes.push(
+			t('catalog:chargeValue.override.amountLine', {
+				from: `${original.symbol}${formatAmount(original.amount)}`,
+				to: `${overridden.symbol}${formatAmount(overridden.amount)}`,
+			}),
+		);
 	}
 
-	// Check for quantity changes - only show if original price was usage-based
-	const quantityOverride = (overridden as any).quantity;
+	const quantityOverride = (overridden as NormalizedPriceDisplay & { quantity?: number }).quantity;
 	if (quantityOverride && quantityOverride !== 1 && originalPrice.type === PRICE_TYPE.USAGE) {
-		changes.push(`Quantity: 1 → ${quantityOverride}`);
+		changes.push(t('catalog:chargeValue.override.quantityLine', { to: quantityOverride }));
 	}
 
-	// Check for transform quantity changes
 	if (
 		overridden.transformQuantity &&
 		(original.billingModel === BILLING_MODEL.PACKAGE || overridden.billingModel === BILLING_MODEL.PACKAGE)
@@ -97,65 +103,98 @@ const OverrideTooltip: FC<{
 		const originalDivideBy = original.transformQuantity?.divide_by || 1;
 		const newDivideBy = overridden.transformQuantity.divide_by;
 		if (originalDivideBy !== newDivideBy) {
-			changes.push(`Package Size: ${originalDivideBy} units → ${newDivideBy} units`);
+			changes.push(
+				t('catalog:chargeValue.override.packageSizeLine', {
+					from: originalDivideBy,
+					to: newDivideBy,
+				}),
+			);
 		}
 	}
 
-	// Check for tier changes
 	if (overridden.tiers && overridden.tiers.length > 0) {
 		const originalTiers = original.tiers || [];
 		const newTiers = overridden.tiers;
 
-		// If tier count changed, show the change
 		if (originalTiers.length !== newTiers.length) {
-			changes.push(`Tiers: ${originalTiers.length} tiers → ${newTiers.length} tiers`);
+			changes.push(
+				t('catalog:chargeValue.override.tiersCountLine', {
+					from: originalTiers.length,
+					to: newTiers.length,
+				}),
+			);
 		} else {
-			// Show detailed tier changes
 			const tierChanges: string[] = [];
 			newTiers.forEach((newTier: CreatePriceTier, index: number) => {
 				const originalTier = originalTiers[index];
 				if (originalTier) {
 					const tierChangesForThisTier: string[] = [];
 
-					// Check From value changes
 					const originalFrom = index === 0 ? 0 : originalTiers[index - 1]?.up_to || 0;
 					const newFrom = index === 0 ? 0 : newTiers[index - 1]?.up_to || 0;
 					if (originalFrom !== newFrom) {
-						tierChangesForThisTier.push(`From (>): ${originalFrom} → ${newFrom}`);
+						tierChangesForThisTier.push(
+							t('catalog:chargeValue.override.tierDetailFrom', {
+								from: originalFrom,
+								to: newFrom,
+							}),
+						);
 					}
 
-					// Check Up to value changes
 					const originalUpTo = originalTier.up_to;
 					const newUpTo = newTier.up_to;
 					if (originalUpTo !== newUpTo) {
 						const originalUpToDisplay = originalUpTo === null || originalUpTo === undefined ? '∞' : originalUpTo.toString();
 						const newUpToDisplay = newUpTo === null || newUpTo === undefined ? '∞' : newUpTo.toString();
-						tierChangesForThisTier.push(`Up to (<=): ${originalUpToDisplay} → ${newUpToDisplay}`);
-					}
-
-					// Check unit amount changes
-					if (originalTier.unit_amount !== newTier.unit_amount) {
 						tierChangesForThisTier.push(
-							`Per unit price: ${overridden.symbol}${formatAmount(originalTier.unit_amount)} → ${overridden.symbol}${formatAmount(newTier.unit_amount)}`,
+							t('catalog:chargeValue.override.tierDetailUpTo', {
+								from: originalUpToDisplay,
+								to: newUpToDisplay,
+							}),
 						);
 					}
 
-					// Check flat amount changes
+					if (originalTier.unit_amount !== newTier.unit_amount) {
+						tierChangesForThisTier.push(
+							t('catalog:chargeValue.override.tierDetailPerUnit', {
+								from: `${overridden.symbol}${formatAmount(originalTier.unit_amount)}`,
+								to: `${overridden.symbol}${formatAmount(newTier.unit_amount)}`,
+							}),
+						);
+					}
+
 					if ((originalTier.flat_amount || '0') !== (newTier.flat_amount || '0')) {
 						tierChangesForThisTier.push(
-							`Flat fee: ${overridden.symbol}${formatAmount(originalTier.flat_amount || '0')} → ${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+							t('catalog:chargeValue.override.tierDetailFlatFee', {
+								from: `${overridden.symbol}${formatAmount(originalTier.flat_amount || '0')}`,
+								to: `${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+							}),
 						);
 					}
 
 					if (tierChangesForThisTier.length > 0) {
-						tierChanges.push(`Tier ${index + 1}: ${tierChangesForThisTier.join(', ')}`);
+						tierChanges.push(
+							t('catalog:chargeValue.override.tierLine', {
+								header: t('catalog:chargeValue.override.tierHeader', { n: index + 1 }),
+								details: tierChangesForThisTier.join(detailSep),
+							}),
+						);
 					}
 				} else {
-					// New tier added
 					const newFrom = index === 0 ? 0 : newTiers[index - 1]?.up_to || 0;
 					const newUpToDisplay = newTier.up_to === null || newTier.up_to === undefined ? '∞' : newTier.up_to.toString();
+					const perUnit = `${overridden.symbol}${formatAmount(newTier.unit_amount)}`;
+					const flatFee = `${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`;
 					tierChanges.push(
-						`Tier ${index + 1} added: From (>): ${newFrom}, Up to (<=): ${newUpToDisplay}, Per unit price: ${overridden.symbol}${formatAmount(newTier.unit_amount)}, Flat fee: ${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+						t('catalog:chargeValue.override.tierAdded', {
+							header: t('catalog:chargeValue.override.tierHeader', { n: index + 1 }),
+							details: t('catalog:chargeValue.override.tierAddedDetails', {
+								from: newFrom,
+								upTo: newUpToDisplay,
+								perUnit,
+								flatFee,
+							}),
+						}),
 					);
 				}
 			});
@@ -163,14 +202,13 @@ const OverrideTooltip: FC<{
 			if (tierChanges.length > 0) {
 				changes.push(...tierChanges);
 			} else {
-				changes.push('Tier structure modified');
+				changes.push(t('catalog:chargeValue.override.tierStructureModified'));
 			}
 		}
 	}
 
-	// If no specific changes detected, show generic message
 	if (changes.length === 0) {
-		changes.push('Price configuration modified');
+		changes.push(t('catalog:chargeValue.override.priceConfigurationModified'));
 	}
 
 	return (
@@ -219,29 +257,26 @@ const OverrideTooltip: FC<{
 	);
 };
 
-/**
- * Display tiered pricing breakdown in a tooltip
- */
 const TieredPricingTooltip: FC<{
 	normalized: NormalizedPriceDisplay;
 	hasOverrides: boolean;
 }> = ({ normalized, hasOverrides }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const { tiers, tierMode, symbol } = normalized;
 
 	if (!tiers || tiers.length === 0) return null;
 
 	const formatRange = (tier: CreatePriceTier, index: number, allTiers: CreatePriceTier[]) => {
-		// For the first tier, start from 0
 		const from = index === 0 ? 0 : allTiers[index - 1]?.up_to || 0;
 
-		// If up_to is null or this is the last tier, show infinity
 		if (tier.up_to === null || tier.up_to === undefined || index === allTiers.length - 1) {
 			return `${from} - ∞`;
 		}
 
-		// Otherwise show the actual range
 		return `${from} - ${tier.up_to}`;
 	};
+
+	const modeLabel = tierMode === TIER_MODE.VOLUME ? t('catalog:chargeValue.volume') : t('catalog:chargeValue.slab');
 
 	return (
 		<TooltipProvider delayDuration={0}>
@@ -254,23 +289,29 @@ const TieredPricingTooltip: FC<{
 					className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-lg max-w-[320px]'>
 					<div className='space-y-3'>
 						<div className='font-medium border-b border-spacing-1 border-gray-200 pb-2 text-base text-gray-900'>
-							{tierMode === TIER_MODE.VOLUME ? 'Volume' : 'Slab'} Tier Pricing
-							{hasOverrides && <span className='text-xs text-orange-600 ml-2'>(Overridden)</span>}
+							{t('catalog:chargeValue.tierPricingTitle', { mode: modeLabel })}
+							{hasOverrides && <span className='text-xs text-orange-600 ms-2'>{t('catalog:chargeValue.overridden')}</span>}
 						</div>
 						<div className='space-y-2'>
 							{tiers.map((tier, index) => (
 								<div key={index} className='flex flex-col gap-1'>
 									<div className='flex items-center justify-between gap-6'>
-										<div className='!font-normal text-muted-foreground'>{formatRange(tier, index, tiers)} units</div>
-										<div className='text-right'>
+										<div className='!font-normal text-muted-foreground'>
+											{t('catalog:chargeValue.tierRangeWithUnits', { range: formatRange(tier, index, tiers) })}
+										</div>
+										<div className='text-end'>
 											<div className='!font-normal text-muted-foreground'>
-												{symbol}
-												{formatAmount(tier.unit_amount)} per unit
+												{t('catalog:chargeValue.perUnitLine', {
+													symbol,
+													amount: formatAmount(tier.unit_amount),
+												})}
 											</div>
 											{Number(tier.flat_amount) > 0 && (
 												<div className='text-xs text-gray-500'>
-													+ {symbol}
-													{formatAmount(tier.flat_amount || '0')} flat fee
+													{t('catalog:chargeValue.flatFeePlusLine', {
+														symbol,
+														amount: formatAmount(tier.flat_amount || '0'),
+													})}
 												</div>
 											)}
 										</div>
@@ -286,49 +327,40 @@ const TieredPricingTooltip: FC<{
 	);
 };
 
-// ===== MAIN COMPONENT =====
-
 const ChargeValueCell: FC<Props> = ({ data, appliedCoupon, priceOverride }) => {
-	// Step 1: Normalize the data
+	const { t } = useTranslation(['catalog', 'common']);
 	const originalNormalized = normalizePriceDisplay(data);
 	const overriddenNormalized = priceOverride ? normalizePriceDisplay(data, priceOverride) : null;
 
-	// Step 2: Determine what to display
 	const displayData = overriddenNormalized || originalNormalized;
 	const hasOverrides = !!overriddenNormalized;
 
-	// Step 3: Check if this is a tiered price
 	const isTiered =
 		(displayData.billingModel === BILLING_MODEL.TIERED || displayData.billingModel === 'SLAB_TIERED') &&
 		Array.isArray(displayData.tiers) &&
 		displayData.tiers.length > 0;
 
-	// Step 4: Handle coupon discount (separate concern)
-	// Coupons and overrides are mutually exclusive - only apply coupon if no override exists
 	const discountInfo = appliedCoupon && !priceOverride ? calculateDiscountedPrice(data, appliedCoupon) : null;
 
-	// Step 5: Render
+	const couponLabel = appliedCoupon ? formatCouponName(appliedCoupon) : t('catalog:chargeValue.noCouponApplied');
+
 	return (
 		<div className='flex items-center gap-2'>
-			{/* Discounted Price Display */}
 			{discountInfo ? (
 				<DiscountedPriceDisplay
 					originalAmount={discountInfo.originalAmount}
 					discountedAmount={discountInfo.discountedAmount}
 					symbol={displayData.symbol}
-					couponName={appliedCoupon ? formatCouponName(appliedCoupon) : 'No coupon applied'}
+					couponName={couponLabel}
 				/>
 			) : (
-				/* Main Price Display */
 				<div>{formatPriceDisplay(displayData)}</div>
 			)}
 
-			{/* Override Indicator Tooltip - only for non-tiered prices */}
 			{hasOverrides && !isTiered && overriddenNormalized && (
 				<OverrideTooltip original={originalNormalized} overridden={overriddenNormalized} originalPrice={data} />
 			)}
 
-			{/* Tiered Pricing Tooltip - combines override indicator if applicable */}
 			{isTiered && <TieredPricingTooltip normalized={displayData} hasOverrides={hasOverrides} />}
 		</div>
 	);

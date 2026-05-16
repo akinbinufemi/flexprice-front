@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FC, useMemo, useCallback } from 'react';
 import { Payment } from '@/models/Payment';
 import FlexpriceTable, { ColumnData, TooltipCell } from '../Table';
@@ -98,6 +99,7 @@ const PaymentTableMenu: FC<PaymentTableMenuProps> = ({ payment }) => {
 };
 
 const InvoicePaymentsTable: FC<Props> = ({ data }) => {
+	const { t } = useTranslation('common');
 	const getPaymentMethodIcon = useCallback((method: string) => {
 		const config = PAYMENT_METHOD_CONFIG[method.toUpperCase() as keyof typeof PAYMENT_METHOD_CONFIG];
 		const IconComponent = config?.icon || CreditCard;
@@ -171,7 +173,7 @@ const InvoicePaymentsTable: FC<Props> = ({ data }) => {
 	if (!data?.length) {
 		return (
 			<div className='my-6'>
-				<NoDataCard title='Payments' subtitle='No payments found' />
+				<NoDataCard title={t('labels.payments')} subtitle='No payments found' />
 			</div>
 		);
 	}

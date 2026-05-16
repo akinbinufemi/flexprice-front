@@ -3,9 +3,9 @@ import FlexpriceTable, { ColumnData } from '../Table';
 import { PriceUnit } from '@/models/PriceUnit';
 import { ENTITY_STATUS } from '@/models';
 import { ActionButton, Chip } from '@/components/atoms';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import { PriceUnitApi } from '@/api/PriceUnitApi';
+import { useTranslation } from 'react-i18next';
 
 const formatConversionRate = (rate: string): string => {
 	if (!rate) return '-';
@@ -23,40 +23,47 @@ interface Props {
 }
 
 const PriceUnitTable: FC<Props> = ({ data, onEdit }) => {
+	const { t } = useTranslation(['catalog', 'common']);
+
 	const columnData: ColumnData<PriceUnit>[] = [
 		{
 			fieldName: 'name',
-			title: 'Name',
+			title: t('catalog:priceUnits.table.name'),
 		},
 		{
 			fieldName: 'code',
-			title: 'Code',
+			title: t('catalog:priceUnits.table.code'),
 		},
 		{
 			fieldName: 'symbol',
-			title: 'Symbol',
+			title: t('catalog:priceUnits.table.symbol'),
 		},
 		{
-			title: 'Base Currency',
+			title: t('catalog:priceUnits.table.baseCurrency'),
 			render: (row) => {
 				return row?.base_currency?.toUpperCase() || '-';
 			},
 		},
 		{
-			title: 'Conversion Rate',
+			title: t('catalog:priceUnits.table.conversionRate'),
 			render: (row) => {
 				return formatConversionRate(row?.conversion_rate || '');
 			},
 		},
 		{
-			title: 'Status',
+			title: t('catalog:priceUnits.table.status'),
 			render: (row) => {
-				const label = formatChips(row?.status);
-				return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+				const isPublished = row?.status === ENTITY_STATUS.PUBLISHED;
+				return (
+					<Chip
+						variant={isPublished ? 'success' : 'default'}
+						label={isPublished ? t('common:status.active') : t('common:status.inactive')}
+					/>
+				);
 			},
 		},
 		{
-			title: 'Updated At',
+			title: t('catalog:priceUnits.table.updatedAt'),
 			render: (row) => {
 				return formatDate(row?.updated_at);
 			},

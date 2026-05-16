@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { Check, ChevronDown, Circle } from 'lucide-react';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface SelectOption {
 	value: string;
@@ -38,21 +39,26 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 	disabled = false,
 	options,
 	value,
-	placeholder = 'Select an option',
+	placeholder: placeholderProp,
 	label = '',
 	description,
 	onChange,
 	error,
 	isRadio,
 	className,
-	noOptionsText = 'No options found',
+	noOptionsText: noOptionsTextProp,
 	defaultOpen = false,
 	hideSelectedTick = true,
 	trigger,
-	searchPlaceholder = 'Search options...',
-	emptyText = 'No options found.',
+	searchPlaceholder: searchPlaceholderProp,
+	emptyText: emptyTextProp,
 	maxHeight = 300,
 }) => {
+	const { t } = useTranslation('common');
+	const placeholder = placeholderProp ?? t('selectUi.selectAnOption');
+	const noOptionsText = noOptionsTextProp ?? t('selectUi.noOptionsFound');
+	const searchPlaceholder = searchPlaceholderProp ?? t('selectUi.searchOptionsPlaceholder');
+	const emptyText = emptyTextProp ?? t('selectUi.noResultsFound');
 	const [open, setOpen] = useState(defaultOpen);
 	const [searchQuery, setSearchQuery] = useState('');
 
@@ -85,7 +91,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 			onSelect={() => handleSelect(option.value)}
 			disabled={option.disabled}
 			className={cn(
-				'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
+				'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 ps-8 pe-2 text-sm outline-none',
 				'focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 				option.disabled && 'select-none cursor-not-allowed',
 			)}>
@@ -96,7 +102,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 			</span>
 
 			<div className='flex items-center space-x-2 w-full'>
-				<div className='flex flex-col mr-2 w-full'>
+				<div className='flex flex-col me-2 w-full'>
 					<span className='break-words'>{option.label}</span>
 					{option.description && <span className='text-sm text-gray-500 break-words whitespace-normal'>{option.description}</span>}
 				</div>
@@ -118,7 +124,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 				className={cn(
 					'flex w-full items-center space-x-2 justify-between',
 					option.disabled && 'opacity-50 pointer-events-none',
-					option.suffixIcon && 'pr-8',
+					option.suffixIcon && 'pe-8',
 					hideSelectedTick && '!pl-0',
 				)}>
 				{option.prefixIcon && option.prefixIcon}
@@ -178,7 +184,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 								) : (
 									<CommandItem disabled>
 										<div className='flex items-center space-x-2 w-full'>
-											<div className='flex flex-col mr-2 w-full'>
+											<div className='flex flex-col me-2 w-full'>
 												<span className='break-words'>{noOptionsText}</span>
 											</div>
 										</div>

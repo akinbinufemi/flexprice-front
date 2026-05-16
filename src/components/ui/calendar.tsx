@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DayPicker } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
 };
 
 function Calendar({ className, classNames, showOutsideDays = true, timezone, onTimezoneChange, ...props }: CalendarProps) {
+	const { t } = useTranslation('common');
 	const showTimezone = timezone !== undefined || onTimezoneChange !== undefined;
 	const currentTz = timezone ?? 'local';
 	const isInteractive = onTimezoneChange !== undefined;
@@ -37,9 +39,9 @@ function Calendar({ className, classNames, showOutsideDays = true, timezone, onT
 					head_cell: 'text-muted-foreground rounded-[6px] w-8 font-normal text-[0.8rem]',
 					row: 'flex w-full mt-2',
 					cell: cn(
-						'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-[6px]',
+						'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-e-[6px]',
 						props.mode === 'range'
-							? '[&:has(>.day-range-end)]:rounded-r-[6px] [&:has(>.day-range-start)]:rounded-l-[6px] first:[&:has([aria-selected])]:rounded-l-[6px] last:[&:has([aria-selected])]:rounded-r-[6px]'
+							? '[&:has(>.day-range-end)]:rounded-e-[6px] [&:has(>.day-range-start)]:rounded-s-[6px] first:[&:has([aria-selected])]:rounded-s-[6px] last:[&:has([aria-selected])]:rounded-e-[6px]'
 							: '[&:has([aria-selected])]:rounded-[6px]',
 					),
 					day: cn(buttonVariants({ variant: 'ghost' }), 'h-8 w-8 p-0 font-normal aria-selected:opacity-100'),
@@ -61,9 +63,9 @@ function Calendar({ className, classNames, showOutsideDays = true, timezone, onT
 				{...props}
 			/>
 			{showTimezone && (
-				<div className='mt-3 pt-3 border-t border-border px-3 pb-2.5' role='group' aria-label='Timezone'>
+				<div className='mt-3 pt-3 border-t border-border px-3 pb-2.5' role='group' aria-label={t('dateTime.timezoneSectionAriaLabel')}>
 					<div className='flex items-center justify-between gap-3'>
-						<span className='text-xs text-muted-foreground font-normal'>Timezone</span>
+						<span className='text-xs text-muted-foreground font-normal'>{t('dateTime.timezoneSectionLabel')}</span>
 						{isInteractive ? (
 							<Select value={currentTz} onValueChange={(value) => onTimezoneChange(value as CalendarTimezone)}>
 								<SelectTrigger className='h-8 min-w-[84px] w-[84px] border-border bg-background px-2.5 text-xs font-normal shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-1 [&>svg]:h-3.5 [&>svg]:w-3.5'>
@@ -71,15 +73,17 @@ function Calendar({ className, classNames, showOutsideDays = true, timezone, onT
 								</SelectTrigger>
 								<SelectContent align='end' side='top' className='z-[70]'>
 									<SelectItem value='local' className='text-xs'>
-										Local
+										{t('dateTime.timezoneLocal')}
 									</SelectItem>
 									<SelectItem value='utc' className='text-xs'>
-										UTC
+										{t('dateTime.timezoneUtc')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
 						) : (
-							<span className='text-xs text-foreground font-medium'>{currentTz === 'local' ? 'Local' : 'UTC'}</span>
+							<span className='text-xs text-foreground font-medium'>
+								{currentTz === 'local' ? t('dateTime.timezoneLocal') : t('dateTime.timezoneUtc')}
+							</span>
 						)}
 					</div>
 				</div>

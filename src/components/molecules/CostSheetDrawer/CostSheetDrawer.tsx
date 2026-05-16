@@ -6,6 +6,7 @@ import CostSheetApi from '@/api/CostSheetApi';
 import toast from 'react-hot-toast';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { CreateCostSheetRequest, UpdateCostSheetRequest } from '@/types/dto/CostSheet';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: CostSheet | null;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 
 	const [formData, setFormData] = useState<Partial<CostSheet>>(
@@ -47,13 +49,13 @@ const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 			}
 		},
 		onSuccess: (_: CostSheet) => {
-			toast.success(isEdit ? 'Cost Sheet updated successfully' : 'Cost Sheet created successfully');
+			toast.success(isEdit ? t('catalog:costSheets.toast.updated') : t('catalog:costSheets.toast.created'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 		},
-		onError: (error: ServerError) => {
-			const errorMessage = error?.error?.message || `Failed to ${isEdit ? 'update' : 'create'} cost sheet. Please try again.`;
-			toast.error(errorMessage);
+		onError: (error: Error) => {
+			const message = error.message || (isEdit ? t('catalog:costSheets.toast.failedUpdate') : t('catalog:costSheets.toast.failedCreate'));
+			toast.error(message);
 		},
 	});
 
@@ -73,11 +75,11 @@ const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 		const newErrors: Partial<Record<keyof CostSheet, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('catalog:costSheets.validation.nameRequired');
 		}
 
 		if (!formData.lookup_key?.trim()) {
-			newErrors.lookup_key = 'Lookup key is required';
+			newErrors.lookup_key = t('catalog:costSheets.validation.lookupKeyRequired');
 		}
 
 		setErrors(newErrors);
@@ -95,14 +97,14 @@ const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Cost Sheet' : 'Create Cost Sheet'}
-			description={isEdit ? 'Enter cost sheet details to update the cost sheet.' : 'Enter cost sheet details to create a new cost sheet.'}
+			title={isEdit ? t('catalog:costSheets.drawer.editTitle') : t('catalog:costSheets.drawer.createTitle')}
+			description={isEdit ? t('catalog:costSheets.drawer.descriptionEdit') : t('catalog:costSheets.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter a name for the cost sheet'
-				description={'A descriptive name for this cost sheet.'}
-				label='Cost Sheet Name'
+				placeholder={t('catalog:costSheets.drawer.namePlaceholder')}
+				description={t('catalog:costSheets.drawer.nameHelp')}
+				label={t('catalog:costSheets.drawer.costSheetName')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -116,13 +118,13 @@ const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Lookup Key'
+				label={t('catalog:shared.lookupKey')}
 				disabled={isEdit}
 				error={errors.lookup_key}
 				onChange={(e) => setFormData({ ...formData, lookup_key: e })}
 				value={formData.lookup_key}
-				placeholder='Enter a slug for the cost sheet'
-				description={'A system identifier used for API calls and integrations.'}
+				placeholder={t('catalog:costSheets.drawer.lookupPlaceholder')}
+				description={t('catalog:shared.lookupKeyDescription')}
 			/>
 
 			<Spacer height={'20px'} />
@@ -132,13 +134,13 @@ const CostSheetDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetch
 					setFormData({ ...formData, description: e });
 				}}
 				className='min-h-[100px]'
-				placeholder='Enter description'
-				label='Description'
-				description='Helps your team to understand the purpose of this cost sheet.'
+				placeholder={t('catalog:shared.enterDescription')}
+				label={t('catalog:shared.description')}
+				description={t('catalog:costSheets.drawer.purposeDescription')}
 			/>
 			<Spacer height={'20px'} />
 			<Button isLoading={isPending} disabled={isPending || !formData.name?.trim() || !formData.lookup_key?.trim()} onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create'}
+				{isEdit ? t('common:actions.save') : t('common:actions.create')}
 			</Button>
 		</Sheet>
 	);

@@ -1,0 +1,170 @@
+{
+	"features": {
+		"createFeature": {
+			"title": "How to create a feature?",
+			"description": "Explore how features work in Flexprice."
+		},
+		"linkToPlans": {
+			"title": "How to link features to plans?",
+			"description": "Link features to plans in Flexprice."
+		},
+		"clonePricing": {
+			"title": "How to clone open ai pricing?",
+			"description": "Clone open ai / cursor style pricing in Flexprice."
+		}
+	},
+	"addons": {
+		"create": {
+			"title": "How to create an Addon?",
+			"description": "Explore how to create a new Addons in Flexprice."
+		},
+		"list": {
+			"title": "How to list all Addons?",
+			"description": "Explore how to list all Addons."
+		},
+		"delete": {
+			"title": "How to delete an Addon?",
+			"description": "Explore how to delete a Addon."
+		}
+	},
+	"coupons": {
+		"create": {
+			"title": "How to create a coupon?",
+			"description": "Explore how to create a new Coupon in Flexprice."
+		},
+		"update": {
+			"title": "How to update a coupon?",
+			"description": "Explore how to update a Coupon."
+		},
+		"delete": {
+			"title": "How to delete a coupon?",
+			"description": "Explore how to delete a Coupon."
+		}
+	},
+	"plans": {
+		"overview": {
+			"title": "Explore how plans work in Flexprice.",
+			"description": "Explore how plans work in Flexprice."
+		},
+		"create": {
+			"title": "How to create a plan",
+			"description": "Create a new plan in Flexprice."
+		},
+		"billingModels": {
+			"title": "How to choose between advance and arrear billing?",
+			"description": "Understand billing models used in plans."
+		}
+	},
+	"groups": {
+		"overview": {
+			"title": "Explore how groups work in Flexprice.",
+			"description": "Learn how groups work in Flexprice."
+		},
+		"plansContext": {
+			"title": "Explore how plans work in Flexprice.",
+			"description": "Explore how plans work in Flexprice."
+		},
+		"featuresContext": {
+			"title": "Explore how features work in Flexprice.",
+			"description": "Explore how features work in Flexprice."
+		}
+	},
+	"customers": {
+		"create": {
+			"title": "How to create a customer",
+			"description": "Explore how customers work in Flexprice."
+		},
+		"archive": {
+			"title": "How to archive a customer",
+			"description": "Create a new customer in Flexprice."
+		},
+		"subscription": {
+			"title": "How to create a subscription",
+			"description": "Create a new subscription in Flexprice."
+		}
+	},
+	"invoices": {
+		"create": {
+			"title": "How to create an invoice",
+			"description": "Explore how invoices work in Flexprice."
+		},
+		"manage": {
+			"title": "How to manage invoices",
+			"description": "Manage invoices in Flexprice."
+		},
+		"partialPayments": {
+			"title": "How to handle partial payments",
+			"description": "Handle partial payments in Flexprice."
+		}
+	},
+	"payments": {
+		"create": {
+			"title": "How to create a payment",
+			"description": "Explore how payments work in Flexprice."
+		},
+		"update": {
+			"title": "How to update a payment",
+			"description": "Create a payment in Flexprice."
+		},
+		"delete": {
+			"title": "How to delete a payment",
+			"description": "Delete an existing payment in Flexprice."
+		}
+	},
+	"secrets": {
+		"list": {
+			"title": "List API Keys",
+			"description": "View all API keys in Flexprice."
+		},
+		"create": {
+			"title": "Create a new API Key",
+			"description": "Generate a new API key in Flexprice."
+		},
+		"delete": {
+			"title": "Delete an API Key",
+			"description": "Delete an API key in Flexprice."
+		}
+	},
+	"creditNotes": {
+		"create": {
+			"title": "Create a new credit note",
+			"description": "Explore how credit notes work in Flexprice."
+		},
+		"process": {
+			"title": "Process a draft credit note",
+			"description": "Create a new credit note in Flexprice."
+		},
+		"void": {
+			"title": "Void a credit note",
+			"description": "Manage credit notes in Flexprice."
+		}
+	},
+	"importExport": {
+		"overview": {
+			"title": "Overview",
+			"description": "Explore import and export options in Flexprice."
+		},
+		"importFile": {
+			"title": "Import a file",
+			"description": "Import a file into Flexprice."
+		},
+		"processTask": {
+			"title": "Process import task",
+			"description": "Process an import task in Flexprice."
+		}
+	},
+	"taxes": {
+		"createRate": {
+			"title": "How to create a tax rate?",
+			"description": "Learn how to set up tax rates for your billing system."
+		},
+		"types": {
+			"title": "Understanding tax types",
+			"description": "Explore percentage vs fixed amount tax calculations."
+		},
+		"associations": {
+			"title": "Tax associations and overrides",
+			"description": "Learn how to apply taxes to specific entities."
+		}
+	}
+}

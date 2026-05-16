@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import { SelectOption } from '@/components/atoms/Select/SearchableSelect';
+import { useTranslation } from 'react-i18next';
 
 interface FilterAsyncMultiSelectProps<T = any> {
 	value: string[]; // Just IDs
@@ -30,6 +31,7 @@ const FilterAsyncMultiSelect = <T = any,>({
 	initialOptions = [],
 	debounceTime = 300,
 }: FilterAsyncMultiSelectProps<T>) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -56,7 +58,7 @@ const FilterAsyncMultiSelect = <T = any,>({
 		isLoading,
 		isError,
 		error,
-	} = useQuery<Array<SelectOption & { data: T }>>({
+	} = useQuery<Array<SelectOption & { data: T }>, Error>({
 		queryKey: ['filter-async-multi-select', debouncedQuery],
 		queryFn: () => searchFn(debouncedQuery),
 		enabled: isOpen, // Only fetch when popover is open
@@ -150,9 +152,9 @@ const FilterAsyncMultiSelect = <T = any,>({
 					{value.length === 0 ? (
 						<span className='truncate text-sm'>{placeholder}</span>
 					) : value.length === 1 ? (
-						<Chip label={selectedOptions[0]?.label || 'Loading...'} className='truncate bg-muted rounded-md' />
+						<Chip label={selectedOptions[0]?.label || t('status.loading')} className='truncate bg-muted rounded-md' />
 					) : (
-						<Chip label={`${value.length} selected`} className='truncate bg-muted rounded-md' />
+						<Chip label={t('queryBuilder.selectedCount', { count: value.length })} className='truncate bg-muted rounded-md' />
 					)}
 				</Button>
 			</PopoverTrigger>
@@ -163,32 +165,30 @@ const FilterAsyncMultiSelect = <T = any,>({
 						{isLoading && searchQuery === '' && (
 							<div className='flex flex-col items-center justify-center py-8'>
 								<Loader2 className='h-5 w-5 animate-spin text-muted-foreground mb-2' />
-								<span className='text-sm text-muted-foreground'>Loading options...</span>
+								<span className='text-sm text-muted-foreground'>{t('search.loadingOptions')}</span>
 							</div>
 						)}
 						{isLoading && searchQuery !== '' && (
 							<div className='flex items-center justify-center py-4 border-b'>
-								<Loader2 className='h-4 w-4 animate-spin text-muted-foreground mr-2' />
-								<span className='text-sm text-muted-foreground'>Searching...</span>
+								<Loader2 className='h-4 w-4 animate-spin text-muted-foreground me-2' />
+								<span className='text-sm text-muted-foreground'>{t('search.searching')}</span>
 							</div>
 						)}
 						{!isLoading && isError && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-destructive text-center mb-1'>
-									{error instanceof Error ? error.message : 'Error loading options'}
-								</div>
-								<div className='text-xs text-muted-foreground text-center'>Please try again</div>
+								<div className='text-sm text-destructive text-center mb-1'>{error.message || t('search.errorLoadingOptions')}</div>
+								<div className='text-xs text-muted-foreground text-center'>{t('search.pleaseRetry')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length === 0 && searchQuery === '' && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-muted-foreground text-center'>No options available</div>
+								<div className='text-sm text-muted-foreground text-center'>{t('search.noOptionsAvailable')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length === 0 && searchQuery !== '' && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-muted-foreground text-center mb-1'>No results found</div>
-								<div className='text-xs text-muted-foreground text-center'>Try a different search term</div>
+								<div className='text-sm text-muted-foreground text-center mb-1'>{t('table.noResults')}</div>
+								<div className='text-xs text-muted-foreground text-center'>{t('search.tryDifferentTerm')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length > 0 && (
@@ -197,9 +197,11 @@ const FilterAsyncMultiSelect = <T = any,>({
 								<div className='flex items-center gap-2 px-2 py-2 border-b bg-muted/20'>
 									<Checkbox id='select-all-async-multi' checked={isAllSelected} onCheckedChange={handleSelectAll} className='h-4 w-4' />
 									<label htmlFor='select-all-async-multi' className='text-sm font-medium leading-none cursor-pointer select-none flex-1'>
-										Select all
+										{t('search.selectAll')}
 									</label>
-									<span className='text-xs text-muted-foreground'>{availableOptions.filter((opt) => !opt.disabled).length} items</span>
+									<span className='text-xs text-muted-foreground'>
+										{t('search.items', { count: availableOptions.filter((opt) => !opt.disabled).length })}
+									</span>
 								</div>
 
 								<CommandGroup>
@@ -211,7 +213,7 @@ const FilterAsyncMultiSelect = <T = any,>({
 											disabled={option.disabled}
 											className='cursor-pointer'>
 											<span className='truncate flex-1'>{option.label}</span>
-											<Check className={cn('ml-auto h-4 w-4 shrink-0', value.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
+											<Check className={cn('ms-auto h-4 w-4 shrink-0', value.includes(option.value) ? 'opacity-100' : 'opacity-0')} />
 										</CommandItem>
 									))}
 								</CommandGroup>

@@ -3,7 +3,7 @@ import { IoRepeat } from 'react-icons/io5';
 import { FiDatabase } from 'react-icons/fi';
 import { cn } from '@/lib/utils';
 import { Plan } from '@/models/Plan';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BILLING_MODEL, Price, PRICE_TYPE, PRICE_UNIT_TYPE, PriceUnitConfig } from '@/models/Price';
 import { BILLING_PERIOD, currencyOptions } from '@/constants/constants';
 import RecurringChargesForm from './RecurringChargesForm';
@@ -11,6 +11,7 @@ import UsagePricingForm, { PriceInternalState } from './UsagePricingForm';
 import { Plus } from 'lucide-react';
 import { INVOICE_CADENCE } from '@/models/Invoice';
 import { PRICE_ENTITY_TYPE } from '@/models/Price';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	plan: Partial<Plan>;
@@ -26,22 +27,6 @@ enum SubscriptionType {
 	USAGE = 'USAGE',
 }
 
-export const subscriptionTypeOptions = [
-	{
-		value: SubscriptionType.FIXED,
-		label: 'Fixed charge',
-		icon: IoRepeat,
-		description: 'Fixed pricing billed on a set schedule.',
-	},
-
-	{
-		value: SubscriptionType.USAGE,
-		label: 'Usage Based',
-		icon: FiDatabase,
-		description: 'Charges based on actual consumption.',
-	},
-];
-
 interface AddChargesButtonProps {
 	onClick: () => void;
 	label: string;
@@ -52,7 +37,7 @@ export const AddChargesButton = ({ onClick, label, className }: AddChargesButton
 	<button
 		onClick={onClick}
 		className={cn(
-			'shrink-0 cursor-pointer flex gap-2 items-center justify-center bg-[#F4F4F5] rounded-[6px] px-2.5 h-9 w-fit text-left',
+			'shrink-0 cursor-pointer flex gap-2 items-center justify-center bg-[#F4F4F5] rounded-[6px] px-2.5 h-9 w-fit text-start',
 			className,
 		)}>
 		<Plus size={16} className='shrink-0' />
@@ -70,6 +55,24 @@ export interface InternalPrice extends Partial<Price> {
 }
 
 const SetupChargesSection: React.FC<Props> = ({ plan, initialPrices, setPlanField, onPricesChange }) => {
+	const { t } = useTranslation('catalog');
+	const subscriptionTypeOptions = useMemo(
+		() => [
+			{
+				value: SubscriptionType.FIXED,
+				label: t('plans.organisms.setupCharges.subscriptionTypeFixed'),
+				icon: IoRepeat,
+				description: t('plans.organisms.setupCharges.fixedPricingDescription'),
+			},
+			{
+				value: SubscriptionType.USAGE,
+				label: t('plans.organisms.setupCharges.subscriptionTypeUsage'),
+				icon: FiDatabase,
+				description: t('plans.organisms.setupCharges.usagePricingDescription'),
+			},
+		],
+		[t],
+	);
 	const [subscriptionType, setSubscriptionType] = useState<string>();
 	const [recurringCharges, setRecurringCharges] = useState<InternalPrice[]>(
 		initialPrices?.filter((price: InternalPrice) => price.type === PRICE_TYPE.FIXED) || [],
@@ -134,8 +137,12 @@ const SetupChargesSection: React.FC<Props> = ({ plan, initialPrices, setPlanFiel
 			{/* Subscription Type Section */}
 			{!recurringCharges.length && !usageCharges.length && (
 				<div>
-					<FormHeader title='Plan Charges' subtitle='Set how customers are charged for this plan.' variant='sub-header' />
-					<FormHeader title='Choose a Pricing Model' variant='form-component-title' />
+					<FormHeader
+						title={t('plans.organisms.setupCharges.planCharges')}
+						subtitle={t('plans.organisms.setupCharges.subtitle')}
+						variant='sub-header'
+					/>
+					<FormHeader title={t('plans.organisms.setupCharges.choosePricingModel')} variant='form-component-title' />
 					<div className='w-full gap-4 grid grid-cols-2'>
 						{subscriptionTypeOptions.map((type) => (
 							<button
@@ -158,7 +165,7 @@ const SetupChargesSection: React.FC<Props> = ({ plan, initialPrices, setPlanFiel
 			{/* Fixed Price Forms */}
 			{recurringCharges.length > 0 && (
 				<div>
-					<FormHeader title='Fixed charges' variant='form-component-title' />
+					<FormHeader title={t('plans.organisms.setupCharges.fixedChargesTitle')} variant='form-component-title' />
 					{recurringCharges.map((price, index) => (
 						<RecurringChargesForm
 							key={index}
@@ -228,7 +235,7 @@ const SetupChargesSection: React.FC<Props> = ({ plan, initialPrices, setPlanFiel
 			{/* Usage Price Forms */}
 			{usageCharges.length > 0 && (
 				<div className='mt-6'>
-					<FormHeader title='Usage Based Charges' variant='form-component-title' />
+					<FormHeader title={t('plans.organisms.setupCharges.usageBasedChargesTitle')} variant='form-component-title' />
 					{usageCharges.map((price, index) => (
 						<UsagePricingForm
 							key={index}
@@ -277,11 +284,19 @@ const SetupChargesSection: React.FC<Props> = ({ plan, initialPrices, setPlanFiel
 			{/* Add Charges Buttons */}
 			{showAddButtons && (
 				<div className='mt-6'>
-					{canAddFixedPrices && <AddChargesButton onClick={() => handleAddNewPrice(SubscriptionType.FIXED)} label='Add fixed charge' />}
+					{canAddFixedPrices && (
+						<AddChargesButton
+							onClick={() => handleAddNewPrice(SubscriptionType.FIXED)}
+							label={t('plans.organisms.setupCharges.addFixedCharge')}
+						/>
+					)}
 					{canAddUsagePrices && (
 						<>
 							{canAddFixedPrices && <Spacer height='8px' />}
-							<AddChargesButton onClick={() => handleAddNewPrice(SubscriptionType.USAGE)} label='Add Usage Based Charges' />
+							<AddChargesButton
+								onClick={() => handleAddNewPrice(SubscriptionType.USAGE)}
+								label={t('plans.organisms.setupCharges.addUsageBasedCharges')}
+							/>
 						</>
 					)}
 				</div>

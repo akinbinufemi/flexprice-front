@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { MdClear } from 'react-icons/md';
 
@@ -14,6 +15,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
 
 const MultichipField = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, label, value, description, error, onChange, placeholder, disabled, ...props }, ref) => {
+		const { t } = useTranslation('common');
 		const [chips, setchips] = useState<string[]>(value || []);
 		const [inputText, setinputText] = useState('');
 
@@ -71,7 +73,7 @@ const MultichipField = React.forwardRef<HTMLInputElement, InputProps>(
 						{!disabled && (
 							<input
 								disabled={disabled}
-								aria-label='Add a chip'
+								aria-label={t('multiSelectUi.addChipAria')}
 								value={inputText}
 								type={type}
 								placeholder={chips.length > 0 ? '' : placeholder}

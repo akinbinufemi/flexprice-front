@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Page } from '@/components/atoms';
 import { EventsTable, ApiDocsContent, PropertyFilterQueryBuilder } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { Event } from '@/models/Event';
 import EventsApi from '@/api/EventsApi';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,6 +21,7 @@ import usePagination from '@/hooks/usePagination';
 import { TypedBackendFilter } from '@/types/formatters/QueryBuilder';
 import { GetEventsPayload } from '@/types/dto/Events';
 import { logger } from '@/utils/common/Logger';
+import { useTranslation } from 'react-i18next';
 
 // Helper function to convert sanitized filters to Events API parameters
 const convertFiltersToEventParams = (filters: TypedBackendFilter[]): Partial<GetEventsPayload> => {
@@ -86,75 +88,8 @@ const createEmptyPropertyFilter = (): PropertyFilterRow => ({
 	value: '',
 });
 
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'email',
-		label: 'Email',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'event_id',
-		label: 'EventID',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'event_name',
-		label: 'Events Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'external_customer_id',
-		label: 'External Customer ID',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'source',
-		label: 'Source',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'start_time',
-		label: 'Start Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: [FilterOperator.AFTER],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'end_time',
-		label: 'End Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: [FilterOperator.BEFORE],
-		dataType: DataType.DATE,
-	},
-];
-
 const EventsPage: React.FC = () => {
+	const { t } = useTranslation('developers');
 	const { reset } = usePagination();
 	const [events, setEvents] = useState<Event[]>([]);
 	const [hasMore, setHasMore] = useState(true);
@@ -162,6 +97,70 @@ const EventsPage: React.FC = () => {
 	const [iterLastKey, setIterLastKey] = useState<string | undefined>(undefined);
 	const [propertyFilters, setPropertyFilters] = useState<PropertyFilterRow[]>(() => [createEmptyPropertyFilter()]);
 	const observer = useRef<IntersectionObserver | null>(null);
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'created_at',
+				label: t('events.queryBuilder.sort.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('events.queryBuilder.sort.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'event_id',
+				label: t('events.queryBuilder.filters.eventId'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'event_name',
+				label: t('events.queryBuilder.filters.eventName'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'external_customer_id',
+				label: t('events.queryBuilder.filters.externalCustomerId'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'source',
+				label: t('events.queryBuilder.filters.source'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'start_time',
+				label: t('events.queryBuilder.filters.startTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: [FilterOperator.AFTER],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'end_time',
+				label: t('events.queryBuilder.filters.endTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: [FilterOperator.BEFORE],
+				dataType: DataType.DATE,
+			},
+		],
+		[t],
+	);
 
 	const initialFilters = useMemo(() => {
 		return [
@@ -210,15 +209,20 @@ const EventsPage: React.FC = () => {
 		];
 	}, []);
 
-	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
-		initialFilters: initialFilters,
-		initialSorts: [
+	const initialSorts: SortOption[] = useMemo(
+		() => [
 			{
 				field: 'updated_at',
-				label: 'Updated At',
+				label: t('events.queryBuilder.sort.updatedAt'),
 				direction: SortDirection.DESC,
 			},
 		],
+		[t],
+	);
+
+	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
+		initialFilters: initialFilters,
+		initialSorts,
 		debounceTime: 300,
 	});
 
@@ -298,8 +302,8 @@ const EventsPage: React.FC = () => {
 	}, [apiParams]);
 
 	return (
-		<Page heading='Events'>
-			<ApiDocsContent tags={['Events']} />
+		<Page heading={t('events.listPage.title')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<PropertyFilterQueryBuilder
 					filterOptions={filterOptions}
@@ -330,7 +334,9 @@ const EventsPage: React.FC = () => {
 						<Skeleton className='h-8 w-full' />
 					</div>
 				)}
-				{!hasMore && events.length === 0 && <p className=' text-[#64748B] text-xs font-normal font-sans mt-4'>No events found</p>}
+				{!hasMore && events.length === 0 && (
+					<p className=' text-[#64748B] text-xs font-normal font-sans mt-4'>{t('events.list.noEventsFound')}</p>
+				)}
 			</div>
 		</Page>
 	);

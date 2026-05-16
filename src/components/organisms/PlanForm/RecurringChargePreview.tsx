@@ -7,6 +7,7 @@ import { FC } from 'react';
 import { Pencil } from 'lucide-react';
 import { InternalPrice } from './SetupChargesSection';
 import { formatAmount } from '@/components/atoms/Input/Input';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	charge: Price | InternalPrice;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const RecurringChargePreview: FC<Props> = ({ charge, onEditClicked, onDeleteClicked, disabled }) => {
+	const { t } = useTranslation('catalog');
 	// Helper to get the appropriate amount and symbol for display
 	const getDisplayInfo = () => {
 		const isCustom = charge.price_unit_type === PRICE_UNIT_TYPE.CUSTOM;
@@ -49,7 +51,7 @@ const RecurringChargePreview: FC<Props> = ({ charge, onEditClicked, onDeleteClic
 	return (
 		<div className='gap-2 w-full flex justify-between group min-h-9 items-center rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground hover:bg-gray-50 transition-colors mb-2'>
 			<div>
-				<p className='font-normal text-sm'>{charge.display_name || 'Fixed charge'}</p>
+				<p className='font-normal text-sm'>{charge.display_name || t('plans.organisms.chargeLabels.fixedCharge')}</p>
 				<div className='flex gap-2 items-center text-zinc-500 text-xs'>
 					<span>{displayCurrency}</span>
 					<span>•</span>

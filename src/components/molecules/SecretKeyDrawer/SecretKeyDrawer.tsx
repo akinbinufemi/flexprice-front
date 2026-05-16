@@ -7,8 +7,8 @@ import { User } from '@/models';
 import { toast } from 'react-hot-toast';
 import { Copy, AlertTriangle, Eye, EyeOff, Info } from 'lucide-react';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
-import { ServerError } from '@/core/axios/types';
 import { GetServiceAccountsResponse } from '@/types/dto/UserApi';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	isOpen: boolean;
@@ -18,7 +18,7 @@ interface Props {
 type AccountType = 'user' | 'service_account';
 
 const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
-	// Combined state for form fields
+	const { t } = useTranslation(['developers', 'common']);
 	const [formData, setFormData] = useState({
 		name: '',
 		accountType: 'user' as AccountType,
@@ -30,7 +30,6 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showApiKey, setShowApiKey] = useState(false);
 
-	// Fetch service accounts when drawer is open
 	const {
 		data: serviceAccounts,
 		isLoading: isLoadingServiceAccounts,
@@ -41,13 +40,11 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 		enabled: isOpen && formData.accountType === 'service_account',
 	});
 
-	// Convert service accounts to select options
 	const serviceAccountOptions: SelectOption[] = useMemo(() => {
 		if (!serviceAccounts?.items || !Array.isArray(serviceAccounts.items)) {
 			return [];
 		}
 
-		// Sort by created_at (newest first) if available, otherwise keep original order
 		const sortedAccounts = [...serviceAccounts.items].sort((a, b) => {
 			if (a.tenant?.created_at && b.tenant?.created_at) {
 				return new Date(b.tenant.created_at).getTime() - new Date(a.tenant.created_at).getTime();
@@ -56,25 +53,16 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 		});
 
 		return sortedAccounts.map((account: User, index: number) => {
-			// Create a meaningful label
 			let label = '';
 
-			// 1. Try name first (if it's a real name, not internal ID)
 			if (account.name && account.name.trim() && !account.name.startsWith('_dup_user_')) {
 				label = account.name;
-			}
-			// 2. Show ALL roles (most common for service accounts)
-			else if (account.roles && account.roles.length > 0) {
-				// Just show the roles, clean and simple
+			} else if (account.roles && account.roles.length > 0) {
 				label = account.roles.join(', ');
-			}
-			// 3. Try email if it's a real email (not internal ID)
-			else if (account.email && account.email.trim() && !account.email.startsWith('_dup_user_') && account.email.includes('@')) {
+			} else if (account.email && account.email.trim() && !account.email.startsWith('_dup_user_') && account.email.includes('@')) {
 				label = account.email;
-			}
-			// 4. Fallback to generic name
-			else {
-				label = `Service Account ${index + 1}`;
+			} else {
+				label = t('developers:secretKeyDrawer.serviceAccountFallback', { index: index + 1 });
 			}
 
 			return {
@@ -83,25 +71,25 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 				key_input: [account.email || account.id],
 			};
 		});
-	}, [serviceAccounts]);
+	}, [serviceAccounts, t]);
 
 	const accountTypeOptions: SelectOption[] = useMemo(
 		() => [
-			{ label: 'User Account', value: 'user' },
-			{ label: 'Service Account', value: 'service_account' },
+			{ label: t('developers:secretKeyDrawer.accountTypes.user'), value: 'user' },
+			{ label: t('developers:secretKeyDrawer.accountTypes.service'), value: 'service_account' },
 		],
-		[],
+		[t],
 	);
 
 	const expirationOptions = useMemo(
 		() => [
-			{ label: 'Never', value: 'never' },
-			{ label: '1 Hour', value: '1_hour' },
-			{ label: '1 Day', value: '1_day' },
-			{ label: '1 Week', value: '1_week' },
-			{ label: '1 Month', value: '1_month' },
+			{ label: t('developers:secretKeyDrawer.expiration.never'), value: 'never' },
+			{ label: t('developers:secretKeyDrawer.expiration.oneHour'), value: '1_hour' },
+			{ label: t('developers:secretKeyDrawer.expiration.oneDay'), value: '1_day' },
+			{ label: t('developers:secretKeyDrawer.expiration.oneWeek'), value: '1_week' },
+			{ label: t('developers:secretKeyDrawer.expiration.oneMonth'), value: '1_month' },
 		],
-		[],
+		[t],
 	);
 
 	const getExpirationDate = useMemo(
@@ -115,12 +103,10 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 		[],
 	);
 
-	// Handle form field changes
 	const handleChange = (field: keyof typeof formData, value: string | string[]) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
 
-	// Reset form on open
 	useEffect(() => {
 		if (isOpen) {
 			setFormData({
@@ -133,7 +119,6 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 		}
 	}, [isOpen]);
 
-	// Mutation for creating API key
 	const {
 		mutate: createApiKey,
 		isPending,
@@ -149,11 +134,9 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 				type: 'private_key',
 			};
 
-			// If service account is selected, add service_account_id (roles inherited from service account)
 			if (formData.accountType === 'service_account') {
 				payload.service_account_id = formData.serviceAccountId;
 			}
-			// User account keys don't need roles field - they inherit full permissions
 
 			return SecretKeysApi.createSecretKey(payload);
 		},
@@ -162,17 +145,15 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 			setIsModalOpen(true);
 			onOpenChange(false);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to create API key. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || t('developers:secretKeyDrawer.createFailed'));
 		},
 	});
 
-	// Check if form is valid
 	const isFormValid = useMemo(() => {
 		if (!formData.name || !formData.accountType || !formData.expirationType) {
 			return false;
 		}
-		// If service account is selected but there's an error or no accounts, disable form
 		if (formData.accountType === 'service_account') {
 			if (isServiceAccountsError || serviceAccountOptions.length === 0) {
 				return false;
@@ -184,22 +165,19 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 		return true;
 	}, [formData, isServiceAccountsError, serviceAccountOptions.length]);
 
-	// Copy API key to clipboard
 	const copyApiKey = () => {
 		navigator.clipboard.writeText(data?.api_key || '');
-		toast.success('API key copied to clipboard');
+		toast.success(t('common:toast.copySuccess'));
 	};
 
 	const toggleApiKeyVisibility = () => {
 		setShowApiKey(!showApiKey);
 	};
 
-	// Function to mask API key with dots
 	const maskApiKey = (key: string) => {
 		return '•'.repeat(key.length);
 	};
 
-	// Get the selected service account for displaying roles
 	const selectedServiceAccount = useMemo(() => {
 		if (!serviceAccounts?.items || !formData.serviceAccountId) return null;
 		return serviceAccounts.items.find((account: User) => account.id === formData.serviceAccountId);
@@ -210,14 +188,19 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 			<Sheet
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
-				title='Create API Key'
-				description='Create a new API key to access the Flexprice API'>
+				title={t('developers:secretKeyDrawer.title')}
+				description={t('developers:secretKeyDrawer.description')}>
 				<div className='space-y-4'>
 					<Spacer className='!h-4' />
-					<Input placeholder='Secret Key' value={formData.name} label='Name' onChange={(value) => handleChange('name', value)} />
+					<Input
+						placeholder={t('developers:labels.placeholders.secretKeyName')}
+						value={formData.name}
+						label={t('developers:labels.name')}
+						onChange={(value) => handleChange('name', value)}
+					/>
 
 					<Select
-						label='Account Type'
+						label={t('developers:labels.accountType')}
 						options={accountTypeOptions}
 						onChange={(value) => handleChange('accountType', value as AccountType)}
 						value={formData.accountType}
@@ -229,8 +212,8 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 								<div className='flex items-start gap-2'>
 									<Info className='w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5' />
 									<div className='text-sm text-blue-800'>
-										<p className='font-medium mb-1'>Full Access</p>
-										<p>This API key will have full access with all permissions inherited from your user account.</p>
+										<p className='font-medium mb-1'>{t('developers:secretKeyDrawer.fullAccess.title')}</p>
+										<p>{t('developers:secretKeyDrawer.fullAccess.body')}</p>
 									</div>
 								</div>
 							</div>
@@ -244,11 +227,8 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 									<div className='flex items-start gap-2'>
 										<AlertTriangle className='w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5' />
 										<div className='text-sm text-amber-800'>
-											<p className='font-medium mb-1'>Service Accounts Not Available</p>
-											<p>
-												The backend endpoint for service accounts is not yet implemented. Please create a user account API key instead, or
-												contact your administrator.
-											</p>
+											<p className='font-medium mb-1'>{t('developers:secretKeyDrawer.serviceAccountsUnavailable.title')}</p>
+											<p>{t('developers:secretKeyDrawer.serviceAccountsUnavailable.body')}</p>
 										</div>
 									</div>
 								</div>
@@ -257,30 +237,30 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 									<div className='flex items-start gap-2'>
 										<Info className='w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5' />
 										<div className='text-sm text-blue-800'>
-											<p className='font-medium mb-1'>No Service Accounts Found</p>
-											<p>Create a service account first to generate API keys for automated services.</p>
+											<p className='font-medium mb-1'>{t('developers:secretKeyDrawer.noServiceAccounts.title')}</p>
+											<p>{t('developers:secretKeyDrawer.noServiceAccounts.body')}</p>
 										</div>
 									</div>
 								</div>
 							) : (
 								<>
 									<Select
-										label='Mapped to Identity'
+										label={t('developers:labels.mappedToIdentity')}
 										options={serviceAccountOptions}
 										onChange={(value) => handleChange('serviceAccountId', value)}
 										value={formData.serviceAccountId}
-										placeholder='Select a service account'
+										placeholder={t('developers:labels.placeholders.selectServiceAccount')}
 										disabled={isLoadingServiceAccounts}
 									/>
 
 									{selectedServiceAccount && selectedServiceAccount.roles && selectedServiceAccount.roles.length > 0 && (
 										<div className='space-y-2'>
-											<label className='block text-sm font-medium text-gray-700'>Account Roles and Permissions</label>
+											<label className='block text-sm font-medium text-gray-700'>{t('developers:labels.accountRolesPermissions')}</label>
 											<div className='bg-blue-50 border border-blue-200 rounded-md p-3'>
 												<div className='flex items-start gap-2'>
 													<Info className='w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5' />
 													<div className='text-sm text-blue-800'>
-														<p className='font-medium mb-1'>Inherited from service account:</p>
+														<p className='font-medium mb-1'>{t('developers:secretKeyDrawer.inheritedPrefix')}</p>
 														<div className='flex flex-wrap gap-1'>
 															{selectedServiceAccount.roles.map((role: string) => (
 																<span
@@ -301,7 +281,7 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 					)}
 
 					<Select
-						label='Expiration'
+						label={t('developers:labels.expiration')}
 						options={expirationOptions}
 						onChange={(value) => handleChange('expirationType', value)}
 						value={formData.expirationType}
@@ -309,22 +289,22 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 
 					<Spacer className='!h-0' />
 					<Button isLoading={isPending} disabled={!isFormValid} onClick={() => createApiKey()}>
-						Create
+						{t('common:actions.create')}
 					</Button>
 				</div>
 			</Sheet>
 
 			<Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
 				<div className='space-y-4 bg-white card p-5 max-w-md mx-auto'>
-					<h1 className='text-xl font-semibold mb-4'>View API Key</h1>
+					<h1 className='text-xl font-semibold mb-4'>{t('developers:secretKeyDrawer.modal.title')}</h1>
 
 					<div className='bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-2'>
 						<AlertTriangle className='w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5' />
-						<p className='text-sm text-amber-800'>You can only see this key once. Store it safely.</p>
+						<p className='text-sm text-amber-800'>{t('developers:secretKeyDrawer.modal.warning')}</p>
 					</div>
 
 					<div className='mt-4'>
-						<label className='block text-sm font-medium mb-1'>API Key</label>
+						<label className='block text-sm font-medium mb-1'>{t('developers:labels.apiKey')}</label>
 						<div className='relative bg-gray-100 rounded-md'>
 							<Input
 								value={showApiKey ? data?.api_key || '' : maskApiKey(data?.api_key || '')}
@@ -343,7 +323,7 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 					</div>
 
 					<div className='mt-6 flex justify-start'>
-						<Button onClick={() => setIsModalOpen(false)}>Done</Button>
+						<Button onClick={() => setIsModalOpen(false)}>{t('common:actions.done')}</Button>
 					</div>
 				</div>
 			</Modal>

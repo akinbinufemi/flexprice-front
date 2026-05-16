@@ -2,6 +2,7 @@ import { useParams, useOutletContext } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardHeader, AddButton, Loader, NoDataCard, ShortPagination } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import TaxApi from '@/api/TaxApi';
 import { TAXRATE_ENTITY_TYPE } from '@/models';
 import usePagination from '@/hooks/usePagination';
@@ -10,12 +11,14 @@ import { TaxAssociationTable, TaxAssociationDialog } from '@/components/molecule
 import { CreateTaxAssociationRequest } from '@/types';
 import { useState } from 'react';
 import { EXPAND } from '@/models';
+import { useTranslation } from 'react-i18next';
 
 type ContextType = {
 	isArchived: boolean;
 };
 
 const CustomerTaxAssociationTab = () => {
+	const { t } = useTranslation('customers');
 	const { id: customerId } = useParams();
 	const { isArchived } = useOutletContext<ContextType>();
 	const { limit, offset, page } = usePagination();
@@ -49,8 +52,8 @@ const CustomerTaxAssociationTab = () => {
 			setDialogOpen(false);
 			refetch();
 		},
-		onError: (error: any) => {
-			toast.error(error.error?.message || 'Failed to create tax association. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to create tax association. Please try again.');
 		},
 	});
 
@@ -77,7 +80,7 @@ const CustomerTaxAssociationTab = () => {
 	if (!taxAssociationsData?.items?.length) {
 		return (
 			<div>
-				<ApiDocsContent tags={['Tax Associations']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.TaxAssociations} />
 				<TaxAssociationDialog
 					open={dialogOpen}
 					onOpenChange={setDialogOpen}
@@ -87,8 +90,8 @@ const CustomerTaxAssociationTab = () => {
 					onCancel={handleCancelTaxAssociation}
 				/>
 				<NoDataCard
-					title='Tax'
-					subtitle='No tax rate assigned to this customer'
+					title={t('tabPanels.tax.emptyTitle')}
+					subtitle={t('tabPanels.tax.emptySubtitle')}
 					cta={!isArchived && <AddButton onClick={handleAddTaxAssociation} disabled={false} />}
 				/>
 			</div>
@@ -97,11 +100,14 @@ const CustomerTaxAssociationTab = () => {
 
 	return (
 		<div className='space-y-6'>
-			<ApiDocsContent tags={['Tax Associations']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxAssociations} />
 			<Card variant='notched'>
-				<CardHeader title='Tax Associations' cta={!isArchived && <AddButton onClick={handleAddTaxAssociation} disabled={false} />} />
+				<CardHeader
+					title={t('tabPanels.tax.associationsTitle')}
+					cta={!isArchived && <AddButton onClick={handleAddTaxAssociation} disabled={false} />}
+				/>
 				<TaxAssociationTable data={taxAssociationsData.items} />
-				<ShortPagination unit='Tax Associations' totalItems={taxAssociationsData.pagination.total ?? 0} />
+				<ShortPagination unit={t('tabPanels.tax.associationsPaginationUnit')} totalItems={taxAssociationsData.pagination.total ?? 0} />
 			</Card>
 
 			<TaxAssociationDialog

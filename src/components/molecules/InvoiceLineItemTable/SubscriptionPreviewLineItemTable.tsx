@@ -4,6 +4,7 @@ import { formatBillingPeriod } from '@/utils/common/format_date';
 import { getCurrencySymbol, getPriceTypeLabel } from '@/utils/common/helper_functions';
 import { FC } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 interface Props {
 	data: LineItem[];
 	currency?: string;
@@ -39,7 +40,9 @@ const SubscriptionPreviewLineItemTable: FC<Props> = ({
 	showZeroCharges = false,
 	onShowZeroChargesChange,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const displayData = data;
+	const li = 'invoices.details.lineItemsTable';
 
 	return (
 		<div className='bg-white'>
@@ -70,7 +73,11 @@ const SubscriptionPreviewLineItemTable: FC<Props> = ({
 			</div>
 			{onShowZeroChargesChange && (
 				<div className='flex items-center gap-4 mb-4'>
-					<Toggle checked={showZeroCharges ?? false} onChange={() => onShowZeroChargesChange(!showZeroCharges)} label='Show Zero Charges' />
+					<Toggle
+						checked={showZeroCharges ?? false}
+						onChange={() => onShowZeroChargesChange(!showZeroCharges)}
+						label={t('invoices.details.showZeroCharges')}
+					/>
 				</div>
 			)}
 
@@ -79,32 +86,36 @@ const SubscriptionPreviewLineItemTable: FC<Props> = ({
 				<table className='w-full border-collapse'>
 					<thead>
 						<tr className='border-b border-gray-200'>
-							<th className='py-3 px-0 text-left text-sm font-medium text-gray-900'>Subscription</th>
+							<th className='py-3 px-0 text-start text-sm font-medium text-gray-900'>{t(`${li}.subscription`)}</th>
 							{invoiceType === INVOICE_TYPE.SUBSCRIPTION && (
-								<th className='py-3 px-4 text-left text-sm font-medium text-gray-900'>Description</th>
+								<th className='py-3 px-4 text-start text-sm font-medium text-gray-900'>{t(`${li}.description`)}</th>
 							)}
 							{invoiceType === INVOICE_TYPE.SUBSCRIPTION && (
-								<th className='py-3 px-4 text-left text-sm font-medium text-gray-900'>Interval</th>
+								<th className='py-3 px-4 text-start text-sm font-medium text-gray-900'>{t(`${li}.interval`)}</th>
 							)}
-							<th className='py-3 px-4 text-center text-sm font-medium text-gray-900'>Quantity</th>
-							<th className='py-3 px-0 text-right text-sm font-medium text-gray-900'>Amount</th>
+							<th className='py-3 px-4 text-center text-sm font-medium text-gray-900'>{t(`${li}.quantity`)}</th>
+							<th className='py-3 px-0 text-end text-sm font-medium text-gray-900'>{t(`${li}.amount`)}</th>
 						</tr>
 					</thead>
 					<tbody>
 						{displayData?.map((item, index) => {
 							return (
 								<tr key={index} className='border-b border-gray-100'>
-									<td className='py-4 px-0 text-sm text-gray-900'>{item.display_name ?? '--'}</td>
+									<td className='py-4 px-0 text-sm text-gray-900'>{item.display_name ?? t('common:labels.na')}</td>
 									{invoiceType === INVOICE_TYPE.SUBSCRIPTION && (
-										<td className='py-4 px-4 text-sm text-gray-600'>{item.price_type ? getPriceTypeLabel(item.price_type) : '--'}</td>
+										<td className='py-4 px-4 text-sm text-gray-600'>
+											{item.price_type ? getPriceTypeLabel(item.price_type) : t('common:labels.na')}
+										</td>
 									)}
 									{invoiceType === INVOICE_TYPE.SUBSCRIPTION && (
 										<td className='py-4 px-4 text-sm text-gray-600'>
-											{item.period_start && item.period_end ? formatBillingPeriod(item.period_start, item.period_end) : '--'}
+											{item.period_start && item.period_end
+												? formatBillingPeriod(item.period_start, item.period_end)
+												: t('common:labels.na')}
 										</td>
 									)}
-									<td className='py-4 px-4 text-center text-sm text-gray-600'>{item.quantity ? item.quantity : '--'}</td>
-									<td className='py-4 px-0 text-right text-sm text-gray-900 '>{formatAmount(item.amount ?? 0, item.currency)}</td>
+									<td className='py-4 px-4 text-center text-sm text-gray-600'>{item.quantity ? item.quantity : t('common:labels.na')}</td>
+									<td className='py-4 px-0 text-end text-sm text-gray-900 '>{formatAmount(item.amount ?? 0, item.currency)}</td>
 								</tr>
 							);
 						})}
@@ -118,30 +129,30 @@ const SubscriptionPreviewLineItemTable: FC<Props> = ({
 					{/* Subtotal - always show if exists */}
 					{subtotal !== undefined && subtotal !== null && Number(subtotal) !== 0 && (
 						<div className='flex flex-row justify-end items-center py-1'>
-							<div className='w-40 text-right text-base font-medium text-gray-900'>Subtotal</div>
-							<div className='flex-1 text-right text-sm text-gray-900 font-medium'>{formatAmount(Number(subtotal), currency ?? '')}</div>
+							<div className='w-40 text-end text-base font-medium text-gray-900'>{t(`${li}.subtotal`)}</div>
+							<div className='flex-1 text-end text-sm text-gray-900 font-medium'>{formatAmount(Number(subtotal), currency ?? '')}</div>
 						</div>
 					)}
 
 					{/* Discount - only show if provided and > 0 */}
 					{discount && Number(discount) > 0 && (
 						<div className='flex flex-row justify-end items-center py-1'>
-							<div className='w-40 text-right text-base font-medium text-gray-900'>Discount</div>
-							<div className='flex-1 text-right text-sm text-gray-900 font-medium'>−{formatAmount(Number(discount), currency ?? '')}</div>
+							<div className='w-40 text-end text-base font-medium text-gray-900'>{t(`${li}.discount`)}</div>
+							<div className='flex-1 text-end text-sm text-gray-900 font-medium'>−{formatAmount(Number(discount), currency ?? '')}</div>
 						</div>
 					)}
 					{/* Tax - only show if provided and > 0 */}
 					{tax !== undefined && tax !== null && Number(tax) !== 0 && (
 						<div className='flex flex-row justify-end items-center py-1'>
-							<div className='w-40 text-right text-base font-medium text-gray-900'>Tax</div>
-							<div className='flex-1 text-right text-sm text-gray-900 font-medium'>{formatAmount(Number(tax), currency ?? '')}</div>
+							<div className='w-40 text-end text-base font-medium text-gray-900'>{t(`${li}.tax`)}</div>
+							<div className='flex-1 text-end text-sm text-gray-900 font-medium'>{formatAmount(Number(tax), currency ?? '')}</div>
 						</div>
 					)}
 
 					{/* Net payable - always show, default to 0 if not provided */}
 					<div className='flex flex-row justify-end border-t border-gray-200 items-center py-3'>
-						<div className='w-40 flex items-center gap-2 justify-end text-sm text-gray-900 font-medium'>Net payable</div>
-						<div className='flex-1 text-right text-sm text-gray-900 font-semibold'>
+						<div className='w-40 flex items-center gap-2 justify-end text-sm text-gray-900 font-medium'>{t(`${li}.netPayable`)}</div>
+						<div className='flex-1 text-end text-sm text-gray-900 font-semibold'>
 							{formatAmount(Number(amount_due ?? 0), currency ?? '')}
 						</div>
 					</div>

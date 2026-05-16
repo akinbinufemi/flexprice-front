@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Copy } from 'lucide-react';
 import { Button } from '../Button';
 import { copyToClipboard } from '@/utils/common/helper_functions';
@@ -20,9 +21,10 @@ interface CopyIdButtonProps extends Omit<React.ComponentProps<typeof Button>, 'o
  * <CopyIdButton id={planId} toastMessage="Plan ID copied to clipboard" />
  */
 export const CopyIdButton: React.FC<CopyIdButtonProps> = ({ id, entityType, toastMessage, className, ...buttonProps }) => {
+	const { t } = useTranslation('common');
 	const handleCopy = () => {
 		if (id) {
-			const message = toastMessage || `${entityType || 'ID'} ID copied to clipboard`;
+			const message = toastMessage || (entityType ? t('copyId.toastWithType', { type: entityType }) : t('copyId.toastFallback'));
 			copyToClipboard(id, message);
 		}
 	};
@@ -33,7 +35,7 @@ export const CopyIdButton: React.FC<CopyIdButtonProps> = ({ id, entityType, toas
 			size='icon'
 			onClick={handleCopy}
 			className={cn('h-6 w-6 p-0 hover:bg-gray-100', className)}
-			title={`Copy ${entityType || 'ID'} ID`}
+			title={t('copyId.titleWithType', { type: entityType ?? t('copyId.defaultEntityType') })}
 			{...buttonProps}>
 			<Copy className='w-4 h-4 text-gray-500' />
 		</Button>

@@ -8,6 +8,7 @@ import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { UpdatePriceRequest } from '@/types/dto/Price';
 import { Price } from '@/models/Price';
 import { GROUP_ENTITY_TYPE } from '@/models/Group';
+import { useTranslation } from 'react-i18next';
 
 interface UpdatePriceDetailsDrawerProps {
 	price: Price;
@@ -18,6 +19,8 @@ interface UpdatePriceDetailsDrawerProps {
 }
 
 const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
+
 	const [formData, setFormData] = useState<{
 		display_name: string;
 		description: string;
@@ -38,12 +41,12 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 			return PriceApi.UpdatePrice(price.id, updateData);
 		},
 		onSuccess: () => {
-			toast.success('Price details updated successfully');
+			toast.success(t('catalog:prices.updateDrawer.toastSuccess'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to update price details. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || t('catalog:prices.updateDrawer.toastFailed'));
 		},
 	});
 
@@ -67,15 +70,15 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 			try {
 				const parsed = JSON.parse(formData.metadata);
 				if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-					newErrors.metadata = 'Metadata must be a JSON object';
+					newErrors.metadata = t('catalog:shared.metadataMustBeObject');
 				} else {
 					const allStrings = Object.values(parsed).every((val) => typeof val === 'string');
 					if (!allStrings) {
-						newErrors.metadata = 'All metadata values must be strings';
+						newErrors.metadata = t('catalog:shared.metadataAllValuesStrings');
 					}
 				}
 			} catch {
-				newErrors.metadata = 'Invalid Metadata format';
+				newErrors.metadata = t('catalog:shared.metadataInvalidFormat');
 			}
 		}
 
@@ -102,7 +105,6 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 			description: formData.description?.trim() || undefined,
 			lookup_key: formData.lookup_key?.trim() || undefined,
 			metadata: metadata,
-			// Send empty string when "None" is selected so the server can clear group_id; otherwise send the id or undefined
 			group_id: formData.group_id?.trim() === '' ? '' : formData.group_id?.trim() || undefined,
 		};
 
@@ -113,13 +115,13 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title='Edit Price Details'
-			description='Update non-critical price details such as display name, description, and metadata.'
+			title={t('catalog:prices.updateDrawer.title')}
+			description={t('catalog:prices.updateDrawer.description')}
 			trigger={trigger}>
 			<div className='space-y-8 mt-4'>
 				<Input
-					label='Display Name'
-					placeholder='Enter display name'
+					label={t('catalog:prices.updateDrawer.displayName')}
+					placeholder={t('catalog:prices.updateDrawer.displayNamePlaceholder')}
 					value={formData.display_name || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, display_name: e });
@@ -127,8 +129,8 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 				/>
 
 				<Textarea
-					label='Description'
-					placeholder='Enter description'
+					label={t('catalog:prices.updateDrawer.descriptionLabel')}
+					placeholder={t('catalog:shared.enterDescription')}
 					value={formData.description || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, description: e });
@@ -137,8 +139,8 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 				/>
 
 				<Input
-					label='Lookup Key'
-					placeholder='Enter lookup key'
+					label={t('catalog:prices.updateDrawer.lookupKey')}
+					placeholder={t('catalog:prices.updateDrawer.lookupKeyPlaceholder')}
 					value={formData.lookup_key || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, lookup_key: e });
@@ -155,14 +157,14 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 					}}
 					error={errors.metadata}
 					className='min-h-[100px]'
-					placeholder='{"key": "value"}'
-					label='Metadata (Optional)'
-					description='Additional metadata as JSON. All values must be strings.'
+					placeholder={t('catalog:shared.metadataPlaceholder')}
+					label={t('catalog:shared.metadataOptional')}
+					description={t('catalog:shared.metadataJsonStringsOnly')}
 				/>
 
 				<SelectGroup
-					label='Group'
-					placeholder='Select a group (optional)'
+					label={t('catalog:prices.updateDrawer.group')}
+					placeholder={t('catalog:prices.updateDrawer.groupPlaceholder')}
 					value={formData.group_id}
 					onChange={(group) => setFormData({ ...formData, group_id: group?.id ?? '' })}
 					entityType={GROUP_ENTITY_TYPE.PRICE}
@@ -171,7 +173,7 @@ const UpdatePriceDetailsDrawer: FC<UpdatePriceDetailsDrawerProps> = ({ price, op
 
 				<Spacer className='!h-4' />
 				<Button isLoading={isPending} disabled={isPending} onClick={handleSave}>
-					Save Details
+					{t('catalog:prices.updateDrawer.saveDetails')}
 				</Button>
 			</div>
 		</Sheet>

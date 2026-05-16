@@ -1,5 +1,5 @@
 import { Button, DatePicker, Input, Spacer } from '@/components/atoms';
-import { FC, useState, useCallback } from 'react';
+import { FC, useState, useCallback, useMemo } from 'react';
 import RectangleRadiogroup, { RectangleRadiogroupOption } from '../RectangleRadiogroup';
 import { useMutation } from '@tanstack/react-query';
 import WalletApi from '@/api/WalletApi';
@@ -12,30 +12,13 @@ import { getCurrencyAmountFromCredits } from '@/utils';
 import { TopupWalletPayload } from '@/types';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui';
 import { useMinCreditExpiryDate, toDateOnlyUtc } from '@/hooks/useMinCreditExpiryDate';
+import { useTranslation } from 'react-i18next';
 
 // Enum for credits type with more descriptive names
 enum CreditsType {
 	FreeCredit = 'FreeCredit',
 	PurchasedCredits = 'PurchasedCredits',
 }
-
-// Centralized credits type options
-const CREDITS_TYPE_OPTIONS: RectangleRadiogroupOption[] = [
-	{
-		label: 'Free',
-		// icon: Receipt,
-		description: 'Grant credits without a charge.',
-		value: CreditsType.FreeCredit,
-		disabled: false,
-	},
-	{
-		label: 'Purchased',
-		// icon: Gift,
-		description: 'Add credits that require payment.',
-		value: CreditsType.PurchasedCredits,
-		disabled: false,
-	},
-];
 
 // Extended payload type for more comprehensive state management
 interface TopupPayload extends Partial<TopupWalletPayload> {
@@ -55,7 +38,26 @@ interface TopupCardProps {
 }
 
 const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1, onSuccess, customerId }) => {
+	const { t } = useTranslation('billing');
 	const { minExpiryDate } = useMinCreditExpiryDate(customerId);
+
+	const creditsTypeOptions = useMemo<RectangleRadiogroupOption[]>(
+		() => [
+			{
+				label: t('wallet.topup.typeFree'),
+				description: t('wallet.topup.typeFreeDesc'),
+				value: CreditsType.FreeCredit,
+				disabled: false,
+			},
+			{
+				label: t('wallet.topup.typePurchased'),
+				description: t('wallet.topup.typePurchasedDesc'),
+				value: CreditsType.PurchasedCredits,
+				disabled: false,
+			},
+		],
+		[t],
+	);
 
 	// State management with more explicit typing
 	const [topupPayload, setTopupPayload] = useState<TopupPayload>({
@@ -169,8 +171,8 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 			});
 			await refetchWalletData();
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to topup wallet');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to topup wallet');
 		},
 	});
 
@@ -192,12 +194,12 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 	return (
 		<DialogContent className='bg-white sm:max-w-[600px]'>
 			<DialogHeader>
-				<DialogTitle>Add Credits</DialogTitle>
+				<DialogTitle>{t('wallet.topup.dialogTitle')}</DialogTitle>
 			</DialogHeader>
 			<div className='grid gap-4 py-4'>
 				<RectangleRadiogroup
-					title='Credit Type'
-					options={CREDITS_TYPE_OPTIONS.map((option) => ({
+					title={t('wallet.topup.creditTypeTitle')}
+					options={creditsTypeOptions.map((option) => ({
 						...option,
 						description: undefined,
 					}))}
@@ -217,8 +219,8 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 				/>
 				<p className='text-sm text-gray-500 -my-2'>
 					{topupPayload.credits_type === CreditsType.PurchasedCredits
-						? 'Purchased credits require payment. Generate invoice to track the purchase.'
-						: 'Free credits are granted without a charge.'}
+						? t('wallet.topup.typeHintPurchased')
+						: t('wallet.topup.typeHintFree')}
 				</p>
 			</div>
 
@@ -228,16 +230,16 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 					variant='formatted-number'
 					onChange={(e) => updateTopupPayload({ credits_to_add: e as unknown as number })}
 					value={topupPayload.credits_to_add ?? ''}
-					suffix='credits'
-					label='Credits'
-					placeholder='credits'
+					suffix={t('payments.transactions.creditsSuffix')}
+					label={t('wallet.topup.creditsLabel')}
+					placeholder={t('wallet.topup.creditsPlaceholder')}
 					description={
 						<>
 							{topupPayload.credits_to_add && topupPayload.credits_to_add > 0 && (
 								<span>
 									{getCurrencySymbol(currency!)}
 									{getCurrencyAmountFromCredits(conversion_rate, topupPayload.credits_to_add ?? 0)}
-									{` will be credited to the wallet`}
+									{t('wallet.topup.creditPreviewSuffix')}
 								</span>
 							)}
 						</>
@@ -252,7 +254,7 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 							? new Date(minExpiryDate.getUTCFullYear(), minExpiryDate.getUTCMonth(), minExpiryDate.getUTCDate())
 							: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate() + 1, 0, 0, 0, 0))
 					}
-					label='Expiry Date'
+					label={t('wallet.topup.expiryDate')}
 					date={topupPayload.expiry_date_utc ? new Date(topupPayload.expiry_date_utc) : undefined}
 					setDate={(value) =>
 						updateTopupPayload({
@@ -267,9 +269,9 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 			)}
 			{topupPayload.credits_type && (
 				<Input
-					label='Priority'
+					label={t('wallet.topup.priority')}
 					className='w-full'
-					placeholder='Enter priority'
+					placeholder={t('wallet.topup.priorityPlaceholder')}
 					value={topupPayload.priority}
 					onChange={(e) => {
 						if (e) {
@@ -285,21 +287,21 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 			{topupPayload.credits_type === CreditsType.PurchasedCredits && topupPayload.generate_invoice && (
 				<>
 					<Input
-						label='Reference ID'
+						label={t('wallet.topup.referenceId')}
 						className='w-full'
-						placeholder='Enter reference ID'
+						placeholder={t('wallet.topup.referenceIdPlaceholder')}
 						value={topupPayload.reference_id || ''}
 						onChange={(e) => updateTopupPayload({ reference_id: e as string })}
-						description='This reference ID will be used as the idempotency key for the transaction.'
+						description={t('wallet.topup.referenceIdDescription')}
 					/>
 
 					<Input
-						label='Description (Optional)'
+						label={t('wallet.topup.descriptionOptional')}
 						className='w-full'
-						placeholder='Enter description'
+						placeholder={t('wallet.topup.descriptionPlaceholder')}
 						value={topupPayload.description || ''}
 						onChange={(e) => updateTopupPayload({ description: e as string })}
-						description='Add any specific details about this transaction.'
+						description={t('wallet.topup.descriptionHint')}
 					/>
 				</>
 			)}
@@ -318,7 +320,7 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 						}}
 					/>
 					<Label htmlFor='generate-invoice'>
-						<p className='font-medium text-sm text-[#18181B] peer-checked:text-black'>Generate Invoice</p>
+						<p className='font-medium text-sm text-[#18181B] peer-checked:text-black'>{t('wallet.topup.generateInvoice')}</p>
 					</Label>
 				</div>
 			)}
@@ -327,7 +329,7 @@ const TopupCard: FC<TopupCardProps> = ({ walletId, currency, conversion_rate = 1
 
 			<div className='w-full justify-end flex'>
 				<Button isLoading={isPending} onClick={handleTopup} disabled={isPending || !topupPayload.credits_type}>
-					Add Credits
+					{t('wallet.topup.addCredits')}
 				</Button>
 			</div>
 		</DialogContent>

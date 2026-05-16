@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { endOfDay, startOfDay } from 'date-fns';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
@@ -15,15 +16,7 @@ interface SectionContentProps {
 	section: SectionConfig;
 }
 
-// ─── Date Preset Labels & Range Calculator ────────────────────────────────────
-
-const DATE_PRESET_LABELS: Record<DatePreset, string> = {
-	[DatePreset.Today]: 'Today',
-	[DatePreset.Last7Days]: '7d',
-	[DatePreset.Last30Days]: '30d',
-	[DatePreset.CurrentMonth]: 'This Month',
-	[DatePreset.LastMonth]: 'Last Month',
-};
+// ─── Date Range Calculator ────────────────────────────────────────────────────
 
 function calculateDateRange(preset: DatePreset): { start_time: string; end_time: string } {
 	const now = new Date();
@@ -67,6 +60,9 @@ interface SectionDateFilterProps {
 	effectiveStart: string;
 	effectiveEnd: string;
 	hasTheme: boolean;
+	getPresetLabel: (preset: DatePreset) => string;
+	startPlaceholder: string;
+	endPlaceholder: string;
 	onPresetClick: (preset: DatePreset) => void;
 	onCustomStartChange: (val: string) => void;
 	onCustomEndChange: (val: string) => void;
@@ -79,6 +75,9 @@ const SectionDateFilter = ({
 	effectiveStart,
 	effectiveEnd,
 	hasTheme,
+	getPresetLabel,
+	startPlaceholder,
+	endPlaceholder,
 	onPresetClick,
 	onCustomStartChange,
 	onCustomEndChange,
@@ -109,7 +108,7 @@ const SectionDateFilter = ({
 									: { color: 'var(--portal-text-secondary, #71717a)' }
 								: undefined
 						}>
-						{DATE_PRESET_LABELS[preset]}
+						{getPresetLabel(preset)}
 					</button>
 				);
 			})}
@@ -120,14 +119,14 @@ const SectionDateFilter = ({
 				<DatePicker
 					date={effectiveStart ? new Date(effectiveStart) : undefined}
 					setDate={(d) => onCustomStartChange(d ? startOfDay(d).toISOString() : '')}
-					placeholder='Start date'
+					placeholder={startPlaceholder}
 					className={`w-[130px] h-9 text-xs ${hasTheme ? '' : 'bg-white'}`}
 					popoverTriggerClassName={`[&_button]:h-9 [&_button]:text-xs [&_button]:rounded-md${hasTheme ? ' [&_button]:bg-[var(--portal-surface)] [&_button]:border-[var(--portal-border)] [&_button]:text-[var(--portal-text-primary)]' : ''}`}
 				/>
 				<DatePicker
 					date={effectiveEnd ? new Date(effectiveEnd) : undefined}
 					setDate={(d) => onCustomEndChange(d ? endOfDay(d).toISOString() : '')}
-					placeholder='End date'
+					placeholder={endPlaceholder}
 					className={`w-[130px] h-9 text-xs ${hasTheme ? '' : 'bg-white'}`}
 					popoverTriggerClassName={`[&_button]:h-9 [&_button]:text-xs [&_button]:rounded-md${hasTheme ? ' [&_button]:bg-[var(--portal-surface)] [&_button]:border-[var(--portal-border)] [&_button]:text-[var(--portal-text-primary)]' : ''}`}
 				/>
@@ -147,6 +146,7 @@ const SectionDateFilter = ({
  * across all those widgets via a common analyticsParams object.
  */
 const SectionContent = ({ section }: SectionContentProps) => {
+	const { t } = useTranslation('customer-portal');
 	const { config } = usePortalConfig();
 	const hasTheme = !!config.theme;
 	const enabledTabs = useMemo(() => [...section.tabs.filter((t) => t.enabled)].sort((a, b) => a.order - b.order), [section.tabs]);
@@ -205,12 +205,12 @@ const SectionContent = ({ section }: SectionContentProps) => {
 	});
 
 	useEffect(() => {
-		if (subscriptionsError) toast.error('Failed to load subscriptions');
-	}, [subscriptionsError]);
+		if (subscriptionsError) toast.error(t('errors.loadSubscriptions'));
+	}, [subscriptionsError, t]);
 
 	useEffect(() => {
-		if (usageError) toast.error('Failed to load usage data');
-	}, [usageError]);
+		if (usageError) toast.error(t('errors.loadUsage'));
+	}, [usageError, t]);
 
 	if (enabledTabs.length === 0) return null;
 
@@ -228,6 +228,9 @@ const SectionContent = ({ section }: SectionContentProps) => {
 					effectiveStart={effectiveRange.start_time}
 					effectiveEnd={effectiveRange.end_time}
 					hasTheme={hasTheme}
+					getPresetLabel={(preset) => t(`datePreset.${preset}`)}
+					startPlaceholder={t('datePicker.startDate')}
+					endPlaceholder={t('datePicker.endDate')}
 					onPresetClick={handlePresetClick}
 					onCustomStartChange={handleCustomStart}
 					onCustomEndChange={handleCustomEnd}

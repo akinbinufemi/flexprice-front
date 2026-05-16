@@ -1,4 +1,5 @@
 import { Fragment, type FC } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import type { SubscriptionModifyResponse } from '@/types/dto/Subscription';
 import {
 	buildBillingImpactRows,
@@ -14,15 +15,16 @@ export interface SubscriptionModifyPreviewSummaryProps {
 	quantityChangeContext?: QuantityChangePreviewContext;
 }
 
-function directionShortLabel(direction: 'increase' | 'decrease' | 'unchanged'): string | null {
-	if (direction === 'increase') return 'Increase';
-	if (direction === 'decrease') return 'Decrease';
-	return null;
-}
-
 const SubscriptionModifyPreviewSummary: FC<SubscriptionModifyPreviewSummaryProps> = ({ data, quantityChangeContext }) => {
+	const { t } = useTranslation(['billing', 'common']);
+
+	function directionShortLabel(direction: 'increase' | 'decrease' | 'unchanged'): string | null {
+		if (direction === 'increase') return t('subscriptions.modifyPreview.directionIncrease');
+		if (direction === 'decrease') return t('subscriptions.modifyPreview.directionDecrease');
+		return null;
+	}
 	if (!data) {
-		return <p className='text-sm text-gray-500'>No preview data.</p>;
+		return <p className='text-sm text-gray-500'>{t('subscriptions.modifyPreview.noData')}</p>;
 	}
 
 	const lineItems = data.changed_resources?.line_items ?? [];
@@ -61,14 +63,16 @@ const SubscriptionModifyPreviewSummary: FC<SubscriptionModifyPreviewSummaryProps
 			{showLineSection && (
 				<div className={showDividerBeforeLines ? 'border-t border-gray-100 pt-4' : undefined}>
 					<div className='grid grid-cols-[auto_auto_1fr] gap-x-4 gap-y-1.5'>
-						<span className='border-b border-gray-100 pb-1.5 text-xs text-gray-500'>Type</span>
-						<span className='border-b border-gray-100 pb-1.5 text-xs tabular-nums text-gray-500'>Qty</span>
-						<span className='border-b border-gray-100 pb-1.5 text-xs text-gray-500'>Period</span>
+						<span className='border-b border-gray-100 pb-1.5 text-xs text-gray-500'>{t('subscriptions.modifyPreview.columnType')}</span>
+						<span className='border-b border-gray-100 pb-1.5 text-xs tabular-nums text-gray-500'>
+							{t('subscriptions.modifyPreview.columnQty')}
+						</span>
+						<span className='border-b border-gray-100 pb-1.5 text-xs text-gray-500'>{t('subscriptions.modifyPreview.columnPeriod')}</span>
 						{lineRows.map((row) => (
 							<Fragment key={row.id}>
 								<span className='py-1 text-gray-600'>{row.label}</span>
 								<span className='py-1 tabular-nums text-gray-900'>{row.quantityDisplay}</span>
-								<span className='py-1 text-gray-600'>{row.periodDisplay ?? '—'}</span>
+								<span className='py-1 text-gray-600'>{row.periodDisplay ?? t('common:labels.na')}</span>
 							</Fragment>
 						))}
 					</div>
@@ -90,15 +94,17 @@ const SubscriptionModifyPreviewSummary: FC<SubscriptionModifyPreviewSummaryProps
 
 			{subscriptions.length > 0 && (
 				<p className='text-gray-600'>
-					<span className='font-medium text-gray-900'>Subscription</span> will be updated to reflect these changes.
+					<Trans
+						ns='billing'
+						i18nKey='subscriptions.modifyPreview.subscriptionUpdated'
+						components={{ bold: <span className='font-medium text-gray-900' /> }}
+					/>
 				</p>
 			)}
 
-			{quantityCopy && !anyResources && (
-				<p className='text-sm text-gray-600'>No additional billing details were included in this preview.</p>
-			)}
+			{quantityCopy && !anyResources && <p className='text-sm text-gray-600'>{t('subscriptions.modifyPreview.noExtraBillingDetails')}</p>}
 
-			{!quantityCopy && !anyResources && <p className='text-sm text-gray-600'>No billing changes returned for this preview.</p>}
+			{!quantityCopy && !anyResources && <p className='text-sm text-gray-600'>{t('subscriptions.modifyPreview.noBillingChanges')}</p>}
 		</div>
 	);
 };

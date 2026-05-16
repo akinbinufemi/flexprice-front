@@ -6,32 +6,35 @@ import CustomerApi from '@/api/CustomerApi';
 import { Page } from '@/components/atoms';
 import { cn } from '@/lib/utils';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { AlertCircle } from 'lucide-react';
 import { ENTITY_STATUS } from '@/models';
 import CustomerHeader from '@/components/molecules/Customer/CustomerHeader';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
 
-const tabs = [
-	{ id: '', label: 'Overview' },
-	{ id: 'wallet', label: 'Wallet' },
-	{ id: 'invoice', label: 'Invoice' },
-	{ id: 'information', label: 'Information' },
-	{ id: 'tax-association', label: 'Tax' },
-	{ id: 'analytics', label: 'Analytics' },
-	{ id: 'usage-events', label: 'Usage Events' },
+const TAB_SPECS = [
+	{ id: '', labelKey: 'detail.tabs.overview' as const },
+	{ id: 'wallet', labelKey: 'detail.tabs.wallet' as const },
+	{ id: 'invoice', labelKey: 'detail.tabs.invoice' as const },
+	{ id: 'information', labelKey: 'detail.tabs.information' as const },
+	{ id: 'tax-association', labelKey: 'detail.tabs.taxAssociation' as const },
+	{ id: 'analytics', labelKey: 'detail.tabs.analytics' as const },
+	{ id: 'usage-events', labelKey: 'detail.tabs.usageEvents' as const },
 ] as const;
 
-type TabId = (typeof tabs)[number]['id'];
+type TabId = (typeof TAB_SPECS)[number]['id'];
 
 const getActiveTab = (pathTabId: string): TabId => {
-	const validTabId = tabs.find((tab) => tab.id === pathTabId);
+	const validTabId = TAB_SPECS.find((tab) => tab.id === pathTabId);
 	return validTabId ? validTabId.id : '';
 };
 
 const CustomerProfilePage = () => {
+	const { t } = useTranslation('customers');
 	const { id: customerId } = useParams();
 	const location = useLocation();
-	const [activeTab, setActiveTab] = useState<TabId>(tabs[0]?.id);
+	const [activeTab, setActiveTab] = useState<TabId>(TAB_SPECS[0]?.id);
 	const navigate = useNavigate();
 
 	const { data: customer, isLoading } = useQuery({
@@ -58,17 +61,17 @@ const CustomerProfilePage = () => {
 		}
 
 		// Find the tab label for the active tab
-		const activeTabData = tabs.find((tab) => tab.id === activeTab);
+		const activeTabData = TAB_SPECS.find((tab) => tab.id === activeTab);
 		setSegmentLoading(2, true);
 
 		if (activeTab !== '' && activeTabData) {
 			// Update breadcrumb with tab name for non-overview tabs
-			updateBreadcrumb(3, activeTabData.label);
+			updateBreadcrumb(3, t(activeTabData.labelKey));
 		}
 		if (customer?.external_id) {
 			updateBreadcrumb(2, customer.external_id);
 		}
-	}, [activeTab, updateBreadcrumb, setSegmentLoading, customer, location.pathname]);
+	}, [activeTab, updateBreadcrumb, setSegmentLoading, customer, location.pathname, t]);
 
 	const onTabChange = (tabId: TabId) => {
 		navigate(`${RouteNames.customers}/${customerId}/${tabId}`);
@@ -84,23 +87,21 @@ const CustomerProfilePage = () => {
 
 	return (
 		<Page className='space-y-6'>
-			<ApiDocsContent tags={['Customers']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Customers} />
 			<CustomerHeader customerId={customerId!} />
 
 			{isArchived && (
 				<div className='flex mt-4 items-center gap-2 py-3 px-4	 bg-yellow-50 border border-yellow-200 rounded-lg'>
 					<AlertCircle className='text-yellow-500 size-5' />
 					<div>
-						<p className='text-sm text-yellow-700'>
-							This customer is Inactive. You can only view their details but cannot make any changes.
-						</p>
+						<p className='text-sm text-yellow-700'>{t('detail.inactiveBanner')}</p>
 					</div>
 				</div>
 			)}
 
 			<div className='border-b border-border mt-4 mb-6'>
-				<nav className='flex space-x-4' aria-label='Tabs'>
-					{tabs.map((tab, index) => {
+				<nav className='flex space-x-4' aria-label={t('detail.tabsAria')}>
+					{TAB_SPECS.map((tab, index) => {
 						return (
 							<button
 								key={tab.id}
@@ -113,7 +114,7 @@ const CustomerProfilePage = () => {
 								)}
 								role='tab'
 								aria-selected={activeTab === tab.id}>
-								{tab.label}
+								{t(tab.labelKey)}
 								{/* {isDisabled && (
 									<span className='ml-2 text-xs text-yellow-600'>(Archived)</span>
 								)} */}

@@ -7,6 +7,7 @@ import { formatBillingPeriodForPrice } from '@/utils/common/helper_functions';
 import { formatAmount } from '@/components/atoms/Input/Input';
 import CreditGrantApi from '@/api/CreditGrantApi';
 import { EllipsisVertical, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CreditGrantsTableProps {
 	data: CreditGrant[];
@@ -15,6 +16,8 @@ interface CreditGrantsTableProps {
 }
 
 const CreditGrantsTable: React.FC<CreditGrantsTableProps> = ({ data, onDelete, showEmptyRow = false }) => {
+	const { t } = useTranslation('common');
+
 	const handleDelete = async (grant: CreditGrant) => {
 		await CreditGrantApi.delete(grant.id);
 
@@ -39,7 +42,7 @@ const CreditGrantsTable: React.FC<CreditGrantsTableProps> = ({ data, onDelete, s
 		{
 			title: 'Priority',
 			render: (row) => {
-				return <span>{row.priority ?? '--'}</span>;
+				return <span>{row.priority ?? t('labels.na')}</span>;
 			},
 		},
 		{
@@ -78,7 +81,7 @@ const CreditGrantsTable: React.FC<CreditGrantsTableProps> = ({ data, onDelete, s
 						}}
 						archive={{
 							enabled: true,
-							text: 'Delete',
+							text: t('actions.delete'),
 							icon: <Trash2 />,
 						}}
 					/>

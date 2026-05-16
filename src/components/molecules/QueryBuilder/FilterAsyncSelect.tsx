@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import { SelectOption } from '@/components/atoms/Select/SearchableSelect';
+import { useTranslation } from 'react-i18next';
 
 interface FilterAsyncSelectProps<T = any> {
 	value: string; // Just ID
@@ -29,6 +30,7 @@ const FilterAsyncSelect = <T = any,>({
 	initialOptions = [],
 	debounceTime = 300,
 }: FilterAsyncSelectProps<T>) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -55,7 +57,7 @@ const FilterAsyncSelect = <T = any,>({
 		isLoading,
 		isError,
 		error,
-	} = useQuery<Array<SelectOption & { data: T }>>({
+	} = useQuery<Array<SelectOption & { data: T }>, Error>({
 		queryKey: ['filter-async-select', debouncedQuery],
 		queryFn: () => searchFn(debouncedQuery),
 		enabled: isOpen,
@@ -124,7 +126,7 @@ const FilterAsyncSelect = <T = any,>({
 			<PopoverTrigger asChild>
 				<Button variant='outline' size='sm' className={cn(className, 'h-9 rounded-sm text-xs w-full justify-between font-normal')}>
 					<span className={cn('truncate', selectedOption ? '' : 'text-muted-foreground')}>
-						{selectedOption?.label || (value ? 'Loading...' : placeholder)}
+						{selectedOption?.label || (value ? t('status.loading') : placeholder)}
 					</span>
 					<ChevronDown className='h-4 w-4 opacity-50 shrink-0' />
 				</Button>
@@ -136,32 +138,30 @@ const FilterAsyncSelect = <T = any,>({
 						{isLoading && searchQuery === '' && (
 							<div className='flex flex-col items-center justify-center py-8'>
 								<Loader2 className='h-5 w-5 animate-spin text-muted-foreground mb-2' />
-								<span className='text-sm text-muted-foreground'>Loading options...</span>
+								<span className='text-sm text-muted-foreground'>{t('search.loadingOptions')}</span>
 							</div>
 						)}
 						{isLoading && searchQuery !== '' && (
 							<div className='flex items-center justify-center py-4 border-b'>
-								<Loader2 className='h-4 w-4 animate-spin text-muted-foreground mr-2' />
-								<span className='text-sm text-muted-foreground'>Searching...</span>
+								<Loader2 className='h-4 w-4 animate-spin text-muted-foreground me-2' />
+								<span className='text-sm text-muted-foreground'>{t('search.searching')}</span>
 							</div>
 						)}
 						{!isLoading && isError && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-destructive text-center mb-1'>
-									{error instanceof Error ? error.message : 'Error loading options'}
-								</div>
-								<div className='text-xs text-muted-foreground text-center'>Please try again</div>
+								<div className='text-sm text-destructive text-center mb-1'>{error.message || t('search.errorLoadingOptions')}</div>
+								<div className='text-xs text-muted-foreground text-center'>{t('search.pleaseRetry')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length === 0 && searchQuery === '' && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-muted-foreground text-center'>No options available</div>
+								<div className='text-sm text-muted-foreground text-center'>{t('search.noOptionsAvailable')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length === 0 && searchQuery !== '' && (
 							<div className='flex flex-col items-center justify-center py-8 px-4'>
-								<div className='text-sm text-muted-foreground text-center mb-1'>No results found</div>
-								<div className='text-xs text-muted-foreground text-center'>Try a different search term</div>
+								<div className='text-sm text-muted-foreground text-center mb-1'>{t('table.noResults')}</div>
+								<div className='text-xs text-muted-foreground text-center'>{t('search.tryDifferentTerm')}</div>
 							</div>
 						)}
 						{!isLoading && !isError && availableOptions.length > 0 && (
@@ -174,7 +174,7 @@ const FilterAsyncSelect = <T = any,>({
 										disabled={option.disabled}
 										className='cursor-pointer'>
 										<span className='truncate flex-1'>{option.label}</span>
-										<Check className={cn('ml-auto h-4 w-4 shrink-0', value === option.value ? 'opacity-100' : 'opacity-0')} />
+										<Check className={cn('ms-auto h-4 w-4 shrink-0', value === option.value ? 'opacity-100' : 'opacity-0')} />
 									</CommandItem>
 								))}
 							</CommandGroup>

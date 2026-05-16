@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 // Internal components
 import { Button, CopyIdButton, Loader, Page } from '@/components/atoms';
 import { ApiDocsContent, DropdownMenu, DuplicatePlanDialog, PlanDrawer } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import type { DropdownMenuOption } from '@/components/molecules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui';
 
@@ -26,9 +27,9 @@ import { Plan, ENTITY_STATUS } from '@/models';
 // Constants and utilities
 import { getPlanPriceSyncWorkflowFilters } from '@/constants/workflow';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
-import { ServerError } from '@/core/axios/types';
 import { INVOICE_CADENCE } from '@/models';
 import { DataType, FilterOperator, SortDirection } from '@/types/common/QueryBuilder';
+import { useTranslation } from 'react-i18next';
 
 export const formatInvoiceCadence = (cadence: string): string => {
 	switch (cadence.toUpperCase()) {
@@ -60,6 +61,7 @@ type Params = {
 };
 
 const PlanDetailsPage = () => {
+	const { t } = useTranslation(['common']);
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { planId } = useParams<Params>();
@@ -120,8 +122,8 @@ const PlanDetailsPage = () => {
 			toast.success('Plan archived successfully');
 			navigate(RouteNames.plan);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to archive plan');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to archive plan');
 		},
 	});
 
@@ -131,8 +133,8 @@ const PlanDetailsPage = () => {
 			toast.success('Sync has been started and will take up to 1 hour to complete.');
 			void queryClient.invalidateQueries({ queryKey: ['planSyncWorkflows', planId] });
 		},
-		onError: (error: ServerError) => {
-			toast.error(error?.error?.message || 'Error synchronizing plan with subscriptions');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Error synchronizing plan with subscriptions');
 		},
 	});
 
@@ -270,10 +272,10 @@ const PlanDetailsPage = () => {
 				refetchQueryKeys={['fetchPlan', 'planEntitlements']}
 			/>
 
-			<ApiDocsContent tags={['Plans']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Plans} />
 
 			<div className='border-b border-border mt-4 mb-6'>
-				<nav className='flex space-x-4' aria-label='Tabs'>
+				<nav className='flex space-x-4' aria-label={t('common:labels.tabs')}>
 					{tabs.map((tab, index) => {
 						return (
 							<button

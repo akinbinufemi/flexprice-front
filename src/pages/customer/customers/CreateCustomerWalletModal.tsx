@@ -11,8 +11,8 @@ import { CreateWalletPayload } from '@/types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui';
 import CurrencyPriceUnitSelector from '@/components/molecules/CurrencyPriceUnitSelector/CurrencyPriceUnitSelector';
 import { CurrencyPriceUnitSelection, isPriceUnitOption } from '@/types/common/PriceUnitSelector';
-import { ServerError } from '@/core/axios/types';
 import { CirclePlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useMinCreditExpiryDate, toDateOnlyUtc } from '@/hooks/useMinCreditExpiryDate';
 
 // Reusable AddButton component
@@ -35,6 +35,7 @@ interface Props {
 }
 
 const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}, open, onOpenChange }) => {
+	const { t } = useTranslation(['customers']);
 	const [errors, setErrors] = useState({
 		currency: '',
 		conversion_rate: '',
@@ -132,11 +133,11 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 
 			return await WalletApi.createWallet(payload);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'An error occurred while creating wallet');
+		onError: (error: Error) => {
+			toast.error(error.message || t('customers:wallet.toast.createError'));
 		},
 		onSuccess: async (data: Wallet) => {
-			toast.success('Wallet created successfully');
+			toast.success(t('customers:wallet.toast.createSuccess'));
 			onSuccess(data.id);
 			await refetchQueries(['fetchWallets']);
 			await refetchQueries(['fetchWalletBalances']);
@@ -149,16 +150,16 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 		if (walletPayload.initial_credits_expiry_date_utc && minExpiryDate) {
 			const expiryDateOnly = toDateOnlyUtc(walletPayload.initial_credits_expiry_date_utc);
 			if (expiryDateOnly.getTime() < minExpiryDate.getTime()) {
-				expiryError = 'Expiry date must be after the current subscription period end';
+				expiryError = t('customers:wallet.errors.expiryAfterSubscription');
 			}
 		}
 
 		const newErrors = {
-			currency: !walletPayload.currency ? 'Currency is required' : '',
-			conversion_rate: (walletPayload.conversion_rate ?? 0) <= 0 ? 'Conversion rate must be greater than 0' : '',
+			currency: !walletPayload.currency ? t('customers:wallet.errors.currencyRequired') : '',
+			conversion_rate: (walletPayload.conversion_rate ?? 0) <= 0 ? t('customers:wallet.errors.conversionRatePositive') : '',
 			topup_conversion_rate:
 				walletPayload.topup_conversion_rate !== undefined && walletPayload.topup_conversion_rate <= 0
-					? 'Top-up conversion rate must be greater than 0'
+					? t('customers:wallet.errors.topupConversionPositive')
 					: '',
 			initial_credits_expiry_date_utc: expiryError,
 		};
@@ -176,52 +177,48 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className='bg-white sm:max-w-[600px] max-h-[80vh] overflow-y-auto'>
 				<DialogHeader>
-					<DialogTitle>Create Wallet</DialogTitle>
-					<DialogDescription>Define the wallet details and the currency it will operate in.</DialogDescription>
+					<DialogTitle>{t('customers:wallet.createTitle')}</DialogTitle>
+					<DialogDescription>{t('customers:wallet.description')}</DialogDescription>
 				</DialogHeader>
 				<div className='grid gap-4 py-4'>
 					<Select
 						value={walletPayload.wallet_type || WALLET_TYPE.PRE_PAID}
 						options={[
 							{
-								label: 'Pre-Paid',
+								label: t('customers:wallet.labelPrePaid'),
 								value: WALLET_TYPE.PRE_PAID,
-								description: 'Customers top up credits in advance. Usage deducts from a real-time balance.',
+								description: t('customers:wallet.typePrepaidDesc'),
 							},
 							{
-								label: 'Post-Paid',
+								label: t('customers:wallet.labelPostPaid'),
 								value: WALLET_TYPE.POST_PAID,
-								description: 'Credits are applied to invoices at the end of the billing cycle.',
+								description: t('customers:wallet.typePostpaidDesc'),
 							},
 						]}
-						label='Wallet Type'
+						label={t('customers:wallet.typeLabel')}
 						onChange={(value) =>
 							setwalletPayload({
 								...walletPayload,
 								wallet_type: value as WALLET_TYPE,
 							})
 						}
-						placeholder='Select Wallet Type'
+						placeholder={t('customers:wallet.typePlaceholder')}
 					/>
 
 					<CurrencyPriceUnitSelector
 						value={selectedPriceUnitOrCurrency?.data.value || walletPayload.currency || walletPayload.price_unit}
 						onChange={handlePriceUnitOrCurrencyChange}
-						label='Currency'
+						label={t('customers:wallet.currencyLabel')}
 						error={errors.currency}
-						description={
-							isPriceUnitSelected
-								? 'Custom currency selected. Currency and conversion rate are automatically set.'
-								: 'Select a currency or custom currency for this wallet.'
-						}
+						description={isPriceUnitSelected ? t('customers:wallet.customCurrencyHint') : t('customers:wallet.selectCurrencyHint')}
 					/>
 
 					{/* Conversion Rate - only show for FIAT currencies */}
 					{!isPriceUnitSelected && (
 						<div className='flex flex-col items-start gap-2 w-full'>
-							<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Conversion Rate</label>
+							<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('customers:wallet.conversionRate')}</label>
 							<div className='flex items-center gap-2 w-full'>
-								<Input className='w-full' value={'1'} disabled suffix='credit' />
+								<Input className='w-full' value={'1'} disabled suffix={t('customers:wallet.suffixCredit')} />
 								<span>=</span>
 								<Input
 									className='w-full'
@@ -240,9 +237,9 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 					{/* Top-up Conversion Rate Input - conditionally rendered above */}
 					{showTopupConversionRate && (
 						<div className='flex flex-col items-start gap-2 w-full'>
-							<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Top-up Conversion Rate</label>
+							<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('customers:wallet.topupConversionRate')}</label>
 							<div className='flex items-center gap-2 w-full'>
-								<Input className='w-full' value={'1'} disabled suffix='credit' />
+								<Input className='w-full' value={'1'} disabled suffix={t('customers:wallet.suffixCredit')} />
 								<span>=</span>
 								<Input
 									className='w-full'
@@ -257,9 +254,7 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 									}}
 								/>
 							</div>
-							<p className='text-sm text-muted-foreground'>
-								Conversion rate for top-ups. Defaults to the main conversion rate if not specified.
-							</p>
+							<p className='text-sm text-muted-foreground'>{t('customers:wallet.topupConversionDescription')}</p>
 							{errors.topup_conversion_rate && <p className='text-sm text-destructive'>{errors.topup_conversion_rate}</p>}
 						</div>
 					)}
@@ -269,10 +264,10 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 						<div className='flex items-start gap-4 w-full'>
 							<div className='flex-1'>
 								<Input
-									label='Free Credits'
-									suffix='credits'
+									label={t('customers:wallet.freeCredits')}
+									suffix={t('customers:wallet.creditsPluralSuffix')}
 									variant='formatted-number'
-									placeholder='Enter Free Credits to be added to the wallet'
+									placeholder={t('customers:wallet.freeCreditsPlaceholder')}
 									value={walletPayload.initial_credits_to_load}
 									onChange={(e) => {
 										setwalletPayload({ ...walletPayload, initial_credits_to_load: e as unknown as number });
@@ -282,7 +277,7 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 							<div className='flex-1'>
 								<DatePicker
 									labelClassName='text-foreground'
-									label='Free Credits Expiry Date'
+									label={t('customers:wallet.freeCreditsExpiry')}
 									minDate={
 										minExpiryDate
 											? new Date(minExpiryDate.getUTCFullYear(), minExpiryDate.getUTCMonth(), minExpiryDate.getUTCDate())
@@ -294,7 +289,7 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 									}
 									popoverTriggerClassName='w-full'
 									className='w-full'
-									placeholder='Select Expiry Date'
+									placeholder={t('customers:wallet.expiryPlaceholder')}
 									date={walletPayload.initial_credits_expiry_date_utc ? new Date(walletPayload.initial_credits_expiry_date_utc) : undefined}
 									setDate={(e) => {
 										setwalletPayload({
@@ -315,13 +310,15 @@ const CreateCustomerWalletModal: FC<Props> = ({ customerId, onSuccess = () => {}
 
 					{/* Add Buttons - always shown at bottom */}
 					<div className='flex gap-2 pt-2'>
-						{!showTopupConversionRate && <AddButton onClick={() => setShowTopupConversionRate(true)} label='Top-up Rate' />}
-						{!showFreeCredits && <AddButton onClick={() => setShowFreeCredits(true)} label='Free Credits' />}
+						{!showTopupConversionRate && (
+							<AddButton onClick={() => setShowTopupConversionRate(true)} label={t('customers:wallet.addTopupRate')} />
+						)}
+						{!showFreeCredits && <AddButton onClick={() => setShowFreeCredits(true)} label={t('customers:wallet.addFreeCredits')} />}
 					</div>
 
 					<div className='w-full justify-end flex pt-2'>
 						<Button isLoading={isPending} disabled={isPending} onClick={handleCreateWallet}>
-							Save Wallet
+							{t('customers:wallet.saveWallet')}
 						</Button>
 					</div>
 				</div>

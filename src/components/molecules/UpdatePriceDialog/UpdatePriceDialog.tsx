@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 import { Dialog } from '@/components/atoms';
 import { Input, Button, Select, SelectOption, DatePicker } from '@/components/atoms';
 import { Price, BILLING_MODEL, TIER_MODE, CreatePriceTier, TransformQuantity, PRICE_TYPE, PRICE_UNIT_TYPE } from '@/models/Price';
@@ -9,9 +9,9 @@ import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { PriceApi } from '@/api/PriceApi';
 import { UpdatePriceRequest } from '@/types/dto';
-import { ServerError } from '@/core/axios/types';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 import { PremiumFeatureIcon } from '../PremiumFeature/PremiumFeature';
+import { useTranslation } from 'react-i18next';
 
 interface UpdatePriceDialogProps {
 	isOpen: boolean;
@@ -21,14 +21,19 @@ interface UpdatePriceDialogProps {
 	onSuccess?: () => void;
 }
 
-const billingModelOptions: SelectOption[] = [
-	{ label: 'Flat Fee', value: BILLING_MODEL.FLAT_FEE },
-	{ label: 'Package', value: BILLING_MODEL.PACKAGE },
-	{ label: 'Volume Tiered', value: BILLING_MODEL.TIERED },
-	{ label: 'Slab Tiered', value: 'SLAB_TIERED' },
-];
-
 const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, price, planId: _planId, onSuccess }) => {
+	const { t } = useTranslation('catalog');
+
+	const billingModelOptions: SelectOption[] = useMemo(
+		() => [
+			{ label: t('priceDialogs.billingModels.flatFee'), value: BILLING_MODEL.FLAT_FEE },
+			{ label: t('priceDialogs.billingModels.package'), value: BILLING_MODEL.PACKAGE },
+			{ label: t('priceDialogs.billingModels.volumeTiered'), value: BILLING_MODEL.TIERED },
+			{ label: t('priceDialogs.billingModels.slabTiered'), value: 'SLAB_TIERED' },
+		],
+		[t],
+	);
+
 	const [overrideAmount, setOverrideAmount] = useState('');
 	const [overrideQuantity, setOverrideQuantity] = useState<number | undefined>(undefined);
 	const [overrideBillingModel, setOverrideBillingModel] = useState<BILLING_MODEL | 'SLAB_TIERED'>(price.billing_model);
@@ -104,8 +109,8 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 		mutationFn: async ({ priceId, data }: { priceId: string; data: UpdatePriceRequest }) => {
 			return await PriceApi.UpdatePrice(priceId, data);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error?.error?.message || 'Failed to update price');
+		onError: (error: Error) => {
+			toast.error(error.message || t('priceDialogs.failedUpdateToast'));
 		},
 	});
 
@@ -172,10 +177,10 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 			// Update the price
 			await updatePrice({ priceId: price.id, data: updateData });
 
-			const priceName = price.meter?.name || 'Price';
+			const priceName = price.meter?.name || t('priceDialogs.fallbackPriceName');
 			const message = effectiveFrom
-				? `${priceName} will be effective from ${formatDateTimeWithSecondsAndTimezone(effectiveFrom)}.`
-				: `${priceName} has been updated successfully.`;
+				? t('priceDialogs.toastScheduled', { name: priceName, date: formatDateTimeWithSecondsAndTimezone(effectiveFrom) })
+				: t('priceDialogs.toastUpdated', { name: priceName });
 			toast.success(message);
 
 			onSuccess?.();
@@ -280,6 +285,7 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 
 	const originalFormatted = formatAmount(getDisplayAmount());
 	const displaySymbol = getDisplaySymbol();
+	const chargeDisplayName = price.meter?.name || price.description || t('priceDialogs.thisChargeFallback');
 
 	return (
 		<Dialog
@@ -287,57 +293,53 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 			onOpenChange={onOpenChange}
 			title={
 				<div className='flex items-center gap-2'>
-					<span>Update Price</span>
+					<span>{t('priceDialogs.updateTitle')}</span>
 					<PremiumFeatureIcon side='right' align='center' sideOffset={10} />
 				</div>
 			}
-			description={`Update the pricing configuration (amount, billing model, tiers) for ${price.meter?.name || price.description || 'this charge'}`}
+			description={t('priceDialogs.updatePricingDescription', { name: chargeDisplayName })}
 			className='w-auto min-w-[32rem] max-w-[90vw]'>
 			<div className='space-y-6 max-h-[80vh] overflow-y-auto'>
 				<div className='space-y-4'>
-					{/* Original Price Display */}
 					<div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
-						<div className='text-sm text-gray-600'>Original Price</div>
+						<div className='text-sm text-gray-600'>{t('priceDialogs.originalPrice')}</div>
 						<div className='font-medium'>
 							{displaySymbol}
 							{originalFormatted}
 						</div>
 					</div>
 
-					{/* Billing Model Override - Only show for USAGE price types */}
 					{price.type === PRICE_TYPE.USAGE && (
 						<div className='space-y-2'>
-							<label className='text-sm font-medium text-gray-700'>Billing Model</label>
+							<label className='text-sm font-medium text-gray-700'>{t('priceDialogs.billingModel')}</label>
 							<Select
 								value={overrideBillingModel}
 								onChange={(value) => setOverrideBillingModel(value as BILLING_MODEL)}
 								options={billingModelOptions}
-								placeholder='Select billing model'
+								placeholder={t('priceDialogs.selectBillingModel')}
 							/>
 						</div>
 					)}
 
-					{/* Amount Override - only show if billing model is not TIERED or SLAB_TIERED */}
 					{overrideBillingModel !== BILLING_MODEL.TIERED && overrideBillingModel !== 'SLAB_TIERED' && (
 						<div className='space-y-2'>
 							<label className='text-sm font-medium text-gray-700'>
-								Override Amount ({isCustomPriceUnit ? displaySymbol : price.currency})
+								{t('priceDialogs.overrideAmountLabel', { unit: isCustomPriceUnit ? displaySymbol : price.currency })}
 							</label>
 							<Input
 								type='formatted-number'
 								value={overrideAmount}
 								onChange={setOverrideAmount}
-								placeholder='Enter new amount (optional)'
+								placeholder={t('priceDialogs.enterNewAmountOptional')}
 								suffix={displaySymbol}
 								className='w-full'
 							/>
 						</div>
 					)}
 
-					{/* Tiers Override - only show if billing model is TIERED or SLAB_TIERED */}
 					{(overrideBillingModel === BILLING_MODEL.TIERED || overrideBillingModel === 'SLAB_TIERED') && (
 						<div className='space-y-2'>
-							<label className='text-sm font-medium text-gray-700'>Tiers</label>
+							<label className='text-sm font-medium text-gray-700'>{t('priceDialogs.tiers')}</label>
 							<VolumeTieredPricingForm
 								tieredPrices={
 									overrideTiers.length > 0
@@ -390,12 +392,11 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 						</div>
 					)}
 
-					{/* Transform Quantity Override - only show if billing model is PACKAGE */}
 					{overrideBillingModel === BILLING_MODEL.PACKAGE && (
 						<div className='space-y-4'>
-							<label className='text-sm font-medium text-gray-700'>Package Configuration</label>
+							<label className='text-sm font-medium text-gray-700'>{t('priceDialogs.packageConfiguration')}</label>
 							<div className='space-y-2'>
-								<label className='text-sm text-gray-600'>Units per package</label>
+								<label className='text-sm text-gray-600'>{t('priceDialogs.unitsPerPackage')}</label>
 								<Input
 									type='number'
 									value={overrideTransformQuantity?.divide_by || ''}
@@ -405,37 +406,38 @@ const UpdatePriceDialog: FC<UpdatePriceDialogProps> = ({ isOpen, onOpenChange, p
 											divide_by: Number(value) || 1,
 										})
 									}
-									placeholder='Enter units per package'
+									placeholder={t('priceDialogs.enterUnitsPerPackage')}
 									className='w-full'
 								/>
 								{price.transform_quantity && (
-									<div className='text-xs text-gray-500'>Original: {price.transform_quantity.divide_by} units per package</div>
+									<div className='text-xs text-gray-500'>
+										{t('priceDialogs.originalUnitsPerPackage', { count: price.transform_quantity.divide_by })}
+									</div>
 								)}
 							</div>
 						</div>
 					)}
 
-					{/* Effective From Date */}
 					<div className='space-y-2'>
 						<DatePicker
-							label='Effective From (Optional)'
-							placeholder='Select date for scheduled update'
+							label={t('priceDialogs.effectiveFromOptional')}
+							placeholder={t('priceDialogs.selectDateScheduledUpdate')}
 							date={effectiveFrom}
 							setDate={setEffectiveFrom}
 							className='w-full'
 							labelClassName=''
 							popoverTriggerClassName='w-full'
 						/>
-						<p className='text-xs text-gray-500'>Schedule this price change to take effect on a future date</p>
+						<p className='text-xs text-gray-500'>{t('priceDialogs.schedulePriceChangeHint')}</p>
 					</div>
 				</div>
 
 				<div className='flex gap-3 pt-4'>
 					<Button variant='outline' onClick={handleCancel} disabled={isLoading} className='flex-1'>
-						Cancel
+						{t('priceDialogs.cancel')}
 					</Button>
 					<Button onClick={handleUpdate} className='flex-1' disabled={!hasChanges() || isLoading} isLoading={isLoading}>
-						Update Price
+						{t('priceDialogs.updatePrice')}
 					</Button>
 				</div>
 			</div>

@@ -1,5 +1,6 @@
 import { config } from '@/config/config';
 import { FC, useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { useMutation } from '@tanstack/react-query';
@@ -45,6 +46,8 @@ interface QuickBooksFormData {
 }
 
 const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
+	const { t } = useTranslation('settings');
+	const { t: tc } = useTranslation('common');
 	const { isProduction, activeEnvironment } = useEnvironment();
 	const { user } = useUser();
 
@@ -136,16 +139,16 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 		const newErrors: Record<string, string> = {};
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'Connection name is required';
+			newErrors.name = t('connection.validation.nameRequired');
 		}
 
 		// Only validate OAuth credentials when creating new connection
 		if (!connection) {
 			if (!formData.client_id.trim()) {
-				newErrors.client_id = 'Client ID is required';
+				newErrors.client_id = t('connection.validation.clientIdRequired');
 			}
 			if (!formData.client_secret.trim()) {
-				newErrors.client_secret = 'Client secret is required';
+				newErrors.client_secret = t('connection.validation.clientSecretRequired');
 			}
 		}
 
@@ -196,14 +199,14 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 			return await ConnectionApi.Update(connection.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('QuickBooks connection updated successfully');
+			toast.success(t('connection.toast.updated', { provider: 'QuickBooks' }));
 			if (response) {
 				onSave(response);
 			}
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to update connection';
+		onError: (error: Error) => {
+			const errorMessage = error.message || t('connection.toast.failedToUpdate');
 			toast.error(errorMessage);
 		},
 	});
@@ -269,8 +272,8 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 			// Redirect to QuickBooks OAuth page
 			window.location.href = response.oauth_url;
 		},
-		onError: (error: unknown) => {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to initiate OAuth';
+		onError: (error: Error) => {
+			const errorMessage = error.message || t('connection.toast.failedOAuth');
 			toast.error(errorMessage);
 		},
 	});
@@ -292,7 +295,7 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 		if (webhookUrl) {
 			navigator.clipboard.writeText(webhookUrl);
 			setWebhookCopied(true);
-			toast.success('Webhook URL copied to clipboard!');
+			toast.success(t('connection.toast.webhookUrlCopied'));
 
 			setTimeout(() => {
 				setWebhookCopied(false);
@@ -304,7 +307,7 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 		if (redirectUri) {
 			navigator.clipboard.writeText(redirectUri);
 			setRedirectUriCopied(true);
-			toast.success('Redirect URI copied to clipboard!');
+			toast.success(t('connection.toast.redirectUriCopied'));
 
 			setTimeout(() => {
 				setRedirectUriCopied(false);
@@ -316,53 +319,53 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? 'Edit QuickBooks Connection' : 'Connect to QuickBooks'}
-			description={
+			title={
 				connection
-					? 'Update your QuickBooks connection settings.'
-					: 'Configure your QuickBooks integration. You will be redirected to QuickBooks to authorize the connection.'
+					? t('integrationDrawer.title.edit', { providerName: 'QuickBooks' })
+					: t('integrationDrawer.title.connect', { providerName: 'QuickBooks' })
 			}
+			description={connection ? t('connection.quickBooks.descriptionEdit') : t('connection.quickBooks.descriptionCreate')}
 			size='lg'>
 			<div className='space-y-6 mt-4'>
 				{/* Connection Name */}
 				<Input
-					label='Connection Name'
-					placeholder='e.g., QuickBooks Production, QuickBooks Sandbox'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('connection.quickBooks.connectionNamePlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
-					description='A friendly name to identify this QuickBooks connection'
+					description={t('connection.quickBooks.connectionNameHint')}
 				/>
 
 				{/* Client ID */}
 				{!connection && (
 					<Input
-						label='Client ID'
-						placeholder='Enter your QuickBooks OAuth Client ID'
+						label={t('connection.quickBooks.clientId')}
+						placeholder={t('connection.quickBooks.clientIdPlaceholder')}
 						type='password'
 						value={formData.client_id}
 						onChange={(value) => handleChange('client_id', value)}
 						error={errors.client_id}
-						description='Your QuickBooks OAuth Client ID from the Developer Dashboard (Keys & Credentials tab)'
+						description={t('connection.quickBooks.clientIdHint')}
 					/>
 				)}
 
 				{/* Client Secret */}
 				{!connection && (
 					<Input
-						label='Client Secret'
-						placeholder='Enter your QuickBooks OAuth Client Secret'
+						label={t('connection.quickBooks.qbClientSecret')}
+						placeholder={t('connection.quickBooks.qbClientSecretPlaceholder')}
 						type='password'
 						value={formData.client_secret}
 						onChange={(value) => handleChange('client_secret', value)}
 						error={errors.client_secret}
-						description='Your QuickBooks OAuth Client Secret from the Developer Dashboard (Keys & Credentials tab)'
+						description={t('connection.quickBooks.qbClientSecretHint')}
 					/>
 				)}
 
 				{/* Environment Display (Read-only, auto-selected based on Flexprice environment) */}
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Environment</label>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('connection.labels.environment')}</label>
 					<div className='flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg'>
 						<div className={`w-3 h-3 rounded-full ${formData.environment === 'production' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
 						<span className='text-sm font-medium text-gray-900 capitalize'>{formData.environment}</span>
@@ -371,25 +374,25 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 
 				{/* Income Account ID */}
 				<Input
-					label='Income Account ID (Optional)'
-					placeholder='79'
+					label={t('connection.quickBooks.incomeAccountOptional')}
+					placeholder={t('connection.quickBooks.incomeAccountPlaceholder')}
 					value={formData.income_account_id}
 					onChange={(value) => handleChange('income_account_id', value)}
 					error={errors.income_account_id}
-					description="QuickBooks Income Account ID for Items. If left blank, it defaults to QuickBooks' standard income account (ID: 79)."
+					description={t('connection.quickBooks.incomeAccountHint')}
 				/>
 
 				{/* Sync Configuration Section */}
 				<div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-gray-800 mb-3'>Sync Configuration</h3>
-					<p className='text-xs text-gray-600 mb-4'>Configure what data to sync between QuickBooks and Flexprice</p>
+					<h3 className='text-sm font-medium text-gray-800 mb-3'>{t('connection.sync.title')}</h3>
+					<p className='text-xs text-gray-600 mb-4'>{t('connection.sync.description', { partner: 'QuickBooks' })}</p>
 
 					<div className='space-y-4'>
 						{/* Invoices */}
 						<div className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg'>
 							<div>
-								<label className='text-sm font-medium text-gray-700'>Invoices</label>
-								<p className='text-xs text-gray-500'>Push to QuickBooks</p>
+								<label className='text-sm font-medium text-gray-700'>{t('connection.labels.invoices')}</label>
+								<p className='text-xs text-gray-500'>{t('connection.quickBooks.pushToQb')}</p>
 							</div>
 							<Switch checked={formData.sync_config.invoice} onCheckedChange={(checked) => handleSyncConfigChange('invoice', checked)} />
 						</div>
@@ -397,8 +400,8 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 						{/* Payments */}
 						<div className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg'>
 							<div>
-								<label className='text-sm font-medium text-gray-700'>Payments</label>
-								<p className='text-xs text-gray-500'>Inbound sync (webhook configuration required)</p>
+								<label className='text-sm font-medium text-gray-700'>{t('connection.labels.payments')}</label>
+								<p className='text-xs text-gray-500'>{t('connection.sync.inboundWebhook')}</p>
 							</div>
 							<Switch checked={formData.sync_config.payment} onCheckedChange={(checked) => handleSyncConfigChange('payment', checked)} />
 						</div>
@@ -407,38 +410,36 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 
 				{/* Webhook Configuration (always shown, but token field only on create) */}
 				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-blue-800 mb-3'>Webhook Configuration</h3>
+					<h3 className='text-sm font-medium text-blue-800 mb-3'>{t('connection.webhook.sectionTitle')}</h3>
 					<p className='text-xs text-blue-700 mb-4'>
 						{formData.sync_config.payment
-							? 'Configure webhooks in your QuickBooks app to enable payment reconciliation from QuickBooks to Flexprice.'
-							: 'Enable payment sync to configure webhook integration for payment reconciliation.'}
+							? t('connection.quickBooks.webhookPaymentEnabled')
+							: t('connection.quickBooks.webhookPaymentDisabled')}
 					</p>
 
 					{/* Webhook Verifier Token - Only show when creating AND payment sync enabled */}
 					{!connection && formData.sync_config.payment && (
 						<div className='mb-4'>
 							<Input
-								label='Webhook Verifier Token (Optional)'
-								placeholder='Enter webhook verifier token from QuickBooks'
+								label={t('connection.quickBooks.webhookVerifierOptional')}
+								placeholder={t('connection.quickBooks.webhookVerifierPlaceholder')}
 								type='password'
 								value={formData.webhook_verifier_token}
 								onChange={(value) => handleChange('webhook_verifier_token', value)}
-								description='The webhook verifier token from Intuit Developer Portal for signature verification (recommended for production)'
+								description={t('connection.quickBooks.webhookVerifierHint')}
 							/>
 						</div>
 					)}
 
 					{/* Webhook URL - Always visible */}
 					<div className='mb-4'>
-						<label className='text-sm font-medium text-blue-800 mb-2 block'>Webhook URL</label>
-						<p className='text-xs text-blue-700 mb-3'>
-							Set up this webhook URL in your QuickBooks app (Intuit Developer Portal) to receive payment notifications:
-						</p>
+						<label className='text-sm font-medium text-blue-800 mb-2 block'>{t('connection.webhook.url')}</label>
+						<p className='text-xs text-blue-700 mb-3'>{t('connection.quickBooks.qbWebhookIntro')}</p>
 						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md'>
 							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{webhookUrl}</code>
 							<Button size='xs' variant='outline' onClick={handleCopyWebhookUrl} className='flex items-center gap-1'>
 								{webhookCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-								{webhookCopied ? 'Copied!' : 'Copy'}
+								{webhookCopied ? tc('actions.copied') : tc('actions.copy')}
 							</Button>
 						</div>
 					</div>
@@ -446,13 +447,13 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 					{/* Webhook Instructions - Only show when payment sync enabled */}
 					{formData.sync_config.payment && (
 						<div className='p-3 bg-white border border-blue-200 rounded-md'>
-							<p className='text-xs text-blue-700 font-medium mb-2'>Setup Instructions:</p>
+							<p className='text-xs text-blue-700 font-medium mb-2'>{t('connection.webhook.setupInstructions')}</p>
 							<ol className='text-xs text-blue-700 space-y-1 list-decimal list-inside'>
-								<li>Go to your QuickBooks app in Intuit Developer Portal</li>
-								<li>Navigate to Webhooks section</li>
-								<li>Add the webhook URL above</li>
-								<li>Subscribe to Payment entity events (Create/Update)</li>
-								{!connection && <li>Copy the webhook verifier token and paste it above (optional but recommended)</li>}
+								<li>{t('connection.quickBooks.qbSetupStep1')}</li>
+								<li>{t('connection.quickBooks.qbSetupStep2')}</li>
+								<li>{t('connection.quickBooks.qbSetupStep3')}</li>
+								<li>{t('connection.quickBooks.qbSetupStep4')}</li>
+								{!connection && <li>{t('connection.quickBooks.qbSetupStep5Optional')}</li>}
 							</ol>
 						</div>
 					)}
@@ -464,12 +465,12 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 							onClick={() => setIsWebhookEventsExpanded(!isWebhookEventsExpanded)}
 							className='flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-900 mb-2'>
 							{isWebhookEventsExpanded ? <ChevronDown className='w-4 h-4' /> : <ChevronRight className='w-4 h-4' />}
-							Webhook Events to Subscribe
+							{t('connection.webhook.eventsToSubscribe')}
 						</button>
 
 						{isWebhookEventsExpanded && (
 							<div className='mt-2 p-3 bg-white border border-blue-200 rounded-md'>
-								<p className='text-xs text-blue-700 mb-3'>Subscribe to this event in your QuickBooks app (Intuit Developer Portal):</p>
+								<p className='text-xs text-blue-700 mb-3'>{t('connection.quickBooks.qbWebhookEventsIntro')}</p>
 								<div className='space-y-1'>
 									{getWebhookEvents().map((event, index) => (
 										<div key={index} className='flex items-center gap-2 text-xs text-blue-700'>
@@ -486,34 +487,30 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 				{/* OAuth Info Box */}
 				{!connection && (
 					<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-						<h3 className='text-sm font-medium text-blue-800 mb-2'>🔒 OAuth Authorization Required</h3>
+						<h3 className='text-sm font-medium text-blue-800 mb-2'>{t('connection.quickBooks.oauthTitle')}</h3>
+						<p className='text-xs text-blue-700 mb-2'>{t('connection.quickBooks.oauthBody')}</p>
+						<p className='text-xs text-blue-700 mb-2'>{t('connection.quickBooks.oauthClientReady')}</p>
 						<p className='text-xs text-blue-700 mb-2'>
-							After clicking `Create Connection`, you will be redirected to QuickBooks to authorize this connection.
-							<br />
-							Make sure you have the `Client ID` and `Client Secret` ready from your QuickBooks Dashboard.
-							<br />
-							<br />
-							<span className='text-yellow-500 font-bold'>IMPORTANT:</span> You must configure this redirect URI in your QuickBooks' app
-							settings.
-							<br />
-							<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md mt-2'>
-								<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{redirectUri}</code>
-								<Button size='xs' variant='outline' onClick={handleCopyRedirectUri} className='flex items-center gap-1'>
-									{redirectUriCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-									{redirectUriCopied ? 'Copied!' : 'Copy'}
-								</Button>
-							</div>
+							<Trans
+								ns='settings'
+								i18nKey='connection.quickBooks.oauthImportantRich'
+								components={{ important: <span className='text-yellow-500 font-bold' /> }}
+							/>
 						</p>
+						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md mt-2'>
+							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{redirectUri}</code>
+							<Button size='xs' variant='outline' onClick={handleCopyRedirectUri} className='flex items-center gap-1'>
+								{redirectUriCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
+								{redirectUriCopied ? tc('actions.copied') : tc('actions.copy')}
+							</Button>
+						</div>
 					</div>
 				)}
 
 				{/* Connection Info (when editing) */}
 				{connection && (
 					<div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
-						<p className='text-xs text-gray-500'>
-							Note: OAuth credentials are encrypted and not displayed for security. To update credentials, delete this connection and create
-							a new one.
-						</p>
+						<p className='text-xs text-gray-500'>{t('connection.quickBooks.noteEditing')}</p>
 					</div>
 				)}
 
@@ -521,10 +518,10 @@ const QuickBooksConnectionDrawer: FC<QuickBooksConnectionDrawerProps> = ({ isOpe
 
 				<div className='flex gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1' disabled={isPending}>
-						Cancel
+						{tc('actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1' isLoading={isPending} disabled={isPending}>
-						{connection ? 'Update Connection' : 'Create Connection'}
+						{connection ? t('connection.buttons.updateConnection') : t('connection.buttons.createConnection')}
 					</Button>
 				</div>
 			</div>

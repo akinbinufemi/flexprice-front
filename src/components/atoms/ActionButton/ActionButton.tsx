@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Button, Dialog } from '@/components/atoms';
 import { EyeOff, Pencil } from 'lucide-react';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
+import { useTranslation } from 'react-i18next';
 
 interface EditActionConfig {
 	enabled?: boolean;
@@ -72,6 +73,7 @@ const ActionButton: FC<ActionProps> = ({
 	editIcon,
 	row: _row,
 }) => {
+	const { t } = useTranslation('common');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const navigate = useNavigate();
@@ -91,20 +93,30 @@ const ActionButton: FC<ActionProps> = ({
 		icon: archiveIcon,
 	};
 
-	const archiveActionText = archiveConfig.text || 'Archive';
-	const editActionText = editConfig.text || 'Edit';
+	const archiveActionText = archiveConfig.text || t('actions.archive');
+	const editActionText = editConfig.text || t('actions.edit');
+	const usesDefaultArchiveLabel = archive?.text === undefined && archiveText === undefined;
+	const confirmArchiveVerb = archiveActionText.toLowerCase();
 
 	const { mutate: deleteEntity } = useMutation({
 		mutationFn: deleteMutationFn,
 		onSuccess: async () => {
 			if (!disableToast) {
-				toast.success(`Successfully ${archiveActionText.toLowerCase()}d ${entityName}`);
+				toast.success(
+					usesDefaultArchiveLabel ? t('toast.archiveSuccess', { entity: entityName }) : t('toast.updateSuccess', { entity: entityName }),
+				);
 			}
 			await refetchQueries(refetchQueryKey);
 		},
-		onError: (err: ServerError) => {
+		onError: (err: Error) => {
 			if (!disableToast) {
-				toast.error(err?.error?.message || `Failed to ${archiveActionText.toLowerCase()} ${entityName}. Please try again.`);
+				const message = err?.message;
+				toast.error(
+					message ||
+						(usesDefaultArchiveLabel
+							? t('actionButton.archiveFailed', { entity: entityName })
+							: t('actionButton.actionFailedGeneric', { entity: entityName })),
+				);
 			}
 		},
 	});
@@ -176,7 +188,7 @@ const ActionButton: FC<ActionProps> = ({
 			</div>
 
 			<Dialog
-				title={`Are you sure you want to ${archiveActionText.toLowerCase()} this ${entityName}?`}
+				title={t('actionButton.confirmActionOnEntity', { action: confirmArchiveVerb, entity: entityName })}
 				titleClassName='text-lg font-normal text-gray-800 w-[90%]'
 				isOpen={isDialogOpen}
 				onOpenChange={setIsDialogOpen}
@@ -184,7 +196,7 @@ const ActionButton: FC<ActionProps> = ({
 				<div className='flex flex-col gap-4 items-end justify-center'>
 					<div className='flex gap-4'>
 						<Button variant='outline' onClick={() => setIsDialogOpen(false)}>
-							Cancel
+							{t('actions.cancel')}
 						</Button>
 						<Button
 							onClick={() => {

@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Coupon } from '@/models/Coupon';
 import { useQuery } from '@tanstack/react-query';
 import CouponApi from '@/api/CouponApi';
@@ -35,6 +36,7 @@ const LineItemCoupon: React.FC<Props> = ({
 	allLineItemCoupons = {},
 	subscriptionLevelCoupons = [],
 }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(isModalOpen);
 	const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
 
@@ -137,7 +139,7 @@ const LineItemCoupon: React.FC<Props> = ({
 						{!disabled && (
 							<div className='flex gap-1'>
 								<button onClick={handleDelete} className='text-xs text-red-600 hover:text-red-800 underline'>
-									Remove
+									{t('form.remove')}
 								</button>
 							</div>
 						)}
@@ -148,7 +150,7 @@ const LineItemCoupon: React.FC<Props> = ({
 			{!disabled && showAddButton && !selectedCoupon && (
 				<div className='flex justify-start'>
 					<button onClick={openModal} className='text-xs text-blue-600 hover:text-blue-800 underline'>
-						Add Coupon
+						{t('labels.addCoupon')}
 					</button>
 				</div>
 			)}

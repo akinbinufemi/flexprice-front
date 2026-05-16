@@ -13,6 +13,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Calculator, X } from 'lucide-react';
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import type { TFunction } from 'i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Props {
 	isOpen: boolean;
@@ -34,23 +36,16 @@ interface ValidationErrors {
 	feature?: string;
 }
 
-// Constants moved outside component for better performance
-const ENTITLEMENT_USAGE_RESET_PERIOD_OPTIONS = [
-	{ label: 'Daily', value: ENTITLEMENT_USAGE_RESET_PERIOD.DAILY },
-	{ label: 'Weekly', value: ENTITLEMENT_USAGE_RESET_PERIOD.WEEKLY },
-	{ label: 'Monthly', value: ENTITLEMENT_USAGE_RESET_PERIOD.MONTHLY },
-	{ label: 'Quarterly', value: ENTITLEMENT_USAGE_RESET_PERIOD.QUARTERLY },
-	{ label: 'Half-Yearly', value: ENTITLEMENT_USAGE_RESET_PERIOD.HALF_YEARLY },
-	{ label: 'Yearly', value: ENTITLEMENT_USAGE_RESET_PERIOD.ANNUAL },
-	{ label: 'Never', value: ENTITLEMENT_USAGE_RESET_PERIOD.NEVER },
-];
-
 // Validation functions extracted for better reusability and testing
-const validateMeteredFeature = (activeFeature: Feature | null, tempEntitlement: Partial<Entitlement>): ValidationErrors => {
+const validateMeteredFeature = (
+	activeFeature: Feature | null,
+	tempEntitlement: Partial<Entitlement>,
+	t: TFunction<'catalog'>,
+): ValidationErrors => {
 	const newErrors: ValidationErrors = {};
 
 	if (!activeFeature?.meter_id) {
-		newErrors.feature = 'Feature must have an associated meter';
+		newErrors.feature = t('entitlements.validation.featureMeterRequired');
 		return newErrors;
 	}
 
@@ -60,14 +55,14 @@ const validateMeteredFeature = (activeFeature: Feature | null, tempEntitlement: 
 	// If reset period is set to NEVER, usage limit is required (cannot be infinite)
 	if (isResetNever) {
 		if (tempEntitlement.usage_limit !== undefined && tempEntitlement.usage_limit !== null && tempEntitlement.usage_limit < 0) {
-			newErrors.usage_limit = 'Usage limit cannot be negative';
+			newErrors.usage_limit = t('entitlements.validation.usageLimitNegative');
 		}
 	} else {
 		// Normal validation for usage limit when reset is not NEVER
 		if (tempEntitlement.usage_limit === undefined) {
-			newErrors.usage_limit = 'Usage limit is required';
+			newErrors.usage_limit = t('entitlements.validation.usageLimitRequired');
 		} else if (tempEntitlement.usage_limit !== null && tempEntitlement.usage_limit < 0) {
-			newErrors.usage_limit = 'Usage limit cannot be negative';
+			newErrors.usage_limit = t('entitlements.validation.usageLimitNegative');
 		}
 	}
 
@@ -75,43 +70,47 @@ const validateMeteredFeature = (activeFeature: Feature | null, tempEntitlement: 
 	// If reset is NEVER, usage reset period is not applicable
 	if (!isInfinite && !isResetNever) {
 		if (!tempEntitlement.usage_reset_period) {
-			newErrors.usage_reset_period = 'Usage reset period is required';
+			newErrors.usage_reset_period = t('entitlements.validation.usageResetRequired');
 		}
 	}
 
 	return newErrors;
 };
 
-const validateStaticFeature = (tempEntitlement: Partial<Entitlement>): ValidationErrors => {
+const validateStaticFeature = (tempEntitlement: Partial<Entitlement>, t: TFunction<'catalog'>): ValidationErrors => {
 	const newErrors: ValidationErrors = {};
 
 	const staticValue = tempEntitlement.static_value;
 	if (staticValue === undefined || staticValue === null) {
-		newErrors.static_value = 'Value is required';
+		newErrors.static_value = t('entitlements.validation.staticValueRequired');
 	} else if (typeof staticValue === 'number' && staticValue < 0) {
-		newErrors.static_value = 'Value cannot be negative';
+		newErrors.static_value = t('entitlements.validation.staticValueNegative');
 	} else if (typeof staticValue === 'string' && !staticValue.trim()) {
-		newErrors.static_value = 'Value cannot be empty';
+		newErrors.static_value = t('entitlements.validation.staticValueEmpty');
 	}
 
 	return newErrors;
 };
 
-const validateEntitlement = (activeFeature: Feature | null, tempEntitlement: Partial<Entitlement>): ValidationErrors => {
+const validateEntitlement = (
+	activeFeature: Feature | null,
+	tempEntitlement: Partial<Entitlement>,
+	t: TFunction<'catalog'>,
+): ValidationErrors => {
 	if (!activeFeature) {
-		return { feature: 'Please select a feature' };
+		return { feature: t('entitlements.validation.selectFeature') };
 	}
 
 	switch (activeFeature.type) {
 		case FEATURE_TYPE.METERED:
-			return validateMeteredFeature(activeFeature, tempEntitlement);
+			return validateMeteredFeature(activeFeature, tempEntitlement, t);
 		case FEATURE_TYPE.STATIC:
-			return validateStaticFeature(tempEntitlement);
+			return validateStaticFeature(tempEntitlement, t);
 		case FEATURE_TYPE.BOOLEAN:
 			// Boolean features don't need additional validation
 			return {};
 		default:
-			return { feature: 'Invalid feature type' };
+			return { feature: t('entitlements.validation.invalidFeatureType') };
 	}
 };
 
@@ -138,9 +137,11 @@ const DisplayValueCalculatorDialog: FC<DisplayValueCalculatorDialogProps> = ({
 	onOpenChange,
 	unitValue,
 	reportingUnit,
-	baseUnitPlural = 'units',
+	baseUnitPlural,
 	onConfirm,
 }) => {
+	const { t } = useTranslation('catalog');
+	const resolvedBasePlural = baseUnitPlural ?? t('entitlements.addDrawer.unitsFallback');
 	// User enters display value; we compute unit value = displayValue * conversionRate
 	const [displayValueInput, setDisplayValueInput] = useState<string>('');
 
@@ -164,33 +165,39 @@ const DisplayValueCalculatorDialog: FC<DisplayValueCalculatorDialogProps> = ({
 		isValidDisplay && conversionRateNum != null && conversionRateNum !== 0 && !Number.isNaN(conversionRateNum)
 			? DISPLAY_VALUE_FORMULA.toUnit(displayValueNum, conversionRateNum)
 			: null;
-	const displayUnitPlural = reportingUnit?.unit_plural ?? baseUnitPlural;
+	const displayUnitPlural = reportingUnit?.unit_plural ?? resolvedBasePlural;
 
 	if (!reportingUnit) {
 		return (
-			<Dialog isOpen={isOpen} onOpenChange={onOpenChange} title='Display value'>
-				<p className='text-sm text-muted-foreground'>No display unit configured for this feature.</p>
+			<Dialog isOpen={isOpen} onOpenChange={onOpenChange} title={t('entitlements.displayCalculator.titleFallback')}>
+				<p className='text-sm text-muted-foreground'>{t('entitlements.displayCalculator.noDisplayUnit')}</p>
 			</Dialog>
 		);
 	}
 
-	const usageLimitDisplay = computedUnitValue != null ? computedUnitValue.toLocaleString(undefined, { maximumFractionDigits: 10 }) : '—';
+	const emDash = t('entitlements.displayCalculator.emDash');
+	const usageLimitDisplay = computedUnitValue != null ? computedUnitValue.toLocaleString(undefined, { maximumFractionDigits: 10 }) : emDash;
 
 	return (
 		<Dialog
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title='Set Entitlement in Display Units'
+			title={t('entitlements.displayCalculator.title')}
 			description={
-				<>
-					Enter a value in <span className='font-semibold'>{displayUnitPlural}</span> to see the equivalent usage limit in{' '}
-					<span className='font-semibold'>{baseUnitPlural}</span>.
-				</>
+				<Trans
+					ns='catalog'
+					i18nKey='entitlements.displayCalculator.description'
+					values={{ displayUnit: displayUnitPlural, baseUnit: resolvedBasePlural }}
+					components={{
+						strongDisplay: <span className='font-semibold' />,
+						strongBase: <span className='font-semibold' />,
+					}}
+				/>
 			}>
 			<div className='space-y-4'>
 				<Input
-					label='Value in Display Unit'
-					placeholder='Enter Value'
+					label={t('entitlements.displayCalculator.valueInDisplayUnitLabel')}
+					placeholder={t('entitlements.displayCalculator.enterValuePlaceholder')}
 					value={displayValueInput}
 					onChange={setDisplayValueInput}
 					variant='formatted-number'
@@ -200,16 +207,20 @@ const DisplayValueCalculatorDialog: FC<DisplayValueCalculatorDialogProps> = ({
 				{computedUnitValue != null && (
 					<div className='rounded-md border border-gray-200 bg-white p-4'>
 						<p className='text-sm'>
-							<span className='font-medium text-gray-900'>Calculated Usage Limit:</span>{' '}
+							<span className='font-medium text-gray-900'>{t('entitlements.displayCalculator.calculatedUsageLimit')}</span>{' '}
 							<span className='font-semibold text-blue-600'>{usageLimitDisplay}</span>{' '}
-							<span className='text-muted-foreground text-xs'>{baseUnitPlural}</span>
+							<span className='text-muted-foreground text-xs'>{resolvedBasePlural}</span>
 						</p>
 					</div>
 				)}
 
 				<p className='text-sm text-muted-foreground'>
-					The conversion factor for this feature is set at{' '}
-					<span className='font-semibold text-blue-600'>{reportingUnit.conversion_rate ?? '—'}</span>.
+					<Trans
+						ns='catalog'
+						i18nKey='entitlements.displayCalculator.conversionFactor'
+						values={{ rate: reportingUnit.conversion_rate ?? emDash }}
+						components={{ rate: <span className='font-semibold text-blue-600' /> }}
+					/>
 				</p>
 
 				<div className='mt-4 flex justify-end'>
@@ -219,7 +230,7 @@ const DisplayValueCalculatorDialog: FC<DisplayValueCalculatorDialogProps> = ({
 							if (computedUnitValue != null && onConfirm) onConfirm(computedUnitValue);
 							onOpenChange(false);
 						}}>
-						OK
+						{t('entitlements.displayCalculator.confirm')}
 					</Button>
 				</div>
 			</div>
@@ -237,6 +248,21 @@ const AddEntitlementDrawer: FC<Props> = ({
 	entityId,
 	refetchQueryKeys,
 }) => {
+	const { t } = useTranslation('catalog');
+
+	const entitlementUsageResetOptions = useMemo(
+		() => [
+			{ label: t('entitlements.usageResetPeriod.DAILY'), value: ENTITLEMENT_USAGE_RESET_PERIOD.DAILY },
+			{ label: t('entitlements.usageResetPeriod.WEEKLY'), value: ENTITLEMENT_USAGE_RESET_PERIOD.WEEKLY },
+			{ label: t('entitlements.usageResetPeriod.MONTHLY'), value: ENTITLEMENT_USAGE_RESET_PERIOD.MONTHLY },
+			{ label: t('entitlements.usageResetPeriod.QUARTERLY'), value: ENTITLEMENT_USAGE_RESET_PERIOD.QUARTERLY },
+			{ label: t('entitlements.usageResetPeriod.HALF_YEARLY'), value: ENTITLEMENT_USAGE_RESET_PERIOD.HALF_YEARLY },
+			{ label: t('entitlements.usageResetPeriod.ANNUAL'), value: ENTITLEMENT_USAGE_RESET_PERIOD.ANNUAL },
+			{ label: t('entitlements.usageResetPeriod.NEVER'), value: ENTITLEMENT_USAGE_RESET_PERIOD.NEVER },
+		],
+		[t],
+	);
+
 	const [entitlements, setEntitlements] = useState<Partial<Entitlement>[]>([]);
 	const [errors, setErrors] = useState<ValidationErrors>({});
 	const [, setSelectedFeatures] = useState<Feature[]>(disabledFeatures ?? []);
@@ -294,16 +320,16 @@ const AddEntitlementDrawer: FC<Props> = ({
 
 	// Memoized validation function
 	const validateCurrentEntitlement = useCallback((): boolean => {
-		const validationErrors = validateEntitlement(activeFeature, tempEntitlement);
+		const validationErrors = validateEntitlement(activeFeature, tempEntitlement, t);
 		setErrors(validationErrors);
 		return Object.keys(validationErrors).length === 0;
-	}, [activeFeature, tempEntitlement]);
+	}, [activeFeature, tempEntitlement, t]);
 
 	const { mutate: createBulkEntitlements, isPending } = useMutation({
 		mutationKey: ['createBulkEntitlements', entitlements],
 		mutationFn: async () => {
 			if (!entityId) {
-				throw new Error('Entity ID is required');
+				throw new Error(t('entitlements.errors.entityIdRequired'));
 			}
 
 			// Convert entitlements to CreateEntitlementRequest format
@@ -327,7 +353,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 			return await EntitlementApi.createBulk(bulkRequest);
 		},
 		onSuccess: () => {
-			toast.success('Entitlements added successfully');
+			toast.success(t('entitlements.toast.addedSuccess'));
 			handleDrawerClose(false);
 			// Use provided refetch query keys or fall back to default plan behavior
 			if (refetchQueryKeys) {
@@ -339,16 +365,18 @@ const AddEntitlementDrawer: FC<Props> = ({
 				refetchQueries(['fetchEntitlements', planId || '']);
 			}
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to add entitlements. Please try again.');
-			setErrors({ general: 'Failed to add entitlements. Please try again.' });
+		onError: (error: Error) => {
+			const message = error.message || t('entitlements.toast.addFailed');
+			toast.error(message);
+			setErrors({ general: message });
 		},
 	});
 
 	const handleSubmit = () => {
 		if (entitlements.length === 0) {
-			setErrors({ general: 'Please add at least one entitlement' });
-			toast.error('Please add at least one entitlement');
+			const msg = t('entitlements.validation.addAtLeastOne');
+			setErrors({ general: msg });
+			toast.error(msg);
 			return;
 		}
 		createBulkEntitlements();
@@ -365,8 +393,9 @@ const AddEntitlementDrawer: FC<Props> = ({
 		const isFeatureAlreadyAdded = alreadyAddedFeatureIds.includes(activeFeature.id);
 
 		if (isFeatureAlreadyAdded) {
-			setErrors({ feature: 'This feature is already added' });
-			toast.error('This feature is already added');
+			const msg = t('entitlements.validation.featureAlreadyAdded');
+			setErrors({ feature: msg });
+			toast.error(msg);
 			return;
 		}
 
@@ -385,7 +414,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 		setActiveFeature(null);
 		setErrors({});
 		setIsCalculatorOpen(false);
-	}, [activeFeature, validateCurrentEntitlement, alreadyAddedFeatureIds, tempEntitlement, entityType, entityId]);
+	}, [activeFeature, validateCurrentEntitlement, alreadyAddedFeatureIds, tempEntitlement, entityType, entityId, t]);
 
 	// Clear errors when feature changes
 	useEffect(() => {
@@ -421,8 +450,8 @@ const AddEntitlementDrawer: FC<Props> = ({
 			<Sheet
 				isOpen={isOpen}
 				onOpenChange={handleDrawerClose}
-				title={'Add Entitlement'}
-				description={'Define the features that customers will be entitled to.'}>
+				title={t('entitlements.addDrawer.title')}
+				description={t('entitlements.addDrawer.description')}>
 				<div className='space-y-4 mt-6'>
 					{ErrorDisplay}
 
@@ -465,8 +494,8 @@ const AddEntitlementDrawer: FC<Props> = ({
 									setErrors({});
 								}
 							}}
-							label='Features'
-							placeholder='Select feature'
+							label={t('entitlements.addDrawer.featuresLabel')}
+							placeholder={t('entitlements.addDrawer.selectFeaturePlaceholder')}
 							value={activeFeature?.id}
 						/>
 					)}
@@ -491,11 +520,15 @@ const AddEntitlementDrawer: FC<Props> = ({
 									{/* <Spacer className='!my-6' /> */}
 									<Input
 										error={errors.usage_limit}
-										label='Value'
-										placeholder='Enter value'
+										label={t('entitlements.addDrawer.valueLabel')}
+										placeholder={t('entitlements.addDrawer.enterValuePlaceholder')}
 										disabled={tempEntitlement.usage_limit === null}
 										variant='formatted-number'
-										value={tempEntitlement.usage_limit === null ? 'Unlimited' : tempEntitlement.usage_limit?.toString() || ''}
+										value={
+											tempEntitlement.usage_limit === null
+												? t('entitlements.addDrawer.unlimitedDisplay')
+												: tempEntitlement.usage_limit?.toString() || ''
+										}
 										onChange={(value) => {
 											const numValue = value === '' ? undefined : Number(value);
 											setTempEntitlement((prev) => ({
@@ -505,7 +538,9 @@ const AddEntitlementDrawer: FC<Props> = ({
 										}}
 										suffix={
 											<div className='flex items-center gap-1.5'>
-												<span className='text-muted-foreground text-xs font-sans'>{featureForForm?.unit_plural?.trim() || 'units'}</span>
+												<span className='text-muted-foreground text-xs font-sans'>
+													{featureForForm?.unit_plural?.trim() || t('entitlements.addDrawer.unitsFallback')}
+												</span>
 												{featureForForm?.reporting_unit != null && (
 													<Button
 														type='button'
@@ -513,7 +548,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 														size='icon'
 														className='size-7 shrink-0 text-muted-foreground hover:text-foreground'
 														onClick={() => setIsCalculatorOpen(true)}
-														aria-label='Display value calculator'>
+														aria-label={t('entitlements.addDrawer.calculatorAriaLabel')}>
 														<Calculator className='size-4' />
 													</Button>
 												)}
@@ -523,7 +558,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 									<Spacer className='!my-4' />
 									<Checkbox
 										id='set-infinite'
-										label='Set to infinite'
+										label={t('entitlements.addDrawer.setInfiniteLabel')}
 										checked={tempEntitlement.usage_limit === null}
 										onCheckedChange={(e) => {
 											setTempEntitlement((prev) => ({
@@ -537,10 +572,10 @@ const AddEntitlementDrawer: FC<Props> = ({
 									<Select
 										disabled={tempEntitlement.usage_limit === null || activeFeature.meter?.reset_usage === METER_USAGE_RESET_PERIOD.NEVER}
 										error={errors.usage_reset_period}
-										label='Usage reset'
-										placeholder='Select usage reset period'
-										options={ENTITLEMENT_USAGE_RESET_PERIOD_OPTIONS}
-										description='The values get reset in the given interval'
+										label={t('entitlements.addDrawer.usageResetLabel')}
+										placeholder={t('entitlements.addDrawer.usageResetPlaceholder')}
+										options={entitlementUsageResetOptions}
+										description={t('entitlements.addDrawer.usageResetDescription')}
 										value={tempEntitlement.usage_reset_period ?? ''}
 										onChange={(value) => {
 											setTempEntitlement((prev) => ({
@@ -552,8 +587,8 @@ const AddEntitlementDrawer: FC<Props> = ({
 									<Spacer className='!my-4' />
 									<Toggle
 										checked={tempEntitlement.is_soft_limit ?? false}
-										label='Soft Limit'
-										description='If enabled, access is always granted, even if the limit is exceeded.'
+										label={t('entitlements.addDrawer.softLimitLabel')}
+										description={t('entitlements.addDrawer.softLimitDescription')}
 										onChange={(value) => {
 											setTempEntitlement((prev) => ({
 												...prev,
@@ -569,9 +604,9 @@ const AddEntitlementDrawer: FC<Props> = ({
 								<div>
 									<Input
 										error={errors.static_value}
-										label='Value'
+										label={t('entitlements.addDrawer.valueLabel')}
 										value={tempEntitlement.static_value === undefined ? '' : tempEntitlement.static_value.toString()}
-										placeholder='Enter value'
+										placeholder={t('entitlements.addDrawer.enterValuePlaceholder')}
 										onChange={(value) => {
 											setTempEntitlement((prev) => ({
 												...prev,
@@ -586,7 +621,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 													size='icon'
 													className='size-7 shrink-0 text-muted-foreground hover:text-foreground'
 													onClick={() => setIsCalculatorOpen(true)}
-													aria-label='Display value calculator'>
+													aria-label={t('entitlements.addDrawer.calculatorAriaLabel')}>
 													<Calculator className='size-4' />
 												</Button>
 											) : undefined
@@ -597,18 +632,20 @@ const AddEntitlementDrawer: FC<Props> = ({
 
 							<div className='w-full mt-6 flex justify-end gap-2'>
 								<Button onClick={handleCancel} variant={'outline'}>
-									Cancel
+									{t('entitlements.addDrawer.cancel')}
 								</Button>
-								<Button onClick={handleAdd}>Add</Button>
+								<Button onClick={handleAdd}>{t('entitlements.addDrawer.add')}</Button>
 							</div>
 						</div>
 					)}
 				</div>
 
 				<div className='!space-y-4 mt-4'>
-					{!showSelect && !activeFeature && <AddChargesButton onClick={() => setShowSelect(true)} label='Add another feature' />}
+					{!showSelect && !activeFeature && (
+						<AddChargesButton onClick={() => setShowSelect(true)} label={t('entitlements.addDrawer.addAnotherFeature')} />
+					)}
 					<Button isLoading={isPending} onClick={handleSubmit} disabled={isPending || (!showSelect && !!activeFeature)}>
-						Save
+						{t('entitlements.addDrawer.save')}
 					</Button>
 				</div>
 			</Sheet>
@@ -628,7 +665,7 @@ const AddEntitlementDrawer: FC<Props> = ({
 					return undefined;
 				})()}
 				reportingUnit={featureForForm?.reporting_unit}
-				baseUnitPlural={featureForForm?.unit_plural?.trim() || 'units'}
+				baseUnitPlural={featureForForm?.unit_plural?.trim() || t('entitlements.addDrawer.unitsFallback')}
 				onConfirm={(unitValue) => {
 					if (activeFeature?.type === FEATURE_TYPE.METERED) {
 						setTempEntitlement((prev) => ({ ...prev, usage_limit: unitValue }));

@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { FlexpriceTable, ColumnData } from '@/components/molecules';
 import { Chip, Select, ShortPagination, Spacer, ActionButton } from '@/components/atoms';
@@ -8,6 +8,7 @@ import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import { Download } from 'lucide-react';
 import { TaskApi } from '@/api';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface TaskRunsTableProps {
 	scheduledTaskId: string;
@@ -17,6 +18,7 @@ interface TaskRunsTableProps {
 const TASK_RUNS_PAGE_SIZE = 10;
 
 const TaskRunsTable: FC<TaskRunsTableProps> = ({ scheduledTaskId, taskType = 'EXPORT' }) => {
+	const { t } = useTranslation('common');
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [dateRangeFilter, setDateRangeFilter] = useState<string>('all');
 	const { limit, offset, page, reset } = usePagination({ initialLimit: TASK_RUNS_PAGE_SIZE, prefix: PAGINATION_PREFIX.TASK_RUNS });
@@ -25,21 +27,21 @@ const TaskRunsTable: FC<TaskRunsTableProps> = ({ scheduledTaskId, taskType = 'EX
 	const { mutate: downloadFile } = useMutation({
 		mutationFn: (taskId: string) => TaskApi.downloadTaskFile(taskId),
 		onSuccess: (data) => {
-			// Open the presigned URL in a new window with security flags
 			window.open(data.download_url, '_blank', 'noopener,noreferrer');
-			toast.success('Download started');
+			toast.success(t('taskRunsTable.downloadStarted'));
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to download file');
+		onError: (error: Error) => {
+			toast.error(error.message || t('taskRunsTable.downloadFailed'));
 		},
 	});
 
-	const handleDownload = (taskId: string) => {
-		downloadFile(taskId);
-	};
+	const handleDownload = useCallback(
+		(taskId: string) => {
+			downloadFile(taskId);
+		},
+		[downloadFile],
+	);
 
-	// Stable ref so we only reset page when filter values change,
-	// not when reset's identity changes after a page navigation (e.g. after setPage(2))
 	const resetRef = useRef(reset);
 	resetRef.current = reset;
 	useEffect(() => {
@@ -66,7 +68,6 @@ const TaskRunsTable: FC<TaskRunsTableProps> = ({ scheduledTaskId, taskType = 'EX
 
 	const runs = runsResponse?.items || [];
 
-	// Filter by date range on client side
 	const filteredRuns = runs.filter((run) => {
 		if (dateRangeFilter === 'all') return true;
 
@@ -96,53 +97,58 @@ const TaskRunsTable: FC<TaskRunsTableProps> = ({ scheduledTaskId, taskType = 'EX
 		}
 	});
 
-	// Use filtered data total when date filtering is active, otherwise use server total
 	const totalItems = dateRangeFilter === 'all' ? runsResponse?.pagination?.total || 0 : filteredRuns.length;
 
-	const getStatusChip = (status: string) => {
-		const statusLower = status.toLowerCase();
-		if (statusLower === 'completed') {
-			return <Chip variant='success' label='Completed' />;
-		} else if (statusLower === 'failed') {
-			return <Chip variant='failed' label='Failed' />;
-		} else if (statusLower === 'running') {
-			return <Chip variant='info' label='Running' />;
-		} else if (statusLower === 'pending') {
-			return <Chip variant='warning' label='Pending' />;
-		}
-		return <Chip variant='default' label={status} />;
-	};
+	const getStatusChip = useCallback(
+		(status: string) => {
+			const statusLower = status.toLowerCase();
+			if (statusLower === 'completed') {
+				return <Chip variant='success' label={t('status.completed')} />;
+			} else if (statusLower === 'failed') {
+				return <Chip variant='failed' label={t('status.failed')} />;
+			} else if (statusLower === 'running') {
+				return <Chip variant='info' label={t('status.running')} />;
+			} else if (statusLower === 'pending') {
+				return <Chip variant='warning' label={t('status.pending')} />;
+			}
+			return <Chip variant='default' label={status} />;
+		},
+		[t],
+	);
 
-	const formatDateTime = (dateString?: string) => {
-		if (!dateString) return '-';
-		const date = new Date(dateString);
+	const formatDateTime = useCallback(
+		(dateString?: string) => {
+			if (!dateString) return '-';
+			const date = new Date(dateString);
 
-		// Get UTC date components
-		const now = new Date();
-		const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-		const yesterdayUTC = new Date(todayUTC);
-		yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
+			const now = new Date();
+			const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+			const yesterdayUTC = new Date(todayUTC);
+			yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
 
-		const dateUTC = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+			const dateUTC = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 
-		// Format time in UTC
-		const hours = date.getUTCHours().toString().padStart(2, '0');
-		const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-		const seconds = date.getUTCSeconds().toString().padStart(2, '0');
-		const timeString = `${hours}:${minutes}:${seconds}`;
+			const hours = date.getUTCHours().toString().padStart(2, '0');
+			const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+			const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+			const timeString = `${hours}:${minutes}:${seconds}`;
 
-		if (dateUTC.getTime() === todayUTC.getTime()) {
-			return `Today ${timeString}`;
-		} else if (dateUTC.getTime() === yesterdayUTC.getTime()) {
-			return `Yesterday ${timeString}`;
-		} else {
-			const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-			const month = monthNames[date.getUTCMonth()];
-			const day = date.getUTCDate();
-			const year = date.getUTCFullYear();
-			return `${month} ${day}, ${year} ${timeString}`;
-		}
-	};
+			if (dateUTC.getTime() === todayUTC.getTime()) {
+				return t('taskRunsTable.todayWithTime', { time: timeString });
+			} else if (dateUTC.getTime() === yesterdayUTC.getTime()) {
+				return t('taskRunsTable.yesterdayWithTime', { time: timeString });
+			} else {
+				const datePart = date.toLocaleDateString(undefined, {
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric',
+					timeZone: 'UTC',
+				});
+				return `${datePart} ${timeString}`;
+			}
+		},
+		[t],
+	);
 
 	const formatRelativeTime = (dateString?: string) => {
 		if (!dateString) return '-';
@@ -153,111 +159,115 @@ const TaskRunsTable: FC<TaskRunsTableProps> = ({ scheduledTaskId, taskType = 'EX
 		}
 	};
 
-	const columns: ColumnData<TaskRun>[] = [
-		{
-			title: 'Status',
-			render: (row) => getStatusChip(row.task_status),
-			width: 120,
-		},
-		{
-			title: 'Task ID',
-			fieldName: 'id',
-			width: 250,
-		},
-		{
-			title: 'Data Interval Start',
-			render: (row) => formatDateTime(row.metadata?.start_time),
-			width: 180,
-		},
-		{
-			title: 'Data Interval End',
-			render: (row) => formatDateTime(row.metadata?.end_time),
-			width: 180,
-		},
-		{
-			title: 'Run Started',
-			render: (row) => formatRelativeTime(row.started_at),
-			width: 150,
-		},
-		{
-			fieldVariant: 'interactive',
-			width: '50px',
-			render: (row) => {
-				// Only show download action for completed export tasks with file_url
-				const hasFile = row.file_url && row.task_status.toLowerCase() === 'completed';
-
-				if (!hasFile) {
-					return null;
-				}
-
-				return (
-					<ActionButton
-						id={row.id}
-						deleteMutationFn={async () => {}} // No delete action
-						refetchQueryKey='task-runs'
-						entityName='Task'
-						disableToast={true}
-						edit={{ enabled: false }}
-						archive={{ enabled: false }}
-						customActions={[
-							{
-								text: 'Download File',
-								icon: <Download className='size-4' />,
-								onClick: () => handleDownload(row.id),
-								enabled: true,
-							},
-						]}
-					/>
-				);
+	const columns: ColumnData<TaskRun>[] = useMemo(
+		() => [
+			{
+				title: t('taskRunsTable.statusLabel'),
+				render: (row) => getStatusChip(row.task_status),
+				width: 120,
 			},
-		},
-	];
+			{
+				title: t('taskRunsTable.columnTaskId'),
+				fieldName: 'id',
+				width: 250,
+			},
+			{
+				title: t('taskRunsTable.columnDataIntervalStart'),
+				render: (row) => formatDateTime(row.metadata?.start_time),
+				width: 180,
+			},
+			{
+				title: t('taskRunsTable.columnDataIntervalEnd'),
+				render: (row) => formatDateTime(row.metadata?.end_time),
+				width: 180,
+			},
+			{
+				title: t('taskRunsTable.columnRunStarted'),
+				render: (row) => formatRelativeTime(row.started_at),
+				width: 150,
+			},
+			{
+				fieldVariant: 'interactive',
+				width: '50px',
+				render: (row) => {
+					const hasFile = row.file_url && row.task_status.toLowerCase() === 'completed';
+
+					if (!hasFile) {
+						return null;
+					}
+
+					return (
+						<ActionButton
+							id={row.id}
+							deleteMutationFn={async () => {}}
+							refetchQueryKey='task-runs'
+							entityName={t('taskRunsTable.entityTask')}
+							disableToast={true}
+							edit={{ enabled: false }}
+							archive={{ enabled: false }}
+							customActions={[
+								{
+									text: t('taskRunsTable.downloadFile'),
+									icon: <Download className='size-4' />,
+									onClick: () => handleDownload(row.id),
+									enabled: true,
+								},
+							]}
+						/>
+					);
+				},
+			},
+		],
+		[t, getStatusChip, formatDateTime, handleDownload],
+	);
+
+	const statusOptions = useMemo(
+		() => [
+			{ value: 'all', label: t('taskRunsTable.allStatuses') },
+			{ value: 'COMPLETED', label: t('status.completed') },
+			{ value: 'FAILED', label: t('status.failed') },
+		],
+		[t],
+	);
+
+	const timeRangeOptions = useMemo(
+		() => [
+			{ value: 'all', label: t('taskRunsTable.allTime') },
+			{ value: 'today', label: t('taskRunsTable.today') },
+			{ value: 'yesterday', label: t('taskRunsTable.yesterday') },
+			{ value: 'last7days', label: t('taskRunsTable.last7Days') },
+			{ value: 'last30days', label: t('taskRunsTable.last30Days') },
+		],
+		[t],
+	);
 
 	return (
 		<div className='space-y-4'>
-			{/* Filters */}
 			<div className='flex gap-4 items-end'>
 				<div className='w-64'>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Status</label>
-					<Select
-						value={statusFilter}
-						onChange={(value) => setStatusFilter(value)}
-						options={[
-							{ value: 'all', label: 'All Statuses' },
-							{ value: 'COMPLETED', label: 'Completed' },
-							{ value: 'FAILED', label: 'Failed' },
-						]}
-					/>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('taskRunsTable.statusLabel')}</label>
+					<Select value={statusFilter} onChange={(value) => setStatusFilter(value)} options={statusOptions} />
 				</div>
 
 				<div className='w-64'>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Time Range</label>
-					<Select
-						value={dateRangeFilter}
-						onChange={(value) => setDateRangeFilter(value)}
-						options={[
-							{ value: 'all', label: 'All Time' },
-							{ value: 'today', label: 'Today' },
-							{ value: 'yesterday', label: 'Yesterday' },
-							{ value: 'last7days', label: 'Last 7 Days' },
-							{ value: 'last30days', label: 'Last 30 Days' },
-						]}
-					/>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('taskRunsTable.timeRangeLabel')}</label>
+					<Select value={dateRangeFilter} onChange={(value) => setDateRangeFilter(value)} options={timeRangeOptions} />
 				</div>
 			</div>
 
-			{/* Table */}
 			<FlexpriceTable columns={columns} data={filteredRuns} showEmptyRow={filteredRuns.length === 0 && !isLoading} />
 
-			{filteredRuns.length === 0 && !isLoading && (
-				<div className='text-center py-8 text-gray-500'>No task runs found for the selected filters.</div>
-			)}
+			{filteredRuns.length === 0 && !isLoading && <div className='text-center py-8 text-gray-500'>{t('taskRunsTable.emptyFiltered')}</div>}
 
-			{/* Pagination - only show when not using date filtering */}
 			{totalItems > 0 && dateRangeFilter === 'all' && (
 				<>
 					<Spacer className='!h-4' />
-					<ShortPagination unit='Task Runs' totalItems={totalItems} pageSize={limit} prefix={PAGINATION_PREFIX.TASK_RUNS} />
+					<ShortPagination
+						unit={t('taskRunsTable.paginationUnit')}
+						totalItems={totalItems}
+						pageSize={limit}
+						prefix={PAGINATION_PREFIX.TASK_RUNS}
+					/>
 				</>
 			)}
 		</div>

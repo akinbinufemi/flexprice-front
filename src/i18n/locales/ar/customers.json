@@ -1,0 +1,515 @@
+{
+	"list": {
+		"title": "العملاء",
+		"paginationUnit": "العملاء",
+		"entityName": "العميل",
+		"openPortal": "فتح بوابة العميل",
+		"emptyHeading": "العملاء",
+		"emptyDescription": "أنشئ خطة لعرض الأسعار وبدء فوترة العملاء.",
+		"createCustomer": "إنشاء عميل",
+		"columns": {
+			"name": "الاسم",
+			"externalId": "المعرّف الخارجي",
+			"status": "الحالة",
+			"updatedAt": "تاريخ التحديث",
+			"actions": "إجراءات"
+		},
+		"filters": {
+			"name": "الاسم",
+			"externalId": "المعرّف الخارجي",
+			"email": "البريد الإلكتروني",
+			"createdAt": "تاريخ الإنشاء",
+			"status": "الحالة",
+			"metadata": "البيانات الوصفية"
+		},
+		"sort": {
+			"name": "الاسم",
+			"email": "البريد الإلكتروني",
+			"createdAt": "تاريخ الإنشاء",
+			"updatedAt": "تاريخ التحديث"
+		}
+	},
+	"detail": {
+		"inactiveBanner": "هذا العميل غير نشط. يمكنك فقط عرض تفاصيله ولا يمكنك إجراء أي تعديلات.",
+		"tabsAria": "علامات تبويب",
+		"tabs": {
+			"overview": "نظرة عامة",
+			"wallet": "المحفظة",
+			"invoice": "الفاتورة",
+			"information": "المعلومات",
+			"taxAssociation": "الضرائب",
+			"analytics": "التحليلات",
+			"usageEvents": "أحداث الاستخدام"
+		},
+		"invoiceTabs": {
+			"overview": "نظرة عامة",
+			"payments": "المدفوعات",
+			"creditNotes": "إشعارات دائنة"
+		},
+		"creditNotesEmptySubtitle": "لا توجد إشعارات دائنة"
+	},
+	"overview": {
+		"sectionTitle": "تفاصيل العميل",
+		"loadingCustomerDetails": "جارٍ تحميل تفاصيل العميل...",
+		"billingStripeTag": "stripe",
+		"labels": {
+			"customer": "العميل",
+			"email": "البريد الإلكتروني",
+			"billingId": "معرّف الفوترة",
+			"billingDetailsHeading": "تفاصيل الفوترة",
+			"address": "العنوان",
+			"country": "الدولة",
+			"state": "المحافظة",
+			"city": "المدينة",
+			"postalCode": "الرمز البريدي",
+			"subscriptionAmount": "مبلغ الاشتراك",
+			"subscriptionStartDate": "تاريخ بدء الاشتراك"
+		},
+		"customerCardSectionTitle": "تفاصيل العميل",
+		"customerCardSlug": "المعرّف",
+		"cardTitle": "تفاصيل العميل"
+	},
+	"form": {
+		"drawer": {
+			"editCustomer": "تعديل العميل",
+			"addCustomer": "إضافة عميل",
+			"editDescription": "أدخل تفاصيل العميل لتحديث الحساب.",
+			"createDescription": "أدخل تفاصيل العميل لإنشاء حساب جديد في النظام.",
+			"detailsSectionBadge": "تفاصيل العميل",
+			"nameLabel": "الاسم",
+			"namePlaceholder": "أدخل الاسم",
+			"externalIdLabel": "المعرّف الخارجي",
+			"externalIdPlaceholder": "customer-",
+			"emailOptionalLabel": "البريد الإلكتروني (اختياري)",
+			"emailPlaceholder": "مثال: example@gmail.com",
+			"addBillingDetail": "إضافة تفاصيل الفوترة",
+			"billingSectionBadge": "تفاصيل الفوترة",
+			"saving": "جارٍ الحفظ...",
+			"save": "حفظ"
+		},
+		"billingFields": {
+			"country": "الدولة",
+			"selectCountry": "اختر الدولة",
+			"noCountries": "لا توجد دول متاحة",
+			"addressLine1": "سطر العنوان 1",
+			"addressLine1Placeholder": "سطر العنوان 1",
+			"addressLine2": "سطر العنوان 2",
+			"addressLine2Placeholder": "سطر العنوان 2",
+			"state": "المحافظة",
+			"selectState": "اختر المحافظة",
+			"noStates": "لا توجد محافظات متاحة",
+			"city": "المدينة",
+			"selectCity": "اختر المدينة",
+			"noCities": "لا توجد مدن متاحة",
+			"postalCode": "الرمز البريدي",
+			"postalCodePlaceholder": "أدخل الرمز البريدي"
+		},
+		"validation": {
+			"externalIdRequired": "المعرّف الخارجي مطلوب",
+			"nameRequired": "اسم العميل مطلوب",
+			"invalidEmail": "عنوان بريد إلكتروني غير صالح",
+			"addressLine1Max": "يجب أن يكون سطر العنوان 1 أقل من 255 حرفًا",
+			"addressLine2Max": "يجب أن يكون سطر العنوان 2 أقل من 255 حرفًا",
+			"cityMax": "يجب أن يكون اسم المدينة أقل من 100 حرف",
+			"stateMax": "يجب أن يكون اسم المحافظة أقل من 100 حرف",
+			"postalCodeMax": "يجب أن يكون الرمز البريدي أقل من 20 حرفًا",
+			"countryLength": "يجب أن يكون رمز الدولة حرفين بالضبط",
+			"addressCountryStateRequired": "الدولة والمحافظة مطلوبان عند إدخال حقول العنوان",
+			"failedToSave": "فشل في إضافة العميل. يرجى المحاولة مرة أخرى."
+		},
+		"toast": {
+			"updated": "تم تحديث العميل بنجاح",
+			"created": "تمت إضافة العميل بنجاح"
+		}
+	},
+	"wallet": {
+		"createTitle": "إنشاء محفظة",
+		"description": "حدد تفاصيل المحفظة والعملة التي ستعمل بها.",
+		"typeLabel": "نوع المحفظة",
+		"typePlaceholder": "اختر نوع المحفظة",
+		"currencyLabel": "العملة",
+		"customCurrencyHint": "تم تحديد عملة مخصّصة. يتم ضبط العملة ومعدل التحويل تلقائيًا.",
+		"selectCurrencyHint": "اختر عملة أو عملة مخصّصة لهذه المحفظة.",
+		"conversionRate": "سعر التحويل",
+		"suffixCredit": "ائتمان",
+		"creditsPluralSuffix": "أرصدة",
+		"topupConversionRate": "سعر تحويل الإعادة شحن",
+		"topupConversionDescription": "سعر تحويل إعادة الشحن. افتراضيًا يساوي سعر التحويل الأساسي إن لم تحدّده.",
+		"freeCredits": "ائتمانات مجانية",
+		"freeCreditsPlaceholder": "أدخل الائتمانات المجانية لإضافتها إلى المحفظة",
+		"freeCreditsExpiry": "تاريخ انتهاء صلاحية الائتمانات المجانية",
+		"expiryPlaceholder": "اختر تاريخ الانتهاء",
+		"typePrepaidDesc": "يقوم العملاء بإعادة شحن الائتمانات مسبقًا. الخصومات من رصيد فوري.",
+		"typePostpaidDesc": "تُطبّق الائتمانات على الفواتير في نهاية دورة الفوترة.",
+		"labelPrePaid": "مسبقة الدفع",
+		"labelPostPaid": "آجلة الدفع",
+		"addTopupRate": "سعر إعادة الشحن",
+		"addFreeCredits": "ائتمانات مجانية",
+		"saveWallet": "حفظ المحفظة",
+		"errors": {
+			"currencyRequired": "العملة مطلوبة",
+			"conversionRatePositive": "يجب أن يكون سعر التحويل أكبر من 0",
+			"topupConversionPositive": "يجب أن يكون سعر تحويل إعادة الشحن أكبر من 0",
+			"expiryAfterSubscription": "يجب أن يكون تاريخ الانتهاء بعد نهاية فترة الاشتراك الحالية"
+		},
+		"toast": {
+			"createSuccess": "تم إنشاء المحفظة بنجاح",
+			"createError": "حدث خطأ أثناء إنشاء المحفظة"
+		}
+	},
+	"select": {
+		"searchCustomers": "ابحث عن العملاء...",
+		"searchCustomer": "ابحث عن عميل...",
+		"searchByName": "ابحث عن العملاء بالاسم...",
+		"customersLabel": "العملاء",
+		"selectCustomers": "اختر العملاء",
+		"none": "بدون",
+		"self": "ذاته"
+	},
+	"inheritanceTable": {
+		"addDialogTitle": "إضافة عملاء للوراثة",
+		"columns": {
+			"customer": "العميل",
+			"externalId": "المعرّف الخارجي"
+		},
+		"removeAriaPrefix": "إزالة",
+		"sectionTitle": "العملاء المتورّثون",
+		"addSelected": "إضافة ({{count}})",
+		"add": "إضافة"
+	},
+	"usageTable": {
+		"columns": {
+			"feature": "الميزة",
+			"plan": "الخطة",
+			"value": "القيمة",
+			"usage": "الاستخدام"
+		},
+		"units": "وحدات",
+		"unlimitedLabel": "غير محدود",
+		"booleanTrue": "نعم",
+		"booleanFalse": "لا",
+		"featureTypes": {
+			"static": "ثابت",
+			"metered": "مقياسي",
+			"boolean": "نعم/لا",
+			"dash": "—",
+			"usageProgressUnlimited": "{{usage}} / غير محدود"
+		},
+		"fallback": "--"
+	},
+	"subscriptionCreate": {
+		"toast": {
+			"draftSaved": "تم حفظ مسودة الاشتراك بنجاح",
+			"created": "تم إنشاء الاشتراك بنجاح",
+			"error": "خطأ أثناء إنشاء الاشتراك"
+		},
+		"validation": {
+			"planAndPeriod": "يرجى اختيار خطة وفترة فوترة.",
+			"startDate": "يرجى اختيار تاريخ بدء للاشتراك.",
+			"phaseStartDate": "يرجى اختيار تاريخ بدء للمرحلة {{phase}}",
+			"saveEditsFirst": "يرجى حفظ التغييرات قبل الإرسال.",
+			"trialDays": "أدخل طول تجربة بالأيام (1 على الأقل)، أو اتركه فارغًا لاستخدام الافتراضي من الخطة.",
+			"autoThresholdFixed": "حد الفاتورة التلقائية غير متاح عندما تتضمن الخطة أسعارًا ثابتة.",
+			"autoThresholdNonNegative": "أدخل قيمة صالحة لحد الفاتورة التلقائية (صفر أو أكبر)، أو اتركه فارغًا لتجاهله."
+		},
+		"billingCustomer": {
+			"loadFailed": "تعذّر تحميل تفاصيل عميل الفوترة.",
+			"missingExternalId": "يجب أن يكون لعميل الفوترة معرّف خارجي."
+		},
+		"sandboxNotice": "هذا اشتراك تجريبي وستنتهي صلاحيته تلقائيًا في {{date}} (بعد {{days}} يومًا).",
+		"saveAsDraft": "حفظ كمسودّة"
+	},
+	"subscriptionDetail": {
+		"breadcrumbSubscription": "الاشتراك",
+		"sectionTitle": "تفاصيل الاشتراك",
+		"subscriptionName": "اسم الاشتراك",
+		"status": "الحالة",
+		"billingCycle": "دورة الفوترة",
+		"commitmentPeriod": "فترة الالتزام",
+		"paymentTerms": "شروط الدفع",
+		"invoicingCustomer": "عميل الفوترة",
+		"parentCustomer": "العميل الأصل",
+		"commitmentLabel": "الالتزام",
+		"autoInvoiceThreshold": "حد الفاتورة التلقائية",
+		"overageFactor": "معامل التجاوُز",
+		"startDate": "تاريخ البدء",
+		"renewalDate": "تاريخ التجديد",
+		"subscriptionsInheritance": "وراثة الاشتراكات",
+		"taxAssociations": "ارتباطات الضرائب",
+		"subscriptionPhases": "مراحل الاشتراك",
+		"phaseHeading": "مرحلة {{index}}",
+		"phaseStart": "البداية",
+		"phaseEnd": "النهاية",
+		"noPhases": "لا توجد مراحل.",
+		"upcomingInvoicesTitle": "الفواتير القادمة",
+		"upcomingInvoicesSubtitle": "هذه معاينة للفاتورة التي ستُفرض في {{date}}. قد تتغيّر إذا تم تحديث الاشتراك.",
+		"upcomingInvoicesEmpty": "لا توجد عناصر سطر لفترة تنتهي في {{date}}.",
+		"cancelsOnDate": "يُلغى في {{date}}",
+		"cancelsByDate": "يُلغى بحلول {{date}}",
+		"columns": {
+			"customer": "العميل",
+			"type": "النوع",
+			"plan": "الخطة",
+			"startDate": "تاريخ البدء",
+			"renewalDate": "تاريخ التجديد"
+		},
+		"toast": {
+			"genericError": "حدث خطأ ما"
+		},
+		"commitment": {
+			"annual": "سنوي",
+			"monthly": "شهري",
+			"nMonths": "{{count}} أشهر",
+			"quarterly": "ربع سنوي",
+			"halfYearly": "نصف سنوي",
+			"weekly": "أسبوعي",
+			"daily": "يومي"
+		}
+	},
+	"tabPanels": {
+		"common": {
+			"metadata": "البيانات الوصفية",
+			"unknown": "غير معروف"
+		},
+		"analytics": {
+			"heading": "التحليلات",
+			"featuresLabel": "الميزات",
+			"featuresPlaceholder": "اختر الميزات",
+			"startDatePlaceholder": "اختر تاريخ البدء",
+			"startDateLabel": "تاريخ البدء",
+			"endDatePlaceholder": "اختر تاريخ الانتهاء",
+			"endDateLabel": "تاريخ الانتهاء",
+			"options": "خيارات",
+			"includeChildren": "تضمين العملاء الفرعيين",
+			"metricRevenue": "الإيرادات",
+			"metricCost": "التكلفة",
+			"metricMargin": "الهامش",
+			"metricMarginPercent": "الهامش %",
+			"metricCpm": "تكلفة الألف ظهور",
+			"usageBreakdown": "تفصيل الاستخدام",
+			"collapseAll": "طي الكل",
+			"expandAll": "توسيع الكل",
+			"totalUsage": "إجمالي الاستخدام",
+			"totalCost": "إجمالي التكلفة",
+			"tableEmpty": "--"
+		},
+		"information": {
+			"saveCardOnStripe": "حفظ البطاقة على Stripe",
+			"sharePortalLinkTitle": "مشاركة رابط بوابة العميل",
+			"childCustomersTitle": "العملاء الفرعيون"
+		},
+		"invoice": {
+			"title": "الفواتير",
+			"emptySubtitle": "لا توجد فواتير",
+			"addInvoice": "إضافة فاتورة",
+			"paginationUnit": "الفواتير"
+		},
+		"overview": {
+			"subscriptionsCardTitle": "الاشتراكات",
+			"subscriptionsPaginationUnit": "الاشتراكات",
+			"entitlementsCardTitle": "الاستحقاقات"
+		},
+		"tax": {
+			"emptyTitle": "الضريبة",
+			"emptySubtitle": "لا يوجد معدل ضريبي مُعيَّن لهذا العميل",
+			"associationsTitle": "ارتباطات الضرائب",
+			"associationsPaginationUnit": "ارتباطات الضرائب"
+		},
+		"usageEvents": {
+			"loadErrorTitle": "تعذّر تحميل الأحداث",
+			"loadErrorDescription": "معلومات العميل مفقودة",
+			"noEventsFound": "لا توجد أحداث"
+		},
+		"wallet": {
+			"emptyTitle": "المحافظ",
+			"emptySubtitle": "لا توجد محافظ مرتبطة بالعميل",
+			"addWallet": "إضافة محفظة",
+			"topupWallet": "إعادة شحن المحفظة",
+			"detailsTitle": "تفاصيل المحفظة",
+			"currentBalanceShort": "الحالي",
+			"ongoingBalanceShort": "المستمر",
+			"balanceLabel": "رصيد {{type}}",
+			"currentBalanceTooltip": "الرصيد وفق آخر فاتورة",
+			"ongoingBalanceTooltip": "يشمل الاستخدام الفوري",
+			"creditsSuffix": "أرصدة",
+			"noTransactionsTitle": "لا توجد معاملات",
+			"transactionsTitle": "المعاملات",
+			"transactionsPaginationUnit": "المعاملات",
+			"noTransactionsSubtitle": "لا توجد معاملات حديثة",
+			"noMetadataTitle": "لا توجد بيانات وصفية",
+			"noMetadataHint": "أضف بيانات وصفية مخصّصة لتخزين معلومات إضافية عن هذه المحفظة."
+		}
+	},
+	"subscriptionEdit": {
+		"pageTitle": "تعديل الاشتراك",
+		"pageHeading": "تعديل الاشتراك",
+		"toast": {
+			"lineItemUpdated": "تم تحديث بند الخط بنجاح",
+			"lineItemUpdateFailed": "فشل في تحديث بند الخط",
+			"lineItemTerminated": "تم إنهاء بند الخط بنجاح",
+			"lineItemTerminateFailed": "فشل في إنهاء بند الخط",
+			"chargeAdded": "تمت إضافة الرسوم بنجاح",
+			"chargeAddFailed": "فشل في إضافة الرسوم",
+			"subscriptionUpdated": "تم تحديث الاشتراك بنجاح",
+			"subscriptionUpdateFailed": "فشل في تحديث الاشتراك",
+			"creditGrantCreated": "تم إنشاء منحة الائتمان بنجاح",
+			"creditGrantCreateFailed": "فشل في إنشاء منحة الائتمان",
+			"creditGrantDeleted": "تم حذف منحة الائتمان بنجاح",
+			"creditGrantDeleteFailed": "فشل في حذف منحة الائتمان",
+			"loadError": "خطأ في تحميل بيانات الاشتراك"
+		}
+	},
+	"organisms": {
+		"phaseForm": {
+			"phaseDuration": "مدة المرحلة",
+			"startDateRequired": "تاريخ البدء*",
+			"endDate": "تاريخ الانتهاء",
+			"foreverPlaceholder": "دائماً",
+			"updatePhase": "تحديث المرحلة",
+			"savePhase": "حفظ المرحلة"
+		},
+		"phaseList": {
+			"title": "مراحل الاشتراك",
+			"forever": "دائماً",
+			"phaseIndex": "المرحلة {{index}}",
+			"couponSingle": "• كوبون {{count}}",
+			"couponPlural": "• {{count}} كوبونات",
+			"lineItemCouponSingle": "• كوبون سطر {{count}}",
+			"lineItemCouponPlural": "• {{count}} كوبونات سطر",
+			"editPhase": "تعديل المرحلة",
+			"deletePhase": "حذف المرحلة",
+			"addPhase": "+ إضافة مرحلة"
+		},
+		"priceOverrideSummary": {
+			"title": "تجاوزات السعر المطبَّقة ({{count}})",
+			"chargeFallback": "رسم"
+		},
+		"subscriptionAction": {
+			"cancelTitle": "إلغاء الاشتراك",
+			"cancelSubtitle": "لا يمكن التراجع عن هذا الإجراء. اختر سلوك الإلغاء والفاتورة قبل المتابعة.",
+			"cancellationType": "نوع الإلغاء",
+			"cancelOn": "الإلغاء في",
+			"selectCancellationDate": "اختر تاريخ الإلغاء",
+			"prorationBehavior": "سلوك التناسب",
+			"invoiceBehaviorTitle": "سلوك الفاتورة",
+			"generateInvoice": "إنشاء فاتورة",
+			"generateInvoiceDesc": "فعِّل لإنشاء فاتورة للاستخدام حتى تاريخ الإلغاء.",
+			"reasonOptional": "السبب (اختياري)",
+			"cancelReasonPlaceholder": "لماذا يُلغى هذا الاشتراك؟",
+			"keepSubscription": "لا، أبقه",
+			"cancelling": "جارٍ الإلغاء…",
+			"yesCancel": "نعم، إلغاء",
+			"cancellationImmediate": "فوري",
+			"cancellationEndOfPeriod": "نهاية الفترة",
+			"cancellationScheduled": "تاريخ مجدول",
+			"prorationNone": "بدون تناسب",
+			"prorationCreate": "إنشاء تسويات تناسب",
+			"activateTitle": "تفعيل الاشتراك",
+			"activateSubtitle": "سيُبدأ تفعيل الاشتراك دورة الفوترة من تاريخ البدء المختار.",
+			"startDate": "تاريخ البدء",
+			"activating": "جارٍ التفعيل…",
+			"activate": "تفعيل"
+		},
+		"subscriptionForm": {
+			"subscriptionDetails": "تفاصيل الاشتراك",
+			"planRequired": "الخطة*",
+			"selectPlan": "اختر الخطة",
+			"loadPlansError": "فشل تحميل الخطط",
+			"loadPlanDetailsError": "فشل تحميل تفاصيل الخطة",
+			"loadingPlanDetails": "جارٍ تحميل تفاصيل الخطة…",
+			"billingPeriodRequired": "فترة الفوترة*",
+			"selectBillingPeriod": "اختر فترة الفوترة",
+			"currencyRequired": "العملة*",
+			"selectCurrency": "اختر العملة",
+			"subscriptionCycle": "دورة الاشتراك",
+			"billingAnniversary": "ذكرى الفوترة",
+			"billingCalendar": "تقويمي",
+			"subscriptionStartRequired": "تاريخ بدء الاشتراك*",
+			"subscriptionEnd": "تاريخ انتهاء الاشتراك",
+			"foreverPlaceholder": "دائماً",
+			"billingDate": "تاريخ الفوترة",
+			"selectBillingDate": "اختر تاريخ الفوترة",
+			"commitmentAmount": "مبلغ الالتزام",
+			"commitmentAmountPlaceholder": "مثال: ‎$100.00",
+			"commitmentPeriod": "فترة الالتزام",
+			"commitmentMonthly": "شهري",
+			"commitmentQuarterly": "ربع سنوي",
+			"commitmentHalfYearly": "نصف سنوي",
+			"commitmentAnnual": "سنوي",
+			"sameAsBillingPlaceholder": "مثل فترة الفوترة",
+			"overageFactor": "معامل الزيادة",
+			"overageFactorPlaceholder": "مثال: 1.5",
+			"enableTrueUp": "تفعيل رسوم التسوية",
+			"entitlements": "الاستحقاقات",
+			"billingConfiguration": "إعدادات الفوترة",
+			"paymentTerms": "شروط الدفع",
+			"selectPaymentTerms": "اختر شروط الدفع",
+			"billingCustomerLabel": "عميل الفوترة",
+			"billingCustomerPlaceholder": "نفسه",
+			"searchBillingCustomer": "ابحث عن عميل الفوترة…",
+			"freeTrial": "تجربة مجانية",
+			"aboutFreeTrialAria": "عن التجربة المجانية",
+			"freeTrialHelp": "مدة تجربة اختيارية بالأيام. اتركه فارغاً لاستخدام الافتراضي من الخطة (أو بلا تجربة إن لم تُعرَّف في الخطة).",
+			"trialDaysAria": "أيام التجربة",
+			"trialDaysPlaceholder": "14",
+			"prorationBehavior": "سلوك التناسب",
+			"aboutProrationAria": "عن التناسب",
+			"prorationHelp": "عند التفعيل، تولّد تغييرات منتصف الدورة بنود تناسب لتعكس الفواتير الزمن على كل سعر.",
+			"prorationInline": "إنشاء بنود تناسب عند تغيير الاشتراك منتصف الدورة.",
+			"autoInvoiceThreshold": "حد الفاتورة التلقائية",
+			"aboutAutoInvoiceAria": "عن حد الفاتورة التلقائية",
+			"autoInvoiceHelp": "مبلغ الاستخدام الذي قد يستدعي فاتورة قبل نهاية الفترة. متاح عند الرسوم بالاستخدام؛ الرسوم الثابتة تعطّله.",
+			"autoInvoicePlaceholder": "100.00",
+			"autoInvoiceAmountAria": "مبلغ حد الفاتورة التلقائية"
+		},
+		"subscriptionPriceTable": {
+			"overridePrice": "تجاوز السعر",
+			"editOverride": "تعديل التجاوز",
+			"resetOverride": "إعادة تعيين التجاوز",
+			"configureCommitment": "ضبط الالتزام",
+			"editCommitment": "تعديل الالتزام",
+			"applyCoupon": "تطبيق كوبون",
+			"payAsYouGo": "ادفع حسب الاستخدام",
+			"chargeFallback": "رسم",
+			"charges": "الرسوم",
+			"showLess": "عرض أقل",
+			"showMore": "عرض {{count}} إضافية",
+			"colCharge": "الرسم",
+			"colBillingPeriod": "فترة الفوترة",
+			"colQuantity": "الكمية",
+			"colPrice": "السعر",
+			"editAdded": "تعديل",
+			"deleteAdded": "حذف"
+		},
+		"subscriptionTable": {
+			"planModifiedAria": "تم تعديل الخطة",
+			"hierarchyColumn": "التسلسل",
+			"inheritedTitle": "اشتراك موروث",
+			"inheritedBody": "يعكس هذا الاشتراك رسوم اشتراك أصل. يُعدَّل على الاشتراك الأصل.",
+			"parentTitle": "الاشتراك الأصل",
+			"parentBody": "تُجمَّع رسوم واستخدام الاشتراكات الفرعية في هذا الاشتراك.",
+			"groupedInvoicingTitle": "فوترة مجمّعة",
+			"groupedInvoicingBody": "لهذا الاشتراك رسومه؛ يمكن دمج الفوترة في فاتورة الاشتراك الأصل.",
+			"delegatedInvoicingTitle": "فوترة بالتفويض",
+			"delegatedInvoicingBody": "الرسوم على هذا الاشتراك لكن الفواتير تُصدَر لعميل آخر (عميل الفوترة).",
+			"chipInherited": "موروث",
+			"chipParent": "أصل",
+			"chipGrouped": "فوترة مجمّعة",
+			"chipDelegated": "فوترة بالتفويض"
+		},
+		"subscriptionWithOverrides": {
+			"chargesTitle": "رسوم الاشتراك",
+			"resetAll": "إعادة تعيين الكل",
+			"priceOverridesTitle": "تجاوزات السعر المطبَّقة",
+			"reset": "إعادة تعيين",
+			"creating": "جارٍ إنشاء الاشتراك…",
+			"create": "إنشاء اشتراك",
+			"chargeFallback": "رسم",
+			"overrideSingle": "{{count}} تجاوز",
+			"overridePlural": "{{count}} تجاوزات"
+		},
+		"usageTable": {
+			"currentMeterUsage": "استخدام العداد الحالي"
+		}
+	}
+}

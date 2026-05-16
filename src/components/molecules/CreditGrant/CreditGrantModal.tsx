@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import RectangleRadiogroup, { RectangleRadiogroupOption } from '../RectangleRadiogroup';
 import { creditGrantPeriodOptions } from '@/constants/constants';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: InternalCreditGrantRequest;
@@ -46,6 +47,7 @@ const expirationTypeOptions: SelectOption[] = [
 ];
 
 const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave, onCancel, getEmptyCreditGrant }) => {
+	const { t } = useTranslation('billing');
 	const isEdit = !!data;
 
 	const [errors, setErrors] = useState<FormErrors>({});
@@ -228,11 +230,11 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 			isOpen={isOpen}
 			showCloseButton={false}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Credit Grant' : 'Add Credit Grant'}
+			title={isEdit ? t('creditGrant.modal.titleEdit') : t('creditGrant.modal.titleAdd')}
 			className='sm:max-w-[600px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2 !mb-6'>
-					<Label label='Credit Type' />
+					<Label label={t('creditGrant.modal.creditType')} />
 					<RectangleRadiogroup
 						options={billingCadenceOptions.map((option) => ({
 							...option,
@@ -245,9 +247,9 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 				</div>
 
 				<div className='space-y-2'>
-					<Label label='Credit Name' />
+					<Label label={t('creditGrant.modal.creditName')} />
 					<Input
-						placeholder='e.g. Welcome Credits'
+						placeholder={t('creditGrant.modal.creditNamePlaceholder')}
 						value={formData.name || ''}
 						onChange={(value) => handleFieldChange('name', value)}
 						error={errors.name}
@@ -255,10 +257,10 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 				</div>
 
 				<div className='space-y-2'>
-					<Label label='Credits' />
+					<Label label={t('creditGrant.modal.credits')} />
 					<Input
 						error={errors.credits}
-						placeholder='e.g. 1000'
+						placeholder={t('creditGrant.modal.creditsPlaceholder')}
 						variant='formatted-number'
 						formatOptions={{
 							allowDecimals: true,
@@ -273,7 +275,7 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 
 				{/* Conversion Rate */}
 				<div className='flex flex-col items-start gap-2 w-full'>
-					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Conversion Rate</label>
+					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('creditGrant.modal.conversionRate')}</label>
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
@@ -286,15 +288,13 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 							}}
 						/>
 					</div>
-					<p className='text-sm text-muted-foreground'>
-						Amount in currency equivalent to 1 credit. For example, if conversion rate is 2, then 1 credit = 2 units of currency.
-					</p>
+					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.conversionRateHint')}</p>
 					{errors.conversion_rate && <p className='text-sm text-destructive'>{errors.conversion_rate}</p>}
 				</div>
 
 				{/* Top-up Conversion Rate */}
 				<div className='flex flex-col items-start gap-2 w-full'>
-					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Top-up Conversion Rate</label>
+					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('creditGrant.modal.topupConversionRate')}</label>
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
@@ -307,15 +307,13 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 							}}
 						/>
 					</div>
-					<p className='text-sm text-muted-foreground'>
-						Conversion rate for top-ups. Defaults to the main conversion rate if not specified.
-					</p>
+					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.topupConversionRateHint')}</p>
 					{errors.topup_conversion_rate && <p className='text-sm text-destructive'>{errors.topup_conversion_rate}</p>}
 				</div>
 
 				{formData.cadence === CREDIT_GRANT_CADENCE.RECURRING && (
 					<div className='space-y-2'>
-						<Label label='Grant Period' />
+						<Label label={t('creditGrant.modal.grantPeriod')} />
 						<Select
 							error={errors.period}
 							options={creditGrantPeriodOptions}
@@ -326,7 +324,7 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 				)}
 
 				<div className='space-y-2'>
-					<Label label='Expiry Type' />
+					<Label label={t('creditGrant.modal.expiryType')} />
 					<Select
 						error={errors.expiration_type}
 						options={expirationTypeOptions}
@@ -337,10 +335,10 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 
 				{formData.expiration_type === CREDIT_GRANT_EXPIRATION_TYPE.DURATION && (
 					<div className='space-y-2'>
-						<Label label='Expiry (days)' />
+						<Label label={t('creditGrant.modal.expiryDays')} />
 						<Input
 							error={errors.expiration_duration}
-							placeholder='e.g. 30'
+							placeholder={t('creditGrant.modal.expiryDaysPlaceholder')}
 							variant='formatted-number'
 							formatOptions={{
 								allowDecimals: false,
@@ -356,10 +354,10 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 				)}
 
 				<div className='space-y-2'>
-					<Label label='Priority' />
+					<Label label={t('creditGrant.modal.priority')} />
 					<Input
 						error={errors.priority}
-						placeholder='e.g. 0'
+						placeholder={t('creditGrant.modal.priorityPlaceholder')}
 						variant='formatted-number'
 						formatOptions={{
 							allowDecimals: false,
@@ -375,9 +373,9 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={handleCancel}>
-					Cancel
+					{t('creditGrant.modal.cancel')}
 				</Button>
-				<Button onClick={handleSave}>{isEdit ? 'Save Changes' : 'Add Credit'}</Button>
+				<Button onClick={handleSave}>{isEdit ? t('creditGrant.modal.saveChanges') : t('creditGrant.modal.addCredit')}</Button>
 			</div>
 		</Dialog>
 	);

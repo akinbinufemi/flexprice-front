@@ -1,0 +1,311 @@
+{
+	"labels": {
+		"missingValue": "—",
+		"name": "Name",
+		"token": "Token",
+		"type": "Type",
+		"roles": "Roles",
+		"createdAt": "Created At",
+		"id": "ID",
+		"expiration": "Expiration",
+		"accountType": "Account Type",
+		"mappedToIdentity": "Mapped to Identity",
+		"selectedRoles": "Selected Roles",
+		"accountRolesPermissions": "Account Roles and Permissions",
+		"apiKey": "API Key",
+		"lineItem": "Line item",
+		"qty": "Qty",
+		"values": "Values",
+		"customer": "Customer",
+		"subscription": "Subscription",
+		"feature": "Feature",
+		"meter": "Meter",
+		"price": "Price",
+		"workflowId": "Workflow ID",
+		"runId": "Run ID",
+		"workflowType": "Workflow type",
+		"taskQueue": "Task queue",
+		"entity": "Entity",
+		"entityId": "Entity ID",
+		"activityId": "Activity ID",
+		"activityType": "Activity type",
+		"close": "Close",
+		"closeTime": "Close time",
+		"status": "Status",
+		"start": "Start",
+		"error": "Error",
+		"duration": "Duration",
+		"startTime": "Start time",
+		"endTime": "End time",
+		"eventId": "Event Id",
+		"eventsName": "Events name",
+		"externalCustomerId": "External Customer ID",
+		"source": "Source",
+		"timestamp": "Timestamp",
+		"response": "Response",
+		"eventDetails": "Event Details",
+		"eventFilter": "Event Filter",
+		"roleRequiredHint": "Roles",
+		"placeholders": {
+			"key": "key",
+			"value": "value",
+			"secretKeyName": "Secret Key",
+			"selectServiceAccount": "Select a service account"
+		}
+	},
+	"apiKeys": {
+		"toastFetchError": "Error fetching secret keys",
+		"paginationUnit": "Secret Keys",
+		"emptyCard": {
+			"heading": "Generate A Secret Key",
+			"description": "Generate a secret key to authenticate API requests and secure access.",
+			"button": "Create Secret Key"
+		},
+		"roles": {
+			"fullAccess": "Full Access"
+		},
+		"accountTypes": {
+			"serviceAccount": "Service Account",
+			"userAccount": "User Account"
+		},
+		"entityName": "API key",
+		"permissionDisplay": {
+			"none": "None",
+			"read": "Read",
+			"write": "Write",
+			"fullAccess": "Full access"
+		}
+	},
+	"serviceAccounts": {
+		"toastFetchError": "Error fetching service accounts",
+		"paginationUnit": "Service Accounts",
+		"noRoles": "No Roles",
+		"emptyCard": {
+			"heading": "Create A Service Account",
+			"description": "Create a service account to manage programmatic access with specific roles and permissions.",
+			"button": "Create Service Account"
+		}
+	},
+	"secretKeyDrawer": {
+		"title": "Create API Key",
+		"description": "Create a new API key to access the Flexprice API",
+		"createFailed": "Failed to create API key. Please try again.",
+		"inheritedPrefix": "Inherited from service account:",
+		"fullAccess": {
+			"title": "Full Access",
+			"body": "This API key will have full access with all permissions inherited from your user account."
+		},
+		"serviceAccountsUnavailable": {
+			"title": "Service Accounts Not Available",
+			"body": "The backend endpoint for service accounts is not yet implemented. Please create a user account API key instead, or contact your administrator."
+		},
+		"noServiceAccounts": {
+			"title": "No Service Accounts Found",
+			"body": "Create a service account first to generate API keys for automated services."
+		},
+		"expiration": {
+			"never": "Never",
+			"oneHour": "1 Hour",
+			"oneDay": "1 Day",
+			"oneWeek": "1 Week",
+			"oneMonth": "1 Month"
+		},
+		"accountTypes": {
+			"user": "User Account",
+			"service": "Service Account"
+		},
+		"serviceAccountFallback": "Service Account {{index}}",
+		"modal": {
+			"title": "View API Key",
+			"warning": "You can only see this key once. Store it safely."
+		}
+	},
+	"serviceAccountDrawer": {
+		"title": "Create Service Account",
+		"description": "Create a new service account with specific roles for automated services",
+		"createSuccess": "Service account created successfully!",
+		"createFailed": "Failed to create service account. Please try again.",
+		"intro": {
+			"title": "Service Account",
+			"body": "Service accounts are used for automated processes and API integrations. They have fixed roles and permissions."
+		},
+		"rolesUnavailable": {
+			"title": "Roles Not Available",
+			"body": "Unable to load available roles. Please contact your administrator."
+		},
+		"rolesHint": "Select one or more roles to define the permissions for this service account",
+		"loadingRoles": "Loading roles...",
+		"noRolesAvailable": "No roles available",
+		"submit": "Create Service Account"
+	},
+	"webhooks": {
+		"toastFetchError": "Error fetching webhook dashboard: {{message}}",
+		"unknownError": "Unknown error",
+		"emptyLoadFailed": {
+			"heading": "Unable to Load Webhooks",
+			"description": "There was an error loading the webhook dashboard. Please try refreshing the page."
+		},
+		"disabled": {
+			"heading": "Webhooks",
+			"description": "Webhooks are not enabled. Please contact support to enable webhooks."
+		}
+	},
+	"workflows": {
+		"paginationUnit": "Workflows",
+		"empty": {
+			"description": "Temporal workflow executions will appear here when runs are recorded."
+		},
+		"filters": {
+			"workflowId": "Workflow ID",
+			"workflowType": "Workflow type",
+			"taskQueue": "Task queue",
+			"status": "Status",
+			"entity": "Entity",
+			"entityId": "Entity ID",
+			"running": "Running",
+			"completed": "Completed",
+			"failed": "Failed",
+			"canceled": "Canceled",
+			"terminated": "Terminated",
+			"continuedAsNew": "Continued As New",
+			"timedOut": "Timed Out"
+		},
+		"sort": {
+			"startTime": "Start time",
+			"endTime": "End time",
+			"createdAt": "Created at"
+		},
+		"columns": {
+			"workflowId": "Workflow ID",
+			"runId": "Run ID",
+			"workflowType": "Workflow type",
+			"status": "Status",
+			"startTime": "Start time",
+			"endTime": "End time",
+			"duration": "Duration"
+		},
+		"statusChip": {
+			"completed": "Completed",
+			"failed": "Failed"
+		},
+		"durationUnits": {
+			"ms": "ms",
+			"s": "s",
+			"min": "min",
+			"hr": "hr"
+		}
+	},
+	"workflowDetail": {
+		"heading": "Workflow details",
+		"headingShort": "Workflow",
+		"notFoundTitle": "Workflow not found",
+		"notFoundDescription": "Failed to load workflow or it may have been removed.",
+		"backToWorkflows": "Back to Workflows",
+		"summaryTitle": "Summary",
+		"activitiesTitle": "Activities",
+		"noActivities": "No activities recorded.",
+		"columns": {
+			"retries": "Retries"
+		},
+		"activityStatus": {
+			"COMPLETED": "Completed",
+			"FAILED": "Failed",
+			"RUNNING": "Running",
+			"CANCELED": "Canceled",
+			"TIMED_OUT": "Timed Out"
+		}
+	},
+	"events": {
+		"listPage": {
+			"title": "Events"
+		},
+		"queryBuilder": {
+			"filters": {
+				"eventId": "Event ID",
+				"eventName": "Event name",
+				"externalCustomerId": "External customer ID",
+				"source": "Source",
+				"startTime": "Start time",
+				"endTime": "End time"
+			},
+			"sort": {
+				"createdAt": "Created at",
+				"updatedAt": "Updated at"
+			}
+		},
+		"debugger": {
+			"processedEventsTitle": "Processed Events",
+			"eventDetailsTitle": "Event Details",
+			"loadFailedTitle": "Failed to load event debug details",
+			"noTrackerData": "No tracker data available for this event.",
+			"couldNotResolveCustomer": "Could not resolve customer for this subscription",
+			"openSubscriptionFailed": "Failed to open subscription",
+			"propertiesCopied": "Properties copied to clipboard!"
+		},
+		"processed": {
+			"eventNumber": "Event #{{n}}"
+		},
+		"tracker": {
+			"ingested": "Ingested",
+			"customerLookup": "Customer Lookup",
+			"featureLookup": "Feature Lookup",
+			"priceLookup": "Price Lookup",
+			"subscriptionLineItemLookup": "Subscription Line Item Lookup",
+			"attributedToCustomer": "Attributed to Customer",
+			"stepStatus": {
+				"processing": "Processing",
+				"failed": "Failed",
+				"successful": "Successful",
+				"skipped": "Skipped"
+			}
+		},
+		"monitoring": {
+			"title": "Events Monitoring",
+			"description": "Event processing metrics and lag information",
+			"eventCount": "Event Count",
+			"emptyRangeTitle": "This range is empty",
+			"emptyRangeDescription": "Not enough data is available in the selected range to show this statistics.",
+			"viewLatestData": "View latest data"
+		},
+		"list": {
+			"noEventsFound": "No events found"
+		}
+	},
+	"usage": {
+		"costAnalytics": {
+			"pageTitle": "Analytics",
+			"featuresLabel": "Features",
+			"selectFeaturesPlaceholder": "Select features",
+			"customerIdLabel": "Customer ID",
+			"externalCustomerIdPlaceholder": "External customer ID",
+			"selectDateRangePlaceholder": "Select date range",
+			"dateRangeTitle": "Date Range",
+			"revenueMetric": "Revenue",
+			"costMetric": "Cost",
+			"marginMetric": "Margin",
+			"marginPercentMetric": "Margin %"
+		},
+		"query": {
+			"pageTitle": "Query",
+			"selectMeteredFeaturePlaceholder": "Select a metered feature",
+			"filters": {
+				"customerId": "Customer ID",
+				"startTime": "Start time",
+				"endTime": "End time"
+			},
+			"windowSizes": {
+				"MINUTE": "Minute",
+				"15MIN": "15 minutes",
+				"30MIN": "30 minutes",
+				"HOUR": "Hour",
+				"3HOUR": "3 hours",
+				"6HOUR": "6 hours",
+				"12HOUR": "12 hours",
+				"DAY": "Day",
+				"WEEK": "Week"
+			},
+			"sortTimeWindow": "Time window",
+			"chartSeriesUsage": "Usage"
+		}
+	}
+}

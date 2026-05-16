@@ -13,6 +13,8 @@ import { LineItemCommitmentConfig, LineItemCommitmentsMap } from '@/types/dto/Li
 import CommitmentConfigDialog from '@/components/molecules/CommitmentConfigDialog';
 import { formatCommitmentSummary } from '@/utils/common/commitment_helpers';
 import { isOneTimePlanPrice } from '@/utils/subscription/planPricesForSubscriptionUi';
+import { useTranslation } from 'react-i18next';
+
 interface Props {
 	data?: AddAddonToSubscriptionRequest;
 	isOpen: boolean;
@@ -42,6 +44,7 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 	billingPeriod,
 	currency,
 }) => {
+	const { t } = useTranslation('common');
 	const [formData, setFormData] = useState<Partial<AddAddonToSubscriptionRequest>>({});
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [selectedAddonDetails, setSelectedAddonDetails] = useState<any>(null);
@@ -86,14 +89,14 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 		const newErrors: FormErrors = {};
 
 		if (!formData.addon_id) {
-			newErrors.addon_id = 'Addon is required';
+			newErrors.addon_id = t('subscriptionAddon.addonRequired');
 		}
 
 		return {
 			isValid: Object.keys(newErrors).length === 0,
 			errors: newErrors,
 		};
-	}, [formData]);
+	}, [formData, t]);
 
 	const handleSave = useCallback(() => {
 		const validation = validateForm();
@@ -186,18 +189,18 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 	const addonChargeColumns: ColumnData<AddonChargeRow>[] = useMemo(
 		() => [
 			{
-				title: 'Charge',
-				render: (row) => <span>{row.price.display_name || row.price.meter?.name || 'Charge'}</span>,
+				title: t('subscriptionAddon.columnCharge'),
+				render: (row) => <span>{row.price.display_name || row.price.meter?.name || t('subscriptionAddon.chargeFallbackLabel')}</span>,
 			},
 			{
-				title: 'Type',
-				render: (row) => <span>{toSentenceCase(row.price.type || '--')}</span>,
+				title: t('subscriptionAddon.columnType'),
+				render: (row) => <span>{toSentenceCase(row.price.type || t('labels.na'))}</span>,
 			},
 			{
-				title: 'Commitment',
+				title: t('subscriptionAddon.columnCommitment'),
 				render: (row) => {
 					if (row.price.type !== PRICE_TYPE.USAGE) {
-						return <span className='text-sm text-gray-400'>Not available</span>;
+						return <span className='text-sm text-gray-400'>{t('subscriptionAddon.notAvailable')}</span>;
 					}
 					const config = commitmentMap[row.price.id];
 					return config ? <span className='text-sm text-gray-600'>{formatCommitmentSummary(config)}</span> : <span>—</span>;
@@ -215,13 +218,13 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 					const hasConfig = commitmentMap[row.price.id] !== undefined;
 					return (
 						<Button variant='outline' onClick={() => handleConfigureCommitment(row.price)} type='button'>
-							{hasConfig ? 'Edit' : 'Configure'}
+							{hasConfig ? t('subscriptionAddon.edit') : t('subscriptionAddon.configure')}
 						</Button>
 					);
 				},
 			},
 		],
-		[commitmentMap, handleConfigureCommitment],
+		[commitmentMap, handleConfigureCommitment, t],
 	);
 
 	// const handleDateChange = useCallback(
@@ -239,22 +242,22 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 		return addons.map((addon) => ({
 			label: addon.name,
 			value: addon.id,
-			description: addon.description || 'No description',
+			description: addon.description || t('subscriptionAddon.noDescription'),
 		}));
-	}, [addons]);
+	}, [addons, t]);
 
 	return (
 		<Dialog
 			isOpen={isOpen}
 			showCloseButton={false}
 			onOpenChange={onOpenChange}
-			title={data ? 'Edit Addon' : 'Add Addon'}
+			title={data ? t('subscriptionAddon.editAddonTitle') : t('subscriptionAddon.addAddonTitle')}
 			className='sm:max-w-[900px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2'>
 					<Select
-						label='Addon'
-						placeholder='Select addon'
+						label={t('subscriptionAddon.labelAddon')}
+						placeholder={t('subscriptionAddon.placeholderSelectAddon')}
 						options={filteredAddonOptions}
 						value={formData.addon_id || ''}
 						onChange={handleAddonSelect}
@@ -267,10 +270,12 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 					<div className='space-y-2'>
 						<div className='flex items-center justify-between'>
 							<div>
-								<p className='text-sm font-medium text-gray-700'>Addon Charges</p>
+								<p className='text-sm font-medium text-gray-700'>{t('subscriptionAddon.addonChargesHeading')}</p>
 								<p className='text-xs text-gray-500'>
-									Filtered by {billingPeriod ? toSentenceCase(billingPeriod.replace('_', ' ')) : 'billing period'} and{' '}
-									{currency ? currency.toUpperCase() : 'currency'}
+									{t('subscriptionAddon.filteredByPeriodAndCurrency', {
+										period: billingPeriod ? toSentenceCase(billingPeriod.replace('_', ' ')) : t('subscriptionAddon.billingPeriodFallback'),
+										currency: currency ? currency.toUpperCase() : t('subscriptionAddon.currencyFallback'),
+									})}
 								</p>
 							</div>
 						</div>
@@ -280,10 +285,10 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 							</div>
 						) : (
 							<div className='rounded-xl border border-gray-200 p-4'>
-								<p className='text-sm text-gray-600'>No charges for this billing period/currency.</p>
+								<p className='text-sm text-gray-600'>{t('subscriptionAddon.noChargesForPeriod')}</p>
 							</div>
 						)}
-						<p className='text-xs text-gray-500'>Commitments can be configured only for usage-based charges.</p>
+						<p className='text-xs text-gray-500'>{t('subscriptionAddon.commitmentUsageOnlyHint')}</p>
 					</div>
 				)}
 
@@ -326,9 +331,9 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={handleCancel}>
-					Cancel
+					{t('actions.cancel')}
 				</Button>
-				<Button onClick={handleSave}>{data ? 'Save Changes' : 'Add Addon'}</Button>
+				<Button onClick={handleSave}>{data ? t('subscriptionAddon.saveChanges') : t('subscriptionAddon.submitAddAddon')}</Button>
 			</div>
 		</Dialog>
 	);

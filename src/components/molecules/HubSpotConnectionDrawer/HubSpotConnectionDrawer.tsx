@@ -1,5 +1,6 @@
 import { config } from '@/config/config';
 import { FC, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { useUser } from '@/hooks/UserContext';
@@ -40,6 +41,8 @@ interface HubSpotFormData {
 }
 
 const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
+	const { t } = useTranslation('settings');
+	const { t: tc } = useTranslation('common');
 	const { user } = useUser();
 	const { activeEnvironment } = useEnvironment();
 
@@ -161,16 +164,16 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 		const newErrors: Record<string, string> = {};
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'Connection name is required';
+			newErrors.name = t('connection.validation.nameRequired');
 		}
 
 		// Only validate secrets when creating new connection
 		if (!connection) {
 			if (!formData.access_token.trim()) {
-				newErrors.access_token = 'Access token is required';
+				newErrors.access_token = t('connection.validation.accessTokenRequired');
 			}
 			if (!formData.client_secret.trim()) {
-				newErrors.client_secret = 'Client secret is required';
+				newErrors.client_secret = t('connection.validation.clientSecretRequired');
 			}
 		}
 
@@ -218,12 +221,12 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 			return await ConnectionApi.Create(payload as CreateConnectionPayload);
 		},
 		onSuccess: (response) => {
-			toast.success('HubSpot connection created successfully');
+			toast.success(t('connection.toast.created', { provider: 'HubSpot' }));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to create connection';
+		onError: (error: Error) => {
+			const errorMessage = error.message || t('connection.toast.failedToCreate');
 			toast.error(errorMessage);
 		},
 	});
@@ -264,14 +267,14 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 			return await ConnectionApi.Update(connection.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('HubSpot connection updated successfully');
+			toast.success(t('connection.toast.updated', { provider: 'HubSpot' }));
 			if (response) {
 				onSave(response);
 			}
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to update connection';
+		onError: (error: Error) => {
+			const errorMessage = error.message || t('connection.toast.failedToUpdate');
 			toast.error(errorMessage);
 		},
 	});
@@ -292,7 +295,7 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 		if (webhookUrl) {
 			navigator.clipboard.writeText(webhookUrl);
 			setWebhookCopied(true);
-			toast.success('Webhook URL copied to clipboard!');
+			toast.success(t('connection.toast.webhookUrlCopied'));
 
 			setTimeout(() => {
 				setWebhookCopied(false);
@@ -304,57 +307,61 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? 'Edit HubSpot Connection' : 'Connect to HubSpot'}
-			description='Configure your HubSpot integration with the required credentials.'
+			title={
+				connection
+					? t('integrationDrawer.title.edit', { providerName: 'HubSpot' })
+					: t('integrationDrawer.title.connect', { providerName: 'HubSpot' })
+			}
+			description={t('connection.hubSpot.description')}
 			size='lg'>
 			<div className='space-y-6 mt-9'>
 				{/* Connection Name */}
 				<Input
-					label='Connection Name'
-					placeholder='e.g., Production HubSpot, Test HubSpot'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('connection.hubSpot.connectionNamePlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
-					description='A friendly name to identify this HubSpot connection'
+					description={t('connection.hubSpot.connectionNameHint')}
 				/>
 
 				{/* Access Token */}
 				{!connection && (
 					<Input
-						label='Access Token'
-						placeholder='pat-...'
+						label={t('connection.hubSpot.accessToken')}
+						placeholder={t('connection.hubSpot.accessTokenPlaceholder')}
 						type='password'
 						value={formData.access_token}
 						onChange={(value) => handleChange('access_token', value)}
 						error={errors.access_token}
-						description='Your HubSpot private app access token'
+						description={t('connection.hubSpot.accessTokenHint')}
 					/>
 				)}
 
 				{/* Client Secret */}
 				{!connection && (
 					<Input
-						label='Client Secret'
-						placeholder='Enter your client secret'
+						label={t('connection.hubSpot.clientSecret')}
+						placeholder={t('connection.hubSpot.clientSecretPlaceholder')}
 						type='password'
 						value={formData.client_secret}
 						onChange={(value) => handleChange('client_secret', value)}
 						error={errors.client_secret}
-						description='Your HubSpot app client secret'
+						description={t('connection.hubSpot.clientSecretHint')}
 					/>
 				)}
 
 				{/* Sync Configuration Section */}
 				<div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-gray-800 mb-3'>Sync Configuration</h3>
-					<p className='text-xs text-gray-600 mb-4'>Configure what data to sync between HubSpot and Flexprice</p>
+					<h3 className='text-sm font-medium text-gray-800 mb-3'>{t('connection.sync.title')}</h3>
+					<p className='text-xs text-gray-600 mb-4'>{t('connection.sync.description', { partner: 'HubSpot' })}</p>
 
 					<div className='space-y-4'>
 						{/* Invoices */}
 						<div className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg'>
 							<div>
-								<label className='text-sm font-medium text-gray-700'>Invoices</label>
-								<p className='text-xs text-gray-500'>Push to HubSpot</p>
+								<label className='text-sm font-medium text-gray-700'>{t('connection.labels.invoices')}</label>
+								<p className='text-xs text-gray-500'>{t('connection.sync.pushToHubSpot')}</p>
 							</div>
 							<Switch checked={formData.sync_config.invoice} onCheckedChange={(checked) => handleSyncConfigChange('invoice', checked)} />
 						</div>
@@ -362,8 +369,8 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 						{/* Deals */}
 						<div className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg'>
 							<div>
-								<label className='text-sm font-medium text-gray-700'>Deals</label>
-								<p className='text-xs text-gray-500'>Push to HubSpot</p>
+								<label className='text-sm font-medium text-gray-700'>{t('connection.labels.deals')}</label>
+								<p className='text-xs text-gray-500'>{t('connection.sync.pushToHubSpot')}</p>
 							</div>
 							<Switch checked={formData.sync_config.deal} onCheckedChange={(checked) => handleSyncConfigChange('deal', checked)} />
 						</div>
@@ -371,8 +378,8 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 						{/* Quotes */}
 						<div className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg'>
 							<div>
-								<label className='text-sm font-medium text-gray-700'>Quotes</label>
-								<p className='text-xs text-gray-500'>Push to HubSpot</p>
+								<label className='text-sm font-medium text-gray-700'>{t('connection.labels.quotes')}</label>
+								<p className='text-xs text-gray-500'>{t('connection.sync.pushToHubSpot')}</p>
 							</div>
 							<Switch checked={formData.sync_config.quote} onCheckedChange={(checked) => handleSyncConfigChange('quote', checked)} />
 						</div>
@@ -386,14 +393,12 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 						onClick={() => setIsScopesExpanded(!isScopesExpanded)}
 						className='flex items-center gap-2 text-sm font-medium text-amber-800 hover:text-amber-900 mb-2'>
 						{isScopesExpanded ? <ChevronDown className='w-4 h-4' /> : <ChevronRight className='w-4 h-4' />}
-						Required Scopes
+						{t('connection.scopes.requiredScopes')}
 					</button>
 
 					{isScopesExpanded && (
 						<div className='mt-2 p-3 bg-white border border-amber-200 rounded-md'>
-							<p className='text-xs text-amber-700 mb-3'>
-								Based on your sync configuration, ensure these scopes are enabled in your HubSpot app:
-							</p>
+							<p className='text-xs text-amber-700 mb-3'>{t('connection.scopes.hubspotHint')}</p>
 							<div className='space-y-1'>
 								{getRequiredScopes().map((scope, index) => (
 									<div key={index} className='flex items-center gap-2 text-xs text-amber-700'>
@@ -408,19 +413,17 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 
 				{/* Webhook Section */}
 				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-blue-800 mb-3'>Webhook Configuration</h3>
+					<h3 className='text-sm font-medium text-blue-800 mb-3'>{t('connection.webhook.sectionTitle')}</h3>
 
 					{/* Webhook URL Block */}
 					<div className='mb-4'>
-						<label className='text-sm font-medium text-blue-800 mb-2 block'>Webhook URL</label>
-						<p className='text-xs text-blue-700 mb-3'>
-							Set up this webhook URL in your HubSpot legacy app dashboard to receive event notifications:
-						</p>
+						<label className='text-sm font-medium text-blue-800 mb-2 block'>{t('connection.webhook.url')}</label>
+						<p className='text-xs text-blue-700 mb-3'>{t('connection.hubSpot.webhookIntro')}</p>
 						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md'>
 							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{webhookUrl}</code>
 							<Button size='xs' variant='outline' onClick={handleCopyWebhookUrl} className='flex items-center gap-1'>
 								{webhookCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-								{webhookCopied ? 'Copied!' : 'Copy'}
+								{webhookCopied ? tc('actions.copied') : tc('actions.copy')}
 							</Button>
 						</div>
 					</div>
@@ -432,12 +435,12 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 							onClick={() => setIsWebhookEventsExpanded(!isWebhookEventsExpanded)}
 							className='flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-900 mb-2'>
 							{isWebhookEventsExpanded ? <ChevronDown className='w-4 h-4' /> : <ChevronRight className='w-4 h-4' />}
-							Webhook Events to Subscribe
+							{t('connection.webhook.eventsToSubscribe')}
 						</button>
 
 						{isWebhookEventsExpanded && (
 							<div className='mt-2 p-3 bg-white border border-blue-200 rounded-md'>
-								<p className='text-xs text-blue-700 mb-3'>Subscribe to these events in your HubSpot webhook configuration:</p>
+								<p className='text-xs text-blue-700 mb-3'>{t('connection.hubSpot.webhookEventsIntro')}</p>
 								<div className='space-y-1'>
 									{getWebhookEvents().map((event, index) => (
 										<div key={index} className='flex items-center gap-2 text-xs text-blue-700'>
@@ -455,10 +458,10 @@ const HubSpotConnectionDrawer: FC<HubSpotConnectionDrawerProps> = ({ isOpen, onO
 
 				<div className='flex gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1' disabled={isPending}>
-						Cancel
+						{tc('actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1' isLoading={isPending} disabled={isPending}>
-						{connection ? 'Update Connection' : 'Create Connection'}
+						{connection ? t('connection.buttons.updateConnection') : t('connection.buttons.createConnection')}
 					</Button>
 				</div>
 			</div>

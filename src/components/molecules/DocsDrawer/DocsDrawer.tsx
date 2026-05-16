@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CodeBlock, Sheet } from '@/components/atoms';
 import { ApiDocsSnippet } from '@/store/useApiDocsStore';
 
@@ -72,10 +73,11 @@ export const SnippetBlock: FC<SnippetBlockProps> = ({ snippet }) => {
 };
 
 const DocsDrawer: FC<Props> = ({ isOpen, onOpenChange, snippets, trigger }) => {
+	const { t } = useTranslation('common');
 	return (
-		<Sheet isOpen={isOpen} onOpenChange={onOpenChange} title='API Reference' trigger={trigger} size='lg'>
+		<Sheet isOpen={isOpen} onOpenChange={onOpenChange} title={t('labels.apiReference')} trigger={trigger} size='lg'>
 			<div className='flex flex-col h-full'>
-				{snippets.length === 0 && <p className='text-sm text-gray-400'>No documentation found</p>}
+				{snippets.length === 0 && <p className='text-sm text-gray-400'>{t('labels.noDocumentationFound')}</p>}
 
 				{/* Code Snippets Section */}
 				<div className='my-6 px-1 pb-8'>

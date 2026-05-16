@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { setRuntimeCredentials, clearRuntimeCredentials } from '@/core/axios/config';
@@ -29,6 +30,7 @@ interface CustomerPortalProps {
 // ─── Inner component — consumes PortalConfigContext ───────────────────────────
 
 const CustomerPortalInner = () => {
+	const { t } = useTranslation('customer-portal');
 	const { config } = usePortalConfig();
 	const hasTheme = !!config.theme;
 
@@ -48,9 +50,9 @@ const CustomerPortalInner = () => {
 	useEffect(() => {
 		if (customerError) {
 			const err = error as { error?: { message?: string }; message?: string };
-			toast.error(err?.error?.message || err?.message || 'Failed to fetch customer data');
+			toast.error(err?.error?.message || err?.message || t('errors.fetchCustomer'));
 		}
-	}, [customerError, error]);
+	}, [customerError, error, t]);
 
 	// Pre-fetch wallets + invoices using the same query keys as the widgets
 	// (React Query deduplicates — zero extra API calls)
@@ -163,13 +165,13 @@ const CustomerPortalInner = () => {
 				{/* Footer */}
 				<div className='mt-12 pt-6 text-center' style={{ borderTop: `1px solid ${hasTheme ? 'var(--portal-border)' : '#E9E9E9'}` }}>
 					<p className='text-xs text-zinc-400'>
-						Powered by{' '}
+						{t('footer.poweredBy')}{' '}
 						<a
 							href='https://flexprice.io'
 							target='_blank'
 							rel='noopener noreferrer'
 							className='text-zinc-500 hover:text-zinc-700 transition-colors'>
-							Flexprice
+							{t('footer.brand')}
 						</a>
 					</p>
 				</div>

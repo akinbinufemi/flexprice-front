@@ -2,9 +2,11 @@ import { FC } from 'react';
 import { ActionButton, Chip } from '@/components/atoms';
 import FlexpriceTable, { ColumnData } from '../Table';
 import { Group } from '@/models/Group';
+import { GROUP_ENTITY_TYPE } from '@/models/Group';
 import { ENTITY_STATUS } from '@/models';
 import formatDate from '@/utils/common/format_date';
 import { GroupApi } from '@/api/GroupApi';
+import { useTranslation } from 'react-i18next';
 
 export interface GroupsTableProps {
 	data: Group[];
@@ -12,6 +14,8 @@ export interface GroupsTableProps {
 }
 
 const GroupsTable: FC<GroupsTableProps> = ({ data, onEdit }) => {
+	const { t } = useTranslation(['catalog', 'common']);
+
 	const mappedData = data?.map((group) => ({
 		...group,
 	}));
@@ -19,21 +23,22 @@ const GroupsTable: FC<GroupsTableProps> = ({ data, onEdit }) => {
 	const columns: ColumnData<Group>[] = [
 		{
 			fieldName: 'name',
-			title: 'Name',
+			title: t('catalog:groups.table.name'),
 		},
 		{
-			title: 'Lookup Key',
+			title: t('catalog:groups.table.lookupKey'),
 			fieldName: 'lookup_key',
 		},
 		{
-			title: 'Entity Type',
+			title: t('catalog:groups.table.entityType'),
 			render: (row) => {
-				const label = row.entity_type.charAt(0).toUpperCase() + row.entity_type.slice(1);
+				const label =
+					row.entity_type === GROUP_ENTITY_TYPE.PRICE ? t('catalog:groups.drawer.entityPrice') : t('catalog:groups.drawer.entityFeature');
 				return <Chip variant='default' label={label} />;
 			},
 		},
 		{
-			title: 'Updated at',
+			title: t('catalog:groups.table.updatedAt'),
 			render: (row) => {
 				return formatDate(row.updated_at);
 			},
@@ -45,7 +50,7 @@ const GroupsTable: FC<GroupsTableProps> = ({ data, onEdit }) => {
 					id={row.id}
 					deleteMutationFn={(id) => GroupApi.deleteGroup(id)}
 					refetchQueryKey='fetchGroups'
-					entityName='Group'
+					entityName={t('catalog:groups.table.entityName')}
 					edit={{
 						onClick: () => onEdit(row),
 					}}

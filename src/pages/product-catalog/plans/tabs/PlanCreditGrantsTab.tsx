@@ -17,9 +17,10 @@ import {
 	ENTITY_STATUS,
 } from '@/models';
 import { InternalCreditGrantRequest, CreateCreditGrantRequest } from '@/types/dto/CreditGrant';
-import { ServerError } from '@/core/axios/types';
+import { useTranslation } from 'react-i18next';
 
 const PlanCreditGrantsTab = () => {
+	const { t } = useTranslation(['catalog']);
 	const { planId } = useParams<{ planId: string }>();
 	const [creditGrantModalOpen, setCreditGrantModalOpen] = useState(false);
 
@@ -52,8 +53,8 @@ const PlanCreditGrantsTab = () => {
 			setCreditGrantModalOpen(false);
 			refetchQueries(['planCreditGrants', planId!]);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to add credit grant');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to add credit grant');
 		},
 	});
 
@@ -109,7 +110,7 @@ const PlanCreditGrantsTab = () => {
 				{creditGrants.length > 0 ? (
 					<Card variant='notched'>
 						<CardHeader
-							title='Credit Grants'
+							title={t('catalog:plans.tabs.creditGrants')}
 							cta={
 								<Button prefixIcon={<Plus />} onClick={() => setCreditGrantModalOpen(true)} disabled={isCreatingCreditGrant}>
 									{isCreatingCreditGrant ? 'Adding...' : 'Add'}
@@ -126,7 +127,7 @@ const PlanCreditGrantsTab = () => {
 					</Card>
 				) : (
 					<NoDataCard
-						title='Credit Grants'
+						title={t('catalog:plans.tabs.creditGrants')}
 						subtitle='No credit grants added to the plan yet'
 						cta={
 							<Button prefixIcon={<Plus />} onClick={() => setCreditGrantModalOpen(true)} disabled={isCreatingCreditGrant}>

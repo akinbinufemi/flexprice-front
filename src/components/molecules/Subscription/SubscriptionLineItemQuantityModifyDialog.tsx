@@ -1,4 +1,5 @@
 import { Button, DatePicker, Dialog, Input } from '@/components/atoms';
+import { useTranslation, Trans } from 'react-i18next';
 import type { LineItem } from '@/models/Subscription';
 import { useSubscriptionQuantityModify } from '@/hooks/useSubscriptionQuantityModify';
 import { buildQuantityChangeModifyRequest } from '@/utils/subscription/buildQuantityChangeModifyRequest';
@@ -43,6 +44,7 @@ const SubscriptionLineItemQuantityModifyDialog: FC<SubscriptionLineItemQuantityM
 	currentPeriodStart,
 	currentPeriodEnd,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [step, setStep] = useState<Step>('form');
 	const [quantityInput, setQuantityInput] = useState('');
 	const [effectiveDate, setEffectiveDate] = useState<Date | undefined>(undefined);
@@ -143,11 +145,16 @@ const SubscriptionLineItemQuantityModifyDialog: FC<SubscriptionLineItemQuantityM
 		<Dialog
 			isOpen={isOpen}
 			onOpenChange={handleOpenChange}
-			title={step === 'form' ? 'Change quantity' : 'Review changes'}
+			title={step === 'form' ? t('subscriptions.changeQuantity') : t('subscriptions.reviewChanges')}
 			description={
 				step === 'form' ? (
 					<span className='text-sm text-gray-600'>
-						You are updating quantity for <span className='font-medium text-gray-900'>{lineItem.display_name}</span>.
+						<Trans
+							ns='billing'
+							i18nKey='subscriptions.quantityModify.updatingDescription'
+							values={{ name: lineItem.display_name }}
+							components={{ highlight: <span className='font-medium text-gray-900' /> }}
+						/>
 					</span>
 				) : undefined
 			}
@@ -159,19 +166,19 @@ const SubscriptionLineItemQuantityModifyDialog: FC<SubscriptionLineItemQuantityM
 						<div className='w-full space-y-5'>
 							<div className='space-y-2'>
 								<Input
-									label='Quantity'
+									label={t('subscriptions.quantity')}
 									variant='text'
 									value={quantityInput}
 									onChange={(e) => setQuantityInput(e)}
-									placeholder='e.g. 10'
+									placeholder={t('subscriptions.quantityPlaceholder')}
 									disabled={busy}
 								/>
 								{formError && <p className='text-sm text-red-600'>{formError}</p>}
 							</div>
 							<div className='w-full space-y-3'>
 								<DatePicker
-									label='Effective date'
-									placeholder='Select date'
+									label={t('subscriptions.effectiveDate')}
+									placeholder={t('subscriptions.selectDate')}
 									date={effectiveDate}
 									setDate={setEffectiveDate}
 									popoverTriggerClassName='w-full'
@@ -180,18 +187,17 @@ const SubscriptionLineItemQuantityModifyDialog: FC<SubscriptionLineItemQuantityM
 								<div className='flex w-full gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3.5'>
 									<Info className='mt-0.5 h-5 w-5 shrink-0 text-blue-600' aria-hidden />
 									<p className='min-w-0 flex-1 text-sm leading-relaxed text-blue-900'>
-										Defaults to the current period start for arrear charges, or the current period end for advance charges, ensuring the
-										charge takes effect this period. Clear the date to apply immediately.
+										{t('subscriptions.quantityModify.effectiveDateHint')}
 									</p>
 								</div>
 							</div>
 						</div>
 						<div className='flex justify-end gap-3 pt-2'>
 							<Button variant='outline' onClick={() => handleOpenChange(false)} disabled={busy}>
-								Cancel
+								{t('common:actions.cancel')}
 							</Button>
 							<Button onClick={() => void handlePreview()} isLoading={isPreviewPending} disabled={busy}>
-								Preview
+								{t('subscriptions.quantityModify.preview')}
 							</Button>
 						</div>
 					</>
@@ -210,10 +216,10 @@ const SubscriptionLineItemQuantityModifyDialog: FC<SubscriptionLineItemQuantityM
 						/>
 						<div className='flex justify-end gap-3 border-t border-gray-100 pt-4'>
 							<Button variant='outline' onClick={handleBack} disabled={busy}>
-								Back
+								{t('common:actions.back')}
 							</Button>
 							<Button onClick={() => void handleApply()} isLoading={isExecutePending} disabled={busy || !confirmedPayload}>
-								Apply changes
+								{t('subscriptions.quantityModify.applyChanges')}
 							</Button>
 						</div>
 					</>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Testimonial } from '@/types';
 import Card from '../../atoms/Card/Card';
 import { getTypographyClass } from '@/lib/typography';
@@ -12,6 +13,7 @@ interface TestimonialCardProps {
 const DUMMY_DP = 'https://randomuser.me/api/portraits/men/32.jpg'; // dummy image for dp
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, logoHeightClass }) => {
+	const { t } = useTranslation('common');
 	return (
 		<Card
 			className={cn(
@@ -21,11 +23,12 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, logoHeig
 			<div className='flex items-center justify-between gap-2 mb-1'>
 				<img
 					src={testimonial.companyTitleLogoUrl || testimonial.logoUrl}
+					// eslint-disable-next-line i18next/no-literal-string
 					alt={testimonial.companyName + ' logo'}
 					className={cn(logoHeightClass ? logoHeightClass + ' w-auto ' : 'max-h-8 w-auto', 'object-contain')}
 				/>
 				{testimonial.labelImageUrl ? (
-					<img src={testimonial.labelImageUrl} alt='label' className='h-4 w-auto object-contain' />
+					<img src={testimonial.labelImageUrl} alt={t('labels.label')} className='h-4 w-auto object-contain' />
 				) : (
 					testimonial.label && (
 						<span className='text-xs font-medium text-blue-600' style={{ fontFamily: 'DM Sans, sans-serif' }}>

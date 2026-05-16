@@ -6,9 +6,15 @@ import toast from 'react-hot-toast';
 import usePagination from '@/hooks/usePagination';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { EmptyPage } from '@/components/organisms';
-import GUIDES from '@/constants/guides';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
+import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 
 const CreditNotesPage = () => {
+	const { t } = useTranslation('billing');
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const { limit, offset, page } = usePagination();
 
 	const fetchCreditNotes = async () => {
@@ -33,30 +39,30 @@ const CreditNotesPage = () => {
 	}
 
 	if (isError) {
-		toast.error('Error fetching credit notes');
+		toast.error(t('creditNotes.toast.fetchListError'));
 	}
 
 	if ((creditNoteData?.items ?? []).length === 0) {
 		return (
 			<EmptyPage
-				heading='Credit Notes'
-				tags={['Credit Notes']}
-				tutorials={GUIDES.creditNotes?.tutorials || []}
+				heading={t('creditNotes.title')}
+				tags={API_DOCS_TAGS.CreditNotes}
+				tutorials={guides.creditNotes.tutorials}
 				emptyStateCard={{
-					heading: 'Issue A Credit Note',
-					description: 'Add a credit note to adjust or refund customer invoices.',
+					heading: t('creditNotes.list.emptyHeading'),
+					description: t('creditNotes.list.emptyDescription'),
 				}}
 			/>
 		);
 	}
 
 	return (
-		<Page heading='Credit Notes'>
-			<ApiDocsContent tags={['Credit Notes']} />
+		<Page heading={t('creditNotes.title')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotes} />
 			<div className='px-0'>
 				<CreditNoteTable data={creditNoteData?.items || []} />
 				<Spacer className='!h-4' />
-				<ShortPagination unit='Credit Notes' totalItems={creditNoteData?.pagination.total ?? 0} />
+				<ShortPagination unit={t('creditNotes.list.paginationUnit')} totalItems={creditNoteData?.pagination.total ?? 0} />
 			</div>
 		</Page>
 	);

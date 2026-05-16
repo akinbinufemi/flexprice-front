@@ -1,5 +1,6 @@
 import { Button, Card, CodePreview, FormHeader, Input, Page, Select, SelectOption, Spacer, Textarea } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import EventFilter, { EventFilterData } from '@/components/molecules/EventFilter';
 import SelectGroup from '@/components/organisms/PlanForm/SelectGroup';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
@@ -19,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 
 // Feature type options constant
 const FEATURE_TYPE_OPTIONS: SelectOption[] = [
@@ -294,6 +296,7 @@ const FeatureDetailsSection = ({
 	onUpdateFeature: (updates: Partial<FeatureFormData>) => void;
 	onUpdateFormState: (updates: Partial<FeatureFormState>) => void;
 }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const handleNameChange = useCallback(
 		(name: string) => {
 			onUpdateFeature({
@@ -361,8 +364,8 @@ const FeatureDetailsSection = ({
 	return (
 		<Card className='p-6 rounded-[6px] border border-[#E4E4E7]'>
 			<Input
-				label='Name*'
-				placeholder='Enter a name for the feature'
+				label={t('catalog:features.form.name')}
+				placeholder={t('catalog:features.form.namePlaceholder')}
 				value={data.name || ''}
 				error={errors.name}
 				onChange={handleNameChange}
@@ -372,7 +375,7 @@ const FeatureDetailsSection = ({
 
 			<div className='w-full min-w-[200px] overflow-hidden'>
 				<Select
-					label='Type*'
+					label={t('catalog:features.form.type')}
 					options={FEATURE_TYPE_OPTIONS}
 					className='w-full overflow-hidden'
 					value={data.type}
@@ -391,20 +394,26 @@ const FeatureDetailsSection = ({
 				!formState.showReportingUnitName &&
 				!formState.showDescription ? (
 					<div className='flex flex-wrap items-center gap-2'>
-						<AddChargesButton label='Lookup Key' onClick={() => onUpdateFormState({ showLookupKey: true })} />
+						<AddChargesButton label={t('catalog:features.form.lookupKey')} onClick={() => onUpdateFormState({ showLookupKey: true })} />
 						{isMeteredType && (
 							<>
-								<AddChargesButton label='Unit Name' onClick={() => onUpdateFormState({ showUnitName: true })} />
-								<AddChargesButton label='Display Unit Name' onClick={() => onUpdateFormState({ showReportingUnitName: true })} />
+								<AddChargesButton label={t('catalog:features.form.unitName')} onClick={() => onUpdateFormState({ showUnitName: true })} />
+								<AddChargesButton
+									label={t('catalog:features.form.displayUnitName')}
+									onClick={() => onUpdateFormState({ showReportingUnitName: true })}
+								/>
 							</>
 						)}
-						<AddChargesButton label='Feature Description' onClick={() => onUpdateFormState({ showDescription: true })} />
-						<AddChargesButton label='Add Group' onClick={() => onUpdateFormState({ showGroup: true })} />
+						<AddChargesButton
+							label={t('catalog:features.form.featureDescription')}
+							onClick={() => onUpdateFormState({ showDescription: true })}
+						/>
+						<AddChargesButton label={t('catalog:features.form.addGroup')} onClick={() => onUpdateFormState({ showGroup: true })} />
 					</div>
 				) : formState.showLookupKey ? (
 					<Input
-						label='Lookup Key'
-						placeholder='Enter a unique lookup key (optional)'
+						label={t('catalog:features.form.lookupKey')}
+						placeholder={t('catalog:features.form.lookupKeyPlaceholder')}
 						value={data.lookup_key || ''}
 						error={errors.lookup_key}
 						onChange={(lookup_key) => onUpdateFeature({ lookup_key })}
@@ -423,28 +432,45 @@ const FeatureDetailsSection = ({
 								{!formState.showUnitName && !formState.showReportingUnitName ? (
 									<div className='flex flex-wrap items-center gap-2'>
 										{!formState.showLookupKey && (
-											<AddChargesButton label='Lookup Key' onClick={() => onUpdateFormState({ showLookupKey: true })} />
+											<AddChargesButton
+												label={t('catalog:features.form.lookupKey')}
+												onClick={() => onUpdateFormState({ showLookupKey: true })}
+											/>
 										)}
-										<AddChargesButton label='Unit name' onClick={() => onUpdateFormState({ showUnitName: true })} />
-										<AddChargesButton label='Display Unit Name' onClick={() => onUpdateFormState({ showReportingUnitName: true })} />
+										<AddChargesButton
+											label={t('catalog:features.form.unitNameLower')}
+											onClick={() => onUpdateFormState({ showUnitName: true })}
+										/>
+										<AddChargesButton
+											label={t('catalog:features.form.displayUnitName')}
+											onClick={() => onUpdateFormState({ showReportingUnitName: true })}
+										/>
 										{!formState.showDescription ? (
-											<AddChargesButton label='Feature description' onClick={() => onUpdateFormState({ showDescription: true })} />
+											<AddChargesButton
+												label={t('catalog:features.form.featureDescriptionLower')}
+												onClick={() => onUpdateFormState({ showDescription: true })}
+											/>
 										) : null}
-										{!formState.showGroup && <AddChargesButton label='Add Group' onClick={() => onUpdateFormState({ showGroup: true })} />}
+										{!formState.showGroup && (
+											<AddChargesButton
+												label={t('catalog:features.form.addGroup')}
+												onClick={() => onUpdateFormState({ showGroup: true })}
+											/>
+										)}
 									</div>
 								) : (
 									<>
 										{formState.showUnitName && (
 											<div className='gap-4 grid grid-cols-2'>
 												<Input
-													label='Unit Singular'
-													placeholder='millisecond'
+													label={t('catalog:features.form.unitSingular')}
+													placeholder={t('catalog:features.form.unitSingularPh')}
 													value={data.unit_singular || ''}
 													onChange={handleUnitSingularChange}
 												/>
 												<Input
-													label='Unit Plural'
-													placeholder='milliseconds'
+													label={t('catalog:features.form.unitPlural')}
+													placeholder={t('catalog:features.form.unitPluralPh')}
 													value={data.unit_plural || ''}
 													onChange={(unit_plural) => onUpdateFeature({ unit_plural })}
 												/>
@@ -453,14 +479,14 @@ const FeatureDetailsSection = ({
 										{formState.showReportingUnitName && (
 											<div className='gap-4 grid grid-cols-2'>
 												<Input
-													label='Display Unit Singular'
-													placeholder='minute'
+													label={t('catalog:features.form.displayUnitSingular')}
+													placeholder={t('catalog:features.form.displayUnitSingularPh')}
 													value={data.reporting_unit?.unit_singular ?? ''}
 													onChange={handleReportingUnitSingularChange}
 												/>
 												<Input
-													label='Display Unit Plural'
-													placeholder='minutes'
+													label={t('catalog:features.form.displayUnitPlural')}
+													placeholder={t('catalog:features.form.displayUnitPluralPh')}
 													value={data.reporting_unit?.unit_plural ?? ''}
 													onChange={(unit_plural) =>
 														onUpdateFeature({
@@ -473,9 +499,9 @@ const FeatureDetailsSection = ({
 													}
 												/>
 												<Input
-													label='Unit Conversion Factor'
-													placeholder='(e.g. 60000)'
-													description='Unit Value = Display Value * Conversion Factor'
+													label={t('catalog:features.form.conversionFactor')}
+													placeholder={t('catalog:features.form.conversionFactorPh')}
+													description={t('catalog:features.form.conversionFormula')}
 													value={data.reporting_unit?.conversion_rate ?? ''}
 													onChange={(conversion_rate) =>
 														onUpdateFeature({
@@ -496,19 +522,34 @@ const FeatureDetailsSection = ({
 											!formState.showDescription) && (
 											<div className='flex flex-wrap items-center gap-2'>
 												{!formState.showLookupKey && (
-													<AddChargesButton label='Lookup Key' onClick={() => onUpdateFormState({ showLookupKey: true })} />
+													<AddChargesButton
+														label={t('catalog:features.form.lookupKey')}
+														onClick={() => onUpdateFormState({ showLookupKey: true })}
+													/>
 												)}
 												{!formState.showUnitName && (
-													<AddChargesButton label='Unit name' onClick={() => onUpdateFormState({ showUnitName: true })} />
+													<AddChargesButton
+														label={t('catalog:features.form.unitNameLower')}
+														onClick={() => onUpdateFormState({ showUnitName: true })}
+													/>
 												)}
 												{!formState.showReportingUnitName && (
-													<AddChargesButton label='Display unit name' onClick={() => onUpdateFormState({ showReportingUnitName: true })} />
+													<AddChargesButton
+														label={t('catalog:features.form.displayUnitNameLower')}
+														onClick={() => onUpdateFormState({ showReportingUnitName: true })}
+													/>
 												)}
 												{!formState.showDescription && (
-													<AddChargesButton label='Feature description' onClick={() => onUpdateFormState({ showDescription: true })} />
+													<AddChargesButton
+														label={t('catalog:features.form.featureDescriptionLower')}
+														onClick={() => onUpdateFormState({ showDescription: true })}
+													/>
 												)}
 												{!formState.showGroup && (
-													<AddChargesButton label='Add Group' onClick={() => onUpdateFormState({ showGroup: true })} />
+													<AddChargesButton
+														label={t('catalog:features.form.addGroup')}
+														onClick={() => onUpdateFormState({ showGroup: true })}
+													/>
 												)}
 											</div>
 										)}
@@ -519,19 +560,27 @@ const FeatureDetailsSection = ({
 						{!isMeteredType && (!formState.showLookupKey || !formState.showGroup || !formState.showDescription) && (
 							<div className='flex flex-wrap items-center gap-2'>
 								{!formState.showLookupKey && (
-									<AddChargesButton label='Lookup Key' onClick={() => onUpdateFormState({ showLookupKey: true })} />
+									<AddChargesButton
+										label={t('catalog:features.form.lookupKey')}
+										onClick={() => onUpdateFormState({ showLookupKey: true })}
+									/>
 								)}
 								{!formState.showDescription && (
-									<AddChargesButton label='Feature description' onClick={() => onUpdateFormState({ showDescription: true })} />
+									<AddChargesButton
+										label={t('catalog:features.form.featureDescriptionLower')}
+										onClick={() => onUpdateFormState({ showDescription: true })}
+									/>
 								)}
-								{!formState.showGroup && <AddChargesButton label='Add Group' onClick={() => onUpdateFormState({ showGroup: true })} />}
+								{!formState.showGroup && (
+									<AddChargesButton label={t('catalog:features.form.addGroup')} onClick={() => onUpdateFormState({ showGroup: true })} />
+								)}
 							</div>
 						)}
 						{formState.showGroup && (
 							<SelectGroup
 								entityType={GROUP_ENTITY_TYPE.FEATURE}
-								label='Group'
-								placeholder='Select a group (optional)'
+								label={t('catalog:features.form.group')}
+								placeholder={t('catalog:features.form.groupPlaceholder')}
 								value={data.group_id ?? ''}
 								onChange={(group) => onUpdateFeature({ group_id: group?.id ?? undefined })}
 								showLookupKey={false}
@@ -539,8 +588,8 @@ const FeatureDetailsSection = ({
 						)}
 						{formState.showDescription && (
 							<Textarea
-								label='Feature Description'
-								placeholder='Enter description'
+								label={t('catalog:features.form.featureDescriptionLabel')}
+								placeholder={t('catalog:features.form.descriptionPlaceholder')}
 								value={data.description || ''}
 								error={errors.description}
 								className='!min-h-32'
@@ -568,6 +617,7 @@ const EventDetailsSection = ({
 	onUpdateFeature: (updates: Partial<FeatureFormData>) => void;
 	onUpdateFormState: (updates: Partial<FeatureFormState>) => void;
 }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const handleEventNameChange = useCallback(
 		(event_name: string) => {
 			onUpdateFeature({
@@ -597,9 +647,9 @@ const EventDetailsSection = ({
 		<Card className='card'>
 			<Input
 				value={meter?.event_name || ''}
-				placeholder='tokens_total'
-				label='Event Name*'
-				description='A unique identifier for the event used to filter and measure usage e.g. user_signup, api_calls, etc.'
+				placeholder={t('catalog:features.form.eventNamePlaceholder')}
+				label={t('catalog:features.form.eventName')}
+				description={t('catalog:features.form.eventNameHelp')}
 				error={meterErrors.event_name}
 				onChange={handleEventNameChange}
 			/>
@@ -607,13 +657,17 @@ const EventDetailsSection = ({
 
 			<div className='flex flex-col gap-2'>
 				{!formState.showEventFilters ? (
-					<AddChargesButton label='Event filters' onClick={() => onUpdateFormState({ showEventFilters: true })} className='self-start' />
+					<AddChargesButton
+						label={t('catalog:features.form.eventFilters')}
+						onClick={() => onUpdateFormState({ showEventFilters: true })}
+						className='self-start'
+					/>
 				) : null}
 				{formState.showEventFilters ? (
 					<>
 						<FormHeader
-							title='Event Filters'
-							subtitle='Filter events based on specific properties e.g., region, user type or custom attributes to refine tracking.'
+							title={t('catalog:features.form.eventFiltersTitle')}
+							subtitle={t('catalog:features.form.eventFiltersSubtitle')}
 							variant='form-component-title'
 						/>
 
@@ -641,6 +695,7 @@ const AggregationSection = ({
 	onUpdateFeature: (updates: Partial<FeatureFormData>) => void;
 	onUpdateFormState: (updates: Partial<FeatureFormState>) => void;
 }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const handleAggregationTypeChange = useCallback(
 		(type: string) => {
 			onUpdateFeature({
@@ -745,9 +800,9 @@ const AggregationSection = ({
 					options={AGGREGATION_OPTIONS}
 					value={meter?.aggregation?.type || AGGREGATION_OPTIONS[0].value}
 					onChange={handleAggregationTypeChange}
-					description='Choose how values are aggregated.'
-					label='Aggregation Function*'
-					placeholder='SUM'
+					description={t('catalog:features.form.aggregationChoose')}
+					label={t('catalog:features.form.aggregationFunction')}
+					placeholder={t('catalog:features.form.aggregationFunctionPh')}
 					error={meterErrors.aggregation_type}
 					hideSelectedTick={true}
 				/>
@@ -757,9 +812,9 @@ const AggregationSection = ({
 						value={meter?.aggregation?.field || ''}
 						disabled={meter?.aggregation?.type === METER_AGGREGATION_TYPE.COUNT}
 						onChange={handleAggregationFieldChange}
-						label='Aggregation Field*'
-						placeholder='tokens'
-						description='Specify the property in the event data that will be aggregated. e.g. tokens, messages_sent, storage_used.'
+						label={t('catalog:features.form.aggregationField')}
+						placeholder={t('catalog:features.form.aggregationFieldPh')}
+						description={t('catalog:features.form.aggregationFieldHelp')}
 						error={meterErrors.aggregation_field}
 					/>
 				)}
@@ -768,9 +823,9 @@ const AggregationSection = ({
 					<Input
 						value={multiplierInput}
 						onChange={handleMultiplierChange}
-						label='Aggregation Multiplier*'
-						placeholder='1'
-						description='Specify the multiplier for the aggregation. e.g. 1.5, 0.25, or 1000.'
+						label={t('catalog:features.form.aggregationMultiplier')}
+						placeholder={t('catalog:features.form.aggregationMultiplierPh')}
+						description={t('catalog:features.form.aggregationMultiplierHelp')}
 						error={meterErrors.aggregation_multiplier}
 					/>
 				)}
@@ -778,19 +833,22 @@ const AggregationSection = ({
 				<div className='flex flex-col gap-2'>
 					<div className='flex flex-wrap items-center gap-2'>
 						{!formState.showBucketSize ? (
-							<AddChargesButton label='Bucket size' onClick={() => onUpdateFormState({ showBucketSize: true })} />
+							<AddChargesButton
+								label={t('catalog:features.form.bucketSizeButton')}
+								onClick={() => onUpdateFormState({ showBucketSize: true })}
+							/>
 						) : null}
 						{meter?.aggregation?.type === METER_AGGREGATION_TYPE.MAX && !formState.showGroupBy ? (
-							<AddChargesButton label='Group by' onClick={() => onUpdateFormState({ showGroupBy: true })} />
+							<AddChargesButton label={t('catalog:features.form.groupByButton')} onClick={() => onUpdateFormState({ showGroupBy: true })} />
 						) : null}
 					</div>
 					{formState.showBucketSize ? (
 						<Select
 							options={BUCKET_SIZE_OPTIONS}
 							onChange={handleWindowSizeChange}
-							label='Bucket Size'
+							label={t('catalog:features.form.bucketSize')}
 							placeholder=''
-							description='The size of the window to aggregate over. eg. 15MIN, 30MIN, HOUR, etc.'
+							description={t('catalog:features.form.bucketSizeHelp')}
 							value={meter?.aggregation?.bucket_size || undefined}
 						/>
 					) : null}
@@ -798,9 +856,9 @@ const AggregationSection = ({
 						<Input
 							value={meter?.aggregation?.group_by || ''}
 							onChange={handleGroupByChange}
-							label='Group by'
-							placeholder='e.g. user_id, tenant_id'
-							description='Field to group aggregation by. Must be a string (e.g. event property name).'
+							label={t('catalog:features.form.groupBy')}
+							placeholder={t('catalog:features.form.groupByPlaceholder')}
+							description={t('catalog:features.form.groupByHelp')}
 						/>
 					) : null}
 				</div>
@@ -820,6 +878,7 @@ const AggregationSection = ({
 
 // Code Preview Section Component
 const CodePreviewSection = ({ meter }: { meter: Partial<CreateMeterRequest> | undefined }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const staticDate = useMemo(() => {
 		const start = new Date(2020, 0, 1);
 		const end = new Date();
@@ -857,13 +916,14 @@ const CodePreviewSection = ({ meter }: { meter: Partial<CreateMeterRequest> | un
 
 	return (
 		<div className='sticky top-16 float-right'>
-			<CodePreview title='Event Example' className='sticky top-0' code={curlCommand} language='js' />
+			<CodePreview title={t('catalog:features.form.eventExample')} className='sticky top-0' code={curlCommand} language='js' />
 		</div>
 	);
 };
 
 // Main Component
 const AddFeaturePage = () => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const navigate = useNavigate();
 	const { data, errors, meterErrors, formState, updateFeatureData, updateFormState, validateFeature, validateMeter } = useFeatureForm();
 
@@ -925,9 +985,8 @@ const AddFeaturePage = () => {
 			navigate(RouteNames.features);
 			toast.success('Feature created successfully');
 		},
-		onError: (error: ServerError) => {
-			const errorMessage = error.error?.message || 'An error occurred while creating feature. Please try again.';
-			toast.error(errorMessage);
+		onError: (error: Error) => {
+			toast.error(error.message || 'An error occurred while creating feature. Please try again.');
 		},
 	});
 
@@ -962,8 +1021,8 @@ const AddFeaturePage = () => {
 	const isMeteredType = data.type === FEATURE_TYPE.METERED;
 	return (
 		<Page type='left-aligned'>
-			<ApiDocsContent tags={['Features']} />
-			<p className='text-2xl font-medium'>Create Feature</p>
+			<ApiDocsContent tags={API_DOCS_TAGS.Features} />
+			<p className='text-2xl font-medium'>{t('catalog:features.form.pageTitle')}</p>
 
 			<Spacer height='16px' />
 
@@ -1005,7 +1064,7 @@ const AddFeaturePage = () => {
 
 					<div>
 						<Button isLoading={isPending} disabled={isCtaDisabled} onClick={handleSubmit}>
-							{isPending ? 'Creating Feature...' : 'Save'}
+							{isPending ? t('catalog:features.form.creating') : t('common:actions.save')}
 						</Button>
 					</div>
 					<Spacer height='16px' />

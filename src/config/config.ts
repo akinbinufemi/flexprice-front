@@ -1,3 +1,19 @@
+// src/config/config.ts
+import {
+	BrandConfig,
+	AuthPageConfig,
+	I18nConfig,
+	brandConfig,
+	authPageConfig,
+	i18nConfig,
+	regionsConfig,
+	allowedLocalesConfig,
+	Locale,
+} from './branding';
+import { RegionsConfig } from './authTemplates';
+
+export type { BrandConfig, AuthPageConfig, I18nConfig };
+
 export enum APP_ENV {
 	Local = 'local',
 	Development = 'development',
@@ -43,6 +59,7 @@ interface IntercomConfig {
 interface RegionConfig {
 	indiaUrl: string;
 	usUrl: string;
+	dataRegionSelectionEnabled: boolean;
 }
 interface IntegrationsConfig {
 	googleSheetsWebAppUrl: string;
@@ -50,6 +67,50 @@ interface IntegrationsConfig {
 interface RestrictionsConfig {
 	rawEnvs: string;
 }
+
+/** Primary defaults to **Qanelas** (`@font-face` in `src/assets/fonts/qanelas/`, imported from `src/index.css`). Override via `VITE_FONT_CONFIG`. */
+export interface TypographyConfig {
+	primaryFont: string;
+	fallbackFont: string;
+	/** Full CSS `font-family` value (primary first, then fallback). */
+	fontFamily: string;
+}
+
+const DEFAULT_FONT_PRIMARY = 'Qanelas';
+const DEFAULT_FONT_FALLBACK = 'ui-sans-serif, system-ui, sans-serif';
+
+/** Wrap family name in quotes when needed for valid CSS `font-family`. */
+function cssFontFamilyToken(name: string): string {
+	const t = name.trim();
+	if (!t) return '';
+	if (/^["'].*["']$/.test(t)) return t;
+	if (/[^a-zA-Z0-9-]/.test(t)) return `'${t.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+	return t;
+}
+
+interface FontConfigJson {
+	primary?: string;
+	fallback?: string;
+}
+
+function parseTypographyConfig(): TypographyConfig {
+	const raw = import.meta.env.VITE_FONT_CONFIG?.trim();
+	let primary = DEFAULT_FONT_PRIMARY;
+	let fallback = DEFAULT_FONT_FALLBACK;
+	if (raw) {
+		try {
+			const parsed = JSON.parse(raw) as FontConfigJson;
+			if (typeof parsed.primary === 'string' && parsed.primary.trim()) primary = parsed.primary.trim();
+			if (typeof parsed.fallback === 'string' && parsed.fallback.trim()) fallback = parsed.fallback.trim();
+		} catch {
+			// invalid JSON — keep defaults
+		}
+	}
+	const fontFamily = [cssFontFamilyToken(primary), fallback].join(', ');
+	return { primaryFont: primary, fallbackFont: fallback, fontFamily };
+}
+
+const typographyConfig = parseTypographyConfig();
 
 export interface Config {
 	app: AppConfig;
@@ -62,11 +123,16 @@ export interface Config {
 	region: RegionConfig;
 	integrations: IntegrationsConfig;
 	restrictions: RestrictionsConfig;
+	brand: BrandConfig;
+	authPage: AuthPageConfig;
+	i18n: I18nConfig;
+	regions: RegionsConfig;
+	allowedLocales: Locale[];
+	typography: TypographyConfig;
 }
 
 function parseAppEnv(): APP_ENV {
 	const raw = import.meta.env.VITE_APP_ENV ?? import.meta.env.VITE_APP_ENVIRONMENT ?? import.meta.env.VITE_ENVIRONMENT;
-
 	if (!raw) return APP_ENV.Local;
 	if (raw === 'prod') return APP_ENV.Production;
 	if (raw === 'dev') return APP_ENV.Development;
@@ -109,6 +175,7 @@ export const config: Config = {
 	region: {
 		indiaUrl: import.meta.env.VITE_DASHBOARD_URL_INDIA ?? '',
 		usUrl: import.meta.env.VITE_DASHBOARD_URL_US ?? '',
+		dataRegionSelectionEnabled: import.meta.env.VITE_DATA_REGION_SELECTION_ENABLED === 'true',
 	},
 	integrations: {
 		googleSheetsWebAppUrl: import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL ?? '',
@@ -116,4 +183,16 @@ export const config: Config = {
 	restrictions: {
 		rawEnvs: import.meta.env.VITE_RESTRICTED_ENVS ?? '',
 	},
+	brand: brandConfig,
+	authPage: authPageConfig,
+	i18n: i18nConfig,
+	regions: regionsConfig,
+	allowedLocales: allowedLocalesConfig,
+	typography: typographyConfig,
 };
+
+/** Sets `--font-sans` from `config.typography.fontFamily` (see `src/index.css`). Call once at startup. */
+export function initTypography(): void {
+	if (typeof document === 'undefined') return;
+	document.documentElement.style.setProperty('--font-sans', config.typography.fontFamily);
+}

@@ -1,4 +1,6 @@
 import { FC, useState, useMemo, useCallback, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { Button, Card, CardHeader, Chip, DatePicker, Dialog, AddButton, Select, Tooltip, NoDataCard } from '@/components/atoms';
@@ -72,7 +74,7 @@ const getStatusVariant = (status: AddonStatus): 'info' | 'default' | 'success' =
 	}
 };
 
-const formatAddonAssociationTooltip = (association: AddonAssociationResponse): ReactNode => {
+const formatAddonAssociationTooltip = (association: AddonAssociationResponse, t: TFunction): ReactNode => {
 	const { start_date, end_date } = association;
 	const items: ReactNode[] = [];
 
@@ -81,7 +83,7 @@ const formatAddonAssociationTooltip = (association: AddonAssociationResponse): R
 		if (!isNaN(parsed.getTime())) {
 			items.push(
 				<div key='start' className='flex items-center gap-2'>
-					<span className='text-xs font-medium text-gray-500'>Start</span>
+					<span className='text-xs font-medium text-gray-500'>{t('labels.start')}</span>
 					<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(parsed)}</span>
 				</div>,
 			);
@@ -93,7 +95,7 @@ const formatAddonAssociationTooltip = (association: AddonAssociationResponse): R
 		if (!isNaN(parsed.getTime())) {
 			items.push(
 				<div key='end' className='flex items-center gap-2'>
-					<span className='text-xs font-medium text-gray-500'>End</span>
+					<span className='text-xs font-medium text-gray-500'>{t('labels.end')}</span>
 					<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(parsed)}</span>
 				</div>,
 			);
@@ -101,7 +103,7 @@ const formatAddonAssociationTooltip = (association: AddonAssociationResponse): R
 	}
 
 	if (items.length === 0) {
-		return <span className='text-sm'>No date information</span>;
+		return <span className='text-sm'>{t('labels.noDateInformation')}</span>;
 	}
 
 	return <div className='flex flex-col gap-2'>{items}</div>;
@@ -148,6 +150,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 	subscriptionCurrentPeriodStart,
 	subscriptionCurrentPeriodEnd,
 }) => {
+	const { t } = useTranslation('common');
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 	const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 	const [addonToCancel, setAddonToCancel] = useState<AddonAssociationResponse | null>(null);
@@ -205,7 +208,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 			const status = computeAssociationStatus(association);
 			const statusVariant = getStatusVariant(status);
 			const statusLabel = toSentenceCase(status || 'active');
-			const tooltipContent = formatAddonAssociationTooltip(association);
+			const tooltipContent = formatAddonAssociationTooltip(association, t);
 
 			return {
 				...association,
@@ -215,7 +218,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 				tooltipContent,
 			};
 		});
-	}, [addonAssociations]);
+	}, [addonAssociations, t]);
 
 	const addonNameToCancel = useMemo(() => {
 		if (!addonToCancel) return 'this addon';
@@ -241,10 +244,8 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 			setEffectiveEndDate(undefined);
 			setCancelProrationBehavior('');
 		},
-		onError: (error: unknown) => {
-			const message =
-				typeof error === 'object' && error && 'error' in error ? (error as { error?: { message?: string } }).error?.message : undefined;
-			toast.error(message || 'Failed to cancel addon');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to cancel addon');
 		},
 	});
 
@@ -335,7 +336,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 										}}
 										className={`flex gap-2 items-center cursor-pointer text-red-600 ${hasEndDate ? 'opacity-50 cursor-not-allowed' : ''}`}>
 										<Trash2 className='h-4 w-4' />
-										<span>Cancel</span>
+										<span>{t('actions.cancel')}</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -350,9 +351,9 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 	if (isLoading) {
 		return (
 			<Card variant='notched'>
-				<CardHeader title='Addons' cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
+				<CardHeader title={t('labels.addons')} cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
 				<div className='flex justify-center items-center py-8'>
-					<span className='text-gray-500'>Loading addons...</span>
+					<span className='text-gray-500'>{t('labels.loadingAddons')}</span>
 				</div>
 			</Card>
 		);
@@ -366,13 +367,13 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 		<>
 			{processedAddonAssociations.length > 0 ? (
 				<Card variant='notched'>
-					<CardHeader title='Addons' cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
+					<CardHeader title={t('labels.addons')} cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
 					<FlexpriceTable showEmptyRow data={processedAddonAssociations} columns={columns} variant='no-bordered' />
 				</Card>
 			) : (
 				<NoDataCard
-					title='Addons'
-					subtitle='No addons added to this subscription yet'
+					title={t('labels.addons')}
+					subtitle={t('labels.noAddonsAddedYet')}
 					cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />}
 				/>
 			)}
@@ -390,7 +391,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 			{/* Cancel Addon Dialog */}
 			<Dialog
 				title={`Cancel "${addonNameToCancel}"?`}
-				description='Optionally schedule an effective end date and choose proration behavior.'
+				description={t('labels.cancelAddonDescription')}
 				titleClassName='text-lg font-normal text-gray-800'
 				isOpen={isCancelDialogOpen}
 				onOpenChange={(open) => {
@@ -404,8 +405,8 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 					<div className='space-y-3'>
 						<div className='gap-3'>
 							<DatePicker
-								label='Effective end date'
-								placeholder='End date'
+								label={t('labels.effectiveEndDate')}
+								placeholder={t('labels.endDate')}
 								date={effectiveEndDate}
 								setDate={setEffectiveEndDate}
 								className='w-full'
@@ -414,8 +415,8 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 								popoverTriggerClassName='w-full'
 							/>
 							<Select
-								label='Proration'
-								placeholder='Default'
+								label={t('labels.proration')}
+								placeholder={t('labels.default')}
 								options={[
 									{
 										label: 'Create prorations',
@@ -428,15 +429,15 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 								onChange={(v) => setCancelProrationBehavior(v as ADDON_PRORATION_BEHAVIOR)}
 							/>
 						</div>
-						<p className='text-xs text-gray-500'>Leave empty to cancel at period end. Pick a future date to schedule cancellation.</p>
+						<p className='text-xs text-gray-500'>{t('labels.leaveEmptyToCancelAtPeriodEnd')}</p>
 					</div>
 
 					<div className='flex justify-end gap-3'>
 						<Button variant='outline' onClick={closeCancelDialog} disabled={isCancellingAddon}>
-							Keep
+							{t('actions.keep')}
 						</Button>
 						<Button variant='destructive' onClick={confirmCancel} disabled={isCancellingAddon}>
-							{isCancellingAddon ? 'Cancelling...' : 'Cancel'}
+							{isCancellingAddon ? t('status.cancelling') : t('actions.cancel')}
 						</Button>
 					</div>
 				</div>

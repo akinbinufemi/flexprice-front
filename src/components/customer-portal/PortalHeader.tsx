@@ -1,5 +1,6 @@
 import { Customer } from '@/models';
 import { Building2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePortalConfig } from '@/context/PortalConfigContext';
 
 interface PortalHeaderProps {
@@ -8,6 +9,7 @@ interface PortalHeaderProps {
 }
 
 const PortalHeader = ({ customer, tenantName }: PortalHeaderProps) => {
+	const { t } = useTranslation('customer-portal');
 	const { config } = usePortalConfig();
 	const hasTheme = !!config.theme;
 
@@ -17,7 +19,7 @@ const PortalHeader = ({ customer, tenantName }: PortalHeaderProps) => {
 			.map((n) => n[0])
 			.join('')
 			.slice(0, 2)
-			.toUpperCase() || 'CU';
+			.toUpperCase() || t('header.defaultInitials');
 
 	return (
 		<div

@@ -1,0 +1,155 @@
+{
+	"wrapper": {
+		"invalidLinkTitle": "Invalid Customer Portal Link",
+		"invalidLinkDescription": "Dashboard session token is missing from the URL. Please check your link and try again.",
+		"refreshPage": "Refresh Page"
+	},
+	"footer": {
+		"poweredBy": "Powered by",
+		"brand": "Flexprice"
+	},
+	"header": {
+		"defaultInitials": "CU"
+	},
+	"errors": {
+		"fetchCustomer": "Failed to fetch customer data",
+		"loadSubscriptions": "Failed to load subscriptions",
+		"loadUsage": "Failed to load usage data",
+		"loadUsageAnalytics": "Failed to load usage analytics",
+		"loadWallet": "Failed to load wallet",
+		"loadInvoices": "Failed to load invoices",
+		"downloadInvoice": "Failed to download invoice",
+		"exportInvoice": "Failed to export invoice",
+		"loadEvents": "Failed to load events",
+		"loadWallets": "Failed to load wallets",
+		"loadTransactions": "Failed to load transactions",
+		"loadAnalytics": "Failed to load analytics",
+		"loadCostAnalytics": "Failed to load cost analytics",
+		"loadUsageBreakdown": "Failed to load usage breakdown"
+	},
+	"toast": {
+		"invoiceDownloaded": "Invoice downloaded",
+		"invoiceCsvDownloaded": "Invoice CSV downloaded",
+		"noBillableLineItems": "No billable line items to export"
+	},
+	"datePreset": {
+		"today": "Today",
+		"last_7_days": "7d",
+		"last_30_days": "30d",
+		"current_month": "This Month",
+		"last_month": "Last Month"
+	},
+	"datePicker": {
+		"startDate": "Start date",
+		"endDate": "End date"
+	},
+	"timePeriod": {
+		"1d": "1d",
+		"7d": "7d",
+		"30d": "30d"
+	},
+	"billingOverview": {
+		"title": "Billing Overview",
+		"totalInvoiced": "Total invoiced",
+		"totalOverdue": "Total overdue",
+		"overdueTooltip": "Unpaid invoices past due date"
+	},
+	"subscriptionStatus": {
+		"active": "Active",
+		"trialing": "Trialing",
+		"cancelled": "Cancelled",
+		"incomplete": "Incomplete",
+		"draft": "Draft"
+	},
+	"walletStatus": {
+		"active": "Active",
+		"frozen": "Frozen",
+		"closed": "Closed"
+	},
+	"invoiceChip": {
+		"paid": "Paid",
+		"voided": "Voided",
+		"draft": "Draft",
+		"overdue": "Overdue",
+		"pending": "Pending"
+	},
+	"subscriptions": {
+		"title": "Subscriptions",
+		"emptyTitle": "No active subscriptions",
+		"emptyDescription": "You do not have any active subscriptions at the moment",
+		"unknownPlan": "Unknown Plan",
+		"nextBilling": "Next billing: {{date}}",
+		"trialEnds": "Trial ends: {{date}}"
+	},
+	"usage": {
+		"title": "Usage",
+		"currentTitle": "Current Usage",
+		"quotaTitle": "Usage Quota",
+		"breakdownTitle": "Usage Breakdown",
+		"trendTitle": "Usage Trend",
+		"unknownFeature": "Unknown Feature",
+		"unlimited": "Unlimited"
+	},
+	"events": {
+		"columnEventName": "Event Name",
+		"columnTimestamp": "Timestamp",
+		"columnEventId": "Event ID",
+		"columnProperties": "Properties",
+		"propertyCount_one": "{{count}} property",
+		"propertyCount_other": "{{count}} properties",
+		"noProperties": "No properties"
+	},
+	"invoices": {
+		"searchPlaceholder": "Search invoices...",
+		"columnDate": "Date",
+		"columnInvoiceNumber": "Invoice #",
+		"columnStatus": "Status",
+		"columnAmount": "Amount",
+		"columnDownload": "Download",
+		"emptyTitle": "No invoices",
+		"emptyDescription": "No invoices have been generated yet",
+		"noMatchTitle": "No invoices found",
+		"noMatchDescription": "No invoices match your search criteria",
+		"numberPrefix": "INV-{{id}}"
+	},
+	"wallet": {
+		"defaultName": "Wallet",
+		"fallbackName": "Wallet {{id}}",
+		"balance": "Balance",
+		"credits": "credits",
+		"valueSuffix": "value",
+		"emptyTitle": "No wallet",
+		"emptyDescription": "No wallet has been set up for this account",
+		"transactionHistory": "Transaction History",
+		"noTransactionsTitle": "No transactions",
+		"noTransactionsDescription": "Your transaction history will appear here"
+	},
+	"usageAnalytics": {
+		"noDataTitle": "No usage data found",
+		"noDataDescription": "Your usage from the last {{period}} will appear here"
+	},
+	"usageEvents": {
+		"unableTitle": "Unable to load events",
+		"unableDescription": "Customer information is missing",
+		"noEventsTitle": "No events found",
+		"noEventsDescription": "Your events from the last {{period}} will appear here"
+	},
+	"usageBreakdown": {
+		"feature": "Feature",
+		"totalUsage": "Total Usage",
+		"totalCost": "Total Cost",
+		"noGroup": "No group",
+		"expandAllAria": "Expand all",
+		"collapseAllAria": "Collapse all",
+		"unknownRow": "Unknown",
+		"cellEmDash": "—",
+		"cellEmpty": "--"
+	},
+	"metrics": {
+		"revenue": "Revenue",
+		"cost": "Cost",
+		"margin": "Margin",
+		"marginPercent": "Margin %",
+		"cpm": "CPM"
+	}
+}

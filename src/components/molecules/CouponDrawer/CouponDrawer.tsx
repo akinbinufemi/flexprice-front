@@ -10,6 +10,7 @@ import { COUPON_TYPE, COUPON_CADENCE } from '@/types/common/Coupon';
 import { CreateCouponRequest, UpdateCouponRequest } from '@/types/dto/Coupon';
 import { RouteNames } from '@/core/routes/Routes';
 import { getCurrencyOptions } from '@/constants/constants';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: Coupon | null;
@@ -23,6 +24,7 @@ interface Props {
 type MutationData = Partial<CreateCouponRequest> & { id?: string };
 
 const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 	const navigate = useNavigate();
 
@@ -45,13 +47,13 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 			}
 		},
 		onSuccess: (data: Coupon) => {
-			toast.success(isEdit ? 'Coupon updated successfully' : 'Coupon created successfully');
+			toast.success(isEdit ? t('coupons.drawer.toast.updated') : t('coupons.drawer.toast.created'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 			navigate(`${RouteNames.coupons}/${data.id}`);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || `Failed to ${isEdit ? 'update' : 'create'} coupon. Please try again.`);
+		onError: (error: Error) => {
+			toast.error(error.message || (isEdit ? t('coupons.drawer.toast.failedUpdate') : t('coupons.drawer.toast.failedCreate')));
 		},
 	});
 
@@ -72,32 +74,32 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 		const newErrors: Partial<Record<keyof CreateCouponRequest, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('coupons.drawer.validation.nameRequired');
 		}
 
 		if (!formData.type) {
-			newErrors.type = 'Type is required';
+			newErrors.type = t('coupons.drawer.validation.typeRequired');
 		}
 
 		if (!formData.cadence) {
-			newErrors.cadence = 'Cadence is required';
+			newErrors.cadence = t('coupons.drawer.validation.cadenceRequired');
 		}
 
 		if (formData.type === COUPON_TYPE.FIXED && !formData.amount_off) {
-			newErrors.amount_off = 'Amount off is required for fixed type coupons';
+			newErrors.amount_off = t('coupons.drawer.validation.amountOffFixedRequired');
 		}
 
 		if (formData.type === COUPON_TYPE.PERCENTAGE && !formData.percentage_off) {
-			newErrors.percentage_off = 'Percentage off is required for percentage type coupons';
+			newErrors.percentage_off = t('coupons.drawer.validation.percentageOffRequired');
 		}
 
 		if (formData.type === COUPON_TYPE.FIXED && !formData.currency) {
-			newErrors.currency = 'Currency is required for fixed type coupons';
+			newErrors.currency = t('coupons.drawer.validation.currencyFixedRequired');
 		}
 
 		// Validate duration_in_periods for repeated cadence
 		if (formData.cadence === COUPON_CADENCE.REPEATED && !formData.duration_in_periods) {
-			newErrors.duration_in_periods = 'Duration in periods is required for repeated cadence';
+			newErrors.duration_in_periods = t('coupons.drawer.validation.durationRepeatedRequired');
 		}
 
 		// Validate date fields
@@ -106,7 +108,7 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 			const redeemBefore = new Date(formData.redeem_before);
 
 			if (redeemAfter >= redeemBefore) {
-				newErrors.redeem_before = 'Redeem before date must be after redeem after date';
+				newErrors.redeem_before = t('coupons.drawer.validation.redeemBeforeAfter');
 			}
 		}
 
@@ -129,14 +131,14 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 	};
 
 	const typeOptions: SelectOption[] = [
-		{ label: 'Fixed Amount', value: COUPON_TYPE.FIXED },
-		{ label: 'Percentage', value: COUPON_TYPE.PERCENTAGE },
+		{ label: t('coupons.drawer.fixedAmount'), value: COUPON_TYPE.FIXED },
+		{ label: t('coupons.drawer.percentage'), value: COUPON_TYPE.PERCENTAGE },
 	];
 
 	const cadenceOptions: SelectOption[] = [
-		{ label: 'Once', value: COUPON_CADENCE.ONCE },
-		{ label: 'Repeated', value: COUPON_CADENCE.REPEATED },
-		{ label: 'Forever', value: COUPON_CADENCE.FOREVER },
+		{ label: t('coupons.drawer.cadenceOnce'), value: COUPON_CADENCE.ONCE },
+		{ label: t('coupons.drawer.cadenceRepeated'), value: COUPON_CADENCE.REPEATED },
+		{ label: t('coupons.drawer.cadenceForever'), value: COUPON_CADENCE.FOREVER },
 	];
 
 	const currencyOptions: SelectOption[] = getCurrencyOptions().map((currency) => {
@@ -150,14 +152,14 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Coupon' : 'Create Coupon'}
-			description={isEdit ? 'Enter coupon details to update the coupon.' : 'Enter coupon details to create a new coupon.'}
+			title={isEdit ? t('coupons.drawer.editTitle') : t('coupons.drawer.createTitle')}
+			description={isEdit ? t('coupons.drawer.descriptionEdit') : t('coupons.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter a name for the coupon'
-				description={'A descriptive name for this coupon.'}
-				label='Coupon Name'
+				placeholder={t('coupons.drawer.namePlaceholder')}
+				description={t('coupons.drawer.nameHelp')}
+				label={t('coupons.drawer.couponName')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -170,31 +172,31 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 
 			<Spacer height={'20px'} />
 			<Select
-				label='Coupon Type'
-				placeholder='Select coupon type'
+				label={t('coupons.drawer.couponType')}
+				placeholder={t('coupons.drawer.selectCouponType')}
 				options={typeOptions}
 				value={formData.type}
 				onChange={(e) => setFormData({ ...formData, type: e as COUPON_TYPE })}
 				error={errors.type}
-				description='Choose between fixed amount or percentage discount'
+				description={t('coupons.drawer.couponTypeHelp')}
 			/>
 
 			<Spacer height={'20px'} />
 			{formData.type === COUPON_TYPE.FIXED ? (
 				<div className='grid grid-cols-2 gap-4'>
 					<Input
-						label='Amount Off'
-						placeholder='0.00'
+						label={t('coupons.drawer.amountOff')}
+						placeholder={t('coupons.drawer.amountPlaceholder')}
 						type='number'
 						step='0.01'
 						value={formData.amount_off}
 						error={errors.amount_off}
 						onChange={(e) => setFormData({ ...formData, amount_off: e })}
-						description='The fixed amount to discount'
+						description={t('coupons.drawer.amountHelp')}
 					/>
 					<Select
-						label='Currency'
-						placeholder='Select currency'
+						label={t('coupons.drawer.currency')}
+						placeholder={t('coupons.drawer.selectCurrency')}
 						options={currencyOptions}
 						value={formData.currency}
 						onChange={(e) => setFormData({ ...formData, currency: e })}
@@ -203,74 +205,74 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 				</div>
 			) : (
 				<Input
-					label='Percentage Off'
-					placeholder='10'
+					label={t('coupons.drawer.percentageOff')}
+					placeholder={t('coupons.drawer.percentagePlaceholder')}
 					type='number'
 					step='0.01'
 					max='100'
 					value={formData.percentage_off}
 					error={errors.percentage_off}
 					onChange={(e) => setFormData({ ...formData, percentage_off: e })}
-					description='The percentage to discount (0-100)'
+					description={t('coupons.drawer.percentageHelp')}
 				/>
 			)}
 
 			<Spacer height={'20px'} />
 			<Select
-				label='Cadence'
-				placeholder='Select cadence'
+				label={t('coupons.drawer.cadence')}
+				placeholder={t('coupons.drawer.selectCadence')}
 				options={cadenceOptions}
 				value={formData.cadence}
 				onChange={(e) => setFormData({ ...formData, cadence: e as COUPON_CADENCE })}
 				error={errors.cadence}
-				description='How often this coupon can be used'
+				description={t('coupons.drawer.cadenceHelp')}
 			/>
 
 			<Spacer height={'20px'} />
 			<div>
 				<DatePicker
-					label='Redeem After (Optional)'
+					label={t('coupons.drawer.redeemAfter')}
 					date={formData.redeem_after ? new Date(formData.redeem_after) : undefined}
 					setDate={(date) => setFormData({ ...formData, redeem_after: date?.toISOString() })}
-					placeholder='Select start date'
+					placeholder={t('coupons.drawer.selectStartDate')}
 				/>
-				<p className='text-xs text-muted-foreground mt-1'>When the coupon becomes valid</p>
+				<p className='text-xs text-muted-foreground mt-1'>{t('coupons.drawer.redeemAfterHelp')}</p>
 				{errors.redeem_after && <p className='text-xs text-red-500 mt-1'>{errors.redeem_after}</p>}
 			</div>
 
 			<Spacer height={'20px'} />
 			<div>
 				<DatePicker
-					label='Redeem Before (Optional)'
+					label={t('coupons.drawer.redeemBefore')}
 					date={formData.redeem_before ? new Date(formData.redeem_before) : undefined}
 					setDate={(date) => setFormData({ ...formData, redeem_before: date?.toISOString() })}
-					placeholder='Select expiry date'
+					placeholder={t('coupons.drawer.selectExpiryDate')}
 				/>
-				<p className='text-xs text-muted-foreground mt-1'>When the coupon expires</p>
+				<p className='text-xs text-muted-foreground mt-1'>{t('coupons.drawer.redeemBeforeHelp')}</p>
 				{errors.redeem_before && <p className='text-xs text-red-500 mt-1'>{errors.redeem_before}</p>}
 			</div>
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Max Redemptions (Optional)'
-				placeholder='100'
+				label={t('coupons.drawer.maxRedemptions')}
+				placeholder={t('coupons.drawer.maxRedemptionsPlaceholder')}
 				type='number'
 				value={formData.max_redemptions?.toString()}
 				onChange={(e) => setFormData({ ...formData, max_redemptions: e ? parseInt(e) : undefined })}
-				description='Maximum number of times this coupon can be used'
+				description={t('coupons.drawer.maxRedemptionsHelp')}
 			/>
 
 			{formData.cadence === COUPON_CADENCE.REPEATED && (
 				<>
 					<Spacer height={'20px'} />
 					<Input
-						label='Duration in Periods'
-						placeholder='3'
+						label={t('coupons.drawer.durationInPeriods')}
+						placeholder={t('coupons.drawer.durationPlaceholder')}
 						type='number'
 						value={formData.duration_in_periods?.toString()}
 						onChange={(e) => setFormData({ ...formData, duration_in_periods: e ? parseInt(e) : undefined })}
 						error={errors.duration_in_periods}
-						description='Number of billing periods the discount applies (required for repeated cadence)'
+						description={t('coupons.drawer.durationHelp')}
 					/>
 				</>
 			)}
@@ -282,14 +284,14 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 					try {
 						const metadata = e ? JSON.parse(e) : undefined;
 						setFormData({ ...formData, metadata });
-					} catch (error) {
-						setErrors({ ...errors, metadata: 'Invalid Metadata' });
+					} catch {
+						setErrors({ ...errors, metadata: t('coupons.drawer.invalidMetadata') });
 					}
 				}}
 				className='min-h-[100px]'
-				placeholder='{"key": "value"}'
-				label='Metadata (Optional)'
-				description='Additional metadata as JSON'
+				placeholder={t('shared.metadataPlaceholder')}
+				label={t('shared.metadataOptional')}
+				description={t('shared.metadataJsonAdditional')}
 			/>
 
 			<Spacer height={'20px'} />
@@ -297,7 +299,7 @@ const CouponDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQue
 				isLoading={isPending}
 				disabled={isPending || !formData.name?.trim() || !formData.type || !formData.cadence}
 				onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create'}
+				{isEdit ? t('common:actions.save') : t('common:actions.create')}
 			</Button>
 		</Sheet>
 	);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card } from '@/components/atoms';
@@ -11,12 +12,17 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePortalConfig } from '@/context/PortalConfigContext';
 
+const SORT_TOTAL_USAGE = 'total_usage' as const;
+const SORT_TOTAL_COST = 'total_cost' as const;
+
 interface UsageBreakdownWidgetProps {
 	analyticsParams: DashboardAnalyticsRequest;
 	label?: string;
 }
 
 const UNGROUPED_KEY = '__ungrouped__';
+
+const EMPTY_ITEMS: UsageAnalyticItem[] = [];
 
 interface GroupBucket {
 	groupKey: string;
@@ -67,6 +73,7 @@ function renderTotalCostPortal(row: UsageAnalyticItem) {
  * Returns null if there are no items — no empty container shown.
  */
 const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetProps) => {
+	const { t } = useTranslation('customer-portal');
 	const { config: portalConfig } = usePortalConfig();
 	const hasTheme = !!portalConfig.theme;
 	const rowStyle = hasTheme ? { backgroundColor: 'var(--portal-surface)', borderColor: 'var(--portal-border)' } : undefined;
@@ -80,10 +87,10 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 	});
 
 	useEffect(() => {
-		if (isError) toast.error('Failed to load usage breakdown');
-	}, [isError]);
+		if (isError) toast.error(t('errors.loadUsageBreakdown'));
+	}, [isError, t]);
 
-	const items = analyticsData?.items ?? [];
+	const items = analyticsData?.items ?? EMPTY_ITEMS;
 
 	// Sort state
 	const [sortField, setSortField] = useState<'total_usage' | 'total_cost'>('total_cost');
@@ -108,7 +115,7 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 			// Check multiple sources for group information (same logic as CustomerAnalyticsTab)
 			const group = item.group ?? item.feature?.group ?? item.price?.group;
 			const groupKey = group?.id ?? UNGROUPED_KEY;
-			const groupName = group?.name ?? 'No group';
+			const groupName = group?.name ?? t('usageBreakdown.noGroup');
 			if (!map.has(groupKey)) map.set(groupKey, { groupKey, groupName, items: [] });
 			map.get(groupKey)!.items.push(item);
 		}
@@ -117,7 +124,7 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 			.filter((b) => b.groupKey !== UNGROUPED_KEY)
 			.sort((a, b) => a.groupName.localeCompare(b.groupName));
 		return { groupedBuckets: grouped, ungroupedItems: ungrouped };
-	}, [sortedItems]);
+	}, [sortedItems, t]);
 
 	useEffect(() => {
 		if (groupedBuckets.length > 0 && !hasInitializedExpand.current) {
@@ -145,7 +152,7 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 		return (
 			<button
 				type='button'
-				className='group -ml-1 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-left transition-colors'
+				className='group -ms-1 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-start transition-colors'
 				style={{ color: 'var(--portal-text-primary, #374151)' }}
 				onClick={() => {
 					if (sortField !== field) {
@@ -194,14 +201,14 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 			<div className='p-6'>
 				<div className='flex items-center justify-between'>
 					<h3 className='text-base font-semibold' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-						{label || 'Usage Breakdown'}
+						{label || t('usage.breakdownTitle')}
 					</h3>
 					{hasGroups && (
 						<button
 							type='button'
 							onClick={toggleExpandAll}
 							className='inline-flex items-center justify-center text-gray-600 hover:text-gray-900'
-							aria-label={allExpanded ? 'Collapse all' : 'Expand all'}>
+							aria-label={allExpanded ? t('usageBreakdown.collapseAllAria') : t('usageBreakdown.expandAllAria')}>
 							{allExpanded ? (
 								<ChevronUp className='h-4 w-4 transition-colors' style={{ color: 'var(--portal-text-secondary, #6b7280)' }} />
 							) : (
@@ -218,14 +225,14 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 					<Table>
 						<TableHeader className='h-10' style={{ borderBottom: '1px solid var(--portal-border, #e5e7eb)' }}>
 							<TableRow style={{ borderBottom: '1px solid var(--portal-border, #e5e7eb)' }}>
-								<TableHead className='pl-3 font-semibold text-[13px] w-[35%]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
-									Feature
+								<TableHead className='ps-3 font-semibold text-[13px] w-[35%]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
+									{t('usageBreakdown.feature')}
 								</TableHead>
 								<TableHead className='font-semibold text-[13px]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
-									{renderSortableHeader('total_usage', 'Total Usage')}
+									{renderSortableHeader(SORT_TOTAL_USAGE, t('usageBreakdown.totalUsage'))}
 								</TableHead>
 								<TableHead className='font-semibold text-[13px]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
-									{renderSortableHeader('total_cost', 'Total Cost')}
+									{renderSortableHeader(SORT_TOTAL_COST, t('usageBreakdown.totalCost'))}
 								</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -251,8 +258,8 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 												bucket.items.length === 0 && 'border-b-0 cursor-default',
 											)}
 											style={rowStyle}>
-											<TableCell className='pl-3 py-2.5 align-middle'>
-												<div className='inline-flex items-center gap-2 text-left'>
+											<TableCell className='ps-3 py-2.5 align-middle'>
+												<div className='inline-flex items-center gap-2 text-start'>
 													<span className='font-semibold text-[13px]' style={{ color: 'var(--portal-text-primary, #111827)' }}>
 														{bucket.groupName}
 													</span>
@@ -275,7 +282,7 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 											</TableCell>
 											{/* Total Usage — aggregate not available for groups */}
 											<TableCell className='py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-secondary, #6b7280)' }}>
-												—
+												{t('usageBreakdown.cellEmDash')}
 											</TableCell>
 											<TableCell className='py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-secondary, #6b7280)' }}>
 												{firstCurrency ? (
@@ -284,7 +291,7 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 														{formatNumber(aggregateCost, 2)}
 													</>
 												) : (
-													'—'
+													t('usageBreakdown.cellEmDash')
 												)}
 											</TableCell>
 										</TableRow>
@@ -295,9 +302,9 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 													className='h-10 align-middle border-b'
 													style={rowStyle}>
 													<TableCell
-														className='py-2.5 pl-3 font-normal text-[13px] align-middle'
+														className='py-2.5 ps-3 font-normal text-[13px] align-middle'
 														style={{ color: 'var(--portal-text-primary, #374151)' }}>
-														{row.name || row.feature?.name || row.event_name || 'Unknown'}
+														{row.name || row.feature?.name || row.event_name || t('usageBreakdown.unknownRow')}
 													</TableCell>
 													<TableCell className='py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-secondary, #6b7280)' }}>
 														{renderTotalUsagePortal(row)}
@@ -315,8 +322,8 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 									key={`ungrouped:${row.feature_id ?? row.price_id ?? row.meter_id ?? index}`}
 									className='h-10 align-middle border-b'
 									style={rowStyle}>
-									<TableCell className='pl-3 py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
-										<span>{row.name || row.feature?.name || row.event_name || 'Unknown'}</span>
+									<TableCell className='ps-3 py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-primary, #374151)' }}>
+										<span>{row.name || row.feature?.name || row.event_name || t('usageBreakdown.unknownRow')}</span>
 									</TableCell>
 									<TableCell className='py-2.5 font-normal text-[13px]' style={{ color: 'var(--portal-text-secondary, #6b7280)' }}>
 										{renderTotalUsagePortal(row)}
@@ -330,9 +337,9 @@ const UsageBreakdownWidget = ({ analyticsParams, label }: UsageBreakdownWidgetPr
 								<TableRow style={rowStyle}>
 									<TableCell
 										colSpan={3}
-										className='pl-3 py-4 font-normal text-[13px]'
+										className='ps-3 py-4 font-normal text-[13px]'
 										style={{ color: 'var(--portal-text-secondary, #6b7280)' }}>
-										--
+										{t('usageBreakdown.cellEmpty')}
 									</TableCell>
 								</TableRow>
 							)}

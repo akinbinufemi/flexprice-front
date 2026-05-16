@@ -1,10 +1,15 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
+import { I18nextProvider } from 'react-i18next';
+import { createInstance } from 'i18next';
+import type { i18n as I18nInstance } from 'i18next';
+import { initReactI18next } from 'react-i18next';
 import toast from 'react-hot-toast';
 import ActionButton from './ActionButton';
+import commonEn from '@/i18n/locales/en/common.json';
 
 // Mock dependencies
 vi.mock('react-hot-toast', () => ({
@@ -29,6 +34,22 @@ vi.mock('@/core/auth/AuthService', () => ({
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
+
+let testI18n: I18nInstance;
+
+beforeAll(async () => {
+	const instance = createInstance();
+	await instance.use(initReactI18next).init({
+		lng: 'en',
+		fallbackLng: 'en',
+		ns: ['common'],
+		defaultNS: 'common',
+		resources: { en: { common: commonEn } },
+		interpolation: { escapeValue: false },
+	});
+	testI18n = instance;
+});
+
 vi.mock('react-router', async () => {
 	const actual = await vi.importActual('react-router');
 	return {
@@ -49,7 +70,9 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<BrowserRouter>{children}</BrowserRouter>
+			<I18nextProvider i18n={testI18n}>
+				<BrowserRouter>{children}</BrowserRouter>
+			</I18nextProvider>
 		</QueryClientProvider>
 	);
 };
@@ -283,7 +306,7 @@ describe('ActionButton Component', () => {
 			});
 
 			await waitFor(() => {
-				expect(toast.success).toHaveBeenCalledWith('Successfully archived Test Entity');
+				expect(toast.success).toHaveBeenCalledWith('Test Entity archived successfully');
 			});
 		});
 

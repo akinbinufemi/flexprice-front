@@ -46,7 +46,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 			notched: cn(
 				'relative',
 				'border border-gray-200 shadow-sm',
-				notchPosition === 'left' ? 'pl-8' : 'pr-8',
+				notchPosition === 'left' ? 'ps-8' : 'pe-8',
 				'before:absolute',
 				notchPosition === 'left' ? 'before:left-0' : 'before:right-0',
 				'before:top-6',

@@ -6,6 +6,7 @@ import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { PriceTier } from './UsagePricingForm';
 import { AddChargesButton } from './SetupChargesSection';
 import { TIER_MODE } from '@/models/Price';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	tieredPrices: PriceTier[];
@@ -51,6 +52,7 @@ const getDisplaySymbol = (value?: string): string => {
 };
 
 const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, currency }) => {
+	const { t } = useTranslation('catalog');
 	const addTieredPrice = () => {
 		setTieredPrices((prev) => {
 			const lastTier = prev[prev.length - 1];
@@ -133,11 +135,15 @@ const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, cur
 			<div className={cn('w-full', tieredPrices.length > 0 ? '' : 'hidden')}>
 				<table className='table-auto w-full border-collapse border border-gray-200 overflow-x-auto'>
 					<thead>
-						<tr className='bg-gray-100 text-left border-b'>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>From {'(>)'}</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>Up to {'(<=)'}</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>{`Per unit price `}</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>Flat fee </th>
+						<tr className='bg-gray-100 text-start border-b'>
+							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>
+								{t('plans.organisms.volumeTier.from')} {t('plans.organisms.volumeTier.fromSuffix')}
+							</th>
+							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>
+								{t('plans.organisms.volumeTier.upTo')} {t('plans.organisms.volumeTier.upToSuffix')}
+							</th>
+							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>{t('plans.organisms.volumeTier.perUnitPrice')}</th>
+							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>{t('plans.organisms.volumeTier.flatFee')}</th>
 							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'></th>
 						</tr>
 					</thead>
@@ -173,7 +179,7 @@ const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, cur
 										}}
 										value={tier.unit_amount?.toString() || ''}
 										inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
-										placeholder={'0.00'}
+										placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
 									/>
 								</td>
 								<td className='px-4 py-2'>
@@ -186,7 +192,7 @@ const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, cur
 										}}
 										value={tier.flat_amount?.toString() ?? '0'}
 										inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
-										placeholder={'0.00'}
+										placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
 									/>
 								</td>
 								<td className='px-4 py-2 text-center'>
@@ -200,7 +206,7 @@ const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, cur
 				</table>
 			</div>
 			<div className='flex justify-between items-center mt-4'>
-				<AddChargesButton onClick={addTieredPrice} label='Add Tier' />
+				<AddChargesButton onClick={addTieredPrice} label={t('plans.organisms.volumeTier.addTier')} />
 			</div>
 		</div>
 	);

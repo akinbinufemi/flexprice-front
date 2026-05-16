@@ -1,5 +1,6 @@
 import { FormHeader, Loader, Page, Button, AddButton } from '@/components/atoms';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Trash2, Eye, Plus } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -10,6 +11,8 @@ import ExportDrawer from '@/components/molecules/ExportDrawer/ExportDrawer';
 import { formatEntityType } from '@/utils/common/helper_functions';
 
 const ExportManagement = () => {
+	const { t } = useTranslation('settings');
+	const { i18n } = useTranslation();
 	const { connectionId } = useParams<{ connectionId: string }>();
 	const navigate = useNavigate();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -42,8 +45,8 @@ const ExportManagement = () => {
 			toast.success('Export task deleted successfully');
 			refetchTasks();
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to delete export task');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to delete export task');
 		},
 	});
 
@@ -65,15 +68,16 @@ const ExportManagement = () => {
 		return <Loader />;
 	}
 
+	const connectionDisplayName = connection?.name ?? t('insightsTools.exports.fallbackS3ConnectionName');
+	const pageTitle = t('insightsTools.exports.exportManagementDocumentTitle', { name: connectionDisplayName });
+
 	return (
-		<Page
-			documentTitle={`Export Management - ${connection?.name || 'S3 Connection'}`}
-			heading={`Export Management - ${connection?.name || 'S3 Connection'}`}>
+		<Page documentTitle={pageTitle} heading={pageTitle}>
 			{/* Back button and Add Export Button */}
 			<div className='mb-6 flex items-center justify-between'>
 				<Button variant='outline' onClick={() => navigate('/tools/exports/s3')} className='flex items-center gap-2'>
 					<ArrowLeft className='w-4 h-4' />
-					Back to S3 Connections
+					{t('insightsTools.exports.backToS3Connections')}
 				</Button>
 				<AddButton
 					onClick={() => {
@@ -85,7 +89,7 @@ const ExportManagement = () => {
 			{/* Exports List */}
 			{tasks.length > 0 ? (
 				<div className='mb-8'>
-					<FormHeader variant='form-component-title' title='Export Tasks' />
+					<FormHeader variant='form-component-title' title={t('insightsTools.exports.exportTasksTitle')} />
 					<div className='card'>
 						{tasks.map((task, idx) => (
 							<div key={idx} className='flex items-center justify-between text-sm p-4 border-b last:border-b-0'>
@@ -93,7 +97,9 @@ const ExportManagement = () => {
 									<div className='flex items-center gap-3'>
 										<div className={`w-3 h-3 rounded-full ${task.enabled ? 'bg-green-500' : 'bg-gray-400'}`} />
 										<div>
-											<p className='text-gray-900 font-medium'>{formatEntityType(task.entity_type)} Export</p>
+											<p className='text-gray-900 font-medium'>
+												{t('insightsTools.exports.entityExportSuffix', { entity: formatEntityType(task.entity_type) })}
+											</p>
 											<p className='text-xs text-gray-500'>
 												{task.interval} • {task.job_config.bucket} • {task.job_config.region}
 											</p>
@@ -103,7 +109,7 @@ const ExportManagement = () => {
 								<div className='flex items-center gap-6'>
 									<Button variant='outline' size='sm' onClick={() => handleViewDetails(task.id)} className='flex items-center gap-1'>
 										<Eye className='w-3 h-3' />
-										View
+										{i18n.t('actions.view', { ns: 'common' })}
 									</Button>
 									<Button
 										variant='outline'
@@ -121,8 +127,8 @@ const ExportManagement = () => {
 			) : (
 				<div className='card text-center !py-12'>
 					<div className='text-gray-500 mb-4'>
-						<h3 className='text-lg font-medium text-gray-900 mb-2'>No Export Tasks</h3>
-						<p className='text-gray-500 mb-4 max-w-[500px] mx-auto'>Create your first export task to start syncing data to S3.</p>
+						<h3 className='text-lg font-medium text-gray-900 mb-2'>{t('insightsTools.exports.noExportTasks')}</h3>
+						<p className='text-gray-500 mb-4 max-w-[500px] mx-auto'>{t('insightsTools.exports.noExportTasksHint')}</p>
 						<Button
 							variant='outline'
 							onClick={() => {
@@ -130,7 +136,7 @@ const ExportManagement = () => {
 							}}
 							className='!p-5 !bg-[#fbfbfb] !border-[#CFCFCF] flex items-center gap-2 mx-auto'>
 							<Plus className='w-4 h-4' />
-							Add Export Task
+							{t('insightsTools.exports.addExportTask')}
 						</Button>
 					</div>
 				</div>

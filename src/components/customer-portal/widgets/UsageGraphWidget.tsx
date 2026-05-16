@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card } from '@/components/atoms';
@@ -23,6 +24,7 @@ interface UsageGraphWidgetProps {
  * Returns null if no data — no empty state container shown.
  */
 const UsageGraphWidget = ({ config, analyticsParams, label }: UsageGraphWidgetProps) => {
+	const { t } = useTranslation('customer-portal');
 	const { config: portalConfig } = usePortalConfig();
 	const hasTheme = !!portalConfig.theme;
 
@@ -36,8 +38,8 @@ const UsageGraphWidget = ({ config, analyticsParams, label }: UsageGraphWidgetPr
 	});
 
 	useEffect(() => {
-		if (isError) toast.error('Failed to load usage analytics');
-	}, [isError]);
+		if (isError) toast.error(t('errors.loadUsageAnalytics'));
+	}, [isError, t]);
 
 	// Client-side feature filter
 	const filteredItems = useMemo(() => {
@@ -63,7 +65,7 @@ const UsageGraphWidget = ({ config, analyticsParams, label }: UsageGraphWidgetPr
 			style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
 			<div className='p-6' style={{ borderBottom: '1px solid var(--portal-border, #E9E9E9)' }}>
 				<h3 className='text-base font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-					{label || 'Usage Trend'}
+					{label || t('usage.trendTitle')}
 				</h3>
 			</div>
 			<div className='p-6'>
@@ -98,7 +100,7 @@ const UsageGraphWidget = ({ config, analyticsParams, label }: UsageGraphWidgetPr
 								</div>
 							</div>
 							{/* X-axis labels */}
-							<div className='flex justify-between pl-12'>
+							<div className='flex justify-between ps-12'>
 								{['', '', '', ''].map((_, i) => (
 									<Skeleton key={i} className='h-3 w-12' style={{ opacity: 0.4 }} />
 								))}

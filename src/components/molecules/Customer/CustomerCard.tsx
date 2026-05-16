@@ -3,6 +3,7 @@ import { SubscriptionUsage } from '@/models/Subscription';
 import CustomerApi from '@/api/CustomerApi';
 import formatDate from '@/utils/common/format_date';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const fetchCustomer = async (customerId: string) => {
 	return await CustomerApi.getCustomerById(customerId);
@@ -14,6 +15,8 @@ interface CustomerCardProps {
 }
 
 const CustomerCard: React.FC<CustomerCardProps> = ({ customerId, subscriptionData }) => {
+	const { t } = useTranslation('customers');
+	const emptyDisplay = t('usageTable.fallback');
 	const { data: customer, isLoading } = useQuery({
 		queryKey: ['fetchCustomerCard', customerId],
 		queryFn: () => fetchCustomer(customerId),
@@ -23,18 +26,18 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customerId, subscriptionDat
 
 	const details = [
 		{
-			label: 'Name',
-			value: customer?.name || '--',
+			label: t('list.columns.name'),
+			value: customer?.name || emptyDisplay,
 		},
 
 		{
-			label: 'Email',
-			value: customer?.email || '--',
+			label: t('overview.labels.email'),
+			value: customer?.email || emptyDisplay,
 		},
 
 		{
-			label: 'Slug',
-			value: customer?.external_id || '--',
+			label: t('overview.customerCardSlug'),
+			value: customer?.external_id || emptyDisplay,
 		},
 	];
 
@@ -61,24 +64,24 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customerId, subscriptionDat
 	return (
 		<div className='items-center justify-center'>
 			<div className='card bg-white'>
-				<FormHeader title='Customer Details' variant='sub-header' />
+				<FormHeader title={t('overview.cardTitle')} variant='sub-header' />
 				<div className='flex items-center space-x-4'>
 					<div className='w-full space-y-4'>
 						{details.map((detail, index) => (
 							<div key={index} className='grid grid-cols-2 gap-4'>
 								<div className='text-sm font-light text-gray-600'>{detail.label}</div>
-								<div className='text-sm font-normal text-gray-800 text-right'>{detail.value || '--'}</div>
+								<div className='text-sm font-normal text-gray-800 text-end'>{detail.value || emptyDisplay}</div>
 							</div>
 						))}
 						<div className='grid grid-cols-2 gap-4'>
 							{subscriptionData && (
 								<>
-									<div className='text-sm font-light text-gray-600'>Subscription Amount</div>
-									<div className='text-sm font-normal text-gray-800 text-right'>{subscriptionData.display_amount || '--'}</div>
+									<div className='text-sm font-light text-gray-600'>{t('overview.labels.subscriptionAmount')}</div>
+									<div className='text-sm font-normal text-gray-800 text-end'>{subscriptionData.display_amount || emptyDisplay}</div>
 
-									<div className='text-sm font-light text-gray-600'>Subscription Start Date</div>
-									<div className='text-sm font-normal text-gray-800 text-right'>
-										{formatDate(subscriptionData.start_time.toString()) || '--'}
+									<div className='text-sm font-light text-gray-600'>{t('overview.labels.subscriptionStartDate')}</div>
+									<div className='text-sm font-normal text-gray-800 text-end'>
+										{formatDate(subscriptionData.start_time.toString()) || emptyDisplay}
 									</div>
 								</>
 							)}

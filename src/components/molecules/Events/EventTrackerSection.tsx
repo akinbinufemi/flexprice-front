@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import EventTrackerStep from './EventTrackerStep';
 import JsonCodeBlock from './JsonCodeBlock';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface EventTrackerSectionProps {
 	debugResponse: GetEventDebugResponse;
@@ -11,51 +12,55 @@ interface EventTrackerSectionProps {
 }
 
 const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, displayEventTimestamp }) => {
-	const t = debugResponse.debug_tracker;
+	const { t } = useTranslation(['developers', 'common']);
+	const tracker = debugResponse.debug_tracker;
 	const overallStatus = debugResponse.status;
 
 	const steps: Array<{
 		key: 'customer_lookup' | 'meter_lookup' | 'price_lookup' | 'subscription_line_item_lookup';
 		title: string;
 		status?: DebugTrackerStatus | EventDebugStatus;
-		value: any;
+		value: unknown;
 	}> = [
 		{
 			key: 'customer_lookup',
-			title: 'Customer Lookup',
-			status: t?.customer_lookup?.status ?? 'unprocessed',
-			value: t?.customer_lookup ?? {},
+			title: t('events.tracker.customerLookup'),
+			status: tracker?.customer_lookup?.status ?? 'unprocessed',
+			value: tracker?.customer_lookup ?? {},
 		},
 		{
 			key: 'meter_lookup',
-			title: 'Feature Lookup',
-			status: t?.meter_matching?.status ?? 'unprocessed',
-			value: t?.meter_matching ?? {},
+			title: t('events.tracker.featureLookup'),
+			status: tracker?.meter_matching?.status ?? 'unprocessed',
+			value: tracker?.meter_matching ?? {},
 		},
 		{
 			key: 'price_lookup',
-			title: 'Price Lookup',
-			status: t?.price_lookup?.status ?? 'unprocessed',
-			value: t?.price_lookup ?? {},
+			title: t('events.tracker.priceLookup'),
+			status: tracker?.price_lookup?.status ?? 'unprocessed',
+			value: tracker?.price_lookup ?? {},
 		},
 		{
 			key: 'subscription_line_item_lookup',
-			title: 'Subscription Line Item Lookup',
-			status: t?.subscription_line_item_lookup?.status ?? 'unprocessed',
-			value: t?.subscription_line_item_lookup ?? {},
+			title: t('events.tracker.subscriptionLineItemLookup'),
+			status: tracker?.subscription_line_item_lookup?.status ?? 'unprocessed',
+			value: tracker?.subscription_line_item_lookup ?? {},
 		},
 	];
 
 	return (
 		<div className='space-y-0'>
-			{/* Tracker Steps - No heading, Sheet title is enough */}
 			<div className='relative'>
-				{/* Vertical line */}
 				<div className='absolute left-3 top-2 bottom-2 w-px bg-gray-100' />
 
-				{/* Ingested step (not expandable) */}
 				<div className='mb-4'>
-					<EventTrackerStep title='Ingested' stepKey='ingested' value={{}} isIngested={true} timestamp={displayEventTimestamp} />
+					<EventTrackerStep
+						title={t('events.tracker.ingested')}
+						stepKey='ingested'
+						value={{}}
+						isIngested={true}
+						timestamp={displayEventTimestamp}
+					/>
 				</div>
 
 				<Accordion type='single' collapsible className='border-none'>
@@ -68,10 +73,10 @@ const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, disp
 								<div className='ml-[40px] relative z-10 mt-3'>
 									<JsonCodeBlock
 										value={s.value}
-										title='Response'
+										title={t('labels.response')}
 										onCopy={() => {
 											navigator.clipboard.writeText(JSON.stringify(s.value ?? {}, null, 2));
-											toast.success('Copied to clipboard!');
+											toast.success(t('common:toast.copySuccess'));
 										}}
 									/>
 								</div>
@@ -80,10 +85,9 @@ const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, disp
 					))}
 				</Accordion>
 
-				{/* Attributed to Customer: status row only (no dropdown) */}
 				<div className='mt-4'>
 					<EventTrackerStep
-						title='Attributed to Customer'
+						title={t('events.tracker.attributedToCustomer')}
 						stepKey='attributed'
 						value={{}}
 						isAttributed={true}

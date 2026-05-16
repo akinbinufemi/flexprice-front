@@ -20,22 +20,9 @@ import { formatBillingPeriodForPrice } from '@/utils/common/helper_functions';
 import { formatAmount } from '@/components/atoms/Input/Input';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { isOneTimePlanPrice } from '@/utils/subscription/planPricesForSubscriptionUi';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_ROW_LIMIT = 5;
-
-const CHARGES_TABLE_COLUMNS: ColumnData<ChargeTableData>[] = [
-	{ fieldName: 'charge', title: 'Charge' },
-	{ title: 'Billing Period', render: (data) => capitalize(data.invoice_cadence) || '--' },
-	{ fieldName: 'quantity', title: 'Quantity' },
-	{ fieldName: 'price', title: 'Price' },
-	{
-		fieldName: 'actions',
-		title: '',
-		width: 50,
-		align: 'center',
-		fieldVariant: 'interactive',
-	},
-];
 
 type ChargeTableData = {
 	priceId: string;
@@ -65,6 +52,7 @@ const PriceActionMenu: FC<PriceActionMenuProps> = ({
 	onCommitment,
 	onOpenCoupon,
 }) => {
+	const { t } = useTranslation('customers');
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 	return (
@@ -83,23 +71,25 @@ const PriceActionMenu: FC<PriceActionMenuProps> = ({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align='end' className='w-48'>
 					<DropdownMenuItem onClick={() => onOverride(price)}>
-						<Pencil className='mr-2 h-4 w-4' />
-						{isOverridden ? 'Edit Override' : 'Override Price'}
+						<Pencil className='me-2 h-4 w-4' />
+						{isOverridden ? t('organisms.subscriptionPriceTable.editOverride') : t('organisms.subscriptionPriceTable.overridePrice')}
 					</DropdownMenuItem>
 					{isOverridden && (
 						<DropdownMenuItem onClick={() => onReset(price.id)}>
-							<RotateCcw className='mr-2 h-4 w-4' />
-							Reset Override
+							<RotateCcw className='me-2 h-4 w-4' />
+							{t('organisms.subscriptionPriceTable.resetOverride')}
 						</DropdownMenuItem>
 					)}
 					<DropdownMenuItem onClick={() => onCommitment(price)}>
-						<Target className='mr-2 h-4 w-4' />
-						{hasCommitment ? 'Edit Commitment' : 'Configure Commitment'}
+						<Target className='me-2 h-4 w-4' />
+						{hasCommitment
+							? t('organisms.subscriptionPriceTable.editCommitment')
+							: t('organisms.subscriptionPriceTable.configureCommitment')}
 					</DropdownMenuItem>
 					{!isOverridden && (
 						<DropdownMenuItem onClick={() => onOpenCoupon(price.id)}>
-							<Tag className='mr-2 h-4 w-4' />
-							Apply Coupon
+							<Tag className='me-2 h-4 w-4' />
+							{t('organisms.subscriptionPriceTable.applyCoupon')}
 						</DropdownMenuItem>
 					)}
 				</DropdownMenuContent>
@@ -132,6 +122,7 @@ const PriceQuantityCell: FC<PriceQuantityCellProps> = ({
 	onPriceOverride,
 	onClearCoupon,
 }) => {
+	const { t } = useTranslation('customers');
 	const minQuantity = price.min_quantity ?? 1;
 	const currentQuantity = override?.quantity ?? minQuantity;
 	const displayQuantity = quantityInput ?? currentQuantity.toString();
@@ -146,7 +137,7 @@ const PriceQuantityCell: FC<PriceQuantityCellProps> = ({
 	}, [override, quantityInput, onQuantityChange]);
 
 	if (price.type !== PRICE_TYPE.FIXED) {
-		return <>pay as you go</>;
+		return <>{t('organisms.subscriptionPriceTable.payAsYouGo')}</>;
 	}
 
 	return (
@@ -254,6 +245,27 @@ const SubscriptionPriceTable: FC<Props> = ({
 	});
 	const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
 
+	const { t } = useTranslation('customers');
+	const chargesTableColumns = useMemo<ColumnData<ChargeTableData>[]>(
+		() => [
+			{ fieldName: 'charge', title: t('organisms.subscriptionPriceTable.colCharge') },
+			{
+				title: t('organisms.subscriptionPriceTable.colBillingPeriod'),
+				render: (data) => capitalize(data.invoice_cadence) || t('usageTable.featureTypes.dash'),
+			},
+			{ fieldName: 'quantity', title: t('organisms.subscriptionPriceTable.colQuantity') },
+			{ fieldName: 'price', title: t('organisms.subscriptionPriceTable.colPrice') },
+			{
+				fieldName: 'actions',
+				title: '',
+				width: 50,
+				align: 'center',
+				fieldVariant: 'interactive',
+			},
+		],
+		[t],
+	);
+
 	const filteredPrices = useMemo(() => {
 		let filtered = data;
 		if (currency) {
@@ -298,7 +310,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 				priceId: price.id,
 				charge: (
 					<div>
-						<div>{price.display_name || price.meter?.name || 'Charge'}</div>
+						<div>{price.display_name || price.meter?.name || t('organisms.subscriptionPriceTable.chargeFallback')}</div>
 					</div>
 				),
 				quantity: (
@@ -338,6 +350,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 		onPriceOverride,
 		onResetOverride,
 		onLineItemCouponsChange,
+		t,
 	]);
 
 	const addedRows = useMemo<ChargeTableData[]>(() => {
@@ -345,7 +358,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 			priceId: item.tempId,
 			charge: (
 				<div>
-					<div>{item.display_name || item.price?.display_name || 'Charge'}</div>
+					<div>{item.display_name || item.price?.display_name || t('organisms.subscriptionPriceTable.chargeFallback')}</div>
 				</div>
 			),
 			quantity: <span>{item.quantity ?? 1}</span>,
@@ -358,7 +371,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 							...(onEditAddedCharge
 								? [
 										{
-											label: 'Edit',
+											label: t('organisms.subscriptionPriceTable.editAdded'),
 											icon: <Pencil className='h-4 w-4' />,
 											onSelect: () => onEditAddedCharge(item),
 										},
@@ -367,7 +380,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 							...(onRemoveAddedCharge
 								? [
 										{
-											label: 'Delete',
+											label: t('organisms.subscriptionPriceTable.deleteAdded'),
 											icon: <Trash2 className='h-4 w-4' />,
 											onSelect: () => onRemoveAddedCharge(item.tempId),
 											className: 'text-red-600 focus:text-red-600',
@@ -386,7 +399,7 @@ const SubscriptionPriceTable: FC<Props> = ({
 					/>
 				) : undefined,
 		}));
-	}, [addedLineItems, currency, disabled, onRemoveAddedCharge, onEditAddedCharge, openAddedMenuTempId]);
+	}, [addedLineItems, currency, disabled, onRemoveAddedCharge, onEditAddedCharge, openAddedMenuTempId, t]);
 
 	const combinedData = useMemo(() => [...mappedData, ...addedRows], [mappedData, addedRows]);
 	const displayedData = showAllRows ? combinedData : combinedData.slice(0, DEFAULT_ROW_LIMIT);
@@ -395,12 +408,12 @@ const SubscriptionPriceTable: FC<Props> = ({
 	return (
 		<div className='space-y-4'>
 			<div className='flex items-center justify-between gap-2'>
-				<FormHeader title='Charges' variant='sub-header' />
+				<FormHeader title={t('organisms.subscriptionPriceTable.charges')} variant='sub-header' />
 				{onAddCharge && <AddButton onClick={onAddCharge} disabled={disabled} className='w-fit'></AddButton>}
 			</div>
 			<div className='rounded-[6px] border border-gray-300'>
 				<div style={{ overflow: 'hidden' }}>
-					<FlexpriceTable columns={CHARGES_TABLE_COLUMNS} data={displayedData} />
+					<FlexpriceTable columns={chargesTableColumns} data={displayedData} />
 				</div>
 			</div>
 			{hasMore && (
@@ -410,12 +423,14 @@ const SubscriptionPriceTable: FC<Props> = ({
 						className='flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors py-2 px-3 rounded-[6px] hover:bg-gray-50'>
 						{showAllRows ? (
 							<>
-								<span>Show less</span>
+								<span>{t('organisms.subscriptionPriceTable.showLess')}</span>
 								<ChevronUpIcon className='w-4 h-4' />
 							</>
 						) : (
 							<>
-								<span>Show {Math.max(0, combinedData.length - DEFAULT_ROW_LIMIT)} more</span>
+								<span>
+									{t('organisms.subscriptionPriceTable.showMore', { count: Math.max(0, combinedData.length - DEFAULT_ROW_LIMIT) })}
+								</span>
 								<ChevronDownIcon className='w-4 h-4' />
 							</>
 						)}

@@ -9,6 +9,8 @@ import { SIDEBAR_PRICING_PROMO_QUERY_KEY } from '@/hooks/useShouldShowSidebarPri
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
 import { CreatePlanRequest, UpdatePlanRequest, PlanResponse, CreatePlanResponse } from '@/types/dto';
+import { useTranslation } from 'react-i18next';
+
 interface Props {
 	data?: Plan | null;
 	open?: boolean;
@@ -18,6 +20,7 @@ interface Props {
 }
 
 const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 	const navigate = useNavigate();
 
@@ -33,7 +36,7 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 
 	const { mutate: updatePlan, isPending } = useMutation<
 		PlanResponse | CreatePlanResponse,
-		ServerError,
+		Error,
 		CreatePlanRequest | (UpdatePlanRequest & { id: string })
 	>({
 		mutationFn: (vars) => {
@@ -50,8 +53,8 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 			void queryClient.invalidateQueries({ queryKey: [SIDEBAR_PRICING_PROMO_QUERY_KEY], exact: false });
 			navigate(`${RouteNames.plan}/${data.id}`);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || `Failed to ${isEdit ? 'update' : 'create'} plan. Please try again.`);
+		onError: (error: Error) => {
+			toast.error(error.message || `Failed to ${isEdit ? 'update' : 'create'} plan. Please try again.`);
 		},
 	});
 
@@ -154,14 +157,14 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Plan' : 'Create Plan'}
-			description={isEdit ? 'Enter plan details to update the plan.' : 'Enter plan details to create a new plan.'}
+			title={isEdit ? t('catalog:plans.drawer.editTitle') : t('catalog:plans.drawer.createTitle')}
+			description={isEdit ? t('catalog:plans.drawer.descriptionEdit') : t('catalog:plans.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter a name for the plan'
-				description={'A descriptive name for this pricing plan.'}
-				label='Plan Name'
+				placeholder={t('catalog:plans.drawer.namePlaceholder')}
+				description={t('catalog:plans.drawer.nameHelp')}
+				label={t('catalog:plans.drawer.planName')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -171,14 +174,14 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Lookup Key'
+				label={t('catalog:shared.lookupKey')}
 				error={errors.lookup_key}
 				onChange={(e) => {
 					setFormData({ ...formData, lookup_key: e });
 				}}
 				value={formData.lookup_key}
-				placeholder='Enter a slug for the plan'
-				description={'A system identifier used for API calls and integrations.'}
+				placeholder={t('catalog:plans.drawer.lookupPlaceholder')}
+				description={t('catalog:shared.lookupKeyDescription')}
 			/>
 
 			<Spacer height={'20px'} />
@@ -188,9 +191,9 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 					setFormData({ ...formData, description: e });
 				}}
 				className='min-h-[100px]'
-				placeholder='Enter description'
-				label='Description'
-				description='Helps your team to understand the purpose of this plan.'
+				placeholder={t('catalog:shared.enterDescription')}
+				label={t('catalog:features.drawer.descriptionLabel')}
+				description={t('catalog:plans.drawer.purposeDescription')}
 			/>
 
 			<Spacer height={'20px'} />
@@ -204,14 +207,14 @@ const PlanDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuery
 				}}
 				error={errors.metadata}
 				className='min-h-[100px]'
-				placeholder='{"key": "value"}'
-				label='Metadata (Optional)'
-				description='Additional metadata as JSON. All values must be strings.'
+				placeholder={t('catalog:shared.metadataPlaceholder')}
+				label={t('catalog:shared.metadataOptional')}
+				description={t('catalog:shared.metadataJsonStringsOnly')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Button isLoading={isPending} disabled={isPending || !formData.name?.trim() || !formData.lookup_key?.trim()} onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create'}
+				{isEdit ? t('common:actions.save') : t('common:actions.create')}
 			</Button>
 		</Sheet>
 	);

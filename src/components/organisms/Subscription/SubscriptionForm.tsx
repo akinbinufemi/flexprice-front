@@ -59,6 +59,7 @@ import {
 	uniqueRecurringBillingPeriodsFromPrices,
 } from '@/utils/subscription/planPricesForSubscriptionUi';
 import { Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const BillingAccordionInfoTooltip = ({ description, ariaLabel }: { description: string; ariaLabel: string }) => (
 	<Tooltip
@@ -92,14 +93,18 @@ const BillingCycleSelector = ({
 	onChange: (value: BILLING_CYCLE) => void;
 	disabled?: boolean;
 }) => {
-	const options = [
-		{ label: 'Anniversary', value: BILLING_CYCLE.ANNIVERSARY },
-		{ label: 'Calendar', value: BILLING_CYCLE.CALENDAR },
-	];
+	const { t } = useTranslation('customers');
+	const options = useMemo(
+		() => [
+			{ label: t('organisms.subscriptionForm.billingAnniversary'), value: BILLING_CYCLE.ANNIVERSARY },
+			{ label: t('organisms.subscriptionForm.billingCalendar'), value: BILLING_CYCLE.CALENDAR },
+		],
+		[t],
+	);
 
 	return (
 		<div className='space-y-2'>
-			<Label label='Subscription Cycle' />
+			<Label label={t('organisms.subscriptionForm.subscriptionCycle')} />
 			<div className='flex items-center space-x-2'>
 				{options.map((option, index) => (
 					<div
@@ -150,6 +155,7 @@ const SubscriptionForm = ({
 	/** Subscription customer; used for invoicing "Self" option and labels */
 	subscriberCustomer?: Customer;
 }) => {
+	const { t } = useTranslation(['customers', 'common']);
 	// Fetch plan prices via shared hook (same cache key + canonical active filter as CreateCustomerSubscriptionPage)
 	const { data: selectedPlanPrices } = usePlanPrices(state.selectedPlan);
 
@@ -475,7 +481,7 @@ const SubscriptionForm = ({
 
 	return (
 		<div className='p-6 rounded-[6px] border border-gray-300 space-y-6 bg-white'>
-			<FormHeader title='Subscription Details' variant='sub-header' />
+			<FormHeader title={t('organisms.subscriptionForm.subscriptionDetails')} variant='sub-header' />
 
 			{/* Plan Selection */}
 			{!plansLoading && (
@@ -484,12 +490,20 @@ const SubscriptionForm = ({
 						value={state.selectedPlan}
 						options={plansWithCharges}
 						onChange={handlePlanChange}
-						label='Plan*'
+						label={t('organisms.subscriptionForm.planRequired')}
 						disabled={isDisabled || isLoadingPlanDetails}
-						placeholder='Select plan'
-						error={plansError ? 'Failed to load plans' : isPlanDetailsError ? 'Failed to load plan details' : undefined}
+						placeholder={t('organisms.subscriptionForm.selectPlan')}
+						error={
+							plansError
+								? t('organisms.subscriptionForm.loadPlansError')
+								: isPlanDetailsError
+									? t('organisms.subscriptionForm.loadPlanDetailsError')
+									: undefined
+						}
 					/>
-					{isLoadingPlanDetails && state.selectedPlan && <p className='text-sm text-gray-500'>Loading plan details...</p>}
+					{isLoadingPlanDetails && state.selectedPlan && (
+						<p className='text-sm text-gray-500'>{t('organisms.subscriptionForm.loadingPlanDetails')}</p>
+					)}
 				</div>
 			)}
 
@@ -500,9 +514,9 @@ const SubscriptionForm = ({
 					value={state.billingPeriod}
 					options={availableBillingPeriods}
 					onChange={handleBillingPeriodChange}
-					label='Billing Period*'
+					label={t('organisms.subscriptionForm.billingPeriodRequired')}
 					disabled={isDisabled || isLoadingPlanDetails}
-					placeholder='Select billing period'
+					placeholder={t('organisms.subscriptionForm.selectBillingPeriod')}
 				/>
 			)}
 
@@ -513,9 +527,9 @@ const SubscriptionForm = ({
 					value={state.currency}
 					options={availableCurrencies}
 					onChange={(value) => setState((prev) => ({ ...prev, currency: value }))}
-					label='Currency*'
+					label={t('organisms.subscriptionForm.currencyRequired')}
 					disabled={isDisabled || isLoadingPlanDetails}
-					placeholder='Select currency'
+					placeholder={t('organisms.subscriptionForm.selectCurrency')}
 				/>
 			)}
 
@@ -573,7 +587,7 @@ const SubscriptionForm = ({
 					{/* Subscription Dates */}
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-6'>
 						<div>
-							<Label label='Subscription Start Date*' />
+							<Label label={t('organisms.subscriptionForm.subscriptionStartRequired')} />
 							<DatePicker
 								date={new Date(state.startDate)}
 								setDate={(date) => {
@@ -585,13 +599,13 @@ const SubscriptionForm = ({
 							/>
 						</div>
 						<div>
-							<Label label='Subscription End Date' />
+							<Label label={t('organisms.subscriptionForm.subscriptionEnd')} />
 							<DatePicker
 								date={state.endDate ? new Date(state.endDate) : undefined}
 								setDate={(date) => {
 									setState((prev) => ({ ...prev, endDate: date ? date.toISOString() : undefined }));
 								}}
-								placeholder='Forever'
+								placeholder={t('organisms.subscriptionForm.foreverPlaceholder')}
 								disabled={isDisabled}
 								minDate={new Date(state.startDate)}
 							/>
@@ -601,11 +615,11 @@ const SubscriptionForm = ({
 					{state.selectedPlan && !isLoadingPlanDetails && phases.length === 0 && state.billingCycle === BILLING_CYCLE.ANNIVERSARY && (
 						<div className=''>
 							<DatePicker
-								label='Billing Date'
+								label={t('organisms.subscriptionForm.billingDate')}
 								date={state.billingAnchor ? new Date(state.billingAnchor) : undefined}
 								setDate={(date) => setState((prev) => ({ ...prev, billingAnchor: date ? date.toISOString() : undefined }))}
 								disabled={isDisabled}
-								placeholder='Select billing date'
+								placeholder={t('organisms.subscriptionForm.selectBillingDate')}
 							/>
 						</div>
 					)}
@@ -742,41 +756,41 @@ const SubscriptionForm = ({
 				<>
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-200'>
 						<DecimalUsageInput
-							label='Commitment Amount'
+							label={t('organisms.subscriptionForm.commitmentAmount')}
 							value={state.commitmentAmount}
 							onChange={(value) => setState((prev) => ({ ...prev, commitmentAmount: value }))}
-							placeholder='e.g. $100.00'
+							placeholder={t('organisms.subscriptionForm.commitmentAmountPlaceholder')}
 							disabled={isDisabled}
 							precision={2}
 							min={0}
 						/>
 						<Select
-							label='Commitment Period'
+							label={t('organisms.subscriptionForm.commitmentPeriod')}
 							value={state.commitmentDuration}
 							options={[
-								{ label: 'Monthly', value: 'MONTHLY' },
-								{ label: 'Quarterly', value: 'QUARTERLY' },
-								{ label: 'Half-Yearly', value: 'HALF_YEARLY' },
-								{ label: 'Annual', value: 'ANNUAL' },
+								{ label: t('organisms.subscriptionForm.commitmentMonthly'), value: 'MONTHLY' },
+								{ label: t('organisms.subscriptionForm.commitmentQuarterly'), value: 'QUARTERLY' },
+								{ label: t('organisms.subscriptionForm.commitmentHalfYearly'), value: 'HALF_YEARLY' },
+								{ label: t('organisms.subscriptionForm.commitmentAnnual'), value: 'ANNUAL' },
 							]}
 							onChange={(value) => setState((prev) => ({ ...prev, commitmentDuration: value }))}
-							placeholder='Same as billing period'
+							placeholder={t('organisms.subscriptionForm.sameAsBillingPlaceholder')}
 							disabled={isDisabled}
 						/>
 					</div>
 					{/* Overage Factor + Enable True Up */}
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
 						<DecimalUsageInput
-							label='Overage Factor'
+							label={t('organisms.subscriptionForm.overageFactor')}
 							value={state.overageFactor}
 							onChange={(value) => setState((prev) => ({ ...prev, overageFactor: value }))}
-							placeholder='e.g. 1.5'
+							placeholder={t('organisms.subscriptionForm.overageFactorPlaceholder')}
 							disabled={isDisabled}
 							precision={2}
 							min={0}
 						/>
 						<div className='flex flex-col space-y-2'>
-							<Label label='Enable True-up fee' />
+							<Label label={t('organisms.subscriptionForm.enableTrueUp')} />
 							<Switch
 								checked={state.enable_true_up}
 								onCheckedChange={(checked) => setState((prev) => ({ ...prev, enable_true_up: checked }))}
@@ -884,7 +898,7 @@ const SubscriptionForm = ({
 			{/* Entitlements Section */}
 			{state.selectedPlan && !isLoadingPlanDetails && allEntitlements.length > 0 && (
 				<div className='space-y-4 mt-4 pt-3 border-t border-gray-200'>
-					<FormHeader className='mb-0' title='Entitlements' variant='sub-header' />
+					<FormHeader className='mb-0' title={t('organisms.subscriptionForm.entitlements')} variant='sub-header' />
 					<div className='rounded-[6px] border border-gray-300 space-y-6 mt-2'>
 						<EntitlementOverridesTable
 							entitlements={allEntitlements}
@@ -899,15 +913,15 @@ const SubscriptionForm = ({
 			{/* Advanced Configuration */}
 			{state.selectedPlan && !isLoadingPlanDetails && (
 				<div className='mt-6 pt-6 border-t border-gray-200 space-y-6'>
-					<FormHeader title='Billing Configuration' variant='sub-header' />
+					<FormHeader title={t('organisms.subscriptionForm.billingConfiguration')} variant='sub-header' />
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<Select
 							value={state.paymentTerms ?? PAYMENT_TERMS_NONE}
 							options={paymentTermsOptions}
 							onChange={(value) => setState((prev) => ({ ...prev, paymentTerms: value === PAYMENT_TERMS_NONE ? undefined : value }))}
-							label='Payment terms'
+							label={t('organisms.subscriptionForm.paymentTerms')}
 							disabled={isDisabled || isLoadingPlanDetails}
-							placeholder='Select payment terms'
+							placeholder={t('organisms.subscriptionForm.selectPaymentTerms')}
 						/>
 						<CustomerSearchSelect
 							selfCustomer={subscriberCustomer}
@@ -920,10 +934,10 @@ const SubscriptionForm = ({
 								}));
 							}}
 							display={{
-								label: 'Billing customer',
-								placeholder: 'Self',
+								label: t('organisms.subscriptionForm.billingCustomerLabel'),
+								placeholder: t('organisms.subscriptionForm.billingCustomerPlaceholder'),
 							}}
-							searchPlaceholder='Search for billing customer...'
+							searchPlaceholder={t('organisms.subscriptionForm.searchBillingCustomer')}
 							disabled={isDisabled}
 						/>
 					</div>
@@ -943,11 +957,11 @@ const SubscriptionForm = ({
 						<AccordionItem value='trial'>
 							<AccordionTrigger className='px-5 py-4'>
 								<span className='flex min-w-0 flex-1 items-center'>
-									<span className='min-w-0 flex-1 truncate'>Free trial</span>
-									<span className='ml-auto flex shrink-0 items-center pl-2'>
+									<span className='min-w-0 flex-1 truncate'>{t('organisms.subscriptionForm.freeTrial')}</span>
+									<span className='ms-auto flex shrink-0 items-center ps-2'>
 										<BillingAccordionInfoTooltip
-											ariaLabel='About free trial'
-											description='Optional trial length for this subscription in days. Leave empty to use the plan default (or no trial if the plan defines none).'
+											ariaLabel={t('organisms.subscriptionForm.aboutFreeTrialAria')}
+											description={t('organisms.subscriptionForm.freeTrialHelp')}
 										/>
 									</span>
 								</span>
@@ -956,12 +970,12 @@ const SubscriptionForm = ({
 								<div className='max-w-xs'>
 									<Input
 										id='subscription-billing-trial-days'
-										aria-label='Trial period days'
+										aria-label={t('organisms.subscriptionForm.trialDaysAria')}
 										variant='number'
 										value={state.subscriptionTrialPeriodDays}
 										onChange={(value) => setState((prev) => ({ ...prev, subscriptionTrialPeriodDays: value }))}
 										suffix='days'
-										placeholder='14'
+										placeholder={t('organisms.subscriptionForm.trialDaysPlaceholder')}
 										disabled={isDisabled || isLoadingPlanDetails}
 									/>
 								</div>
@@ -971,11 +985,11 @@ const SubscriptionForm = ({
 						<AccordionItem value='proration'>
 							<AccordionTrigger className='px-5 py-4'>
 								<span className='flex min-w-0 flex-1 items-center'>
-									<span className='min-w-0 flex-1 truncate'>Proration behavior</span>
-									<span className='ml-auto flex shrink-0 items-center pl-2'>
+									<span className='min-w-0 flex-1 truncate'>{t('organisms.subscriptionForm.prorationBehavior')}</span>
+									<span className='ms-auto flex shrink-0 items-center ps-2'>
 										<BillingAccordionInfoTooltip
-											ariaLabel='About proration'
-											description='When enabled, mid-cycle subscription changes generate proration line items so invoices reflect time spent on each price.'
+											ariaLabel={t('organisms.subscriptionForm.aboutProrationAria')}
+											description={t('organisms.subscriptionForm.prorationHelp')}
 										/>
 									</span>
 								</span>
@@ -983,7 +997,7 @@ const SubscriptionForm = ({
 							<AccordionContent className='border-t border-zinc-100 bg-white px-5 pb-5 pt-4'>
 								<div className='flex flex-row items-center justify-between gap-4 w-full'>
 									<p className='text-[13px] leading-relaxed text-zinc-600 min-w-0 flex-1'>
-										Create proration line items when the subscription changes mid-cycle.
+										{t('organisms.subscriptionForm.prorationInline')}
 									</p>
 									<Switch
 										id='subscription-billing-proration'
@@ -999,11 +1013,11 @@ const SubscriptionForm = ({
 						<AccordionItem value='auto-invoice'>
 							<AccordionTrigger className='px-5 py-4'>
 								<span className='flex min-w-0 flex-1 items-center'>
-									<span className='min-w-0 flex-1 truncate'>Auto invoice threshold</span>
-									<span className='ml-auto flex shrink-0 items-center pl-2'>
+									<span className='min-w-0 flex-1 truncate'>{t('organisms.subscriptionForm.autoInvoiceThreshold')}</span>
+									<span className='ms-auto flex shrink-0 items-center ps-2'>
 										<BillingAccordionInfoTooltip
-											ariaLabel='About auto invoice threshold'
-											description='Usage amount that can trigger an invoice before the period ends. Available when charges are usage-based; fixed-price subscription charges disable this field.'
+											ariaLabel={t('organisms.subscriptionForm.aboutAutoInvoiceAria')}
+											description={t('organisms.subscriptionForm.autoInvoiceHelp')}
 										/>
 									</span>
 								</span>
@@ -1012,11 +1026,11 @@ const SubscriptionForm = ({
 								<div className='flex-1 min-w-[12rem] max-w-md'>
 									<DecimalUsageInput
 										id='subscription-billing-auto-invoice-threshold-amount'
-										ariaLabel='Auto invoice threshold amount'
+										ariaLabel={t('organisms.subscriptionForm.autoInvoiceAmountAria')}
 										suffix={state.currency ? getCurrencySymbol(state.currency) : undefined}
 										value={state.autoInvoiceThreshold}
 										onChange={(value) => setState((prev) => ({ ...prev, autoInvoiceThreshold: value }))}
-										placeholder='100.00'
+										placeholder={t('organisms.subscriptionForm.autoInvoicePlaceholder')}
 										disabled={isDisabled || isLoadingPlanDetails || hasFixedSubscriptionChargePrice}
 										precision={2}
 										min={0}

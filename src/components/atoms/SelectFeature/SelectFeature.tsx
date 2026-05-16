@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Gauge, SquareCheckBig, Wrench } from 'lucide-react';
 import { FC, useMemo } from 'react';
 import { ENTITY_STATUS } from '@/models/base';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	onChange: (value: Feature) => void;
@@ -39,8 +40,8 @@ const SelectFeature: FC<Props> = ({
 	onChange,
 	value,
 	error,
-	label = 'Features',
-	placeholder = 'Select feature',
+	label: labelProp,
+	placeholder: placeholderProp,
 	description,
 	className,
 	disabledFeatures,
@@ -48,6 +49,9 @@ const SelectFeature: FC<Props> = ({
 	popoverSide = 'bottom',
 	popoverAlign = 'start',
 }) => {
+	const { t } = useTranslation('common');
+	const label = labelProp ?? t('features.title');
+	const placeholder = placeholderProp ?? t('features.selectFeature');
 	// Fetch the selected feature if value is provided (for initial display)
 	const { data: selectedFeatureData, isLoading: isLoadingSelected } = useQuery({
 		queryKey: ['fetchFeatureById', value],
@@ -110,7 +114,7 @@ const SelectFeature: FC<Props> = ({
 				search={{
 					searchFn: searchFeatures,
 					debounceTime: 300,
-					placeholder: 'Search features...',
+					placeholder: t('features.searchPlaceholder'),
 				}}
 				extractors={extractors}
 				display={{
@@ -123,8 +127,8 @@ const SelectFeature: FC<Props> = ({
 					align: popoverAlign,
 				}}
 				options={{
-					noOptionsText: 'No features added yet',
-					emptyText: 'No features found.',
+					noOptionsText: t('features.noFeaturesAddedYet'),
+					emptyText: t('features.noneFound'),
 					hideSelectedTick: true,
 				}}
 				value={currentValue}

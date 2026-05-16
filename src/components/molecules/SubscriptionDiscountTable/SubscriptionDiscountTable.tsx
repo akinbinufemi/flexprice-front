@@ -9,6 +9,7 @@ import { formatAmount } from '@/components/atoms/Input/Input';
 import { useQuery } from '@tanstack/react-query';
 import CouponApi from '@/api/CouponApi';
 import filterValidCoupons from '@/utils/helpers/coupons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	coupon: Coupon | null;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const SubscriptionDiscountTable: FC<Props> = ({ coupon, onChange, disabled, currency, allLineItemCoupons = {} }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	// Fetch available coupons
@@ -83,45 +85,55 @@ const SubscriptionDiscountTable: FC<Props> = ({ coupon, onChange, disabled, curr
 
 	const columns: ColumnData<Coupon>[] = [
 		{
-			title: 'Coupon Name',
+			title: t('subscriptions.discountTable.couponName'),
 			render: (row) => {
 				try {
 					return <div className='font-medium'>{formatCouponName(row)}</div>;
 				} catch (error) {
 					console.error('Error formatting coupon name:', error);
-					return <div className='font-medium'>{row?.name || 'Unknown Coupon'}</div>;
+					return <div className='font-medium'>{row?.name || t('subscriptions.unknownCoupon')}</div>;
 				}
 			},
 		},
 		{
-			title: 'Discount',
+			title: t('subscriptions.discountTable.discount'),
 			render: (row) => {
 				try {
 					if (row?.type === 'fixed') {
+						const symbol = getCurrencySymbol(row.currency?.trim() ? row.currency : '');
 						return (
 							<div className='text-green-600 font-medium'>
-								{getCurrencySymbol(row.currency || 'USD')}
-								{formatAmount(row.amount_off || '0')} off
+								{t('subscriptions.discountFixedOff', {
+									symbol,
+									amount: formatAmount(row.amount_off ?? '0'),
+								})}
 							</div>
 						);
 					} else if (row?.type === 'percentage') {
-						return <div className='text-green-600 font-medium'>{row.percentage_off || 0}% off</div>;
+						return (
+							<div className='text-green-600 font-medium'>
+								{t('subscriptions.discountPercentOff', { percent: row.percentage_off ?? 0 })}
+							</div>
+						);
 					}
-					return '--';
+					return t('common:labels.na');
 				} catch (error) {
 					console.error('Error rendering discount:', error);
-					return <div>--</div>;
+					return <div>{t('common:labels.na')}</div>;
 				}
 			},
 		},
 		{
-			title: 'Type',
+			title: t('subscriptions.discountTable.type'),
 			render: (row) => (
-				<Chip variant={row.type === 'fixed' ? 'default' : 'info'} label={row.type === 'fixed' ? 'Fixed Amount' : 'Percentage'} />
+				<Chip
+					variant={row.type === 'fixed' ? 'default' : 'info'}
+					label={row.type === 'fixed' ? t('subscriptions.fixedAmount') : t('subscriptions.percentage')}
+				/>
 			),
 		},
 		{
-			title: 'Currency',
+			title: t('subscriptions.discountTable.currency'),
 			render: (row) => row.currency.toUpperCase(),
 		},
 		{
@@ -159,8 +171,8 @@ const SubscriptionDiscountTable: FC<Props> = ({ coupon, onChange, disabled, curr
 
 			<div className='space-y-4'>
 				<div className='flex items-center justify-between'>
-					<FormHeader className='mb-0' title='Discounts' variant='sub-header' />
-					{!coupon && <AddButton onClick={() => setIsModalOpen(true)} disabled={disabled} label='Add' />}
+					<FormHeader className='mb-0' title={t('subscriptions.discounts')} variant='sub-header' />
+					{!coupon && <AddButton onClick={() => setIsModalOpen(true)} disabled={disabled} label={t('common:actions.add')} />}
 				</div>
 				<div className='rounded-[6px] border border-gray-300'>
 					<FlexpriceTable data={tableData} columns={columns} showEmptyRow />

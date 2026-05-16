@@ -78,7 +78,7 @@ const Chip: FC<ChipProps> = ({
 			}}
 			aria-disabled={disabled}>
 			{icon && <span className='flex items-center text-[16px] leading-none'>{icon}</span>}
-			{label && <span className={cn('leading-none text-[14px]', icon ? 'ml-1.5' : '', childrenAfter ? 'mr-1.5' : '')}>{label}</span>}
+			{label && <span className={cn('leading-none text-[14px]', icon ? 'ms-1.5' : '', childrenAfter ? 'me-1.5' : '')}>{label}</span>}
 			{childrenAfter && <span className='flex items-center text-[16px] leading-none'>{childrenAfter}</span>}
 		</span>
 	);

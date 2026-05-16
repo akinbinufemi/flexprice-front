@@ -6,7 +6,7 @@ import { defaultFilter } from 'cmdk';
 import { CommandPaletteDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command-palette';
 
 import { commandPaletteCommands, COMMAND_PALETTE_INITIAL_SUGGESTED_IDS, CommandPaletteGroup } from '@/config/command-palette';
-import { isIntercomMessengerAvailable } from '@/config/intercomMessengerConfig';
+import { isIntercomMessengerAvailable } from '@/config/intercom';
 import {
 	dispatchCommandPaletteAction,
 	getCommandPaletteActionEventName,
@@ -15,6 +15,7 @@ import {
 } from '@/core/actions';
 import useEnvironment from '@/hooks/useEnvironment';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const GROUPS_ORDER = [
 	CommandPaletteGroup.Actions,
@@ -24,6 +25,7 @@ const GROUPS_ORDER = [
 ] as const;
 
 const CommandPalette = () => {
+	const { t } = useTranslation('common');
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
 	const navigate = useNavigate();
@@ -51,11 +53,11 @@ const CommandPalette = () => {
 		const shortcut = isMac ? '⌘K' : 'Ctrl+K';
 		const eventName = getCommandPaletteActionEventName(CommandPaletteActionId.ShowKeyboardShortcutsHint);
 		const handler = () => {
-			toast.success(`Press ${shortcut} to open the command palette anytime`);
+			toast.success(t('commandPalette.shortcutToast', { shortcut }));
 		};
 		window.addEventListener(eventName, handler);
 		return () => window.removeEventListener(eventName, handler);
-	}, []);
+	}, [t]);
 
 	const handleOpenChange = (next: boolean) => {
 		setOpen(next);
@@ -133,9 +135,9 @@ const CommandPalette = () => {
 
 	return (
 		<CommandPaletteDialog open={open} onOpenChange={handleOpenChange} value={search} onValueChange={setSearch} filter={filter}>
-			<CommandInput placeholder='Search features, plans, customers...' aria-label='Search commands' />
+			<CommandInput placeholder={t('commandPalette.searchPlaceholderExtended')} aria-label={t('commandPalette.searchCommandsAriaLabel')} />
 			<CommandList>
-				<CommandEmpty>No results found.</CommandEmpty>
+				<CommandEmpty>{t('selectUi.noResultsFound')}</CommandEmpty>
 				{GROUPS_ORDER.map((groupName) => {
 					const items = commandsByGroup.get(groupName);
 					if (!items?.length) return null;
@@ -160,8 +162,8 @@ const CommandPalette = () => {
 				})}
 			</CommandList>
 			<p className='px-3 py-2 text-[11px] text-muted-foreground/80 border-t border-border/80 bg-muted/30'>
-				<span className='sr-only'>Keyboard: </span>
-				↑↓ Navigate · Enter Select · Esc Close · {shortcutHint} to open anytime
+				<span className='sr-only'>{t('commandPalette.keyboardShortcutsSrOnly')} </span>
+				{t('commandPalette.keyboardShortcutsHint', { shortcut: shortcutHint })}
 			</p>
 		</CommandPaletteDialog>
 	);

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { Check, Coins, Eye, Gauge, Info, Mail, MessageSquare, Phone, Sparkles, Zap, type LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, Button } from '@/components/ui';
 import { formatBillingPeriodForPrice, getCurrencySymbol } from '@/utils';
@@ -66,12 +68,14 @@ const formatEntitlementValue = ({
 	name,
 	usage_reset_period,
 	feature_id,
+	t,
 }: {
 	type: string;
 	value: string | number | boolean;
 	name: string;
 	usage_reset_period: string;
 	feature_id: string;
+	t: TFunction<'common'>;
 }) => {
 	const feature = feature_id ? (
 		<Link
@@ -91,12 +95,22 @@ const formatEntitlementValue = ({
 				</>
 			);
 		case 'BOOLEAN':
-			return <>{value ? feature : `${feature} Not included`}</>;
+			return (
+				<>
+					{value ? (
+						feature
+					) : (
+						<>
+							{name} {t('pricingCard.notIncluded')}
+						</>
+					)}
+				</>
+			);
 		case 'METERED':
 			return (
 				<>
 					{formatAmount(value.toString())} {feature}
-					{usage_reset_period ? ` per ${formatBillingPeriodForPrice(usage_reset_period)}` : ''}
+					{usage_reset_period ? t('pricingCard.perBillingPeriod', { period: formatBillingPeriodForPrice(usage_reset_period) }) : ''}
 				</>
 			);
 		default:
@@ -104,39 +118,35 @@ const formatEntitlementValue = ({
 	}
 };
 
-const PRICE_DISPLAY_CONFIG = {
-	[PlanType.FREE]: { text: 'Free', showBillingPeriod: false, subtext: '' },
-	[PlanType.HYBRID_FREE]: { text: '0', showBillingPeriod: true, subtext: '+ Usage' },
-	[PlanType.HYBRID_PAID]: { text: '', showBillingPeriod: true, subtext: '+ Usage' },
-	[PlanType.USAGE_ONLY]: { text: '0', showBillingPeriod: true, subtext: '+ Usage' },
-	[PlanType.FIXED]: { text: '', showBillingPeriod: true, subtext: '' },
-} as const;
-
-const formatUsageCharge = (charge: UsageCharge) => {
+const formatUsageCharge = (charge: UsageCharge, t: TFunction<'common'>) => {
 	if (!charge.amount) return '';
 
+	const sym = getCurrencySymbol(charge.currency || '');
+	const amt = `${sym}${formatAmount(charge.amount)}`;
+
 	if (charge.billing_model === 'PACKAGE') {
-		return `${getCurrencySymbol(charge.currency || '')}${formatAmount(charge.amount)} per package`;
+		return t('pricingCard.perPackage', { amount: amt });
 	} else if (charge.billing_model === 'FLAT_FEE') {
-		return `${getCurrencySymbol(charge.currency || '')}${formatAmount(charge.amount)} per unit`;
+		return t('pricingCard.perUnit', { amount: amt });
 	} else if (charge.billing_model === 'TIERED' && charge.tiers?.length) {
-		return `Starting at ${getCurrencySymbol(charge.currency || '')}${formatAmount(charge.tiers[0].unit_amount)} per unit`;
+		const startAmt = `${sym}${formatAmount(charge.tiers[0].unit_amount)}`;
+		return t('pricingCard.startingAtPerUnit', { amount: startAmt });
 	}
-	return `${getCurrencySymbol(charge.currency || '')}${formatAmount(charge.amount)} per unit`;
+	return t('pricingCard.perUnit', { amount: amt });
 };
 
 /** Compact usage line for AI pricing preview (/unit instead of per unit). */
-const formatUsageChargeCompact = (charge: UsageCharge) => {
+const formatUsageChargeCompact = (charge: UsageCharge, t: TFunction<'common'>) => {
 	if (!charge.amount) return '';
 	const sym = getCurrencySymbol(charge.currency || '');
 	const amt = formatAmount(charge.amount);
 	if (charge.billing_model === 'PACKAGE') {
-		return `${sym}${amt}/pkg`;
+		return t('pricingCard.compactPerPkg', { amount: `${sym}${amt}` });
 	}
 	if (charge.billing_model === 'TIERED' && charge.tiers?.length) {
-		return `from ${sym}${formatAmount(charge.tiers[0].unit_amount)}/unit`;
+		return t('pricingCard.compactFromPerUnit', { amount: `${sym}${formatAmount(charge.tiers[0].unit_amount)}` });
 	}
-	return `${sym}${amt}/unit`;
+	return t('pricingCard.compactPerUnit', { amount: `${sym}${amt}` });
 };
 
 /** Matches default/template grant titles — redundant with plan cadence (e.g. /month on price). */
@@ -158,13 +168,13 @@ function getEntitlementVisual(type: string, name: string): { Icon: LucideIcon; i
 	return { Icon: Sparkles, iconClass: 'text-emerald-600' };
 }
 
-function formatEntitlementPreviewLine(ent: PricingCardProps['entitlements'][0]): string {
+function formatEntitlementPreviewLine(ent: PricingCardProps['entitlements'][0], t: TFunction<'common'>): string {
 	const period = ent.usage_reset_period ? `/${formatBillingPeriodForPrice(ent.usage_reset_period)}` : '';
 	switch (ent.type) {
 		case 'STATIC':
 			return `${ent.value} ${ent.name}`;
 		case 'BOOLEAN':
-			return ent.value ? String(ent.name) : `${ent.name} not included`;
+			return ent.value ? String(ent.name) : t('pricingCard.previewBooleanNotIncluded', { name: ent.name });
 		case 'METERED':
 			return `${formatAmount(String(ent.value))} ${ent.name}${period}`;
 		default:
@@ -172,7 +182,7 @@ function formatEntitlementPreviewLine(ent: PricingCardProps['entitlements'][0]):
 	}
 }
 
-const UsageChargeTooltip: React.FC<{ charge: UsageCharge }> = ({ charge }) => {
+const UsageChargeTooltip: React.FC<{ charge: UsageCharge; t: TFunction<'common'> }> = ({ charge, t }) => {
 	if (charge.billing_model !== 'TIERED' || !charge.tiers) {
 		return null;
 	}
@@ -185,26 +195,32 @@ const UsageChargeTooltip: React.FC<{ charge: UsageCharge }> = ({ charge }) => {
 		return `${from} - ${tier.up_to}`;
 	};
 
+	const sym = getCurrencySymbol(charge.currency || '');
+
 	return (
 		<TooltipContent
 			sideOffset={5}
 			className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-lg max-w-[320px]'>
 			<div className='space-y-3'>
-				<div className='font-medium border-b border-spacing-1 border-gray-200 pb-2 text-base text-gray-900'>Volume Pricing</div>
+				<div className='font-medium border-b border-spacing-1 border-gray-200 pb-2 text-base text-gray-900'>
+					{t('pricingCard.volumePricing')}
+				</div>
 				<div className='space-y-2'>
 					{charge.tiers.map((tier, index) => (
 						<div key={index} className='flex flex-col gap-1'>
 							<div className='flex items-center justify-between gap-6'>
-								<div className='!font-normal text-muted-foreground'>{formatRange(tier, index, charge.tiers || [])} units</div>
-								<div className='text-right'>
+								<div className='!font-normal text-muted-foreground'>
+									{t('pricingCard.unitsLabel', { range: formatRange(tier, index, charge.tiers || []) })}
+								</div>
+								<div className='text-end'>
 									<div className='!font-normal text-muted-foreground'>
-										{getCurrencySymbol(charge.currency || '')}
-										{formatAmount(tier.unit_amount)} per unit
+										{t('pricingCard.perUnitShort', {
+											amount: `${sym}${formatAmount(tier.unit_amount)}`,
+										})}
 									</div>
 									{Number(tier.flat_amount) > 0 && (
 										<div className='text-xs text-gray-500'>
-											+ {getCurrencySymbol(charge.currency || '')}
-											{formatAmount(tier.flat_amount)} flat fee
+											{t('pricingCard.flatFeeShort', { amount: `${sym}${formatAmount(tier.flat_amount)}` })}
 										</div>
 									)}
 								</div>
@@ -232,6 +248,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 	isPreview = false,
 	useModernChrome = false,
 }) => {
+	const { t } = useTranslation('common');
 	const navigate = useNavigate();
 	const [showAllCharges, setShowAllCharges] = useState(false);
 	const [showAllEntitlements, setShowAllEntitlements] = useState(false);
@@ -239,7 +256,19 @@ const PricingCard: React.FC<PricingCardProps> = ({
 	const isSetupPreview = isPreview;
 	const visualModern = isSetupPreview || useModernChrome;
 
-	const config = PRICE_DISPLAY_CONFIG[price.displayType];
+	const priceDisplayConfig = useMemo(
+		() =>
+			({
+				[PlanType.FREE]: { text: t('pricingCard.free'), useCurrencyZeroDisplay: false, showBillingPeriod: false, subtext: '' },
+				[PlanType.HYBRID_FREE]: { text: '', useCurrencyZeroDisplay: true, showBillingPeriod: true, subtext: t('pricingCard.plusUsage') },
+				[PlanType.HYBRID_PAID]: { text: '', useCurrencyZeroDisplay: false, showBillingPeriod: true, subtext: t('pricingCard.plusUsage') },
+				[PlanType.USAGE_ONLY]: { text: '', useCurrencyZeroDisplay: true, showBillingPeriod: true, subtext: t('pricingCard.plusUsage') },
+				[PlanType.FIXED]: { text: '', useCurrencyZeroDisplay: false, showBillingPeriod: true, subtext: '' },
+			}) as const,
+		[t],
+	);
+
+	const config = priceDisplayConfig[price.displayType];
 	const displayAmount = config.text || `${getCurrencySymbol(price.currency || '')}${formatAmount(price.amount || '')}`;
 	const hasUsageCharges = usageCharges.length > 0;
 
@@ -273,13 +302,13 @@ const PricingCard: React.FC<PricingCardProps> = ({
 				<div className='flex flex-col'>
 					<div className='flex items-baseline'>
 						<span className={cn('font-normal text-gray-900', visualModern ? 'text-[28px]' : 'text-4xl')}>
-							{config.text === '0' ? `${getCurrencySymbol(price.currency || '')}0` : displayAmount}
+							{config.useCurrencyZeroDisplay ? `${getCurrencySymbol(price.currency || '')}0` : displayAmount}
 						</span>
 						{config.showBillingPeriod && (
-							<span className={cn('ml-2 text-gray-500', visualModern ? 'text-xs' : 'text-sm text3')}>
+							<span className={cn('ms-2 text-gray-500', visualModern ? 'text-xs' : 'text-sm text3')}>
 								/{formatBillingPeriodForPrice(price.billingPeriod || '')}
 								{config.subtext && (!visualModern || isSetupPreview) && (
-									<span className={cn('ml-1', visualModern ? 'text-[11px] font-semibold text-indigo-600' : 'font-medium text-lg')}>
+									<span className={cn('ms-1', visualModern ? 'text-[11px] font-semibold text-indigo-600' : 'font-medium text-lg')}>
 										{config.subtext}
 									</span>
 								)}
@@ -296,7 +325,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 								'font-medium text-gray-900',
 								visualModern ? 'mb-2 text-[10px] uppercase tracking-wide text-gray-400' : 'mb-2 text-sm',
 							)}>
-							{visualModern ? 'Usage' : 'Usage-based charges:'}
+							{visualModern ? t('pricingCard.usageSectionModern') : t('pricingCard.usageSectionClassic')}
 						</div>
 						<div className={cn(visualModern ? 'space-y-2' : 'space-y-2')}>
 							{visibleCharges.map((charge, index) => (
@@ -308,8 +337,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
 									)}>
 									<span className={cn('min-w-0 flex-1', !visualModern && 'leading-snug')}>{charge.meter_name}</span>
 									<div className='flex items-center gap-1.5 shrink-0'>
-										<span className={cn('whitespace-nowrap text-right font-medium', visualModern ? 'text-slate-800' : 'text-gray-700')}>
-											{visualModern ? formatUsageChargeCompact(charge) : formatUsageCharge(charge)}
+										<span className={cn('whitespace-nowrap text-end font-medium', visualModern ? 'text-slate-800' : 'text-gray-700')}>
+											{visualModern ? formatUsageChargeCompact(charge, t) : formatUsageCharge(charge, t)}
 										</span>
 										{charge.billing_model === 'TIERED' && charge.tiers && (
 											<TooltipProvider delayDuration={0}>
@@ -322,7 +351,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 															)}
 														/>
 													</TooltipTrigger>
-													<UsageChargeTooltip charge={charge} />
+													<UsageChargeTooltip charge={charge} t={t} />
 												</Tooltip>
 											</TooltipProvider>
 										)}
@@ -337,7 +366,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
 										'mt-1 flex items-center gap-1.5 text-xs transition-colors',
 										visualModern ? 'text-slate-400 hover:text-slate-600' : 'text-gray-400 hover:text-gray-600',
 									)}>
-									<Eye className='h-3.5 w-3.5' />+{hiddenChargesCount} more
+									<Eye className='h-3.5 w-3.5' />
+									{t('pricingCard.moreCount', { count: hiddenChargesCount })}
 								</button>
 							)}
 							{showAllCharges && usageCharges.length > VISIBLE_LIMIT && (
@@ -348,7 +378,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 										'mt-1 flex items-center gap-1.5 text-xs transition-colors',
 										visualModern ? 'text-slate-400 hover:text-slate-600' : 'text-gray-400 hover:text-gray-600',
 									)}>
-									Show less
+									{t('pricingCard.showLess')}
 								</button>
 							)}
 						</div>
@@ -370,7 +400,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 								: 'rounded-2xl bg-gray-50 text-gray-900 hover:bg-gray-100',
 						)}
 						variant='outline'>
-						View plan
+						{t('pricingCard.viewPlan')}
 					</Button>
 				</div>
 			)}
@@ -380,7 +410,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
 				<div className={cn(visualModern ? 'mt-4 border-t border-slate-100 pt-4' : 'mt-7')}>
 					{entitlements.length > 0 ? (
 						<>
-							{visualModern && <p className='mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400'>Included</p>}
+							{visualModern && (
+								<p className='mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400'>{t('pricingCard.includedHeading')}</p>
+							)}
 							<ul className={cn(visualModern ? 'space-y-2.5' : 'space-y-3.5')}>
 								{visibleEntitlements.map((entitlement) => {
 									if (visualModern) {
@@ -390,7 +422,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 												<Icon className={cn('h-3.5 w-3.5 shrink-0', iconClass)} strokeWidth={2} aria-hidden />
 												<span className='min-w-0 flex-1 text-[11px] font-normal leading-snug text-slate-700'>
 													{isSetupPreview ? (
-														formatEntitlementPreviewLine(entitlement)
+														formatEntitlementPreviewLine(entitlement, t)
 													) : (
 														<>
 															{formatEntitlementValue({
@@ -399,6 +431,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 																name: entitlement.name,
 																usage_reset_period: entitlement.usage_reset_period || '',
 																feature_id: entitlement.feature_id,
+																t,
 															})}
 														</>
 													)}
@@ -430,6 +463,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 													name: entitlement.name,
 													usage_reset_period: entitlement.usage_reset_period || '',
 													feature_id: entitlement.feature_id,
+													t,
 												})}
 											</span>
 											{entitlement.description && (
@@ -459,7 +493,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
 															'flex items-center gap-1.5 text-xs transition-colors',
 															visualModern ? 'text-slate-400 hover:text-slate-600' : 'text-gray-400 hover:text-gray-600',
 														)}>
-														<Eye className='h-3.5 w-3.5' />+{hiddenEntitlementsCount} more
+														<Eye className='h-3.5 w-3.5' />
+														{t('pricingCard.moreCount', { count: hiddenEntitlementsCount })}
 													</button>
 												</TooltipTrigger>
 												<TooltipContent
@@ -479,6 +514,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 																				name: ent.name,
 																				usage_reset_period: ent.usage_reset_period || '',
 																				feature_id: '',
+																				t,
 																			})}
 																		</span>
 																	</div>
@@ -494,6 +530,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 																			name: ent.name,
 																			usage_reset_period: ent.usage_reset_period || '',
 																			feature_id: '',
+																			t,
 																		})}
 																	</span>
 																</div>
@@ -514,7 +551,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 												'flex items-center gap-1.5 text-xs transition-colors',
 												visualModern ? 'text-slate-400 hover:text-slate-600' : 'text-gray-400 hover:text-gray-600',
 											)}>
-											Show less
+											{t('pricingCard.showLess')}
 										</button>
 									</li>
 								)}
@@ -525,24 +562,36 @@ const PricingCard: React.FC<PricingCardProps> = ({
 							<button
 								onClick={() => navigate(`${RouteNames.plan}/${id}`)}
 								className='text-sm text-gray-900 underline decoration-dashed decoration-[0.5px] decoration-muted-foreground/50 underline-offset-4 hover:text-gray-700 transition-colors'>
-								Add entitlements
+								{t('pricingCard.addEntitlements')}
 							</button>
 						</div>
 					)}
 
 					{visualModern && creditGrants.length > 0 && (
 						<div className={cn(entitlements.length > 0 || !isSetupPreview ? 'mt-3 border-t border-slate-100 pt-3' : '')}>
-							<p className='mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400'>Credits</p>
+							<p className='mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400'>{t('pricingCard.creditsHeading')}</p>
 							<ul className='space-y-2.5'>
 								{creditGrants.map((g, i) => (
 									<li key={`${g.name}-${i}`} className='flex items-center gap-2'>
 										<Coins className='h-3.5 w-3.5 shrink-0 text-slate-400' strokeWidth={2} aria-hidden />
 										<span className='min-w-0 flex-1 text-[11px] font-normal leading-snug text-slate-700'>
-											<span className='font-medium text-slate-800'>{g.credits.toLocaleString()} credits</span>
+											<span className='font-medium text-slate-800'>
+												{t('pricingCard.creditsAmount', { formatted: g.credits.toLocaleString() })}
+											</span>
 											{!isBoilerplateCreditGrantName(g.name) && <span className='text-slate-600'> · {g.name}</span>}
 											{g.cadence === 'recurring' && g.period && <span className='text-slate-500'> /{g.period}</span>}
-											{g.cadence === 'onetime' && <span className='text-slate-500'> · one-time</span>}
-											{g.cadence === 'recurring' && !g.period && <span className='text-slate-500'> · recurring</span>}
+											{g.cadence === 'onetime' && (
+												<span className='text-slate-500'>
+													{' · '}
+													{t('pricingCard.oneTime')}
+												</span>
+											)}
+											{g.cadence === 'recurring' && !g.period && (
+												<span className='text-slate-500'>
+													{' · '}
+													{t('pricingCard.recurring')}
+												</span>
+											)}
 										</span>
 									</li>
 								))}

@@ -1,11 +1,14 @@
 import { Loader, Page, Dialog, Card, Button, Divider } from '@/components/atoms';
-import { Integration, integrations } from './integrationsData';
+import { Integration, INTEGRATION_TAG_DATA_PIPELINES } from './integrationsData';
+import { useIntegrationsCatalog } from './useIntegrationsCatalog';
 import { cn } from '@/lib/utils';
 import { PremiumFeature, ApiDocsContent, PaddleConnectionDrawer } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
 import { Switch } from '@/components/ui/switch';
 import { ExternalLinkIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import ConnectionApi from '@/api/ConnectionApi';
 import { CONNECTION_PROVIDER_TYPE } from '@/models/Connection';
@@ -23,13 +26,13 @@ import IntegrationDrawer from '@/components/molecules/IntegrationDrawer/Integrat
 const PREVIEW_CONNECTED_PROVIDER: string | null = null;
 const PREVIEW_MOCK_CONNECTION_ID = '__preview__';
 
-/** API provider_type for List(); Zoho card uses name "Zoho" but backend expects zoho_books */
-const getProviderTypeForIntegration = (integrationName: string): CONNECTION_PROVIDER_TYPE => {
-	const n = integrationName.toLowerCase();
-	return n === 'zoho' ? CONNECTION_PROVIDER_TYPE.ZOHO_BOOKS : (n as CONNECTION_PROVIDER_TYPE);
-};
+/** API provider_type for List(); route id `zoho` maps to zoho_books */
+const getProviderTypeForIntegration = (integrationId: string): CONNECTION_PROVIDER_TYPE =>
+	integrationId === 'zoho' ? CONNECTION_PROVIDER_TYPE.ZOHO_BOOKS : (integrationId as CONNECTION_PROVIDER_TYPE);
 
 const Integrations = () => {
+	const { t } = useTranslation('settings');
+	const integrations = useIntegrationsCatalog();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [activeIntegration, setActiveIntegration] = useState<Integration | null>(null);
 	const [editingConnection, setEditingConnection] = useState<any | null>(null);
@@ -38,8 +41,8 @@ const Integrations = () => {
 
 	const connectionQueries = useQueries({
 		queries: availableIntegrations.map((integration) => {
-			const listKey = integration.name.toLowerCase();
-			const providerType = getProviderTypeForIntegration(integration.name);
+			const listKey = integration.id;
+			const providerType = getProviderTypeForIntegration(integration.id);
 			return {
 				queryKey: ['connections', listKey],
 				queryFn: () => ConnectionApi.List({ provider_type: providerType }),
@@ -50,7 +53,7 @@ const Integrations = () => {
 	const connectionByProvider = new Map<string, any[]>();
 	for (let idx = 0; idx < availableIntegrations.length; idx++) {
 		const integration = availableIntegrations[idx];
-		const listKey = integration.name.toLowerCase();
+		const listKey = integration.id;
 		const q = connectionQueries[idx];
 		connectionByProvider.set(listKey, q?.data?.connections ?? []);
 	}
@@ -59,16 +62,18 @@ const Integrations = () => {
 
 	const hasConnection = (integration: Integration) => {
 		if (integration.premium) return false;
-		const provider = integration.name.toLowerCase();
+		const provider = integration.id;
 		return (connectionByProvider.get(provider) ?? []).length > 0;
 	};
 
 	const availableNonPremium = integrations.filter(
-		(integration) => integration.type === 'available' && !integration.premium && !integration.tags.includes('Data Pipelines'),
+		(integration) =>
+			integration.type === 'available' && !integration.premium && !integration.tagKeys.includes(INTEGRATION_TAG_DATA_PIPELINES),
 	);
 
 	const availablePremium = integrations.filter(
-		(integration) => integration.type === 'available' && integration.premium && !integration.tags.includes('Data Pipelines'),
+		(integration) =>
+			integration.type === 'available' && integration.premium && !integration.tagKeys.includes(INTEGRATION_TAG_DATA_PIPELINES),
 	);
 	const previewProvider = PREVIEW_CONNECTED_PROVIDER ?? '';
 
@@ -77,19 +82,19 @@ const Integrations = () => {
 	}
 
 	return (
-		<Page heading='Integrations'>
-			<ApiDocsContent tags={['Integrations', 'secrets']} />
+		<Page heading={t('insightsTools.integrations.pageHeading')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.Integrations} />
 			<div className='mt-6'>
-				<h2 className='mb-4 font-medium text-xl'>Available</h2>
+				<h2 className='mb-4 font-medium text-xl'>{t('insightsTools.integrations.availableSection')}</h2>
 				<div className='grid grid-cols-2 gap-4'>
 					{availableNonPremium.map((integration, index) => {
-						const previewConnected = !!PREVIEW_CONNECTED_PROVIDER && integration.name.toLowerCase() === previewProvider.toLowerCase();
+						const previewConnected = !!PREVIEW_CONNECTED_PROVIDER && integration.id === previewProvider.toLowerCase();
 						const connected = hasConnection(integration) || previewConnected;
 						const connection =
-							connectionByProvider.get(integration.name.toLowerCase())?.[0] ??
-							(previewConnected ? { id: PREVIEW_MOCK_CONNECTION_ID, name: 'Preview connection' } : null);
+							connectionByProvider.get(integration.id)?.[0] ??
+							(previewConnected ? { id: PREVIEW_MOCK_CONNECTION_ID, name: t('insightsTools.integrations.previewConnectionName') } : null);
 						return (
-							<div key={`${integration.name}-${index}`} className='min-w-0'>
+							<div key={`${integration.id}-${index}`} className='min-w-0'>
 								<IntegrationCard
 									integration={integration}
 									connected={connected}
@@ -97,7 +102,7 @@ const Integrations = () => {
 									isPreviewConnection={connection?.id === PREVIEW_MOCK_CONNECTION_ID}
 									onOpenDrawer={(mode) => {
 										setActiveIntegration(integration);
-										setEditingConnection(mode === 'edit' ? (connectionByProvider.get(integration.name.toLowerCase())?.[0] ?? null) : null);
+										setEditingConnection(mode === 'edit' ? (connectionByProvider.get(integration.id)?.[0] ?? null) : null);
 										setIsDrawerOpen(true);
 									}}
 									onDeleted={() => {
@@ -110,10 +115,10 @@ const Integrations = () => {
 				</div>
 			</div>
 			<div className='mt-16'>
-				<p className='mb-4 font-medium text-xl'>Premium add-ons</p>
+				<p className='mb-4 font-medium text-xl'>{t('insightsTools.integrations.premiumAddonsSection')}</p>
 				<div className='grid grid-cols-2 gap-4'>
 					{availablePremium.map((integration, index) => (
-						<div key={`${integration.name}-${index}`} className='min-w-0'>
+						<div key={`${integration.id}-${index}`} className='min-w-0'>
 							<IntegrationCard integration={integration} connected={false} connection={null} />
 						</div>
 					))}
@@ -123,7 +128,7 @@ const Integrations = () => {
 			{/* Provider drawer rendered on this page */}
 			{activeIntegration && (
 				<>
-					{activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.STRIPE ? (
+					{activeIntegration.id === CONNECTION_PROVIDER_TYPE.STRIPE ? (
 						<StripeConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -141,7 +146,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.RAZORPAY ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.RAZORPAY ? (
 						<RazorpayConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -159,7 +164,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.CHARGEBEE ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.CHARGEBEE ? (
 						<ChargebeeConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -177,7 +182,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.HUBSPOT ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.HUBSPOT ? (
 						<HubSpotConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -195,7 +200,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.QUICKBOOKS ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.QUICKBOOKS ? (
 						<QuickBooksConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -213,7 +218,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : getProviderTypeForIntegration(activeIntegration.name) === CONNECTION_PROVIDER_TYPE.ZOHO_BOOKS ? (
+					) : getProviderTypeForIntegration(activeIntegration.id) === CONNECTION_PROVIDER_TYPE.ZOHO_BOOKS ? (
 						<ZohoBooksConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -231,7 +236,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.NOMOD ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.NOMOD ? (
 						<NomodConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -249,7 +254,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.MOYASAR ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.MOYASAR ? (
 						<MoyasarConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open) => {
@@ -267,7 +272,7 @@ const Integrations = () => {
 								setActiveIntegration(null);
 							}}
 						/>
-					) : activeIntegration.name.toLowerCase() === CONNECTION_PROVIDER_TYPE.PADDLE ? (
+					) : activeIntegration.id === CONNECTION_PROVIDER_TYPE.PADDLE ? (
 						<PaddleConnectionDrawer
 							isOpen={isDrawerOpen}
 							onOpenChange={(open: boolean) => {
@@ -295,7 +300,7 @@ const Integrations = () => {
 									setActiveIntegration(null);
 								}
 							}}
-							provider={activeIntegration.name.toLowerCase()}
+							provider={activeIntegration.id}
 							providerName={activeIntegration.name}
 							connection={editingConnection}
 							onSave={() => {
@@ -324,20 +329,22 @@ type IntegrationCardProps = {
 
 const IntegrationCard = ({ integration, connected, connection, isPreviewConnection, onOpenDrawer, onDeleted }: IntegrationCardProps) => {
 	const queryClient = useQueryClient();
+	const { t } = useTranslation('settings');
+	const { i18n } = useTranslation();
 	const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false);
 
-	const providerKey = integration.name.toLowerCase();
+	const providerKey = integration.id;
 
 	const { mutate: deleteConnection, isPending: isDeletingConnection } = useMutation({
 		mutationFn: (id: string) => ConnectionApi.Delete(id),
 		onSuccess: () => {
-			toast.success(`${integration.name} disconnected`);
+			toast.success(t('insightsTools.integrations.toastDisconnected', { name: integration.name }));
 			queryClient.invalidateQueries({ queryKey: ['connections', providerKey] });
 			setDisconnectDialogOpen(false);
 			onDeleted?.();
 		},
 		onError: (err: Error) => {
-			toast.error(err?.message ?? 'Failed to disconnect');
+			toast.error(err?.message ?? t('insightsTools.integrations.toastDisconnectFailed'));
 		},
 	});
 
@@ -354,7 +361,7 @@ const IntegrationCard = ({ integration, connected, connection, isPreviewConnecti
 	const handleConfirmDisconnect = () => {
 		if (!connection?.id) return;
 		if (connection.id === PREVIEW_MOCK_CONNECTION_ID) {
-			toast.success('Preview only — this is a mock connected state.');
+			toast.success(t('insightsTools.integrations.toastPreviewDisconnectMock'));
 			setDisconnectDialogOpen(false);
 			return;
 		}
@@ -374,12 +381,12 @@ const IntegrationCard = ({ integration, connected, connection, isPreviewConnecti
 								<h3 className='font-semibold text-lg text-foreground'>{integration.name}</h3>
 								{connected && (
 									<span className='inline-flex h-5 items-center rounded-sm bg-emerald-100 px-2 text-xs font-medium text-emerald-700'>
-										Connected
+										{t('insightsTools.integrations.badgeConnected')}
 									</span>
 								)}
 								{integration.premium && (
 									<span className='inline-flex h-5 items-center rounded-sm bg-amber-100 px-2 text-xs font-medium text-amber-700'>
-										Premium
+										{t('insightsTools.integrations.badgePremium')}
 									</span>
 								)}
 								<div className='ml-auto'>
@@ -389,8 +396,8 @@ const IntegrationCard = ({ integration, connected, connection, isPreviewConnecti
 											target='_blank'
 											rel='noopener noreferrer'
 											className='inline-flex h-5 items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-700'
-											title={`Open ${integration.name} docs`}>
-											Docs
+											title={t('insightsTools.integrations.openDocsTitle', { name: integration.name })}>
+											{t('insightsTools.integrations.docsLink')}
 											<ExternalLinkIcon className='size-3.5' />
 										</a>
 									) : null}
@@ -452,15 +459,15 @@ const IntegrationCard = ({ integration, connected, connection, isPreviewConnecti
 			<Dialog
 				isOpen={disconnectDialogOpen}
 				onOpenChange={setDisconnectDialogOpen}
-				title={`Disconnect ${integration.name}?`}
-				description='This will remove the connection. You can reconnect from the integrations page at any time.'
+				title={t('insightsTools.integrations.disconnectTitle', { name: integration.name })}
+				description={t('insightsTools.integrations.disconnectDescription')}
 				descriptionClassName='mt-2'>
 				<div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-0 sm:space-x-2'>
 					<Button variant='outline' onClick={() => setDisconnectDialogOpen(false)} disabled={isDeletingConnection}>
-						Cancel
+						{i18n.t('actions.cancel', { ns: 'common' })}
 					</Button>
 					<Button variant='destructive' onClick={handleConfirmDisconnect} disabled={isDeletingConnection || !connection?.id}>
-						{isDeletingConnection ? 'Disconnecting…' : 'Disconnect'}
+						{isDeletingConnection ? i18n.t('status.disconnecting', { ns: 'common' }) : t('insightsTools.integrations.disconnect')}
 					</Button>
 				</div>
 			</Dialog>

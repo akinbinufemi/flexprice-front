@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card } from '@/components/atoms';
@@ -47,6 +48,7 @@ const OverviewSkeleton = () => (
 );
 
 const OverviewTab = () => {
+	const { t } = useTranslation('customer-portal');
 	const [selectedPeriod, setSelectedPeriod] = useState<CustomerPortalTimePeriod>(DEFAULT_TIME_PERIOD);
 
 	// Fetch subscriptions
@@ -103,27 +105,27 @@ const OverviewTab = () => {
 	// Handle errors with toast
 	useEffect(() => {
 		if (subscriptionsError) {
-			toast.error('Failed to load subscriptions');
+			toast.error(t('errors.loadSubscriptions'));
 		}
-	}, [subscriptionsError]);
+	}, [subscriptionsError, t]);
 
 	useEffect(() => {
 		if (usageError) {
-			toast.error('Failed to load usage data');
+			toast.error(t('errors.loadUsage'));
 		}
-	}, [usageError]);
+	}, [usageError, t]);
 
 	useEffect(() => {
 		if (analyticsError) {
-			toast.error('Failed to load usage analytics');
+			toast.error(t('errors.loadUsageAnalytics'));
 		}
-	}, [analyticsError]);
+	}, [analyticsError, t]);
 
 	useEffect(() => {
 		if (walletsError) {
-			toast.error('Failed to load wallet');
+			toast.error(t('errors.loadWallet'));
 		}
-	}, [walletsError]);
+	}, [walletsError, t]);
 
 	const isLoading = subscriptionsLoading || walletsLoading || usageLoading;
 
@@ -144,18 +146,18 @@ const OverviewTab = () => {
 							<WalletIcon className='h-5 w-5 text-blue-600' />
 						</div>
 						<div>
-							<h3 className='text-base font-medium text-zinc-950'>{firstWallet.name || 'Wallet'}</h3>
+							<h3 className='text-base font-medium text-zinc-950'>{firstWallet.name || t('wallet.defaultName')}</h3>
 						</div>
 					</div>
 					<div>
-						<span className='text-sm text-zinc-500 block mb-1.5'>Balance</span>
+						<span className='text-sm text-zinc-500 block mb-1.5'>{t('wallet.balance')}</span>
 						<div className='flex items-baseline gap-2'>
 							<span className='text-4xl font-semibold text-zinc-950'>{formatAmount(firstWallet.credit_balance?.toString() ?? '0')}</span>
-							<span className='text-base font-normal text-zinc-500'>credits</span>
+							<span className='text-base font-normal text-zinc-500'>{t('wallet.credits')}</span>
 						</div>
 						<p className='text-sm text-zinc-500 mt-1.5'>
 							{currencySymbol}
-							{formatAmount(firstWallet.balance?.toString() ?? '0')} value
+							{formatAmount(firstWallet.balance?.toString() ?? '0')} {t('wallet.valueSuffix')}
 						</p>
 					</div>
 				</Card>
@@ -167,7 +169,7 @@ const OverviewTab = () => {
 			{analyticsData && (
 				<Card className={CARD_CLASS}>
 					<div className={`flex items-center justify-between ${TITLE_TO_CONTENT_GAP}`}>
-						<h3 className='text-base font-medium text-zinc-950'>Usage</h3>
+						<h3 className='text-base font-medium text-zinc-950'>{t('usage.title')}</h3>
 						<TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
 					</div>
 					<CustomerUsageChart data={analyticsData} />

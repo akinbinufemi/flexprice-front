@@ -37,7 +37,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
 			<p className='text-[24px] leading-[28px] font-medium text-[#111827] flex items-center'>
 				{renderValue()}
 				{showChangeIndicator && (
-					<span className={`inline-block ${arrowColor} ml-3`}>{isNegative ? <TrendingDown size={18} /> : <TrendingUp size={18} />}</span>
+					<span className={`inline-block ${arrowColor} ms-3`}>{isNegative ? <TrendingDown size={18} /> : <TrendingUp size={18} />}</span>
 				)}
 			</p>
 		</div>

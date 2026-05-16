@@ -1,7 +1,9 @@
 import { Button, Card, Page } from '@/components/atoms';
 import { AlignJustify, ArrowRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useState } from 'react';
 import { logger } from '@/utils/common/Logger';
 
@@ -48,6 +50,7 @@ const tutorials: TutorialItem[] = [
 const ONBOARDING_STORAGE_KEY = 'flexprice_onboarding_completed_v1';
 
 const OnboardingPage = () => {
+	const { t } = useTranslation('common');
 	const [showVideoModal, setShowVideoModal] = useState(() => {
 		// Check if onboarding has been completed
 		try {
@@ -86,25 +89,25 @@ const OnboardingPage = () => {
 			)}
 			<Page>
 				{/* Top Containers */}
-				<ApiDocsContent tags={['Events']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 				<div className='flex gap-6 mb-16 w-full'>
 					{/* Welcome Container */}
 					<div className='flex-1 w-[70%] flex-grow rounded bg-[#dde1eb] p-8'>
 						<div className='flex justify-between items-start w-full'>
 							<div className='w-[60%]'>
-								<h1 className='mb-2 text-xl font-semibold tracking-tight'>Welcome to Flexprice!</h1>
-								<p className='mb-6 text-sm text-slate-800'>Let's get your pricing and billing started!</p>
+								<h1 className='mb-2 text-xl font-semibold tracking-tight'>{t('onboardingLanding.welcomeHeading')}</h1>
+								<p className='mb-6 text-sm text-slate-800'>{t('onboardingLanding.welcomeSubtext')}</p>
 								<div className='flex gap-4'>
 									<Button
 										onClick={() => {
 											window.open('https://calendly.com/flexprice-30mins-chat/manish', '_blank');
 										}}>
-										Book a Demo
+										{t('onboardingLanding.bookDemo')}
 									</Button>
 								</div>
 							</div>
 							<div className='flex-shrink-0 ml-8 w-[40%]'>
-								<img src='/assets/svg/onboarding_hero.svg' alt='Onboarding Hero' className='h-auto' />
+								<img src='/assets/svg/onboarding_hero.svg' alt={t('onboardingLanding.heroImageAlt')} className='h-auto' />
 							</div>
 						</div>
 					</div>
@@ -118,7 +121,7 @@ const OnboardingPage = () => {
 				</div>
 				{/* Quick Start Section */}
 				<div className='w-full'>
-					<h2 className='mb-6 text-2xl font-semibold text-slate-900'>Quick Start</h2>
+					<h2 className='mb-6 text-2xl font-semibold text-slate-900'>{t('onboardingLanding.quickStart')}</h2>
 					<div className='grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'>
 						{tutorials.map((tutorial, index) => (
 							<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} key={index}>
@@ -137,7 +140,7 @@ const OnboardingPage = () => {
 											<p className='text-sm leading-relaxed text-slate-500'>{tutorial.description}</p>
 
 											<div className='flex gap-1 items-center mt-4 transition-all duration-200 text-slate-400 group-hover:text-blue-600'>
-												<span className='text-xs font-medium'>Learn more</span>
+												<span className='text-xs font-medium'>{t('onboardingLanding.learnMore')}</span>
 												<ArrowRight className='w-4 h-4 transition-transform duration-200 transform group-hover:translate-x-1' />
 											</div>
 										</div>

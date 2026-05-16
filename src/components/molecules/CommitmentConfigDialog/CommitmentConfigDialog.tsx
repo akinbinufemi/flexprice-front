@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 import { Dialog, Button, Input, Select } from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { Price } from '@/models/Price';
@@ -7,6 +7,8 @@ import { validateCommitment, supportsWindowCommitment } from '@/utils/common/com
 import { removeFormatting } from '@/components/atoms/Input/Input';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { BILLING_PERIOD } from '@/constants/constants';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 interface CommitmentConfigDialogProps {
 	isOpen: boolean;
@@ -17,20 +19,32 @@ interface CommitmentConfigDialogProps {
 	billingPeriod?: BILLING_PERIOD;
 }
 
-const commitmentTypeOptions = [
-	{
-		label: 'Amount',
-		value: CommitmentType.AMOUNT,
-		description: 'Commitment based on monetary amount',
-	},
-	{
-		label: 'Quantity',
-		value: CommitmentType.QUANTITY,
-		description: 'Commitment based on usage quantity',
-	},
-];
+function mapCommitmentValidationError(raw: string, t: TFunction<'billing'>): string {
+	const table: Record<string, string> = {
+		'Cannot set both commitment_amount and commitment_quantity': t('commitmentConfig.errors.bothAmountAndQuantity'),
+		'When commitment_amount is set, commitment_type must be "amount"': t('commitmentConfig.errors.typeMismatchAmount'),
+		'When commitment_quantity is set, commitment_type must be "quantity"': t('commitmentConfig.errors.typeMismatchQuantity'),
+		'Overage factor is required when commitment is set': t('commitmentConfig.errors.overageRequired'),
+		'Overage factor must be greater than 1.0': t('commitmentConfig.errors.overageGtOne'),
+		'Commitment amount must be non-negative': t('commitmentConfig.errors.amountNonNegative'),
+		'Commitment quantity must be non-negative': t('commitmentConfig.errors.quantityNonNegative'),
+	};
+	return table[raw] ?? raw;
+}
+
+type CommitmentValidationTarget = 'amountField' | 'quantityField' | 'overageField' | 'bothFields' | 'banner';
+
+/** Maps raw `validateCommitment` messages (stable English) to which inputs should surface the error */
+function classifyCommitmentValidation(raw: string): CommitmentValidationTarget {
+	if (/^Overage factor/i.test(raw)) return 'overageField';
+	if (/^Cannot set both/i.test(raw)) return 'bothFields';
+	if (/When commitment_quantity is set/i.test(raw) || /^Commitment quantity/i.test(raw)) return 'quantityField';
+	if (/When commitment_amount is set/i.test(raw) || /^Commitment amount/i.test(raw)) return 'amountField';
+	return 'banner';
+}
 
 const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpenChange, price, onSave, currentConfig, billingPeriod }) => {
+	const { t } = useTranslation('billing');
 	const [commitmentType, setCommitmentType] = useState<CommitmentType>(CommitmentType.AMOUNT);
 	const [commitmentAmount, setCommitmentAmount] = useState<string>('');
 	const [commitmentQuantity, setCommitmentQuantity] = useState<string>('');
@@ -39,22 +53,40 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 	const [isWindowCommitment, setIsWindowCommitment] = useState<boolean>(() => supportsWindowCommitment(price));
 	const [commitmentDuration, setCommitmentDuration] = useState<string>(billingPeriod?.toUpperCase() || '');
 	const [validationError, setValidationError] = useState<string | null>(null);
+	const [commitmentErrorTarget, setCommitmentErrorTarget] = useState<CommitmentValidationTarget | null>(null);
 
-	const commitmentDurationOptions = [
-		{ label: 'Monthly', value: BILLING_PERIOD.MONTHLY },
-		{ label: 'Quarterly', value: BILLING_PERIOD.QUARTERLY },
-		{ label: 'Half-Yearly', value: BILLING_PERIOD.HALF_YEARLY },
-		{ label: 'Annual', value: BILLING_PERIOD.ANNUAL },
-	];
+	const commitmentTypeOptions = useMemo(
+		() => [
+			{
+				label: t('commitmentConfig.typeAmount'),
+				value: CommitmentType.AMOUNT,
+				description: t('commitmentConfig.typeAmountDescription'),
+			},
+			{
+				label: t('commitmentConfig.typeQuantity'),
+				value: CommitmentType.QUANTITY,
+				description: t('commitmentConfig.typeQuantityDescription'),
+			},
+		],
+		[t],
+	);
+
+	const commitmentDurationOptions = useMemo(
+		() => [
+			{ label: t('commitmentConfig.billingPeriodLabels.MONTHLY'), value: BILLING_PERIOD.MONTHLY },
+			{ label: t('commitmentConfig.billingPeriodLabels.QUARTERLY'), value: BILLING_PERIOD.QUARTERLY },
+			{ label: t('commitmentConfig.billingPeriodLabels.HALF_YEARLY'), value: BILLING_PERIOD.HALF_YEARLY },
+			{ label: t('commitmentConfig.billingPeriodLabels.ANNUAL'), value: BILLING_PERIOD.ANNUAL },
+		],
+		[t],
+	);
 
 	const currencySymbol = getCurrencySymbol(price.currency);
-	const meterDisplayName = price.meter?.name || price.display_name || 'this charge';
+	const meterDisplayName = price.meter?.name || price.display_name || t('commitmentConfig.thisChargeFallback');
 	const showWindowCommitment = supportsWindowCommitment(price);
 
-	// Initialize form with current config or defaults
 	useEffect(() => {
 		if (currentConfig) {
-			// Determine commitment type from fields if not explicitly set
 			const type =
 				currentConfig.commitment_type ||
 				(currentConfig.commitment_amount !== undefined && currentConfig.commitment_amount !== null
@@ -70,7 +102,6 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			setIsWindowCommitment(currentConfig.is_window_commitment ?? showWindowCommitment);
 			setCommitmentDuration(currentConfig.commitment_duration || billingPeriod?.toUpperCase() || '');
 		} else {
-			// Reset to defaults when opening without existing config
 			setCommitmentType(CommitmentType.AMOUNT);
 			setCommitmentAmount('');
 			setCommitmentQuantity('');
@@ -80,7 +111,8 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			setCommitmentDuration(billingPeriod?.toUpperCase() || '');
 		}
 		setValidationError(null);
-	}, [currentConfig, isOpen, showWindowCommitment]);
+		setCommitmentErrorTarget(null);
+	}, [currentConfig, isOpen, showWindowCommitment, billingPeriod]);
 
 	const handleSave = () => {
 		const config: Partial<LineItemCommitmentConfig> = {
@@ -97,14 +129,14 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			config.commitment_quantity = commitmentQuantity ? parseInt(commitmentQuantity, 10) : undefined;
 		}
 
-		// Validate
-		const error = validateCommitment(config);
-		if (error) {
-			setValidationError(error);
+		const rawError = validateCommitment(config);
+		if (rawError) {
+			setCommitmentErrorTarget(classifyCommitmentValidation(rawError));
+			setValidationError(mapCommitmentValidationError(rawError, t));
 			return;
 		}
 
-		// Save
+		setCommitmentErrorTarget(null);
 		onSave(price.id, config as LineItemCommitmentConfig);
 		onOpenChange(false);
 	};
@@ -116,6 +148,7 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 
 	const handleCancel = () => {
 		setValidationError(null);
+		setCommitmentErrorTarget(null);
 		onOpenChange(false);
 	};
 
@@ -125,13 +158,12 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 		<Dialog
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title='Configure Commitment'
-			description={`Set up commitment configuration for ${meterDisplayName}`}
+			title={t('commitmentConfig.title')}
+			description={t('commitmentConfig.description', { name: meterDisplayName })}
 			className='w-auto min-w-[32rem] max-w-[90vw]'>
 			<div className='space-y-6 max-h-[80vh] overflow-y-auto'>
-				{/* Commitment Type Selection */}
 				<div className='space-y-3'>
-					<label className='text-sm font-medium text-gray-700'>Commitment Type*</label>
+					<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.commitmentType')}</label>
 					<div className='flex gap-2'>
 						{commitmentTypeOptions.map((option) => (
 							<button
@@ -140,6 +172,7 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 								onClick={() => {
 									setCommitmentType(option.value);
 									setValidationError(null);
+									setCommitmentErrorTarget(null);
 								}}
 								className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all ${
 									commitmentType === option.value
@@ -153,140 +186,147 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 					</div>
 				</div>
 
-				{/* Conditional: Commitment Amount + Duration */}
 				{commitmentType === CommitmentType.AMOUNT && (
 					<div className='grid grid-cols-2 gap-4 items-start'>
 						<div className='space-y-1'>
-							<label className='text-sm font-medium text-gray-700'>Commitment Amount ({price.currency})*</label>
+							<label className='text-sm font-medium text-gray-700'>
+								{t('commitmentConfig.commitmentAmount', { currency: price.currency })}
+							</label>
 							<Input
 								type='formatted-number'
 								value={commitmentAmount}
 								onChange={(value) => {
 									setCommitmentAmount(value);
 									setValidationError(null);
+									setCommitmentErrorTarget(null);
 								}}
-								placeholder='Enter commitment amount'
+								placeholder={t('commitmentConfig.commitmentAmountPlaceholder')}
 								suffix={currencySymbol}
 								className='w-full'
-								error={validationError && validationError.includes('amount') ? validationError : undefined}
+								error={
+									commitmentErrorTarget && (commitmentErrorTarget === 'amountField' || commitmentErrorTarget === 'bothFields')
+										? (validationError ?? undefined)
+										: undefined
+								}
 							/>
-							<p className='text-xs text-gray-500'>The minimum monetary commitment</p>
+							<p className='text-xs text-gray-500'>{t('commitmentConfig.commitmentAmountHint')}</p>
 						</div>
 						<div className='space-y-1'>
-							<label className='text-sm font-medium text-gray-700'>Commitment Period</label>
+							<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.commitmentPeriod')}</label>
 							<Select
 								value={commitmentDuration}
 								options={commitmentDurationOptions}
 								onChange={(value) => {
 									setCommitmentDuration(value);
 									setValidationError(null);
+									setCommitmentErrorTarget(null);
 								}}
-								placeholder='Same as billing period'
+								placeholder={t('commitmentConfig.sameAsBillingPlaceholder')}
 							/>
-							<p className='text-xs text-gray-500'>Duration the commitment applies for</p>
+							<p className='text-xs text-gray-500'>{t('commitmentConfig.commitmentPeriodHint')}</p>
 						</div>
 					</div>
 				)}
 
-				{/* Conditional: Commitment Quantity + Duration */}
 				{commitmentType === CommitmentType.QUANTITY && (
 					<div className='grid grid-cols-2 gap-4 items-start'>
 						<div className='space-y-1'>
-							<label className='text-sm font-medium text-gray-700'>Commitment Quantity*</label>
+							<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.commitmentQuantity')}</label>
 							<Input
 								type='number'
 								value={commitmentQuantity}
 								onChange={(value) => {
 									setCommitmentQuantity(value);
 									setValidationError(null);
+									setCommitmentErrorTarget(null);
 								}}
-								placeholder='Enter commitment quantity'
+								placeholder={t('commitmentConfig.commitmentQuantityPlaceholder')}
 								className='w-full'
-								error={validationError && validationError.includes('quantity') ? validationError : undefined}
+								error={
+									commitmentErrorTarget && (commitmentErrorTarget === 'quantityField' || commitmentErrorTarget === 'bothFields')
+										? (validationError ?? undefined)
+										: undefined
+								}
 							/>
-							<p className='text-xs text-gray-500'>The minimum usage quantity</p>
+							<p className='text-xs text-gray-500'>{t('commitmentConfig.commitmentQuantityHint')}</p>
 						</div>
 						<div className='space-y-1'>
-							<label className='text-sm font-medium text-gray-700'>Commitment Period</label>
+							<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.commitmentPeriod')}</label>
 							<Select
 								value={commitmentDuration}
 								options={commitmentDurationOptions}
 								onChange={(value) => {
 									setCommitmentDuration(value);
 									setValidationError(null);
+									setCommitmentErrorTarget(null);
 								}}
-								placeholder='Same as billing period'
+								placeholder={t('commitmentConfig.sameAsBillingPlaceholder')}
 							/>
-							<p className='text-xs text-gray-500'>Duration the commitment applies for</p>
+							<p className='text-xs text-gray-500'>{t('commitmentConfig.commitmentPeriodHint')}</p>
 						</div>
 					</div>
 				)}
 
-				{/* Overage Factor */}
 				<div className='space-y-2'>
-					<label className='text-sm font-medium text-gray-700'>Overage Factor*</label>
+					<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.overageFactor')}</label>
 					<Input
 						type='number'
 						value={overageFactor}
 						onChange={(value) => {
 							setOverageFactor(value);
 							setValidationError(null);
+							setCommitmentErrorTarget(null);
 						}}
-						placeholder='1.0'
+						placeholder={t('commitmentConfig.overageFactorPlaceholder')}
 						className='w-full'
-						error={validationError && validationError.includes('overage') ? validationError : undefined}
+						error={commitmentErrorTarget === 'overageField' ? (validationError ?? undefined) : undefined}
 					/>
-					<p className='text-xs text-gray-500'>Multiplier applied to usage beyond commitment (e.g., 1.2 = 20% premium on overage)</p>
+					<p className='text-xs text-gray-500'>{t('commitmentConfig.overageFactorHint')}</p>
 				</div>
 
-				{/* Enable True Up */}
 				<div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
 					<div className='flex-1'>
-						<label className='text-sm font-medium text-gray-700 block mb-1'>Enable True Up</label>
-						<p className='text-xs text-gray-500'>Charge the commitment amount even if usage is below the commitment</p>
+						<label className='text-sm font-medium text-gray-700 block mb-1'>{t('commitmentConfig.enableTrueUp')}</label>
+						<p className='text-xs text-gray-500'>{t('commitmentConfig.enableTrueUpHint')}</p>
 					</div>
 					<Switch checked={enableTrueUp} onCheckedChange={setEnableTrueUp} />
 				</div>
 
-				{/* Conditional: Window Commitment (only if meter has bucket_size) */}
 				{showWindowCommitment && (
 					<div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
 						<div className='flex-1'>
-							<label className='text-sm font-medium text-gray-700 block mb-1'>Window Commitment</label>
+							<label className='text-sm font-medium text-gray-700 block mb-1'>{t('commitmentConfig.windowCommitment')}</label>
 							<p className='text-xs text-gray-500'>
-								Apply commitment to each bucket window (meter has bucket size: {price.meter?.aggregation?.bucket_size})
+								{t('commitmentConfig.windowCommitmentHint', { bucketSize: price.meter?.aggregation?.bucket_size })}
 							</p>
 						</div>
 						<Switch checked={isWindowCommitment} onCheckedChange={setIsWindowCommitment} />
 					</div>
 				)}
 
-				{/* General Validation Error */}
-				{validationError && !validationError.includes('amount') && !validationError.includes('quantity') && (
+				{validationError && commitmentErrorTarget === 'banner' && (
 					<div className='p-3 bg-red-50 border border-red-200 rounded-lg'>
 						<p className='text-sm text-red-700'>{validationError}</p>
 					</div>
 				)}
 
-				{/* Existing Config Notice */}
 				{hasExistingConfig && (
 					<div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
-						<p className='text-sm text-blue-700'>This price already has a commitment configuration. Your changes will update it.</p>
+						<p className='text-sm text-blue-700'>{t('commitmentConfig.existingNotice')}</p>
 					</div>
 				)}
 
-				{/* Action Buttons */}
 				<div className='flex gap-3 pt-4 border-t'>
 					<Button variant='outline' onClick={handleCancel} className='flex-1'>
-						Cancel
+						{t('commitmentConfig.cancel')}
 					</Button>
 					{hasExistingConfig && (
 						<Button variant='outline' onClick={handleClear} className='flex-1 text-red-600 hover:bg-red-50'>
-							Clear Commitment
+							{t('commitmentConfig.clearCommitment')}
 						</Button>
 					)}
 					<Button onClick={handleSave} className='flex-1'>
-						{hasExistingConfig ? 'Update Commitment' : 'Save Commitment'}
+						{hasExistingConfig ? t('commitmentConfig.updateCommitment') : t('commitmentConfig.saveCommitment')}
 					</Button>
 				</div>
 			</div>

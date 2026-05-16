@@ -1,5 +1,6 @@
 import { Spacer, Divider, Loader, Card, Page } from '@/components/atoms';
 import { ApiDocsContent, CreditNoteLineItemTable } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import formatDate from '@/utils/common/format_date';
@@ -12,37 +13,40 @@ import { CREDIT_NOTE_STATUS, CREDIT_NOTE_TYPE } from '@/types/dto';
 import { Chip } from '@/components/atoms';
 import { AlertCircle } from 'lucide-react';
 import { getTypographyClass } from '@/lib/typography';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 interface Props {
 	credit_note_id: string;
 	breadcrumb_index: number;
 }
 
-const getStatusChip = (status: CREDIT_NOTE_STATUS) => {
+const getStatusChip = (status: CREDIT_NOTE_STATUS, t: TFunction) => {
 	switch (status) {
 		case CREDIT_NOTE_STATUS.VOIDED:
-			return <Chip variant='default' label='Voided' />;
+			return <Chip variant='default' label={t('creditNotes.status.voided')} />;
 		case CREDIT_NOTE_STATUS.FINALIZED:
-			return <Chip variant='success' label='Finalized' />;
+			return <Chip variant='success' label={t('invoices.status.finalized')} />;
 		case CREDIT_NOTE_STATUS.DRAFT:
-			return <Chip variant='default' label='Draft' />;
+			return <Chip variant='default' label={t('common:status.draft')} />;
 		default:
-			return <Chip variant='default' label='Draft' />;
+			return <Chip variant='default' label={t('common:status.draft')} />;
 	}
 };
 
-const getTypeChip = (type: CREDIT_NOTE_TYPE) => {
+const getTypeChip = (type: CREDIT_NOTE_TYPE, t: TFunction) => {
 	switch (type) {
 		case CREDIT_NOTE_TYPE.REFUND:
-			return <Chip variant='default' label='Refund' />;
+			return <Chip variant='default' label={t('creditNotes.status.refund')} />;
 		case CREDIT_NOTE_TYPE.ADJUSTMENT:
-			return <Chip variant='default' label='Adjustment' />;
+			return <Chip variant='default' label={t('creditNotes.status.adjustment')} />;
 		default:
-			return <Chip variant='default' label='Unknown' />;
+			return <Chip variant='default' label={t('invoices.status.unknown')} />;
 	}
 };
 
 const CreditNoteDetails: FC<Props> = ({ credit_note_id, breadcrumb_index }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ['fetchCreditNote', credit_note_id],
@@ -61,7 +65,7 @@ const CreditNoteDetails: FC<Props> = ({ credit_note_id, breadcrumb_index }) => {
 	if (isLoading) return <Loader />;
 
 	if (isError) {
-		toast.error('Something went wrong');
+		toast.error(t('common:toast.genericError'));
 		return (
 			<div className='flex min-h-screen justify-center items-center h-full'>
 				<Loader />
@@ -71,22 +75,22 @@ const CreditNoteDetails: FC<Props> = ({ credit_note_id, breadcrumb_index }) => {
 
 	return (
 		<Page className='space-y-6 '>
-			<ApiDocsContent tags={['Credit Notes', 'Features']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotesWithFeatures} />
 			{/* Main Credit Note Card */}
 			<div ref={creditNoteRef} className='rounded-xl border border-gray-300 p-6'>
 				<div className='p-4'>
 					<div className='flex items-center gap-2'>
-						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>Credit Note Details</h3>
-						<div className='text-[#09090B] text-sm'>{getStatusChip(data?.credit_note_status ?? CREDIT_NOTE_STATUS.DRAFT)}</div>
+						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>{t('creditNotes.detailPage.title')}</h3>
+						<div className='text-[#09090B] text-sm'>{getStatusChip(data?.credit_note_status ?? CREDIT_NOTE_STATUS.DRAFT, t)}</div>
 					</div>
 					<Spacer className='!my-8' />
 
 					{/* Credit Note Information Grid */}
 					<div className='w-full grid grid-cols-4 gap-4 mb-4'>
-						<p className='text-[#71717A] text-sm'>Credit Note Number</p>
-						<p className='text-[#71717A] text-sm'>Date Created</p>
-						<p className='text-[#71717A] text-sm'>Invoice Number</p>
-						<p className='text-[#71717A] text-sm'>Type</p>
+						<p className='text-[#71717A] text-sm'>{t('creditNotes.detailPage.creditNoteNumber')}</p>
+						<p className='text-[#71717A] text-sm'>{t('creditNotes.detailPage.dateCreated')}</p>
+						<p className='text-[#71717A] text-sm'>{t('creditNotes.detailPage.invoiceNumber')}</p>
+						<p className='text-[#71717A] text-sm'>{t('creditNotes.detailPage.typeLabel')}</p>
 					</div>
 					<div className='w-full grid grid-cols-4 gap-4'>
 						<p className='text-[#09090B] text-sm font-medium'>{data?.credit_note_number || data?.id?.slice(0, 8)}</p>
@@ -98,18 +102,18 @@ const CreditNoteDetails: FC<Props> = ({ credit_note_id, breadcrumb_index }) => {
 								</Link>
 							)}
 						</div>
-						<div className='text-[#09090B] text-sm'>{getTypeChip(data?.credit_note_type ?? CREDIT_NOTE_TYPE.ADJUSTMENT)}</div>
+						<div className='text-[#09090B] text-sm'>{getTypeChip(data?.credit_note_type ?? CREDIT_NOTE_TYPE.ADJUSTMENT, t)}</div>
 					</div>
 				</div>
 
 				<Divider />
 				{/* Credit Note Line Items */}
 				<CreditNoteLineItemTable
-					title='Line Items'
+					title={t('creditNotes.lineItems')}
 					data={data?.line_items ?? []}
 					total_amount={data?.total_amount}
 					currency={data?.currency}
-					total_label='Total Credit Amount'
+					total_label={t('creditNotes.totalCreditAmount')}
 				/>
 				{data?.memo && (
 					<Card variant='default' className='mb-4 p-3'>

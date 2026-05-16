@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import FlexpriceTable, { ColumnData, TooltipCell } from '@/components/molecules/Table';
 import { formatDateWithMilliseconds } from '@/utils/common/format_date';
 import EventPropertiesDrawer from '@/components/molecules/Events/EventPropertiesDrawer';
@@ -9,35 +10,36 @@ interface Props {
 }
 
 const EventsTable: FC<Props> = ({ data }) => {
+	const { t } = useTranslation('customer-portal');
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
 	const columns: ColumnData[] = [
 		{
-			title: 'Event Name',
+			title: t('events.columnEventName'),
 			render(rowData) {
-				return <span>{rowData.event_name || '--'}</span>;
+				return <span>{rowData.event_name || t('events.valuePlaceholder')}</span>;
 			},
 		},
 		{
-			title: 'Timestamp',
+			title: t('events.columnTimestamp'),
 			render(rowData) {
 				return <span>{formatDateWithMilliseconds(rowData.timestamp)}</span>;
 			},
 		},
 		{
-			title: 'Event ID',
+			title: t('events.columnEventId'),
 			render(rowData) {
 				return <TooltipCell tooltipContent={rowData.id} tooltipText={rowData.id} />;
 			},
 		},
 		{
-			title: 'Properties',
+			title: t('events.columnProperties'),
 			render(rowData) {
 				const propertyCount = rowData.properties ? Object.keys(rowData.properties).length : 0;
 				return (
 					<span className='text-zinc-600'>
-						{propertyCount > 0 ? `${propertyCount} ${propertyCount === 1 ? 'property' : 'properties'}` : 'No properties'}
+						{propertyCount > 0 ? t('events.propertyCount', { count: propertyCount }) : t('events.noProperties')}
 					</span>
 				);
 			},

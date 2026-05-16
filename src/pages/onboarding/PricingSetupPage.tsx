@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Check, Loader2, X } from 'lucide-react';
 import { RouteNames } from '@/core/routes/Routes';
 import { queryClient } from '@/core/services/tanstack/ReactQueryProvider';
@@ -55,6 +56,7 @@ type Phase = 'input' | 'preview' | 'creating';
 const PricingSetupPage = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { t } = useTranslation('common');
 	const [selectedTemplate, setSelectedTemplate] = useState<TemplateDefinition | null>(null);
 	/** Seed for remounting the uncontrolled textarea (template pick, clear, back from preview). */
 	const [promptInputSeed, setPromptInputSeed] = useState('');
@@ -80,6 +82,15 @@ const PricingSetupPage = () => {
 
 	/** Steps shown during Create — omits limits/credits when the schema has none (matches orchestrator). */
 	const setupProgressSteps = useMemo(() => (schema ? getSetupProgressSteps(schema) : []), [schema]);
+
+	const previewSummaryLine = useMemo(() => {
+		if (!schema) return '';
+		const featurePart = t('pricingSetupPage.schemaFeatureCount', { count: schema.features.length });
+		const planPart = t('pricingSetupPage.schemaPlanCount', { count: schema.plans.length });
+		const cg = schema.credit_grants ?? [];
+		const creditPart = cg.length > 0 ? t('pricingSetupPage.schemaCreditGrantCount', { count: cg.length }) : '';
+		return [featurePart, planPart, creditPart].filter(Boolean).join(' · ');
+	}, [schema, t]);
 
 	useEffect(() => {
 		if (phase !== 'preview') {
@@ -254,7 +265,7 @@ const PricingSetupPage = () => {
 				<button
 					type='button'
 					onClick={handleSkip}
-					aria-label='Close and return to dashboard'
+					aria-label={t('pricingSetupPage.closeReturnDashboardAria')}
 					className={cn(
 						'absolute right-3 top-3 z-[55] flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
 						'border border-gray-200/90 bg-white/85 text-gray-500 shadow-sm backdrop-blur-sm',
@@ -274,7 +285,7 @@ const PricingSetupPage = () => {
 					<div className='fixed inset-0 z-[60] flex items-center justify-center bg-white/50' role='status' aria-live='polite'>
 						<div className='flex items-center gap-3 rounded-xl bg-white px-5 py-3 shadow-md ring-1 ring-gray-200/80'>
 							<Loader2 className='h-5 w-5 shrink-0 animate-spin text-indigo-600' aria-hidden />
-							<span className='analyzing-prompt-shimmer text-sm font-medium'>Analyzing prompt..</span>
+							<span className='analyzing-prompt-shimmer text-sm font-medium'>{t('pricingSetupPage.analyzingPrompt')}</span>
 						</div>
 					</div>
 				)}
@@ -284,8 +295,8 @@ const PricingSetupPage = () => {
 					<div className='relative z-10 w-full min-w-0 max-w-3xl'>
 						{/* Header */}
 						<div className='mb-8 text-center'>
-							<h1 className='text-[2rem] font-medium tracking-tight text-gray-900'>Set up your pricing</h1>
-							<p className='mt-2.5 text-[15px] text-gray-600'>Describe your pricing model, or start from a template.</p>
+							<h1 className='text-[2rem] font-medium tracking-tight text-gray-900'>{t('pricingSetupPage.title')}</h1>
+							<p className='mt-2.5 text-[15px] text-gray-600'>{t('pricingSetupPage.subtitle')}</p>
 						</div>
 
 						{/* Template badge */}
@@ -295,18 +306,18 @@ const PricingSetupPage = () => {
 									{selectedTemplate.iconSrc ? (
 										<img
 											src={selectedTemplate.iconSrc}
-											alt={`${selectedTemplate.label} logo`}
+											alt={t('pricingSetupPage.templateLogoAlt', { label: selectedTemplate.label })}
 											className='mr-2 inline-block h-4 w-4 object-contain align-[-2px]'
 										/>
 									) : (
 										<span className='mr-1.5 text-base'>{selectedTemplate.icon}</span>
 									)}
-									Using <span className='font-semibold text-gray-900'>{selectedTemplate.label}</span> template
+									{t('pricingSetupPage.usingTemplate', { name: selectedTemplate.label })}
 								</span>
 								<button
 									type='button'
 									onClick={handleClearTemplate}
-									aria-label='Clear template'
+									aria-label={t('pricingSetupPage.clearTemplateAria')}
 									className='ml-3 rounded-lg p-1 text-gray-500 transition-colors hover:text-gray-900'>
 									<X className='h-3.5 w-3.5' />
 								</button>
@@ -318,7 +329,7 @@ const PricingSetupPage = () => {
 							<textarea
 								key={promptFieldKey}
 								ref={promptRef}
-								placeholder='My app has a free plan and a pro plan at $20/month with 500 API calls included…'
+								placeholder={t('pricingSetupPage.promptPlaceholder')}
 								defaultValue={promptInputSeed}
 								onInput={handlePromptInput}
 								autoComplete='off'
@@ -338,7 +349,7 @@ const PricingSetupPage = () => {
 										'hover:opacity-90 active:scale-95',
 										'disabled:cursor-not-allowed disabled:opacity-30',
 									)}
-									aria-label='Generate pricing preview'>
+									aria-label={t('pricingSetupPage.generatePreviewAria')}>
 									{isParsing ? (
 										<Loader2 className='h-4 w-4 animate-spin' aria-hidden />
 									) : (
@@ -352,34 +363,35 @@ const PricingSetupPage = () => {
 						<div className='mt-7'>
 							<div className='mb-5 flex items-center gap-3'>
 								<div className='h-px flex-1 bg-gray-200' />
-								<span className='text-xs font-medium text-gray-500'>Templates</span>
+								<span className='text-xs font-medium text-gray-500'>{t('pricingSetupPage.templatesHeading')}</span>
 								<div className='h-px flex-1 bg-gray-200' />
 							</div>
 							<div className='flex justify-center gap-2.5 flex-wrap'>
-								{PRICING_TEMPLATES.map((t) => (
+								{PRICING_TEMPLATES.map((tpl) => (
 									<button
 										type='button'
-										key={t.label}
-										onClick={() => handleTemplateClick(t)}
+										key={tpl.label}
+										onClick={() => handleTemplateClick(tpl)}
 										className={cn(
 											'flex shrink-0 items-center gap-3 rounded-xl border bg-white px-4 py-2.5 text-left text-sm shadow-sm',
 											'transition-all hover:border-gray-400 hover:shadow active:scale-95',
-											selectedTemplate?.label === t.label ? 'border-black text-gray-900 shadow-md' : 'border-gray-300 text-gray-700',
+											selectedTemplate?.label === tpl.label ? 'border-black text-gray-900 shadow-md' : 'border-gray-300 text-gray-700',
 										)}>
-										{t.iconSrc ? (
+										{tpl.iconSrc ? (
 											<img
-												src={t.iconSrc}
-												alt={`${t.label} logo`}
-												className={cn('h-4 w-4 object-contain', selectedTemplate?.label === t.label ? 'opacity-100' : 'opacity-70')}
+												src={tpl.iconSrc}
+												alt={t('pricingSetupPage.templateLogoAlt', { label: tpl.label })}
+												className={cn('h-4 w-4 object-contain', selectedTemplate?.label === tpl.label ? 'opacity-100' : 'opacity-70')}
 											/>
 										) : (
-											<span className={cn('text-[15px] leading-none', selectedTemplate?.label === t.label ? 'opacity-100' : 'opacity-60')}>
-												{t.icon}
+											<span
+												className={cn('text-[15px] leading-none', selectedTemplate?.label === tpl.label ? 'opacity-100' : 'opacity-60')}>
+												{tpl.icon}
 											</span>
 										)}
 										<span
-											className={cn('font-medium leading-none', selectedTemplate?.label === t.label ? 'text-gray-900' : 'text-gray-900')}>
-											{t.label}
+											className={cn('font-medium leading-none', selectedTemplate?.label === tpl.label ? 'text-gray-900' : 'text-gray-900')}>
+											{tpl.label}
 										</span>
 									</button>
 								))}
@@ -389,7 +401,7 @@ const PricingSetupPage = () => {
 						{/* Skip */}
 						<div className='mt-6 text-center'>
 							<button type='button' onClick={handleSkip} className='text-sm text-gray-500 transition-colors hover:text-gray-900'>
-								or get back to dashboard
+								{t('pricingSetupPage.skipToDashboard')}
 							</button>
 						</div>
 					</div>
@@ -400,12 +412,7 @@ const PricingSetupPage = () => {
 					<div className='relative z-10 flex w-full min-w-0 max-w-[1420px] flex-col'>
 						{/* Header */}
 						<div className='mb-8 shrink-0 text-center sm:mb-9'>
-							<p className='text-[13px] font-semibold leading-relaxed text-gray-700'>
-								{schema.features.length} feature{schema.features.length !== 1 ? 's' : ''} · {schema.plans.length} plan
-								{schema.plans.length !== 1 ? 's' : ''}
-								{(schema.credit_grants ?? []).length > 0 &&
-									` · ${(schema.credit_grants ?? []).length} credit grant${(schema.credit_grants ?? []).length !== 1 ? 's' : ''}`}
-							</p>
+							<p className='text-[13px] font-semibold leading-relaxed text-gray-700'>{previewSummaryLine}</p>
 						</div>
 
 						{/* Canvas: comfortable vertical padding + cap so 4+ cards can still scroll inside */}
@@ -444,13 +451,13 @@ const PricingSetupPage = () => {
 
 							<div className='mx-auto mt-9 flex w-full max-w-[1320px] shrink-0 items-center justify-end gap-6 sm:mt-10'>
 								<button type='button' onClick={handleBack} className='text-sm text-gray-800 transition-colors hover:text-gray-900'>
-									Back
+									{t('actions.back')}
 								</button>
 								<Button
 									type='button'
 									onClick={() => void handleConfirmCreate()}
 									className='rounded-xl px-5 py-2.5 shadow-sm active:scale-95'>
-									Create
+									{t('actions.create')}
 								</Button>
 							</div>
 						</div>
@@ -461,14 +468,14 @@ const PricingSetupPage = () => {
 				{phase === 'creating' && (
 					<div className='w-full max-w-2xl'>
 						<div className='rounded-2xl border border-gray-200 bg-white p-10 shadow-sm sm:p-11'>
-							<h2 className='text-center text-xl font-semibold text-gray-900'>Building your pricing</h2>
-							<p className='mt-2.5 text-center text-sm text-gray-500'>This usually takes a few seconds</p>
+							<h2 className='text-center text-xl font-semibold text-gray-900'>{t('pricingSetupPage.buildingPricing')}</h2>
+							<p className='mt-2.5 text-center text-sm text-gray-500'>{t('pricingSetupPage.creatingSubtitle')}</p>
 
 							<div className='mt-10 flex flex-col items-center'>
 								<div
 									className='flex w-full min-w-0 max-w-[36rem] items-center justify-center gap-0 px-2 sm:px-6'
 									role='list'
-									aria-label='Setup progress'>
+									aria-label={t('pricingSetupPage.setupProgressAria')}>
 									{setupProgressSteps.map((step, idx) => {
 										const isCompleted = completedSteps.has(step);
 										const isActive = activeStepIdx === idx;
@@ -526,7 +533,7 @@ const PricingSetupPage = () => {
 								<div className='mt-8 flex justify-center'>
 									<div className='flex items-center gap-2 text-sm font-medium text-gray-600'>
 										<Loader2 className='h-4 w-4 animate-spin' aria-hidden />
-										Redirecting to your plans…
+										{t('pricingSetupPage.redirectingToPlans')}
 									</div>
 								</div>
 							)}

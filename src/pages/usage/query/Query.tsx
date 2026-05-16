@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Page, Select } from '@/components/atoms';
 import { ApiDocsContent, QueryBuilder } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import EventsApi from '@/api/EventsApi';
 import { Skeleton } from '@/components/ui';
 import { RefreshCw } from 'lucide-react';
@@ -16,6 +17,7 @@ import { Card, CardContent, ChartConfig, ChartContainer, ChartTooltipContent } f
 import { formatDateTime } from '@/utils';
 import SelectFeature from '@/components/atoms/SelectFeature/SelectFeature';
 import Feature, { FEATURE_TYPE } from '@/models/Feature';
+import { useTranslation } from 'react-i18next';
 
 // Helper function to convert sanitized filters to Usage API parameters
 const convertFiltersToUsageParams = (filters: TypedBackendFilter[]): Partial<GetUsageByMeterPayload> => {
@@ -61,17 +63,7 @@ const getNext24HoursDate = (date: Date): Date => {
 	return nextDate;
 };
 
-const windowSizeOptions = [
-	{ label: 'Minute', value: 'MINUTE' },
-	{ label: '15 Minute', value: '15MIN' },
-	{ label: '30 Minute', value: '30MIN' },
-	{ label: 'Hour', value: 'HOUR' },
-	{ label: '3 Hour', value: '3HOUR' },
-	{ label: '6 Hour', value: '6HOUR' },
-	{ label: '12 Hour', value: '12HOUR' },
-	{ label: 'Day', value: 'DAY' },
-	{ label: 'Week', value: 'WEEK' },
-];
+const WINDOW_SIZE_KEYS = ['MINUTE', '15MIN', '30MIN', 'HOUR', '3HOUR', '6HOUR', '12HOUR', 'DAY', 'WEEK'] as const;
 
 // const sortingOptions: SortOption[] = [
 // 	{
@@ -86,35 +78,41 @@ const windowSizeOptions = [
 // 	},
 // ];
 
-const filterOptions: FilterField[] = [
-	{
-		field: 'external_customer_id',
-		label: 'Customer ID',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'start_time',
-		label: 'Start Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'end_time',
-		label: 'End Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-];
-
 const QueryPage: React.FC = () => {
+	const { t } = useTranslation('developers');
 	const [usageData, setUsageData] = useState<any>(null);
 	const [selectedMeter, setSelectedMeter] = useState<string | undefined>(undefined);
 	const [selectedFeature, setSelectedFeature] = useState<Feature | undefined>(undefined);
-	const [windowSize, setWindowSize] = useState(windowSizeOptions[0].value);
+	const [windowSize, setWindowSize] = useState<string>('MINUTE');
+
+	const windowSizeOptions = useMemo(() => WINDOW_SIZE_KEYS.map((value) => ({ value, label: t(`usage.query.windowSizes.${value}`) })), [t]);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'external_customer_id',
+				label: t('usage.query.filters.customerId'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'start_time',
+				label: t('usage.query.filters.startTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'end_time',
+				label: t('usage.query.filters.endTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+		],
+		[t],
+	);
 
 	// Move useMemo here
 	const initialFilters = useMemo(() => {
@@ -143,15 +141,20 @@ const QueryPage: React.FC = () => {
 		];
 	}, []);
 
-	const { filters, sorts, setFilters, setSorts, sanitizedFilters } = useFilterSorting({
-		initialFilters: initialFilters,
-		initialSorts: [
+	const initialSorts = useMemo(
+		() => [
 			{
 				field: 'window_size',
-				label: 'Time Window',
+				label: t('usage.query.sortTimeWindow'),
 				direction: SortDirection.ASC,
 			},
 		],
+		[t],
+	);
+
+	const { filters, sorts, setFilters, setSorts, sanitizedFilters } = useFilterSorting({
+		initialFilters: initialFilters,
+		initialSorts,
 		debounceTime: 300,
 	});
 
@@ -191,7 +194,7 @@ const QueryPage: React.FC = () => {
 		onSuccess: (data) => {
 			setUsageData(data);
 		},
-		onError: (error: any) => toast.error(error?.error?.message || 'Error fetching usage data'),
+		onError: (error: Error) => toast.error(error.message || 'Error fetching usage data'),
 	});
 
 	const resetFilters = () => {
@@ -210,13 +213,17 @@ const QueryPage: React.FC = () => {
 		value: item.value,
 	}));
 
-	const chartConfig = {
-		value: { label: 'Usage', color: 'hsl(var(--chart-1))' },
-	} satisfies ChartConfig;
+	const chartConfig = useMemo(
+		() =>
+			({
+				value: { label: t('usage.query.chartSeriesUsage'), color: 'hsl(var(--chart-1))' },
+			}) satisfies ChartConfig,
+		[t],
+	);
 
 	return (
-		<Page heading='Query'>
-			<ApiDocsContent tags={['Events']} />
+		<Page heading={t('usage.query.pageTitle')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='bg-white rounded-md flex items-start gap-4'>
 				<QueryBuilder
 					filterOptions={filterOptions}
@@ -239,7 +246,7 @@ const QueryPage: React.FC = () => {
 							}
 						}}
 						value={selectedFeature?.id}
-						placeholder='Select a metered feature'
+						placeholder={t('usage.query.selectMeteredFeaturePlaceholder')}
 					/>
 				</div>
 				<div className='flex flex-col justify-end min-w-32'>

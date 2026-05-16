@@ -1,0 +1,515 @@
+{
+	"list": {
+		"title": "Customers",
+		"paginationUnit": "Customers",
+		"entityName": "Customer",
+		"openPortal": "Open Customer Portal",
+		"emptyHeading": "Customers",
+		"emptyDescription": "Create a plan to display pricing and start billing customers.",
+		"createCustomer": "Create Customer",
+		"columns": {
+			"name": "Name",
+			"externalId": "External ID",
+			"status": "Status",
+			"updatedAt": "Updated at",
+			"actions": "Actions"
+		},
+		"filters": {
+			"name": "Name",
+			"externalId": "External ID",
+			"email": "Email",
+			"createdAt": "Created At",
+			"status": "Status",
+			"metadata": "Metadata"
+		},
+		"sort": {
+			"name": "Name",
+			"email": "Email",
+			"createdAt": "Created At",
+			"updatedAt": "Updated At"
+		}
+	},
+	"detail": {
+		"inactiveBanner": "This customer is Inactive. You can only view their details but cannot make any changes.",
+		"tabsAria": "Tabs",
+		"tabs": {
+			"overview": "Overview",
+			"wallet": "Wallet",
+			"invoice": "Invoice",
+			"information": "Information",
+			"taxAssociation": "Tax",
+			"analytics": "Analytics",
+			"usageEvents": "Usage Events"
+		},
+		"invoiceTabs": {
+			"overview": "Overview",
+			"payments": "Payments",
+			"creditNotes": "Credit Notes"
+		},
+		"creditNotesEmptySubtitle": "No credit notes found"
+	},
+	"overview": {
+		"sectionTitle": "Customer Details",
+		"loadingCustomerDetails": "Loading customer details...",
+		"billingStripeTag": "stripe",
+		"labels": {
+			"customer": "Customer",
+			"email": "Email",
+			"billingId": "Billing ID",
+			"billingDetailsHeading": "Billing Details",
+			"address": "Address",
+			"country": "Country",
+			"state": "State",
+			"city": "City",
+			"postalCode": "Postal Code",
+			"subscriptionAmount": "Subscription Amount",
+			"subscriptionStartDate": "Subscription Start Date"
+		},
+		"customerCardSectionTitle": "Customer Details",
+		"customerCardSlug": "Slug",
+		"cardTitle": "Customer Details"
+	},
+	"form": {
+		"drawer": {
+			"editCustomer": "Edit Customer",
+			"addCustomer": "Add Customer",
+			"editDescription": "Enter customer details to update the account.",
+			"createDescription": "Enter customer details to create a new account in the system.",
+			"detailsSectionBadge": "Customer Details",
+			"nameLabel": "Name",
+			"namePlaceholder": "Enter Name",
+			"externalIdLabel": "External ID",
+			"externalIdPlaceholder": "customer-",
+			"emailOptionalLabel": "Email (Optional)",
+			"emailPlaceholder": "e.g. example@gmail.com",
+			"addBillingDetail": "Add Billing Detail",
+			"billingSectionBadge": "Billing Details",
+			"saving": "Saving...",
+			"save": "Save"
+		},
+		"billingFields": {
+			"country": "Country",
+			"selectCountry": "Select Country",
+			"noCountries": "No countries Available",
+			"addressLine1": "Address Line 1",
+			"addressLine1Placeholder": "Address Line 1",
+			"addressLine2": "Address Line 2",
+			"addressLine2Placeholder": "Address Line 2",
+			"state": "State",
+			"selectState": "Select State",
+			"noStates": "No states Available",
+			"city": "City",
+			"selectCity": "Select City",
+			"noCities": "No cities Available",
+			"postalCode": "Postal Code",
+			"postalCodePlaceholder": "Enter Postal Code"
+		},
+		"validation": {
+			"externalIdRequired": "External ID is required",
+			"nameRequired": "Customer Name is required",
+			"invalidEmail": "Invalid email address",
+			"addressLine1Max": "Address Line 1 must be less than 255 characters",
+			"addressLine2Max": "Address Line 2 must be less than 255 characters",
+			"cityMax": "City name must be less than 100 characters",
+			"stateMax": "State name must be less than 100 characters",
+			"postalCodeMax": "Postal code must be less than 20 characters",
+			"countryLength": "Country code must be exactly 2 characters",
+			"addressCountryStateRequired": "Country and State are required when address fields are provided",
+			"failedToSave": "Failed to add customer. Please try again."
+		},
+		"toast": {
+			"updated": "Customer updated successfully",
+			"created": "Customer added successfully"
+		}
+	},
+	"wallet": {
+		"createTitle": "Create Wallet",
+		"description": "Define the wallet details and the currency it will operate in.",
+		"typeLabel": "Wallet Type",
+		"typePlaceholder": "Select Wallet Type",
+		"currencyLabel": "Currency",
+		"customCurrencyHint": "Custom currency selected. Currency and conversion rate are automatically set.",
+		"selectCurrencyHint": "Select a currency or custom currency for this wallet.",
+		"conversionRate": "Conversion Rate",
+		"suffixCredit": "credit",
+		"creditsPluralSuffix": "credits",
+		"topupConversionRate": "Top-up Conversion Rate",
+		"topupConversionDescription": "Conversion rate for top-ups. Defaults to the main conversion rate if not specified.",
+		"freeCredits": "Free Credits",
+		"freeCreditsPlaceholder": "Enter Free Credits to be added to the wallet",
+		"freeCreditsExpiry": "Free Credits Expiry Date",
+		"expiryPlaceholder": "Select Expiry Date",
+		"typePrepaidDesc": "Customers top up credits in advance. Usage deducts from a real-time balance.",
+		"typePostpaidDesc": "Credits are applied to invoices at the end of the billing cycle.",
+		"labelPrePaid": "Pre-Paid",
+		"labelPostPaid": "Post-Paid",
+		"addTopupRate": "Top-up Rate",
+		"addFreeCredits": "Free Credits",
+		"saveWallet": "Save Wallet",
+		"errors": {
+			"currencyRequired": "Currency is required",
+			"conversionRatePositive": "Conversion rate must be greater than 0",
+			"topupConversionPositive": "Top-up conversion rate must be greater than 0",
+			"expiryAfterSubscription": "Expiry date must be after the current subscription period end"
+		},
+		"toast": {
+			"createSuccess": "Wallet created successfully",
+			"createError": "An error occurred while creating wallet"
+		}
+	},
+	"select": {
+		"searchCustomers": "Search for customers...",
+		"searchCustomer": "Search for customer...",
+		"searchByName": "Search customers by name...",
+		"customersLabel": "Customers",
+		"selectCustomers": "Select customers",
+		"none": "None",
+		"self": "Self"
+	},
+	"inheritanceTable": {
+		"addDialogTitle": "Add customers to inherit",
+		"columns": {
+			"customer": "Customer",
+			"externalId": "External ID"
+		},
+		"removeAriaPrefix": "Remove",
+		"sectionTitle": "Inherited customers",
+		"addSelected": "Add ({{count}})",
+		"add": "Add"
+	},
+	"usageTable": {
+		"columns": {
+			"feature": "Feature",
+			"plan": "Plan",
+			"value": "Value",
+			"usage": "Usage"
+		},
+		"units": "units",
+		"unlimitedLabel": "Unlimited",
+		"booleanTrue": "True",
+		"booleanFalse": "False",
+		"featureTypes": {
+			"static": "Static",
+			"metered": "Metered",
+			"boolean": "Boolean",
+			"dash": "--",
+			"usageProgressUnlimited": "{{usage}} / Unlimited"
+		},
+		"fallback": "--"
+	},
+	"subscriptionCreate": {
+		"toast": {
+			"draftSaved": "Draft subscription saved successfully",
+			"created": "Subscription created successfully",
+			"error": "Error creating subscription"
+		},
+		"validation": {
+			"planAndPeriod": "Please select a plan and billing period.",
+			"startDate": "Please select a start date for the subscription.",
+			"phaseStartDate": "Please select a start date for phase {{phase}}",
+			"saveEditsFirst": "Please save your changes before submitting.",
+			"trialDays": "Enter a valid trial length in days (at least 1), or leave empty to use the plan default.",
+			"autoThresholdFixed": "Auto invoice threshold is not available when the plan includes fixed charges.",
+			"autoThresholdNonNegative": "Enter a valid auto invoice threshold (0 or greater), or leave empty to omit."
+		},
+		"billingCustomer": {
+			"loadFailed": "Could not load billing customer details.",
+			"missingExternalId": "Billing customer must have an external ID."
+		},
+		"sandboxNotice": "This is a sandbox subscription and will automatically end on {{date}} ({{days}} days from now).",
+		"saveAsDraft": "Save as Draft"
+	},
+	"subscriptionDetail": {
+		"breadcrumbSubscription": "Subscription",
+		"sectionTitle": "Subscription details",
+		"subscriptionName": "Subscription name",
+		"status": "Status",
+		"billingCycle": "Billing cycle",
+		"commitmentPeriod": "Commitment Period",
+		"paymentTerms": "Payment terms",
+		"invoicingCustomer": "Invoicing Customer",
+		"parentCustomer": "Parent customer",
+		"commitmentLabel": "Commitment",
+		"autoInvoiceThreshold": "Auto invoice threshold",
+		"overageFactor": "Overage Factor",
+		"startDate": "Start date",
+		"renewalDate": "Renewal date",
+		"subscriptionsInheritance": "Subscriptions Inheritance",
+		"taxAssociations": "Tax Associations",
+		"subscriptionPhases": "Subscription Phases",
+		"phaseHeading": "Phase {{index}}",
+		"phaseStart": "Start",
+		"phaseEnd": "End",
+		"noPhases": "No phases found.",
+		"upcomingInvoicesTitle": "Upcoming Invoices",
+		"upcomingInvoicesSubtitle": "This is a preview of the invoice that will be billed on {{date}}. It may change if subscription is updated.",
+		"upcomingInvoicesEmpty": "No line items for the period ending {{date}}.",
+		"cancelsOnDate": "Cancels on {{date}}",
+		"cancelsByDate": "Cancels by {{date}}",
+		"columns": {
+			"customer": "Customer",
+			"type": "Type",
+			"plan": "Plan",
+			"startDate": "Start date",
+			"renewalDate": "Renewal date"
+		},
+		"toast": {
+			"genericError": "Something went wrong"
+		},
+		"commitment": {
+			"annual": "Annual",
+			"monthly": "Monthly",
+			"nMonths": "{{count}} months",
+			"quarterly": "Quarterly",
+			"halfYearly": "Half-Yearly",
+			"weekly": "Weekly",
+			"daily": "Daily"
+		}
+	},
+	"tabPanels": {
+		"common": {
+			"metadata": "Metadata",
+			"unknown": "Unknown"
+		},
+		"analytics": {
+			"heading": "Analytics",
+			"featuresLabel": "Features",
+			"featuresPlaceholder": "Select features",
+			"startDatePlaceholder": "Select start date",
+			"startDateLabel": "Start Date",
+			"endDatePlaceholder": "Select end date",
+			"endDateLabel": "End Date",
+			"options": "Options",
+			"includeChildren": "Include children",
+			"metricRevenue": "Revenue",
+			"metricCost": "Cost",
+			"metricMargin": "Margin",
+			"metricMarginPercent": "Margin %",
+			"metricCpm": "CPM",
+			"usageBreakdown": "Usage Breakdown",
+			"collapseAll": "Collapse all",
+			"expandAll": "Expand all",
+			"totalUsage": "Total Usage",
+			"totalCost": "Total Cost",
+			"tableEmpty": "--"
+		},
+		"information": {
+			"saveCardOnStripe": "Save Card on Stripe",
+			"sharePortalLinkTitle": "Share Customer Portal Link",
+			"childCustomersTitle": "Child customers"
+		},
+		"invoice": {
+			"title": "Invoices",
+			"emptySubtitle": "No invoices found",
+			"addInvoice": "Add Invoice",
+			"paginationUnit": "Invoices"
+		},
+		"overview": {
+			"subscriptionsCardTitle": "Subscriptions",
+			"subscriptionsPaginationUnit": "Subscriptions",
+			"entitlementsCardTitle": "Entitlements"
+		},
+		"tax": {
+			"emptyTitle": "Tax",
+			"emptySubtitle": "No tax rate assigned to this customer",
+			"associationsTitle": "Tax Associations",
+			"associationsPaginationUnit": "Tax Associations"
+		},
+		"usageEvents": {
+			"loadErrorTitle": "Unable to load events",
+			"loadErrorDescription": "Customer information is missing",
+			"noEventsFound": "No events found"
+		},
+		"wallet": {
+			"emptyTitle": "Wallets",
+			"emptySubtitle": "No wallets linked to the customer",
+			"addWallet": "Add Wallet",
+			"topupWallet": "Topup Wallet",
+			"detailsTitle": "Wallet Details",
+			"currentBalanceShort": "Current",
+			"ongoingBalanceShort": "Ongoing",
+			"balanceLabel": "{{type}} Balance",
+			"currentBalanceTooltip": "Balance as per latest invoice",
+			"ongoingBalanceTooltip": "Includes real-time usage",
+			"creditsSuffix": "credits",
+			"noTransactionsTitle": "No transactions found",
+			"transactionsTitle": "Transactions",
+			"transactionsPaginationUnit": "Transactions",
+			"noTransactionsSubtitle": "No recent transactions",
+			"noMetadataTitle": "No metadata",
+			"noMetadataHint": "Add custom metadata to store additional information about this wallet."
+		}
+	},
+	"organisms": {
+		"phaseForm": {
+			"phaseDuration": "Phase Duration",
+			"startDateRequired": "Start Date*",
+			"endDate": "End Date",
+			"foreverPlaceholder": "Forever",
+			"updatePhase": "Update Phase",
+			"savePhase": "Save Phase"
+		},
+		"phaseList": {
+			"title": "Subscription Phases",
+			"forever": "Forever",
+			"phaseIndex": "Phase {{index}}",
+			"couponSingle": "• {{count}} coupon",
+			"couponPlural": "• {{count}} coupons",
+			"lineItemCouponSingle": "• {{count}} line item coupon",
+			"lineItemCouponPlural": "• {{count}} line item coupons",
+			"editPhase": "Edit phase",
+			"deletePhase": "Delete phase",
+			"addPhase": "+ Add phase"
+		},
+		"priceOverrideSummary": {
+			"title": "Price Overrides Applied ({{count}})",
+			"chargeFallback": "Charge"
+		},
+		"subscriptionAction": {
+			"cancelTitle": "Cancel Subscription",
+			"cancelSubtitle": "This action cannot be undone. Choose cancellation and invoice behavior before continuing.",
+			"cancellationType": "Cancellation Type",
+			"cancelOn": "Cancel on",
+			"selectCancellationDate": "Select cancellation date",
+			"prorationBehavior": "Proration Behavior",
+			"invoiceBehaviorTitle": "Invoice behavior",
+			"generateInvoice": "Generate invoice",
+			"generateInvoiceDesc": "Enable to generate an invoice for usage till the cancellation date.",
+			"reasonOptional": "Reason (optional)",
+			"cancelReasonPlaceholder": "Why is this subscription being cancelled?",
+			"keepSubscription": "No, Keep It",
+			"cancelling": "Cancelling...",
+			"yesCancel": "Yes, Cancel",
+			"cancellationImmediate": "Immediate",
+			"cancellationEndOfPeriod": "End of period",
+			"cancellationScheduled": "Scheduled date",
+			"prorationNone": "None",
+			"prorationCreate": "Create prorations",
+			"activateTitle": "Activate Subscription",
+			"activateSubtitle": "Activating the subscription will start the billing cycle from the selected start date.",
+			"startDate": "Start Date",
+			"activating": "Activating...",
+			"activate": "Activate"
+		},
+		"subscriptionForm": {
+			"subscriptionDetails": "Subscription Details",
+			"planRequired": "Plan*",
+			"selectPlan": "Select plan",
+			"loadPlansError": "Failed to load plans",
+			"loadPlanDetailsError": "Failed to load plan details",
+			"loadingPlanDetails": "Loading plan details...",
+			"billingPeriodRequired": "Billing Period*",
+			"selectBillingPeriod": "Select billing period",
+			"currencyRequired": "Currency*",
+			"selectCurrency": "Select currency",
+			"subscriptionCycle": "Subscription Cycle",
+			"billingAnniversary": "Anniversary",
+			"billingCalendar": "Calendar",
+			"subscriptionStartRequired": "Subscription Start Date*",
+			"subscriptionEnd": "Subscription End Date",
+			"foreverPlaceholder": "Forever",
+			"billingDate": "Billing Date",
+			"selectBillingDate": "Select billing date",
+			"commitmentAmount": "Commitment Amount",
+			"commitmentAmountPlaceholder": "e.g. $100.00",
+			"commitmentPeriod": "Commitment Period",
+			"commitmentMonthly": "Monthly",
+			"commitmentQuarterly": "Quarterly",
+			"commitmentHalfYearly": "Half-Yearly",
+			"commitmentAnnual": "Annual",
+			"sameAsBillingPlaceholder": "Same as billing period",
+			"overageFactor": "Overage Factor",
+			"overageFactorPlaceholder": "e.g. 1.5",
+			"enableTrueUp": "Enable True-up fee",
+			"entitlements": "Entitlements",
+			"billingConfiguration": "Billing Configuration",
+			"paymentTerms": "Payment terms",
+			"selectPaymentTerms": "Select payment terms",
+			"billingCustomerLabel": "Billing customer",
+			"billingCustomerPlaceholder": "Self",
+			"searchBillingCustomer": "Search for billing customer...",
+			"freeTrial": "Free trial",
+			"aboutFreeTrialAria": "About free trial",
+			"freeTrialHelp": "Optional trial length for this subscription in days. Leave empty to use the plan default (or no trial if the plan defines none).",
+			"trialDaysAria": "Trial period days",
+			"trialDaysPlaceholder": "14",
+			"prorationBehavior": "Proration behavior",
+			"aboutProrationAria": "About proration",
+			"prorationHelp": "When enabled, mid-cycle subscription changes generate proration line items so invoices reflect time spent on each price.",
+			"prorationInline": "Create proration line items when the subscription changes mid-cycle.",
+			"autoInvoiceThreshold": "Auto invoice threshold",
+			"aboutAutoInvoiceAria": "About auto invoice threshold",
+			"autoInvoiceHelp": "Usage amount that can trigger an invoice before the period ends. Available when charges are usage-based; fixed-price subscription charges disable this field.",
+			"autoInvoicePlaceholder": "100.00",
+			"autoInvoiceAmountAria": "Auto invoice threshold amount"
+		},
+		"subscriptionPriceTable": {
+			"overridePrice": "Override Price",
+			"editOverride": "Edit Override",
+			"resetOverride": "Reset Override",
+			"configureCommitment": "Configure Commitment",
+			"editCommitment": "Edit Commitment",
+			"applyCoupon": "Apply Coupon",
+			"payAsYouGo": "pay as you go",
+			"chargeFallback": "Charge",
+			"charges": "Charges",
+			"showLess": "Show less",
+			"showMore": "Show {{count}} more",
+			"colCharge": "Charge",
+			"colBillingPeriod": "Billing Period",
+			"colQuantity": "Quantity",
+			"colPrice": "Price",
+			"editAdded": "Edit",
+			"deleteAdded": "Delete"
+		},
+		"subscriptionTable": {
+			"planModifiedAria": "Plan modified",
+			"hierarchyColumn": "Hierarchy",
+			"inheritedTitle": "Inherited subscription",
+			"inheritedBody": "This subscription mirrors charges from a parent subscription. Changes should be made on the parent.",
+			"parentTitle": "Parent subscription",
+			"parentBody": "Usage and charges from linked child subscriptions roll up into this subscription.",
+			"groupedInvoicingTitle": "Grouped invoicing",
+			"groupedInvoicingBody": "This subscription has its own charges; billing can be consolidated on the parent subscription invoice.",
+			"delegatedInvoicingTitle": "Delegated invoicing",
+			"delegatedInvoicingBody": "Charges accrue on this subscription, but invoices are issued to another customer (invoicing customer).",
+			"chipInherited": "Inherited",
+			"chipParent": "Parent",
+			"chipGrouped": "Grouped invoicing",
+			"chipDelegated": "Delegated invoicing"
+		},
+		"subscriptionWithOverrides": {
+			"chargesTitle": "Subscription Charges",
+			"resetAll": "Reset All",
+			"priceOverridesTitle": "Price Overrides Applied",
+			"reset": "Reset",
+			"creating": "Creating Subscription...",
+			"create": "Create Subscription",
+			"chargeFallback": "Charge",
+			"overrideSingle": "{{count}} override",
+			"overridePlural": "{{count}} overrides"
+		},
+		"usageTable": {
+			"currentMeterUsage": "Current Meter Usage"
+		}
+	},
+	"subscriptionEdit": {
+		"pageTitle": "Edit Subscription",
+		"pageHeading": "Edit Subscription",
+		"toast": {
+			"lineItemUpdated": "Line item updated successfully",
+			"lineItemUpdateFailed": "Failed to update line item",
+			"lineItemTerminated": "Line item terminated successfully",
+			"lineItemTerminateFailed": "Failed to terminate line item",
+			"chargeAdded": "Charge added successfully",
+			"chargeAddFailed": "Failed to add charge",
+			"subscriptionUpdated": "Subscription updated successfully",
+			"subscriptionUpdateFailed": "Failed to update subscription",
+			"creditGrantCreated": "Credit grant created successfully",
+			"creditGrantCreateFailed": "Failed to create credit grant",
+			"creditGrantDeleted": "Credit grant deleted successfully",
+			"creditGrantDeleteFailed": "Failed to delete credit grant",
+			"loadError": "Error loading subscription data"
+		}
+	}
+}

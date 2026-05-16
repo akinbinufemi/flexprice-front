@@ -10,8 +10,8 @@ import { RecordPaymentPayload } from '@/types/dto/Payment';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { LoaderCircleIcon } from 'lucide-react';
-import { ServerError } from '@/core/axios/types';
 import { CONNECTION_PROVIDER_TYPE } from '@/models/Connection';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	isOpen: boolean;
@@ -54,6 +54,7 @@ const RecordPaymentTopup: FC<Props> = ({
 	currency,
 	onSuccess,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [formData, setFormData] = useState<PaymentFormData>({
 		amount: max_amount || 0,
 		payment_method_type: '',
@@ -241,8 +242,8 @@ const RecordPaymentTopup: FC<Props> = ({
 
 			onSuccess?.(payment);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error?.error?.message || 'Failed to record payment. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to record payment. Please try again.');
 		},
 	});
 
@@ -274,8 +275,8 @@ const RecordPaymentTopup: FC<Props> = ({
 	const renderPaymentMethodFields = () => {
 		const descriptionField = (
 			<Textarea
-				label='Description'
-				placeholder='Add payment description or notes'
+				label={t('payments.description')}
+				placeholder={t('payments.descriptionPlaceholder')}
 				value={formData.description || ''}
 				onChange={(value) => setFormData({ ...formData, description: value })}
 				error={errors.description}
@@ -287,24 +288,24 @@ const RecordPaymentTopup: FC<Props> = ({
 				return (
 					<div className='space-y-3'>
 						<Input
-							label='Reference ID'
-							placeholder='Enter payment reference ID'
+							label={t('payments.referenceId')}
+							placeholder={t('payments.referenceIdPlaceholder')}
 							value={formData.reference_id || ''}
 							onChange={(value) => setFormData({ ...formData, reference_id: value })}
 							error={errors.reference_id}
-							description='Enter the reference number or payment details from your payment processor.'
+							description={t('payments.referenceIdHint')}
 						/>
 						<div className='space-y-2 w-full'>
 							<DatePicker
 								className='w-full'
-								label='Recorded At (Optional)'
+								label={t('payments.recordedAtOptional')}
 								popoverTriggerClassName='w-full'
 								date={formData.recorded_at}
 								setDate={(date) => setFormData({ ...formData, recorded_at: date })}
-								placeholder='Select when the payment was recorded (optional)'
+								placeholder={t('payments.recordedAtPlaceholder')}
 								maxDate={new Date()}
 							/>
-							<p className='text-xs text-muted-foreground'>Optionally select the date when this payment was actually received</p>
+							<p className='text-xs text-muted-foreground'>{t('payments.recordedReceivedHint')}</p>
 							{errors.recorded_at && <p className='text-xs text-red-500'>{errors.recorded_at}</p>}
 						</div>
 						{descriptionField}
@@ -314,19 +315,19 @@ const RecordPaymentTopup: FC<Props> = ({
 				return (
 					<div className='space-y-3'>
 						<Select
-							label='Wallet'
+							label={t('payments.wallet')}
 							placeholder={
 								filteredWallets.length === 0
-									? 'No post-paid wallets available with matching currency'
+									? t('payments.noPostPaidWallets')
 									: filteredWallets.length === 1
-										? 'Post-paid wallet auto-selected'
-										: 'Choose a post-paid wallet or auto-select'
+										? t('payments.walletAutoSelected')
+										: t('payments.chooseWallet')
 							}
 							options={selectOptions}
 							value={formData.wallet_id || (filteredWallets.length > 1 ? '__auto_select__' : '')}
 							onChange={(value) => setFormData({ ...formData, wallet_id: value === '__auto_select__' ? '' : value })}
 							error={errors.wallet_id}
-							description='Post-paid wallets are used to pay invoices during payment processing. Select a specific post-paid wallet or let the system choose from all available post-paid wallets.'
+							description={t('payments.walletHint')}
 							disabled={filteredWallets.length === 0}
 						/>
 						{descriptionField}
@@ -338,8 +339,7 @@ const RecordPaymentTopup: FC<Props> = ({
 					<div className='space-y-3'>
 						<div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
 							<div className='text-sm text-gray-600'>
-								<span className='font-medium'>{formData.payment_method_type}</span> payment processing is not available yet. Please use
-								offline payment method or credits instead.
+								{t('payments.paymentMethodUnavailable', { method: formData.payment_method_type })}
 							</div>
 						</div>
 					</div>
@@ -356,24 +356,24 @@ const RecordPaymentTopup: FC<Props> = ({
 			<Dialog
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
-				title='Record Payment'
+				title={t('payments.recordPayment')}
 				className='sm:max-w-[500px]'
 				titleClassName='text-lg font-semibold text-[#18181B]'>
 				<div className='space-y-4 py-4'>
 					<Input
-						label='Amount'
-						placeholder='0.00'
+						label={t('payments.amount')}
+						placeholder={t('payments.amountPlaceholder')}
 						variant='formatted-number'
 						inputPrefix={getCurrencySymbol(currency)}
 						value={formData.amount.toString()}
 						onChange={(value) => setFormData({ ...formData, amount: Number(value) || 0 })}
 						error={errors.amount}
-						description={max_amount ? `Amount Due:${getCurrencySymbol(currency)}${max_amount}` : undefined}
+						description={max_amount ? t('payments.amountDueInline', { amount: `${getCurrencySymbol(currency)}${max_amount}` }) : undefined}
 					/>
 
 					<Select
-						label='Payment Method'
-						placeholder='Select payment method'
+						label={t('payments.paymentMethod')}
+						placeholder={t('payments.selectPaymentMethod')}
 						options={paymentMethodOptions}
 						value={formData.payment_method_type}
 						onChange={(value) => {
@@ -392,8 +392,8 @@ const RecordPaymentTopup: FC<Props> = ({
 
 					{formData.payment_method_type === PAYMENT_METHOD_TYPE.PAYMENT_LINK && providerOptions.length > 0 && (
 						<Select
-							label='Payment Provider'
-							placeholder='Select payment provider'
+							label={t('payments.paymentProvider')}
+							placeholder={t('payments.selectPaymentProvider')}
 							options={providerOptions}
 							value={formData.selected_connection_id}
 							onChange={(connectionId) => setFormData({ ...formData, selected_connection_id: connectionId })}
@@ -404,12 +404,12 @@ const RecordPaymentTopup: FC<Props> = ({
 					{formData.payment_method_type && renderPaymentMethodFields()}
 
 					<div className='pt-2 flex justify-end'>
-						<Button variant='outline' onClick={() => onOpenChange(false)} className='mr-2'>
-							Cancel
+						<Button variant='outline' onClick={() => onOpenChange(false)} className='me-2'>
+							{t('common:actions.cancel')}
 						</Button>
 						<Button onClick={handleSubmit} disabled={isPending || !formData.payment_method_type} isLoading={isPending}>
-							{isPending && <LoaderCircleIcon className='w-4 h-4 animate-spin mr-2' />}
-							Record
+							{isPending && <LoaderCircleIcon className='w-4 h-4 animate-spin me-2' />}
+							{t('payments.recordPaymentButton')}
 						</Button>
 					</div>
 				</div>

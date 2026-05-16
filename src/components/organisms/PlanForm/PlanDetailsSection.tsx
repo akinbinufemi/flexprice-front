@@ -1,6 +1,7 @@
 import { Input, Spacer, Textarea } from '@/components/atoms';
 import { Plan } from '@/models/Plan';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	plan: Partial<Plan>;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const PlanDetailsSection = ({ plan, setPlanField, errors }: Props) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	// Track if user manually edited the lookup key to stop auto-generation
 	const [isLookupKeyManuallyEdited, setIsLookupKeyManuallyEdited] = useState(false);
 
@@ -20,9 +22,9 @@ const PlanDetailsSection = ({ plan, setPlanField, errors }: Props) => {
 	return (
 		<div className='p-6  rounded-xl border border-[#E4E4E7]'>
 			<Input
-				placeholder='Enter a name for the plan'
-				description={'A descriptive name for this pricing plan.'}
-				label='Plan Name'
+				placeholder={t('catalog:plans.drawer.namePlaceholder')}
+				description={t('catalog:plans.drawer.nameHelp')}
+				label={t('catalog:plans.drawer.planName')}
 				value={plan.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -36,7 +38,7 @@ const PlanDetailsSection = ({ plan, setPlanField, errors }: Props) => {
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Lookup Key'
+				label={t('catalog:shared.lookupKey')}
 				error={errors.lookup_key}
 				onChange={(e) => {
 					setPlanField('lookup_key', e);
@@ -44,17 +46,17 @@ const PlanDetailsSection = ({ plan, setPlanField, errors }: Props) => {
 					setIsLookupKeyManuallyEdited(true);
 				}}
 				value={plan.lookup_key}
-				placeholder='Enter a slug for the plan'
-				description={'A system identifier used for API calls and integrations.'}
+				placeholder={t('catalog:plans.drawer.lookupPlaceholder')}
+				description={t('catalog:shared.lookupKeyDescription')}
 			/>
 			<Spacer height={'20px'} />
 			<Textarea
 				value={plan.description}
 				onChange={(e) => setPlanField('description', e)}
 				className='min-h-[100px]'
-				placeholder='Enter description'
-				label='Description'
-				description='Helps your team to understand the purpose of this plan.'
+				placeholder={t('catalog:shared.enterDescription')}
+				label={t('catalog:shared.description')}
+				description={t('catalog:plans.drawer.purposeDescription')}
 			/>
 		</div>
 	);

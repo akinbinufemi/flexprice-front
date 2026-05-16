@@ -2,7 +2,8 @@ import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
 import { ApiDocsContent, CouponDrawer } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
-import GUIDES from '@/constants/guides';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import CouponApi from '@/api/CouponApi';
 import { useState, useMemo } from 'react';
 import {
@@ -20,66 +21,9 @@ import { COUPON_TYPE } from '@/types/common/Coupon';
 import { Coupon } from '@/models/Coupon';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-	{
-		field: 'type',
-		label: 'Type',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.ARRAY],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: COUPON_TYPE.FIXED, label: 'Fixed Amount' },
-			{ value: COUPON_TYPE.PERCENTAGE, label: 'Percentage' },
-		],
-	},
-];
+import { useTranslation } from 'react-i18next';
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -98,18 +42,87 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
 const CouponsPage = () => {
+	const { t } = useTranslation('catalog');
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 	const navigate = useNavigate();
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('coupons.listPage.sortLabels.name'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'created_at',
+				label: t('coupons.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('coupons.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('coupons.listPage.filterLabels.name'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'created_at',
+				label: t('coupons.listPage.filterLabels.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'status',
+				label: t('coupons.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('coupons.listPage.filterStatus.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('coupons.listPage.filterStatus.inactive') },
+				],
+			},
+			{
+				field: 'type',
+				label: t('coupons.listPage.filterLabels.type'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.ARRAY],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: COUPON_TYPE.FIXED, label: t('coupons.drawer.fixedAmount') },
+					{ value: COUPON_TYPE.PERCENTAGE, label: t('coupons.drawer.percentage') },
+				],
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('coupons.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
 
 	const handleCreateCoupon = () => {
 		setSelectedCoupon(null);
@@ -125,17 +138,17 @@ const CouponsPage = () => {
 		() => [
 			{
 				fieldName: 'name',
-				title: 'Name',
+				title: t('coupons.table.name'),
 			},
 			{
-				title: 'Type',
+				title: t('coupons.table.type'),
 				render: (row) => {
-					const label = row.type === COUPON_TYPE.FIXED ? 'Fixed Amount' : 'Percentage';
+					const label = row.type === COUPON_TYPE.FIXED ? t('coupons.drawer.fixedAmount') : t('coupons.drawer.percentage');
 					return <Chip variant='default' label={label} />;
 				},
 			},
 			{
-				title: 'Discount',
+				title: t('coupons.table.discount'),
 				render: (row) => {
 					if (row.type === COUPON_TYPE.FIXED) {
 						return row.amount_off ? `${getCurrencySymbol(row.currency)} ${row.amount_off}` : '-';
@@ -145,7 +158,7 @@ const CouponsPage = () => {
 				},
 			},
 			{
-				title: 'Redemptions',
+				title: t('coupons.table.redemptions'),
 				render: (row) => {
 					const max = row.max_redemptions || '∞';
 					const current = row.total_redemptions;
@@ -153,14 +166,15 @@ const CouponsPage = () => {
 				},
 			},
 			{
-				title: 'Status',
+				title: t('coupons.table.status'),
 				render: (row) => {
-					const label = formatChips(row.status);
-					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+					const isActive = row.status === ENTITY_STATUS.PUBLISHED;
+					const label = isActive ? t('coupons.table.statusActive') : t('coupons.table.statusInactive');
+					return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
-				title: 'Updated at',
+				title: t('coupons.table.updatedAt'),
 				render: (row) => {
 					return formatDate(row.updated_at);
 				},
@@ -172,7 +186,7 @@ const CouponsPage = () => {
 						id={row.id}
 						deleteMutationFn={(id) => CouponApi.deleteCoupon(id)}
 						refetchQueryKey='fetchCoupons'
-						entityName='Coupon'
+						entityName={t('coupons.table.entityName')}
 						edit={{
 							path: `${RouteNames.couponDetails}/${row.id}`,
 							onClick: () => handleEdit(row),
@@ -184,19 +198,19 @@ const CouponsPage = () => {
 				),
 			},
 		],
-		[],
+		[t],
 	);
 
 	return (
 		<>
 			<Page
-				heading='Coupons'
+				heading={t('coupons.listPage.title')}
 				headingCTA={
 					<div className='flex justify-between items-center gap-2'>
 						<AddButton onClick={handleCreateCoupon} />
 					</div>
 				}>
-				<ApiDocsContent tags={['Coupons']} />
+				<ApiDocsContent tags={API_DOCS_TAGS.Coupons} />
 				<QueryableDataArea<Coupon>
 					queryConfig={{
 						filterOptions,
@@ -225,15 +239,15 @@ const CouponsPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Coupons',
+						unit: t('coupons.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						heading: 'Coupons',
-						description: 'Create your first coupon to offer discounts to customers.',
-						buttonLabel: 'Create Coupon',
+						heading: t('coupons.listPage.emptyState.heading'),
+						description: t('coupons.listPage.emptyState.description'),
+						buttonLabel: t('coupons.listPage.emptyState.createButton'),
 						buttonAction: handleCreateCoupon,
-						tags: ['Coupons'],
-						tutorials: GUIDES.coupons.tutorials,
+						tags: API_DOCS_TAGS.Coupons,
+						tutorials: guides.coupons.tutorials,
 					}}
 				/>
 			</Page>

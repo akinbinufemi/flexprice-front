@@ -5,6 +5,7 @@ import { formatAmount } from '@/components/atoms/Input/Input';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { Check } from 'lucide-react';
 import { Card } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	overrides: SubscriptionLineItemOverrideRequest[];
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const PriceOverrideSummary: FC<Props> = ({ overrides, prices, className }) => {
+	const { t } = useTranslation('customers');
 	if (overrides.length === 0) return null;
 
 	const getDisplaySymbol = (price: Price): string => {
@@ -90,7 +92,7 @@ const PriceOverrideSummary: FC<Props> = ({ overrides, prices, className }) => {
 			<div className='flex items-start gap-3'>
 				<Check className='w-5 h-5  mt-0.5 flex-shrink-0' />
 				<div className='flex-1 min-w-0'>
-					<h4 className='font-medium mb-3'>Price Overrides Applied ({overrides.length})</h4>
+					<h4 className='font-medium mb-3'>{t('organisms.priceOverrideSummary.title', { count: overrides.length })}</h4>
 					<div className='space-y-3'>
 						{overrides.map((override) => {
 							const price = prices.find((p) => p.id === override.price_id);
@@ -100,8 +102,10 @@ const PriceOverrideSummary: FC<Props> = ({ overrides, prices, className }) => {
 
 							return (
 								<div key={override.price_id} className='flex items-center justify-between text-sm text-muted-foreground'>
-									<span className='truncate'>{price.meter?.name || price.description || 'Charge'}</span>
-									<span className='ml-2 flex-shrink-0 text-xs'>{overrideDescription}</span>
+									<span className='truncate'>
+										{price.meter?.name || price.description || t('organisms.priceOverrideSummary.chargeFallback')}
+									</span>
+									<span className='ms-2 flex-shrink-0 text-xs'>{overrideDescription}</span>
 								</div>
 							);
 						})}

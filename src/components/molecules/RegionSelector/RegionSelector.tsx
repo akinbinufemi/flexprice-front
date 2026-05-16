@@ -1,103 +1,80 @@
+// src/components/molecules/RegionSelector/RegionSelector.tsx
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Tooltip from '@/components/atoms/Tooltip/Tooltip';
 import RegionInfoDialog from './RegionInfoDialog';
-import { Region } from '@/types/enums/Region';
-import { detectCurrentRegion, switchRegion, getDashboardUrls } from '@/utils/region/regionUtils';
-import { IN, US } from 'country-flag-icons/react/3x2';
+import { RegionOption } from '@/config/authTemplates';
+import { detectCurrentRegion, switchRegion } from '@/utils/region/regionUtils';
+import { getFlagComponent } from '@/utils/region/flagMap';
 import { Info } from 'lucide-react';
+import { config } from '@/config/config';
 
-const RegionSelector: React.FC = () => {
-	const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
+const RegionSelectorImpl: React.FC = () => {
+	const { t } = useTranslation('settings');
+	const { regions } = config.regions;
+	const [selectedRegion, setSelectedRegion] = useState<RegionOption | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [isDisabled, setIsDisabled] = useState(false);
 
-	// Detect current region on mount
 	useEffect(() => {
-		const currentRegion = detectCurrentRegion();
-		setSelectedRegion(currentRegion);
+		setSelectedRegion(detectCurrentRegion(regions));
+	}, [regions]);
 
-		// Check if both URLs are configured
-		const urls = getDashboardUrls();
-		if (!urls.india && !urls.us) {
-			setIsDisabled(true);
-		}
-	}, []);
-
-	const handleRegionChange = (value: string) => {
-		const newRegion = value as Region;
-		setSelectedRegion(newRegion);
-		switchRegion(newRegion);
+	const handleRegionChange = (key: string) => {
+		const region = regions.find((r) => r.key === key);
+		if (!region) return;
+		setSelectedRegion(region);
+		switchRegion(region);
 	};
-
-	const regionOptions = [
-		{ value: Region.INDIA, label: 'India', icon: IN },
-		{ value: Region.US, label: 'United States', icon: US },
-	];
-
-	// Filter options based on available URLs
-	const availableOptions = regionOptions.filter((option) => {
-		const urls = getDashboardUrls();
-		if (option.value === Region.INDIA) return !!urls.india;
-		if (option.value === Region.US) return !!urls.us;
-		return false;
-	});
 
 	return (
 		<div className='space-y-2'>
-			{/* Label with tooltip */}
 			<div className='flex items-center gap-1'>
-				<label className='block text-sm font-medium text-gray-700'>Data region</label>
-				<Tooltip content='Click to learn more about regions'>
-					<button
-						type='button'
-						onClick={() => setIsDialogOpen(true)}
-						className='text-sm text-[#0E5AC9] hover:text-[#0E5AC9] hover:underline cursor-pointer'>
+				<label className='block text-sm font-medium text-gray-700'>{t('region.dataRegion')}</label>
+				<Tooltip content={t('region.tooltipLearnMore')}>
+					<button type='button' onClick={() => setIsDialogOpen(true)} className='text-sm text-[#0E5AC9] cursor-pointer'>
 						<Info size={16} className='text-grey' />
 					</button>
 				</Tooltip>
 			</div>
-
-			{/* Select dropdown */}
-			<Select value={selectedRegion || undefined} onValueChange={handleRegionChange} disabled={isDisabled || availableOptions.length === 0}>
+			<Select value={selectedRegion?.key ?? ''} onValueChange={handleRegionChange} disabled={regions.length === 0}>
 				<SelectTrigger className='w-full'>
 					{selectedRegion ? (
 						(() => {
-							const selectedOption = regionOptions.find((opt) => opt.value === selectedRegion);
-							const IconComponent = selectedOption?.icon;
-							return selectedOption && IconComponent ? (
+							const FlagIcon = getFlagComponent(selectedRegion.countryCode);
+							return (
 								<div className='flex items-center gap-2'>
-									<IconComponent className='h-4 w-5' />
-									<span>{selectedOption.label}</span>
+									{FlagIcon && <FlagIcon className='h-4 w-5' />}
+									<span>{selectedRegion.label}</span>
 								</div>
-							) : (
-								<SelectValue placeholder='Select a region' />
 							);
 						})()
 					) : (
-						<SelectValue placeholder='Select a region' />
+						<SelectValue placeholder={t('region.selectPlaceholder')} />
 					)}
 				</SelectTrigger>
 				<SelectContent>
-					{availableOptions.map((option) => {
-						const fullOption = regionOptions.find((opt) => opt.value === option.value);
-						const IconComponent = fullOption?.icon;
+					{regions.map((region) => {
+						const FlagIcon = getFlagComponent(region.countryCode);
 						return (
-							<SelectItem key={option.value} value={option.value}>
+							<SelectItem key={region.key} value={region.key}>
 								<div className='flex items-center gap-2'>
-									{IconComponent && <IconComponent className='h-4 w-5' />}
-									<span>{option.label}</span>
+									{FlagIcon && <FlagIcon className='h-4 w-5' />}
+									<span>{region.label}</span>
 								</div>
 							</SelectItem>
 						);
 					})}
 				</SelectContent>
 			</Select>
-
-			{/* Region Info Dialog */}
 			<RegionInfoDialog isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />
 		</div>
 	);
+};
+
+const RegionSelector: React.FC = () => {
+	if (!config.regions.enabled) return null;
+	return <RegionSelectorImpl />;
 };
 
 export default RegionSelector;

@@ -1,5 +1,6 @@
 import { Button, Input, Select, SelectOption, Sheet, Spacer } from '@/components/atoms';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Country, State, City, IState } from 'country-state-city';
@@ -75,30 +76,8 @@ interface Props {
 	trigger?: React.ReactNode;
 }
 
-// Validation Schema
-const tenantSchema = z.object({
-	name: z.string().min(1, 'Organization name is required'),
-	billing_details: z
-		.object({
-			address: z
-				.object({
-					address_line1: z.string().optional(),
-					address_line2: z.string().optional(),
-					address_city: z.string().optional(),
-					address_state: z.string().optional(),
-					address_postal_code: z.string().optional(),
-					address_country: z.string().optional(),
-				})
-				.optional(),
-			email: z.string().email().optional(),
-			help_email: z.string().email().optional(),
-			phone: z.string().optional(),
-		})
-		.optional(),
-});
-
 // Custom Hook for Form Management
-const useUpdateTenantForm = (initialData?: User) => {
+const useUpdateTenantForm = (tenantSchema: z.ZodTypeAny, initialData?: User) => {
 	const [formData, setFormData] = useState<FormState>({
 		billing_details: {
 			address: {
@@ -221,11 +200,40 @@ const getLocationOptions = (
 
 // Main Component
 const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) => {
+	const { t } = useTranslation('settings');
 	const [internalOpen, setInternalOpen] = useState(false);
 	const isControlled = open !== undefined && onOpenChange !== undefined;
 	const currentOpen = isControlled ? open : internalOpen;
 
-	const { formData, errors, activeState, setActiveState, handleChange, validateForm, preparePayload } = useUpdateTenantForm(data);
+	const tenantSchema = useMemo(
+		() =>
+			z.object({
+				name: z.string().min(1, t('tenant.validation.organizationNameRequired')),
+				billing_details: z
+					.object({
+						address: z
+							.object({
+								address_line1: z.string().optional(),
+								address_line2: z.string().optional(),
+								address_city: z.string().optional(),
+								address_state: z.string().optional(),
+								address_postal_code: z.string().optional(),
+								address_country: z.string().optional(),
+							})
+							.optional(),
+						email: z.string().email().optional(),
+						help_email: z.string().email().optional(),
+						phone: z.string().optional(),
+					})
+					.optional(),
+			}),
+		[t],
+	);
+
+	const { formData, errors, activeState, setActiveState, handleChange, validateForm, preparePayload } = useUpdateTenantForm(
+		tenantSchema,
+		data,
+	);
 
 	const { countriesOptions, statesOptions, citiesOptions } = getLocationOptions(
 		formData.billing_details?.address?.address_country,
@@ -234,7 +242,7 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 
 	const { mutate: updateTenant, isPending } = useMutation({
 		mutationFn: async () => {
-			if (!data?.tenant?.id) throw new Error('Tenant ID is required');
+			if (!data?.tenant?.id) throw new Error(t('tenant.errors.tenantIdRequired'));
 			const apiPayload = preparePayload();
 
 			// Convert the API payload to the format expected by UserApi.updateUser
@@ -259,12 +267,12 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 		},
 		onSuccess: async () => {
 			await refetchQueries(['user']);
-			toast.success('Tenant details updated successfully');
+			toast.success(t('tenant.toast.updated'));
 			toggleOpen();
 		},
-		onError: (error: ServerError) => {
+		onError: (error: Error) => {
 			logger.error(error);
-			toast.error(error.error.message || 'Failed to update tenant details. Please try again.');
+			toast.error(error.message || t('tenant.errors.updateFailed'));
 		},
 	});
 
@@ -289,28 +297,30 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 			<Sheet
 				isOpen={currentOpen}
 				onOpenChange={toggleOpen}
-				title='Update Tenant Details'
-				description='Update your billing address details.'
+				title={t('tenant.drawer.title')}
+				description={t('tenant.drawer.description')}
 				trigger={trigger}>
 				<div className='space-y-4'>
 					<Spacer className='!h-4' />
 					<Input
-						label='Organization Name'
-						placeholder='Enter your organization name'
+						label={t('tenant.drawer.organizationName')}
+						placeholder={t('tenant.drawer.organizationNamePlaceholder')}
 						value={formData.name}
 						onChange={(e) => handleChange('name', e)}
 						error={errors['name']}
 					/>
 					<Spacer className='!h-4' />
 					<div className='relative card !p-4'>
-						<span className='absolute -top-4 left-2 text-[#18181B] text-sm bg-white font-medium px-2 py-1'>Billing Details</span>
+						<span className='absolute -top-4 left-2 text-[#18181B] text-sm bg-white font-medium px-2 py-1'>
+							{t('tenant.drawer.billingSection')}
+						</span>
 						<div className='space-y-4'>
 							<Select
-								label='Country'
-								placeholder='Select Country'
+								label={t('tenant.drawer.country')}
+								placeholder={t('tenant.drawer.selectCountry')}
 								options={countriesOptions}
 								value={formData.billing_details?.address?.address_country}
-								noOptionsText='No countries Available'
+								noOptionsText={t('tenant.drawer.noCountries')}
 								onChange={(e) => {
 									handleChange('billing_details.address.address_country', e);
 									handleChange('billing_details.address.address_state', '');
@@ -320,15 +330,15 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 								error={errors['billing_details.address.address_country']}
 							/>
 							<Input
-								label='Address Line 1'
-								placeholder='Street address, P.O. box, company name, c/o'
+								label={t('tenant.drawer.addressLine1')}
+								placeholder={t('tenant.drawer.addressLine1Placeholder')}
 								value={formData.billing_details?.address?.address_line1}
 								onChange={(e) => handleChange('billing_details.address.address_line1', e)}
 								error={errors['billing_details.address.address_line1']}
 							/>
 							<Input
-								label='Address Line 2'
-								placeholder='Apartment, suite, unit, building, floor, etc.'
+								label={t('tenant.drawer.addressLine2')}
+								placeholder={t('tenant.drawer.addressLine2Placeholder')}
 								value={formData.billing_details?.address?.address_line2}
 								onChange={(e) => handleChange('billing_details.address.address_line2', e)}
 								error={errors['billing_details.address.address_line2']}
@@ -336,8 +346,8 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 
 							<div className='grid grid-cols-2 gap-4'>
 								<Select
-									label='State'
-									placeholder='Select State'
+									label={t('tenant.drawer.state')}
+									placeholder={t('tenant.drawer.selectState')}
 									options={statesOptions}
 									value={formData.billing_details?.address?.address_state}
 									onChange={(e) => {
@@ -348,23 +358,23 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 											: undefined;
 										setActiveState(selectedState || undefined);
 									}}
-									noOptionsText='No states Available'
+									noOptionsText={t('tenant.drawer.noStates')}
 									error={errors['billing_details.address.address_state']}
 								/>
 								<Select
-									label='City'
+									label={t('tenant.drawer.city')}
 									options={citiesOptions}
 									value={formData.billing_details?.address?.address_city}
-									placeholder='Select City'
-									noOptionsText='No cities Available'
+									placeholder={t('tenant.drawer.selectCity')}
+									noOptionsText={t('tenant.drawer.noCities')}
 									onChange={(e) => handleChange('billing_details.address.address_city', e)}
 									error={errors['billing_details.address.address_city']}
 								/>
 							</div>
 
 							<Input
-								label='Postal Code'
-								placeholder='Enter Postal Code'
+								label={t('tenant.drawer.postalCode')}
+								placeholder={t('tenant.drawer.postalCodePlaceholder')}
 								value={formData.billing_details?.address?.address_postal_code}
 								onChange={(e) => handleChange('billing_details.address.address_postal_code', e)}
 								error={errors['billing_details.address.address_postal_code']}
@@ -374,7 +384,7 @@ const UpdateTenantDrawer: FC<Props> = ({ data, onOpenChange, open, trigger }) =>
 
 					<Spacer className='!h-4' />
 					<Button isLoading={isPending} disabled={isPending || isCtaDisabled} onClick={handleSubmit}>
-						{isPending ? 'Saving...' : 'Save Changes'}
+						{isPending ? t('tenant.drawer.saving') : t('tenant.drawer.saveChanges')}
 					</Button>
 				</div>
 			</Sheet>

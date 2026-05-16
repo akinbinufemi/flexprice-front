@@ -1,6 +1,7 @@
 // src/components/multi-select.tsx
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { CheckIcon, XCircle, ChevronDown, XIcon, WandSparkles } from 'lucide-react';
 
@@ -124,7 +125,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 			onValueChange,
 			variant,
 			defaultValue = [],
-			placeholder = 'Select options',
+			placeholder: placeholderProp,
 			animation = 0,
 			maxCount = 3,
 			modalPopover = false,
@@ -135,6 +136,8 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 		},
 		ref,
 	) => {
+		const { t } = useTranslation('common');
+		const placeholder = placeholderProp ?? t('selectUi.selectOptions');
 		const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultValue);
 		const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 		const [isAnimating, setIsAnimating] = React.useState(false);
@@ -202,7 +205,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 						{customDisplay ? (
 							customDisplay(selectedValues.length) || (
 								<div className='flex items-center justify-between w-full'>
-									<span className='text-muted-foreground truncate pl-1 font-normal'>{placeholder}</span>
+									<span className='text-muted-foreground truncate ps-1 font-normal'>{placeholder}</span>
 									<ChevronDown className='h-4 w-4 text-muted-foreground shrink-0' />
 								</div>
 							)
@@ -258,7 +261,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 								</div>
 
 								{/* Controls container - minimal spacing */}
-								<div className='flex items-center gap-1 ml-2 shrink-0'>
+								<div className='flex items-center gap-1 ms-2 shrink-0'>
 									<XIcon
 										className='h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive'
 										onClick={(event) => {
@@ -272,7 +275,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 							</div>
 						) : (
 							<div className='flex items-center justify-between w-full'>
-								<span className='text-muted-foreground truncate pl-1 font-normal'>{placeholder}</span>
+								<span className='text-muted-foreground truncate ps-1 font-normal'>{placeholder}</span>
 								<ChevronDown className='h-4 w-4 text-muted-foreground shrink-0' />
 							</div>
 						)}
@@ -280,21 +283,21 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 				</PopoverTrigger>
 				<PopoverContent className='w-auto p-0' align='start' onEscapeKeyDown={() => setIsPopoverOpen(false)}>
 					<Command>
-						<CommandInput placeholder='Search...' onKeyDown={handleInputKeyDown} />
+						<CommandInput placeholder={t('search.placeholderShort')} onKeyDown={handleInputKeyDown} />
 						<CommandList>
-							<CommandEmpty>No results found.</CommandEmpty>
+							<CommandEmpty>{t('selectUi.noResultsFound')}</CommandEmpty>
 							<CommandGroup>
 								<CommandItem key='all' onSelect={toggleAll} className='cursor-pointer'>
 									<div
 										className={cn(
-											'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+											'me-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
 											selectedValues.length === options.filter((o) => !o.disabled).length
 												? 'bg-primary text-primary-foreground'
 												: 'opacity-50 [&_svg]:invisible',
 										)}>
 										<CheckIcon className='h-4 w-4' />
 									</div>
-									<span>(Select All)</span>
+									<span>{t('multiSelectUi.selectAll')}</span>
 								</CommandItem>
 								{options.map((option) => {
 									const isSelected = selectedValues.includes(option.value);
@@ -307,12 +310,12 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 											disabled={isDisabled}>
 											<div
 												className={cn(
-													'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+													'me-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
 													isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible',
 												)}>
 												<CheckIcon className='h-4 w-4' />
 											</div>
-											{option.icon && <option.icon className='mr-2 h-4 w-4 text-muted-foreground' />}
+											{option.icon && <option.icon className='me-2 h-4 w-4 text-muted-foreground' />}
 											<span>{option.label}</span>
 										</CommandItem>
 									);
@@ -324,13 +327,13 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 									{selectedValues.length > 0 && (
 										<>
 											<CommandItem onSelect={handleClear} className='flex-1 justify-center cursor-pointer'>
-												Clear
+												{t('multiSelectUi.clear')}
 											</CommandItem>
 											<Separator orientation='vertical' className='flex min-h-6 h-full' />
 										</>
 									)}
 									<CommandItem onSelect={() => setIsPopoverOpen(false)} className='flex-1 justify-center cursor-pointer max-w-full'>
-										Close
+										{t('multiSelectUi.close')}
 									</CommandItem>
 								</div>
 							</CommandGroup>

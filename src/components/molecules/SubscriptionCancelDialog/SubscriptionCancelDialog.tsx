@@ -1,7 +1,6 @@
 import SubscriptionApi from '@/api/SubscriptionApi';
 import { Button, DatePicker, FormHeader, Input, Label, Modal, Select, Toggle } from '@/components/atoms';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
-import { ServerError } from '@/core/axios/types';
 import {
 	SUBSCRIPTION_CANCELLATION_TYPE,
 	SUBSCRIPTION_CANCEL_IMMEDIATELY_INVOICE_POLICY,
@@ -10,6 +9,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	isOpen: boolean;
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetchQueryKeys = [] }: Props) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [cancellationType, setCancellationType] = useState<SUBSCRIPTION_CANCELLATION_TYPE>(SUBSCRIPTION_CANCELLATION_TYPE.IMMEDIATE);
 	const [prorationBehavior, setProrationBehavior] = useState<SUBSCRIPTION_PRORATION_BEHAVIOR>(SUBSCRIPTION_PRORATION_BEHAVIOR.NONE);
 	const [generateInvoice, setGenerateInvoice] = useState(false);
@@ -61,13 +62,13 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 		onSuccess: async () => {
 			onOpenChange(false);
 			resetState();
-			toast.success('Subscription cancelled successfully');
+			toast.success(t('subscriptions.cancelDialog.toastSuccess'));
 			await Promise.all(refetchQueryKeys.map((key) => refetchQueries(key)));
 		},
-		onError: (error: ServerError) => {
+		onError: (error: Error) => {
 			onOpenChange(false);
 			resetState();
-			toast.error(error.error.message || 'Failed to cancel subscription');
+			toast.error(error.message || t('subscriptions.cancelDialog.toastError'));
 		},
 	});
 
@@ -83,34 +84,34 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 			className='card bg-white w-[620px] max-w-[90vw]'>
 			<div className='space-y-5'>
 				<FormHeader
-					title='Cancel Subscription'
+					title={t('subscriptions.cancelSubscription')}
 					variant='sub-header'
-					subtitle='This action cannot be undone. Review cancellation settings before continuing.'
+					subtitle={t('subscriptions.cancelDialog.subtitle')}
 					titleClassName='!mb-1'
 					subtitleClassName='!text-sm !max-w-[440px] !leading-6'
 				/>
 
 				<div className='rounded-md border border-border p-4 space-y-4'>
-					<p className='text-sm font-medium text-foreground'>Cancellation details</p>
+					<p className='text-sm font-medium text-foreground'>{t('subscriptions.cancelDialog.cancellationDetails')}</p>
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<Select
-							label='Cancellation type'
+							label={t('subscriptions.cancellationType')}
 							value={cancellationType}
 							options={[
 								{
-									label: 'Immediate',
+									label: t('subscriptions.cancelDialog.immediateLabel'),
 									value: SUBSCRIPTION_CANCELLATION_TYPE.IMMEDIATE,
-									description: 'Cancel now and apply the selected proration and invoice policy.',
+									description: t('subscriptions.cancelDialog.immediateDescription'),
 								},
 								{
-									label: 'End of period',
+									label: t('subscriptions.cancelDialog.endOfPeriodLabel'),
 									value: SUBSCRIPTION_CANCELLATION_TYPE.END_OF_PERIOD,
-									description: 'Keep service active until period end, then cancel automatically.',
+									description: t('subscriptions.cancelDialog.endOfPeriodDescription'),
 								},
 								{
-									label: 'Scheduled date',
+									label: t('subscriptions.cancelDialog.scheduledDateLabel'),
 									value: SUBSCRIPTION_CANCELLATION_TYPE.SCHEDULED_DATE,
-									description: 'Cancel on a specific future date you choose.',
+									description: t('subscriptions.cancelDialog.scheduledDateDescription'),
 								},
 							]}
 							onChange={(value) => {
@@ -122,18 +123,18 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 							}}
 						/>
 						<Select
-							label='Proration behavior'
+							label={t('subscriptions.prorationBehavior')}
 							value={prorationBehavior}
 							options={[
 								{
-									label: 'None',
+									label: t('subscriptions.cancelDialog.prorationNoneLabel'),
 									value: SUBSCRIPTION_PRORATION_BEHAVIOR.NONE,
-									description: 'No proration adjustments are created.',
+									description: t('subscriptions.cancelDialog.prorationNoneDescription'),
 								},
 								{
-									label: 'Create prorations',
+									label: t('subscriptions.cancelDialog.prorationCreateLabel'),
 									value: SUBSCRIPTION_PRORATION_BEHAVIOR.CREATE_PRORATIONS,
-									description: 'Create proration credits or charges based on timing.',
+									description: t('subscriptions.cancelDialog.prorationCreateDescription'),
 								},
 							]}
 							onChange={(value) => setProrationBehavior(value as SUBSCRIPTION_PRORATION_BEHAVIOR)}
@@ -141,11 +142,11 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 					</div>
 					{cancellationType === SUBSCRIPTION_CANCELLATION_TYPE.SCHEDULED_DATE && (
 						<div className='space-y-1 pt-1 w-full'>
-							<Label label='Cancel on' />
+							<Label label={t('subscriptions.cancelOn')} />
 							<DatePicker
 								date={cancelAtDate}
 								setDate={setCancelAtDate}
-								placeholder='Select cancellation date'
+								placeholder={t('subscriptions.selectCancellationDate')}
 								minDate={minCancelAtDate}
 								className='!w-full'
 								popoverClassName='!w-full'
@@ -157,10 +158,10 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 				</div>
 
 				<div className='rounded-md border border-border p-4 space-y-3'>
-					<p className='text-sm font-medium text-foreground'>Invoice behavior</p>
+					<p className='text-sm font-medium text-foreground'>{t('subscriptions.cancelDialog.invoiceBehavior')}</p>
 					<Toggle
-						label='Generate invoice'
-						description='Enabled: send generate_invoice. Disabled: send skip.'
+						label={t('subscriptions.generateInvoice')}
+						description={t('subscriptions.generateInvoiceHint')}
 						checked={generateInvoice}
 						onChange={setGenerateInvoice}
 					/>
@@ -168,23 +169,23 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 
 				<div className='space-y-1'>
 					<Input
-						label='Reason (optional)'
+						label={t('subscriptions.reasonOptional')}
 						value={reason}
 						onChange={setReason}
-						description='This reason is sent only when provided.'
-						placeholder='Add an internal note for this cancellation'
+						description={t('subscriptions.reasonHint')}
+						placeholder={t('subscriptions.internalNote')}
 					/>
 				</div>
 
 				<div className='flex justify-end gap-3 pt-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
-						Keep subscription
+						{t('subscriptions.cancelDialog.keepSubscription')}
 					</Button>
 					<Button
 						variant='destructive'
 						onClick={() => cancelSubscription()}
 						disabled={isPending || !subscriptionId || scheduledCancelInvalid}>
-						{isPending ? 'Cancelling...' : 'Cancel subscription'}
+						{isPending ? t('subscriptions.cancelDialog.cancelling') : t('subscriptions.cancelDialog.confirmCancel')}
 					</Button>
 				</div>
 			</div>

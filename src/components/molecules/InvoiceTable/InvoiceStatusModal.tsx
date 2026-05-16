@@ -7,8 +7,8 @@ import { FC, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
 import { Trash2 } from 'lucide-react';
-import { ServerError } from '@/core/axios/types';
 import { PAYMENT_STATUS } from '@/constants';
+import { useTranslation } from 'react-i18next';
 
 /** Payment statuses that allow voiding an invoice (matches backend allowedPaymentStatuses) */
 const ALLOWED_PAYMENT_STATUSES_FOR_VOID = [
@@ -40,6 +40,7 @@ interface InvoiceStatusProps {
  */
 
 const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invoice }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const statusOptions: CheckboxRadioGroupItem[] = [
 		{
 			label: 'Void',
@@ -93,8 +94,8 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 			await refetchQueries(['fetchInvoice']);
 			await refetchQueries(['invoice']);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error?.error.message || 'Failed to update invoice status');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to update invoice status');
 		},
 	});
 
@@ -137,9 +138,9 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 		<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
 			<div className='card bg-white max-w-lg'>
 				<FormHeader
-					title='Update Invoice Status'
+					title={t('invoices.details.updateInvoiceStatus')}
 					variant='sub-header'
-					subtitle='Updating the invoice status will not impact the payment status.'
+					subtitle={t('invoices.details.updateInvoiceStatusSubtitle')}
 				/>
 				<Spacer className='!my-6' />
 				<Select
@@ -153,16 +154,21 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 					<>
 						<Spacer className='!my-6' />
 						<div className='border-t pt-6'>
-							<h3 className='text-lg font-medium text-gray-900 mb-4'>Add Metadata (Optional)</h3>
+							<h3 className='text-lg font-medium text-gray-900 mb-4'>{t('invoices.details.addMetadataOptional')}</h3>
 							<div className='flex flex-col gap-4'>
 								{voidMetadata.map((item, idx) => (
 									<div key={idx} className='flex gap-2 items-center'>
 										<div className='flex-[3] min-w-0'>
-											<Input placeholder='Key' value={item.key} onChange={(v) => handleKeyChange(idx, v)} className='rounded-lg h-10' />
+											<Input
+												placeholder={t('common:form.key')}
+												value={item.key}
+												onChange={(v) => handleKeyChange(idx, v)}
+												className='rounded-lg h-10'
+											/>
 										</div>
 										<div className='flex-[5] min-w-0'>
 											<Textarea
-												placeholder='Value'
+												placeholder={t('common:form.value')}
 												value={item.value}
 												onChange={(v) => handleValueChange(idx, v)}
 												textAreaClassName='min-h-6 h-6'
@@ -175,14 +181,14 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 												size='sm'
 												className='h-10 w-10 flex-shrink-0'
 												onClick={() => handleRemoveMetadata(idx)}
-												aria-label='Remove'>
+												aria-label={t('common:form.remove')}>
 												<Trash2 className='h-4 w-4' />
 											</Button>
 										)}
 									</div>
 								))}
 								<div>
-									<AddChargesButton onClick={handleAddMetadata} label='Add more' />
+									<AddChargesButton onClick={handleAddMetadata} label={t('invoices.details.addMore')} />
 								</div>
 							</div>
 						</div>
@@ -192,7 +198,7 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 				<Spacer className='!my-6' />
 				<div className='flex justify-end gap-4'>
 					<Button onClick={() => onOpenChange(false)} variant={'outline'} className='btn btn-primary'>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button
 						disabled={isPending}
@@ -201,7 +207,7 @@ const InvoiceStatusModal: FC<InvoiceStatusProps> = ({ isOpen, onOpenChange, invo
 							updateStatus(status.value);
 						}}
 						className='btn btn-primary'>
-						{status.value === 'VOIDED' ? 'Void Invoice' : 'Update'}
+						{status.value === 'VOIDED' ? t('invoices.details.voidInvoice') : t('common:actions.update')}
 					</Button>
 				</div>
 			</div>

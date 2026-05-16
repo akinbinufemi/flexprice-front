@@ -16,6 +16,7 @@ import { CurrencyPriceUnitSelection, isPriceUnitOption } from '@/types/common';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calculator } from 'lucide-react';
 import { SubscriptionCalculatorContent } from '@/components/organisms/EntityChargesPage/SubscriptionCalculator';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	price: Partial<InternalPrice>;
@@ -38,6 +39,7 @@ const RecurringChargesForm = ({
 	entityId,
 	entityName,
 }: Props) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	// Helper function to compute default values for price state
 	const computePriceDefaults = (priceProp: Partial<InternalPrice>, entityNameProp?: string) => {
 		return {
@@ -221,15 +223,15 @@ const RecurringChargesForm = ({
 				onChange={(value) => setLocalPrice({ ...localPrice, display_name: value })}
 				value={localPrice.display_name || ''}
 				variant='text'
-				label='Display Name'
-				placeholder={entityName || 'Enter display name'}
+				label={t('catalog:plans.organisms.priceForm.displayName')}
+				placeholder={entityName || t('catalog:plans.organisms.priceForm.enterDisplayName')}
 				error={errors.display_name}
 			/>
 			<Spacer height={'8px'} />
 			<CurrencyPriceUnitSelector
 				value={currencyPriceUnitValue}
 				onChange={handleCurrencyPriceUnitChange}
-				label='Currency'
+				label={t('catalog:plans.organisms.priceForm.currency')}
 				error={errors.currency || errors.price_unit_config}
 			/>
 			<Spacer height={'8px'} />
@@ -237,7 +239,7 @@ const RecurringChargesForm = ({
 				value={localPrice.billing_period}
 				options={billlingPeriodOptions}
 				onChange={(value) => setLocalPrice({ ...localPrice, billing_period: value as BILLING_PERIOD })}
-				label='Billing Period'
+				label={t('catalog:plans.organisms.priceForm.billingPeriod')}
 				error={errors.billing_period}
 			/>
 			<Spacer height={'8px'} />
@@ -245,18 +247,22 @@ const RecurringChargesForm = ({
 				onChange={(value) => setLocalPrice({ ...localPrice, amount: value })}
 				value={localPrice.amount}
 				variant='formatted-number'
-				label='Price'
-				placeholder='0'
+				label={t('catalog:plans.organisms.priceForm.price')}
+				placeholder={t('catalog:plans.organisms.priceForm.amountPlaceholderShort')}
 				error={errors.amount}
 				inputPrefix={displayCurrencySymbol}
 				suffix={
 					<div className='flex items-center gap-1.5'>
-						<span className='text-[#64748B]'> {`per ${formatBillingPeriodForPrice(localPrice.billing_period || '')}`}</span>
+						<span className='text-[#64748B]'>
+							{t('catalog:plans.organisms.recurringForm.perBilling', {
+								period: formatBillingPeriodForPrice(localPrice.billing_period || ''),
+							})}
+						</span>
 						<Popover open={calculatorOpen} onOpenChange={setCalculatorOpen}>
 							<PopoverTrigger asChild>
 								<button
 									type='button'
-									aria-label='Open subscription duration calculator'
+									aria-label={t('catalog:plans.organisms.recurringForm.calculatorAria')}
 									className='inline-flex items-center justify-center rounded p-0.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1'
 									onClick={(e) => {
 										e.stopPropagation();
@@ -285,9 +291,9 @@ const RecurringChargesForm = ({
 			<SelectGroup
 				value={localPrice.group_id}
 				onChange={handleGroupChange}
-				label='Group'
-				placeholder='Select a group (optional)'
-				description='Assign this price to a group for better organization'
+				label={t('catalog:plans.organisms.priceForm.group')}
+				placeholder={t('catalog:plans.organisms.priceForm.groupPlaceholder')}
+				description={t('catalog:plans.organisms.priceForm.groupDescription')}
 				showLookupKey={false}
 				hiddenIfEmpty
 			/>
@@ -299,11 +305,11 @@ const RecurringChargesForm = ({
 				popoverContentClassName='w-full'
 				date={startDate}
 				setDate={setStartDate}
-				label='Start Date (Optional)'
-				placeholder='Select start date'
+				label={t('catalog:plans.organisms.priceForm.startDateOptional')}
+				placeholder={t('catalog:plans.organisms.priceForm.selectStartDate')}
 			/>
 			<Spacer height={'16px'} />
-			<FormHeader title='Billing Timing' variant='form-component-title' />
+			<FormHeader title={t('catalog:plans.organisms.recurringForm.billingTiming')} variant='form-component-title' />
 			{/* starting billing preffercences */}
 
 			<CheckboxRadioGroup
@@ -311,14 +317,14 @@ const RecurringChargesForm = ({
 				value={localPrice.invoice_cadence}
 				checkboxItems={[
 					{
-						label: 'Advance',
+						label: t('catalog:plans.organisms.recurringForm.invoiceCadenceAdvance'),
 						value: INVOICE_CADENCE.ADVANCE,
-						description: 'Charge at the start of each billing cycle.',
+						description: t('catalog:plans.organisms.recurringForm.invoiceCadenceAdvanceDesc'),
 					},
 					{
-						label: 'Arrear',
+						label: t('catalog:plans.organisms.recurringForm.invoiceCadenceArrear'),
 						value: INVOICE_CADENCE.ARREAR,
-						description: 'Charge at the end of the billing cycle.',
+						description: t('catalog:plans.organisms.recurringForm.invoiceCadenceArrearDesc'),
 					},
 				]}
 				onChange={(value) => {
@@ -340,14 +346,14 @@ const RecurringChargesForm = ({
 							const numValue = value === '' ? undefined : Math.floor(Number(value));
 							setLocalPrice({ ...localPrice, min_quantity: numValue });
 						}}
-						label='Minimum Quantity'
+						label={t('catalog:plans.organisms.recurringForm.minQuantity')}
 						placeholder='1'
 					/>
 					<Spacer height={'16px'} />
 				</>
 			)}
 			<div>
-				<FormHeader title='Trial Period' variant='form-component-title' />
+				<FormHeader title={t('catalog:plans.organisms.recurringForm.trialPeriodTitle')} variant='form-component-title' />
 				<div className='flex items-center space-x-4 s'>
 					<Switch
 						id='airplane-mode'
@@ -357,10 +363,12 @@ const RecurringChargesForm = ({
 						}}
 					/>
 					<Label htmlFor='airplane-mode'>
-						<p className='font-medium text-sm text-[#18181B] peer-checked:text-black'>Start with a free trial</p>
+						<p className='font-medium text-sm text-[#18181B] peer-checked:text-black'>
+							{t('catalog:plans.organisms.recurringForm.trialToggleTitle')}
+						</p>
 						<Spacer height={'4px'} />
 						<p className='text-sm font-normal text-[#71717A] peer-checked:text-gray-700'>
-							Enable this option to add a free trial period for the subscription.
+							{t('catalog:plans.organisms.recurringForm.trialToggleHint')}
 						</p>
 					</Label>
 				</div>
@@ -376,17 +384,17 @@ const RecurringChargesForm = ({
 							setLocalPrice({ ...localPrice, trial_period_days: Number(value) });
 						}}
 						suffix='days'
-						placeholder='Number of trial days'
+						placeholder={t('catalog:plans.organisms.recurringForm.trialDaysPlaceholder')}
 					/>
 				</div>
 			)}
 			<Spacer height={'16px'} />
 			<div className='flex justify-end'>
-				<Button onClick={onDeleteClicked} variant='secondary' className='mr-4 text-zinc-900'>
-					{price.internal_state === PriceInternalState.EDIT ? 'Delete' : 'Cancel'}
+				<Button onClick={onDeleteClicked} variant='secondary' className='me-4 text-zinc-900'>
+					{price.internal_state === PriceInternalState.EDIT ? t('common:actions.delete') : t('common:actions.cancel')}
 				</Button>
-				<Button onClick={handleSubmit} variant='default' className='mr-4 font-normal'>
-					{price.internal_state === PriceInternalState.EDIT ? 'Update' : 'Add'}
+				<Button onClick={handleSubmit} variant='default' className='me-4 font-normal'>
+					{price.internal_state === PriceInternalState.EDIT ? t('common:actions.update') : t('common:actions.add')}
 				</Button>
 			</div>
 		</div>

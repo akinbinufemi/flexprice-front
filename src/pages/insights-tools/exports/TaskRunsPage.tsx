@@ -1,17 +1,19 @@
 import { Page, Button } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import TaskRunsTable from '@/components/molecules/TaskRunsTable/TaskRunsTable';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { RouteNames } from '@/core/routes/Routes';
 
 const TaskRunsPage = () => {
+	const { t } = useTranslation('settings');
 	const { connectionId, exportId } = useParams<{ connectionId: string; exportId: string }>();
 	const navigate = useNavigate();
 
 	return (
-		<Page heading='Task Runs'>
+		<Page heading={t('insightsTools.exports.taskRunsHeading')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Tasks} />
 
 			{/* Back button */}
@@ -21,7 +23,7 @@ const TaskRunsPage = () => {
 					onClick={() => navigate(RouteNames.s3ExportDetails.replace(':connectionId', connectionId!).replace(':exportId', exportId!))}
 					className='flex items-center gap-2'>
 					<ArrowLeft className='w-4 h-4' />
-					Back to Export Details
+					{t('insightsTools.exports.backToExportDetails')}
 				</Button>
 			</div>
 

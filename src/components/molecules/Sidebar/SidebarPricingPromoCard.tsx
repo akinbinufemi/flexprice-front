@@ -1,6 +1,7 @@
 'use client';
 
 import type { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ export interface SidebarPricingPromoCardProps {
 }
 
 const SidebarPricingPromoCard: FC<SidebarPricingPromoCardProps> = ({ onCreateWithAI, className }) => {
+	const { t } = useTranslation('common');
 	return (
 		<div
 			className={cn(
@@ -31,8 +33,8 @@ const SidebarPricingPromoCard: FC<SidebarPricingPromoCardProps> = ({ onCreateWit
 			<div className='pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/65 to-transparent' aria-hidden />
 
 			<div className='relative z-10 flex flex-col gap-5 p-4'>
-				<h2 className='text-left text-base font-semibold leading-snug tracking-normal text-gray-900 antialiased'>
-					Describe your Pricing. Let AI Build It.
+				<h2 className='text-start text-base font-semibold leading-snug tracking-normal text-gray-900 antialiased'>
+					{t('labels.describeYourPricing')}
 				</h2>
 
 				<Button
@@ -46,7 +48,7 @@ const SidebarPricingPromoCard: FC<SidebarPricingPromoCardProps> = ({ onCreateWit
 						'inline-flex items-center justify-center gap-1.5',
 					)}>
 					<Wand2 className='size-3.5 shrink-0 text-[#092E44] opacity-90' strokeWidth={1.75} aria-hidden />
-					<span className='analyzing-prompt-shimmer text-xs font-medium'>Create Plan</span>
+					<span className='analyzing-prompt-shimmer text-xs font-medium'>{t('labels.createPlan')}</span>
 				</Button>
 			</div>
 		</div>

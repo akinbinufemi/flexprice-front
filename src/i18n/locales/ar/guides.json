@@ -1,0 +1,170 @@
+{
+	"features": {
+		"createFeature": {
+			"title": "كيف أنشئ ميزة؟",
+			"description": "تعرّف على طريقة عمل الميزات في Flexprice."
+		},
+		"linkToPlans": {
+			"title": "كيف أربط الميزات بالخطط؟",
+			"description": "اربط الميزات بالخطط في Flexprice."
+		},
+		"clonePricing": {
+			"title": "كيف أستنسخ تسعير OpenAI؟",
+			"description": "استنساخ أسلوب تسعير مشابه لـ OpenAI / Cursor في Flexprice."
+		}
+	},
+	"addons": {
+		"create": {
+			"title": "كيف أنشئ إضافة؟",
+			"description": "تعرّف على إنشاء إضافات جديدة في Flexprice."
+		},
+		"list": {
+			"title": "كيف أعرض كل الإضافات؟",
+			"description": "تعرّف على عرض جميع الإضافات."
+		},
+		"delete": {
+			"title": "كيف أحذف إضافة؟",
+			"description": "تعرّف على حذف إضافة في Flexprice."
+		}
+	},
+	"coupons": {
+		"create": {
+			"title": "كيف أنشئ قسيمة؟",
+			"description": "تعرّف على إنشاء قسيمة جديدة في Flexprice."
+		},
+		"update": {
+			"title": "كيف أحدّث قسيمة؟",
+			"description": "تعرّف على تحديث قسيمة في Flexprice."
+		},
+		"delete": {
+			"title": "كيف أحذف قسيمة؟",
+			"description": "تعرّف على حذف قسيمة في Flexprice."
+		}
+	},
+	"plans": {
+		"overview": {
+			"title": "تعرّف على طريقة عمل الخطط في Flexprice.",
+			"description": "تعرّف على طريقة عمل الخطط في Flexprice."
+		},
+		"create": {
+			"title": "كيف أنشئ خطة",
+			"description": "أنشئ خطة جديدة في Flexprice."
+		},
+		"billingModels": {
+			"title": "كيف أختار بين الفوترة المسبقة والمؤجلة؟",
+			"description": "افهم نماذج الفوترة المستخدمة في الخطط."
+		}
+	},
+	"groups": {
+		"overview": {
+			"title": "تعرّف على طريقة عمل المجموعات في Flexprice.",
+			"description": "تعرّف على طريقة عمل المجموعات في Flexprice."
+		},
+		"plansContext": {
+			"title": "تعرّف على طريقة عمل الخطط في Flexprice.",
+			"description": "تعرّف على طريقة عمل الخطط في Flexprice."
+		},
+		"featuresContext": {
+			"title": "تعرّف على طريقة عمل الميزات في Flexprice.",
+			"description": "تعرّف على طريقة عمل الميزات في Flexprice."
+		}
+	},
+	"customers": {
+		"create": {
+			"title": "كيف أنشئ عميلاً",
+			"description": "تعرّف على طريقة عمل العملاء في Flexprice."
+		},
+		"archive": {
+			"title": "كيف أؤرشف عميلاً",
+			"description": "تعرّف على إنشاء عميل جديد في Flexprice."
+		},
+		"subscription": {
+			"title": "كيف أنشئ اشتراكاً",
+			"description": "أنشئ اشتراكاً جديداً في Flexprice."
+		}
+	},
+	"invoices": {
+		"create": {
+			"title": "كيف أنشئ فاتورة",
+			"description": "تعرّف على طريقة عمل الفواتير في Flexprice."
+		},
+		"manage": {
+			"title": "كيف أدير الفواتير",
+			"description": "إدارة الفواتير في Flexprice."
+		},
+		"partialPayments": {
+			"title": "كيف أتعامل مع المدفوعات الجزئية",
+			"description": "التعامل مع المدفوعات الجزئية في Flexprice."
+		}
+	},
+	"payments": {
+		"create": {
+			"title": "كيف أنشئ دفعة",
+			"description": "تعرّف على طريقة عمل المدفوعات في Flexprice."
+		},
+		"update": {
+			"title": "كيف أحدّث دفعة",
+			"description": "أنشئ دفعة في Flexprice."
+		},
+		"delete": {
+			"title": "كيف أحذف دفعة",
+			"description": "احذف دفعة قائمة في Flexprice."
+		}
+	},
+	"secrets": {
+		"list": {
+			"title": "عرض مفاتيح API",
+			"description": "اعرض جميع مفاتيح API في Flexprice."
+		},
+		"create": {
+			"title": "إنشاء مفتاح API جديد",
+			"description": "ولّد مفتاح API جديداً في Flexprice."
+		},
+		"delete": {
+			"title": "حذف مفتاح API",
+			"description": "احذف مفتاح API في Flexprice."
+		}
+	},
+	"creditNotes": {
+		"create": {
+			"title": "إنشاء إشعار دائن جديد",
+			"description": "تعرّف على طريقة عمل الإشعارات الدائنة في Flexprice."
+		},
+		"process": {
+			"title": "معالجة إشعار دائن مسودة",
+			"description": "أنشئ إشعاراً دائناً جديداً في Flexprice."
+		},
+		"void": {
+			"title": "إبطال إشعار دائن",
+			"description": "إدارة الإشعارات الدائنة في Flexprice."
+		}
+	},
+	"importExport": {
+		"overview": {
+			"title": "نظرة عامة",
+			"description": "تعرّف على خيارات الاستيراد والتصدير في Flexprice."
+		},
+		"importFile": {
+			"title": "استيراد ملف",
+			"description": "استورد ملفاً إلى Flexprice."
+		},
+		"processTask": {
+			"title": "معالجة مهمة استيراد",
+			"description": "عالج مهمة استيراد في Flexprice."
+		}
+	},
+	"taxes": {
+		"createRate": {
+			"title": "كيف أنشئ معدل ضريبة؟",
+			"description": "تعرّف على إعداد معدلات الضريبة لنظام الفوترة."
+		},
+		"types": {
+			"title": "أنواع الضرائب",
+			"description": "تعرّف على حساب الضريبة كنسبة أو مبلغ ثابت."
+		},
+		"associations": {
+			"title": "ارتباطات الضريبة والتجاوزات",
+			"description": "تعرّف على تطبيق الضرائب على كيانات محددة."
+		}
+	}
+}

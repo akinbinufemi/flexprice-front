@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer, Select, Tooltip } from '@/components/atoms';
 import { useMutation } from '@tanstack/react-query';
 import { TaskApi } from '@/api';
@@ -12,7 +13,7 @@ import {
 import { CreateScheduledTaskPayload } from '@/types/dto';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronRight, Info, Plus, Trash2 } from 'lucide-react';
-import { getApiErrorMessage } from '@/core/axios/types';
+import type { HttpRejectedError } from '@/core/axios/types';
 
 interface ExportDrawerProps {
 	isOpen: boolean;
@@ -57,6 +58,7 @@ function scheduledEntityTypeSupportsExportMetadataFields(entityType: SCHEDULED_E
 }
 
 const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionId, connection, exportTask, onSave }) => {
+	const { t } = useTranslation(['settings', 'common']);
 	// Check if this is a Flexprice-managed connection
 	const isFlexpriceManaged = connection?.sync_config?.s3?.is_flexprice_managed || false;
 
@@ -202,22 +204,22 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 		// For Flexprice Managed, we don't need to validate bucket, region, key_prefix
 		if (!isFlexpriceManaged) {
 			if (!formData.bucket.trim()) {
-				newErrors.bucket = 'S3 bucket name is required';
+				newErrors.bucket = t('exportDrawer.validation.bucketRequired');
 			}
 
 			if (!formData.region.trim()) {
-				newErrors.region = 'AWS region is required';
+				newErrors.region = t('exportDrawer.validation.regionRequired');
 			}
 
 			if (!formData.key_prefix.trim()) {
-				newErrors.key_prefix = 'Key prefix is required';
+				newErrors.key_prefix = t('exportDrawer.validation.keyPrefixRequired');
 			}
 		}
 
 		if (scheduledEntityTypeSupportsExportMetadataFields(formData.entity_type)) {
 			const hasEmptyFieldKey = formData.export_metadata_fields.some((f) => !f.field_key.trim());
 			if (hasEmptyFieldKey) {
-				newErrors.export_metadata_fields = 'All metadata fields must have a field key';
+				newErrors.export_metadata_fields = t('exportDrawer.validation.metadataFieldKeys');
 			}
 		}
 
@@ -271,15 +273,16 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 			return await TaskApi.createScheduledTask(payload);
 		},
 		onSuccess: (response) => {
-			toast.success('Export task created successfully');
+			toast.success(t('exportDrawer.toast.created'));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: any) => {
-			const apiMessage = getApiErrorMessage(error?.response?.data ?? error, 'Failed to create export task');
+		onError: (error: Error) => {
+			const apiMessage = error.message || t('exportDrawer.toast.createFailed');
 			toast.error(apiMessage);
 
-			const code = error?.response?.data?.code;
+			const raw = (error as HttpRejectedError).cause;
+			const code = raw && typeof raw === 'object' && raw !== null && 'code' in raw ? (raw as { code?: string }).code : undefined;
 			if (code === 'validation_error' && typeof apiMessage === 'string' && apiMessage.toLowerCase().includes('export metadata field')) {
 				setErrors((prev) => ({ ...prev, export_metadata_fields: apiMessage }));
 				setIsMetadataExpanded(true);
@@ -323,15 +326,16 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 			return await TaskApi.updateScheduledTask(exportTask!.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('Export task updated successfully');
+			toast.success(t('exportDrawer.toast.updated'));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: any) => {
-			const apiMessage = getApiErrorMessage(error?.response?.data ?? error, 'Failed to update export task');
+		onError: (error: Error) => {
+			const apiMessage = error.message || t('exportDrawer.toast.updateFailed');
 			toast.error(apiMessage);
 
-			const code = error?.response?.data?.code;
+			const raw = (error as HttpRejectedError).cause;
+			const code = raw && typeof raw === 'object' && raw !== null && 'code' in raw ? (raw as { code?: string }).code : undefined;
 			if (code === 'validation_error' && typeof apiMessage === 'string' && apiMessage.toLowerCase().includes('export metadata field')) {
 				setErrors((prev) => ({ ...prev, export_metadata_fields: apiMessage }));
 				setIsMetadataExpanded(true);
@@ -355,41 +359,41 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={exportTask ? 'Edit Export Task' : 'Create Export Task'}
-			description="Configure the export settings for your S3 data pipeline. Click save when you're done."
+			title={exportTask ? t('exportDrawer.title.edit') : t('exportDrawer.title.create')}
+			description={t('exportDrawer.description')}
 			size='lg'>
 			<div className='space-y-4 mt-4'>
 				{/* Entity Type */}
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Entity Type</label>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('exportDrawer.entityType')}</label>
 					<Select
 						value={formData.entity_type}
 						onChange={(value) => handleChange('entity_type', value as SCHEDULED_ENTITY_TYPE)}
 						error={errors.entity_type}
 						options={[
-							{ value: SCHEDULED_ENTITY_TYPE.EVENTS, label: 'Events' },
-							{ value: SCHEDULED_ENTITY_TYPE.INVOICE, label: 'Invoice' },
-							{ value: SCHEDULED_ENTITY_TYPE.CREDIT_TOPUPS, label: 'Credit Topups' },
-							{ value: SCHEDULED_ENTITY_TYPE.CREDIT_USAGE, label: 'Credit Usage' },
-							{ value: SCHEDULED_ENTITY_TYPE.USAGE_ANALYTICS, label: 'Usage Analytics' },
+							{ value: SCHEDULED_ENTITY_TYPE.EVENTS, label: t('exportDrawer.entityTypes.events') },
+							{ value: SCHEDULED_ENTITY_TYPE.INVOICE, label: t('exportDrawer.entityTypes.invoice') },
+							{ value: SCHEDULED_ENTITY_TYPE.CREDIT_TOPUPS, label: t('exportDrawer.entityTypes.creditTopups') },
+							{ value: SCHEDULED_ENTITY_TYPE.CREDIT_USAGE, label: t('exportDrawer.entityTypes.creditUsage') },
+							{ value: SCHEDULED_ENTITY_TYPE.USAGE_ANALYTICS, label: t('exportDrawer.entityTypes.usageAnalytics') },
 						]}
 					/>
-					<p className='text-xs text-gray-500 mt-1'>Select the type of data to export</p>
+					<p className='text-xs text-gray-500 mt-1'>{t('exportDrawer.entityTypeHint')}</p>
 				</div>
 
 				{/* Interval */}
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Export Interval</label>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('exportDrawer.interval.label')}</label>
 					<Select
 						value={formData.interval}
 						onChange={(value) => handleChange('interval', value as SCHEDULED_TASK_INTERVAL)}
 						error={errors.interval}
 						options={[
-							{ value: SCHEDULED_TASK_INTERVAL.HOURLY, label: 'Hourly' },
-							{ value: SCHEDULED_TASK_INTERVAL.DAILY, label: 'Daily' },
+							{ value: SCHEDULED_TASK_INTERVAL.HOURLY, label: t('exportDrawer.interval.hourly') },
+							{ value: SCHEDULED_TASK_INTERVAL.DAILY, label: t('exportDrawer.interval.daily') },
 						]}
 					/>
-					<p className='text-xs text-gray-500 mt-1'>How often to run the export</p>
+					<p className='text-xs text-gray-500 mt-1'>{t('exportDrawer.interval.hint')}</p>
 				</div>
 
 				{/* S3 Configuration - Only show for customer-owned S3 */}
@@ -397,59 +401,59 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 					<>
 						{/* S3 Bucket */}
 						<Input
-							label='S3 Bucket Name'
-							placeholder='Enter S3 bucket name'
+							label={t('exportDrawer.s3.bucket')}
+							placeholder={t('exportDrawer.s3.bucketPlaceholder')}
 							value={formData.bucket}
 							onChange={(value) => handleChange('bucket', value)}
 							error={errors.bucket}
-							description='The name of your S3 bucket'
+							description={t('exportDrawer.s3.bucketHint')}
 						/>
 
 						{/* AWS Region */}
 						<Input
-							label='AWS Region'
-							placeholder='Enter AWS region'
+							label={t('exportDrawer.s3.region')}
+							placeholder={t('exportDrawer.s3.regionPlaceholder')}
 							value={formData.region}
 							onChange={(value) => handleChange('region', value)}
 							error={errors.region}
-							description='The AWS region where your S3 bucket is located'
+							description={t('exportDrawer.s3.regionHint')}
 						/>
 
 						{/* Key Prefix */}
 						<Input
-							label='Key Prefix'
-							placeholder='Enter key prefix'
+							label={t('exportDrawer.s3.keyPrefix')}
+							placeholder={t('exportDrawer.s3.keyPrefixPlaceholder')}
 							value={formData.key_prefix}
 							onChange={(value) => handleChange('key_prefix', value)}
 							error={errors.key_prefix}
-							description='The prefix for files in your S3 bucket'
+							description={t('exportDrawer.s3.keyPrefixHint')}
 						/>
 					</>
 				)}
 
 				{/* Compression */}
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Compression</label>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('exportDrawer.compression.label')}</label>
 					<Select
 						value={formData.compression}
 						onChange={(value) => handleChange('compression', value)}
 						options={[
-							{ value: 'none', label: 'None' },
-							{ value: 'gzip', label: 'GZIP' },
+							{ value: 'none', label: t('exportDrawer.compression.none') },
+							{ value: 'gzip', label: t('exportDrawer.compression.gzip') },
 						]}
 					/>
-					<p className='text-xs text-gray-500 mt-1'>Compression format for exported files</p>
+					<p className='text-xs text-gray-500 mt-1'>{t('exportDrawer.compression.hint')}</p>
 				</div>
 
 				{/* Encryption */}
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-2'>Encryption</label>
+					<label className='block text-sm font-medium text-gray-700 mb-2'>{t('exportDrawer.encryption.label')}</label>
 					<Select
 						value={formData.encryption}
 						onChange={(value) => handleChange('encryption', value)}
-						options={[{ value: 'AES256', label: 'AES256' }]}
+						options={[{ value: 'AES256', label: t('exportDrawer.encryption.aes256') }]}
 					/>
-					<p className='text-xs text-gray-500 mt-1'>Encryption method for exported files</p>
+					<p className='text-xs text-gray-500 mt-1'>{t('exportDrawer.encryption.hint')}</p>
 				</div>
 
 				{/* Additional metadata fields (credit usage & usage analytics exports) */}
@@ -464,23 +468,18 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 									addMetadataField();
 								}
 							}}
-							className='w-full flex items-center px-3 py-2.5 text-left hover:bg-gray-100 rounded-md transition-colors gap-2'>
+							className='w-full flex items-center px-3 py-2.5 text-start hover:bg-gray-100 rounded-md transition-colors gap-2'>
 							<div className='text-gray-500 shrink-0'>
 								{isMetadataExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
 							</div>
 							<div className='min-w-0'>
 								<div className='text-sm font-medium text-gray-900 inline-flex items-center gap-1.5'>
-									Additional Metadata Fields
-									<span className='text-xs font-normal text-gray-500'>(Optional)</span>
+									{t('exportDrawer.metadata.title')}
+									<span className='text-xs font-normal text-gray-500'>{t('exportDrawer.metadata.optional')}</span>
 									<Tooltip
 										delayDuration={0}
 										side='right'
-										content={
-											<div className='max-w-[280px] text-sm'>
-												Export custom metadata fields as additional CSV columns. If the same field key exists on multiple entity types, use{' '}
-												<span className='font-medium'>Column Name</span> to give each a unique header.
-											</div>
-										}>
+										content={<div className='max-w-[280px] text-sm'>{t('exportDrawer.metadata.tooltip')}</div>}>
 										<span className='inline-flex items-center text-blue-500 hover:text-blue-600'>
 											<Info className='h-3.5 w-3.5' />
 										</span>
@@ -488,8 +487,10 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 								</div>
 								<div className='text-xs text-gray-500'>
 									{formData.export_metadata_fields.length > 0
-										? `${formData.export_metadata_fields.length} field${formData.export_metadata_fields.length > 1 ? 's' : ''} configured`
-										: 'Click to add metadata fields to export'}
+										? formData.export_metadata_fields.length > 1
+											? t('exportDrawer.metadata.summaryPlural', { count: formData.export_metadata_fields.length })
+											: t('exportDrawer.metadata.summary', { count: formData.export_metadata_fields.length })
+										: t('exportDrawer.metadata.emptyHint')}
 								</div>
 							</div>
 						</button>
@@ -498,17 +499,17 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 							<div className='px-3 pb-3 space-y-1.5'>
 								{formData.export_metadata_fields.length > 0 && (
 									<div className='grid grid-cols-[120px_1fr_32px] gap-x-2'>
-										<span className='text-xs font-medium text-gray-500'>Entity Type</span>
-										<span className='text-xs font-medium text-gray-500'>Field Key *</span>
+										<span className='text-xs font-medium text-gray-500'>{t('exportDrawer.metadata.entityTypeCol')}</span>
+										<span className='text-xs font-medium text-gray-500'>{t('exportDrawer.metadata.fieldKeyCol')}</span>
 										<span />
 									</div>
 								)}
 
 								{formData.export_metadata_fields.map((field, index) => {
 									const allowedTypes = ALLOWED_METADATA_ENTITY_TYPES[formData.entity_type] ?? [];
-									const entityTypeOptions = allowedTypes.map((t: EXPORT_METADATA_ENTITY_TYPE) => ({
-										value: t,
-										label: t.charAt(0).toUpperCase() + t.slice(1),
+									const entityTypeOptions = allowedTypes.map((et: EXPORT_METADATA_ENTITY_TYPE) => ({
+										value: et,
+										label: t(`exportDrawer.metadata.entityTypes.${et}`),
 									}));
 									return (
 										<div key={index} className='space-y-1'>
@@ -519,7 +520,7 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 													options={entityTypeOptions}
 												/>
 												<Input
-													placeholder='e.g. account_id'
+													placeholder={t('exportDrawer.metadata.fieldKeyPlaceholder')}
 													value={field.field_key}
 													onChange={(value) => updateMetadataField(index, 'field_key', value)}
 												/>
@@ -533,7 +534,7 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 											{expandedColumnNames.has(index) ? (
 												<div className='pl-[128px] pr-[40px]'>
 													<Input
-														placeholder='CSV column header, e.g. Account ID'
+														placeholder={t('exportDrawer.metadata.columnNamePlaceholder')}
 														value={field.column_name}
 														onChange={(value) => updateMetadataField(index, 'column_name', value)}
 													/>
@@ -544,7 +545,7 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 														type='button'
 														onClick={() => toggleColumnName(index)}
 														className='text-xs text-gray-400 hover:text-blue-600 transition-colors'>
-														+ set column name
+														{t('exportDrawer.metadata.setColumnName')}
 													</button>
 												</div>
 											)}
@@ -559,7 +560,7 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 									onClick={addMetadataField}
 									className='inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium pt-0.5'>
 									<Plus className='h-4 w-4' />
-									Add Metadata Field
+									{t('exportDrawer.metadata.addField')}
 								</button>
 							</div>
 						)}
@@ -569,22 +570,19 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 				{/* Endpoint URL (Optional) - only for customer-owned S3 */}
 				{!isFlexpriceManaged && (
 					<Input
-						label='Endpoint URL (Optional)'
-						placeholder='Enter custom S3 endpoint URL'
+						label={t('exportDrawer.endpoint.label')}
+						placeholder={t('exportDrawer.endpoint.placeholder')}
 						value={formData.endpoint_url}
 						onChange={(value) => handleChange('endpoint_url', value)}
-						description='Custom endpoint URL for S3-compatible storage (e.g., MinIO, DigitalOcean Spaces)'
+						description={t('exportDrawer.endpoint.description')}
 					/>
 				)}
 
 				{/* Flexprice Managed Info */}
 				{isFlexpriceManaged && (
 					<div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
-						<h4 className='font-medium text-blue-900 mb-2'>Flexprice Managed Storage</h4>
-						<p className='text-sm text-blue-800'>
-							Your exports will be automatically stored in Flexprice-managed S3 buckets. No additional export configuration required.
-							Download the exported files from the respective task runs table.
-						</p>
+						<h4 className='font-medium text-blue-900 mb-2'>{t('exportDrawer.flexpriceManaged.title')}</h4>
+						<p className='text-sm text-blue-800'>{t('exportDrawer.flexpriceManaged.body')}</p>
 					</div>
 				)}
 
@@ -598,17 +596,17 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 						className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
 					/>
 					<label htmlFor='enabled' className='text-sm font-medium text-gray-700'>
-						Enable this export task
+						{t('exportDrawer.enabled')}
 					</label>
 				</div>
 
 				<Spacer className='!h-4' />
 				<div className='flex gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1'>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1' isLoading={isPending}>
-						{exportTask ? 'Update' : 'Create'}
+						{exportTask ? t('common:actions.update') : t('exportDrawer.buttons.create')}
 					</Button>
 				</div>
 			</div>

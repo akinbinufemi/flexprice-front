@@ -7,6 +7,7 @@ import { Price } from '@/models/Price';
 import { usePriceOverrides } from '@/hooks/usePriceOverrides';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
+import { useTranslation } from 'react-i18next';
 
 // Simplified phase form state - just stores UI-friendly data
 export interface PhaseFormData {
@@ -43,6 +44,7 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 	minStartDate,
 	maxEndDate,
 }) => {
+	const { t } = useTranslation(['customers', 'common']);
 	const [formState, setFormState] = useState<PhaseFormData>({
 		start_date: initialData?.start_date || new Date(),
 		end_date: initialData?.end_date || null,
@@ -97,10 +99,10 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 		<div className='space-y-6 p-6 border border-gray-200 rounded-lg bg-white shadow-sm'>
 			{/* Phase Dates */}
 			<div>
-				<h4 className='text-sm font-semibold text-gray-900 mb-4'>Phase Duration</h4>
+				<h4 className='text-sm font-semibold text-gray-900 mb-4'>{t('organisms.phaseForm.phaseDuration')}</h4>
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 					<div>
-						<Label label='Start Date*' />
+						<Label label={t('organisms.phaseForm.startDateRequired')} />
 						<DatePicker
 							date={formState.start_date}
 							setDate={(date) => {
@@ -114,13 +116,13 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 						/>
 					</div>
 					<div>
-						<Label label='End Date' />
+						<Label label={t('organisms.phaseForm.endDate')} />
 						<DatePicker
 							date={formState.end_date || undefined}
 							setDate={(date) => {
 								updateFormState({ end_date: date });
 							}}
-							placeholder='Forever'
+							placeholder={t('organisms.phaseForm.foreverPlaceholder')}
 							disabled={disabled}
 							minDate={formState.start_date}
 							maxDate={maxEndDate}
@@ -178,10 +180,10 @@ const PhaseForm: React.FC<PhaseFormProps> = ({
 			{/* Action Buttons */}
 			<div className='flex justify-end gap-3 pt-6 border-t border-gray-200'>
 				<Button variant='outline' onClick={onCancel} disabled={disabled}>
-					Cancel
+					{t('common:actions.cancel')}
 				</Button>
 				<Button onClick={handleSave} disabled={disabled}>
-					{isEditing ? 'Update Phase' : 'Save Phase'}
+					{isEditing ? t('organisms.phaseForm.updatePhase') : t('organisms.phaseForm.savePhase')}
 				</Button>
 			</div>
 		</div>

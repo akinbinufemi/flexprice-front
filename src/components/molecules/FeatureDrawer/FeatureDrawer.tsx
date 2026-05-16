@@ -8,6 +8,7 @@ import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { UpdateFeatureRequest } from '@/types/dto/Feature';
 import Feature from '@/models/Feature';
 import { GROUP_ENTITY_TYPE } from '@/models/Group';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data: Feature; // Required - update-only drawer
@@ -29,6 +30,7 @@ const getInitialReportingUnit = (data: Feature | undefined) => {
 };
 
 const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const [formData, setFormData] = useState<UpdateFeatureRequest>({
 		name: data?.name || '',
 		description: data?.description || '',
@@ -48,8 +50,8 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to update feature. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to update feature. Please try again.');
 		},
 	});
 
@@ -105,11 +107,16 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 	const isCtaDisabled = !formData.name?.trim() || isPending;
 
 	return (
-		<Sheet isOpen={open} onOpenChange={onOpenChange} title='Edit Feature' description='Update feature details.' trigger={trigger}>
+		<Sheet
+			isOpen={open}
+			onOpenChange={onOpenChange}
+			title={t('catalog:features.drawer.editTitle')}
+			description={t('catalog:features.drawer.description')}
+			trigger={trigger}>
 			<div className='space-y-8 mt-4'>
 				<Input
-					label='Name'
-					placeholder='Enter feature name'
+					label={t('catalog:features.drawer.name')}
+					placeholder={t('catalog:features.drawer.namePlaceholder')}
 					value={formData.name || ''}
 					error={errors.name}
 					onChange={(e) => {
@@ -118,8 +125,8 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 				/>
 
 				<Textarea
-					label='Description'
-					placeholder='Enter description'
+					label={t('catalog:features.drawer.descriptionLabel')}
+					placeholder={t('catalog:shared.enterDescription')}
 					value={formData.description || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, description: e });
@@ -129,16 +136,16 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 
 				<SelectGroup
 					entityType={GROUP_ENTITY_TYPE.FEATURE}
-					label='Group'
-					placeholder='Select a group (optional)'
+					label={t('catalog:features.drawer.group')}
+					placeholder={t('catalog:features.drawer.groupPlaceholder')}
 					value={formData.group_id ?? ''}
 					onChange={(group) => setFormData({ ...formData, group_id: group?.id ?? '' })}
 					showLookupKey={false}
 				/>
 
 				<Input
-					label='Unit Singular'
-					placeholder='e.g., unit'
+					label={t('catalog:features.drawer.unitSingular')}
+					placeholder={t('catalog:features.drawer.unitSingularPh')}
 					value={formData.unit_singular || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, unit_singular: e });
@@ -146,8 +153,8 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 				/>
 
 				<Input
-					label='Unit Plural'
-					placeholder='e.g., units'
+					label={t('catalog:features.drawer.unitPlural')}
+					placeholder={t('catalog:features.drawer.unitPluralPh')}
 					value={formData.unit_plural || ''}
 					onChange={(e) => {
 						setFormData({ ...formData, unit_plural: e });
@@ -155,15 +162,16 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 				/>
 
 				<Input
-					label='Display Unit Singular'
-					placeholder='e.g., unit'
+					label={t('catalog:features.drawer.displayUnitSingular')}
+					placeholder={t('catalog:features.drawer.unitSingularPh')}
 					value={formData.reporting_unit?.unit_singular ?? ''}
 					onChange={(e) => {
+						const pluralSuffix = t('catalog:features.drawer.displayUnitPluralAutoSuffix');
 						setFormData({
 							...formData,
 							reporting_unit: {
 								unit_singular: e,
-								unit_plural: e ? e + 's' : '',
+								unit_plural: e ? `${e}${pluralSuffix}` : '',
 								conversion_rate: formData.reporting_unit?.conversion_rate ?? '0.01',
 							},
 						});
@@ -171,8 +179,8 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 				/>
 
 				<Input
-					label='Display Unit Plural'
-					placeholder='e.g., units'
+					label={t('catalog:features.drawer.displayUnitPlural')}
+					placeholder={t('catalog:features.drawer.unitPluralPh')}
 					value={formData.reporting_unit?.unit_plural ?? ''}
 					onChange={(e) => {
 						setFormData({
@@ -187,8 +195,8 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 				/>
 
 				<Input
-					label='Display Unit Conversion Factor'
-					placeholder='e.g., 0.0000167'
+					label={t('catalog:features.drawer.conversionFactor')}
+					placeholder={t('catalog:features.drawer.conversionFactorPh')}
 					value={formData.reporting_unit?.conversion_rate ?? ''}
 					onChange={(e) => {
 						setFormData({
@@ -204,7 +212,7 @@ const FeatureDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQu
 
 				<Spacer className='!h-4' />
 				<Button isLoading={isPending} disabled={isCtaDisabled} onClick={handleSave}>
-					Save Feature
+					{t('catalog:features.drawer.saveFeature')}
 				</Button>
 			</div>
 		</Sheet>

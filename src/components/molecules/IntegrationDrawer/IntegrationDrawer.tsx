@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 
 interface IntegrationDrawerProps {
@@ -12,6 +13,7 @@ interface IntegrationDrawerProps {
 }
 
 const IntegrationDrawer: FC<IntegrationDrawerProps> = ({ isOpen, onOpenChange, provider, providerName, connection, onSave, trigger }) => {
+	const { t } = useTranslation(['settings', 'common']);
 	const [formData, setFormData] = useState({
 		name: '',
 		apiKey: '',
@@ -43,10 +45,10 @@ const IntegrationDrawer: FC<IntegrationDrawerProps> = ({ isOpen, onOpenChange, p
 	const validateForm = () => {
 		const newErrors: Record<string, string> = {};
 		if (!formData.name.trim()) {
-			newErrors.name = 'Connection name is required';
+			newErrors.name = t('integrationDrawer.validation.nameRequired');
 		}
 		if (!formData.apiKey.trim()) {
-			newErrors.apiKey = 'API secret key is required';
+			newErrors.apiKey = t('integrationDrawer.validation.apiSecretRequired');
 		}
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
@@ -68,35 +70,35 @@ const IntegrationDrawer: FC<IntegrationDrawerProps> = ({ isOpen, onOpenChange, p
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? `Edit ${providerName} Connection` : `Connect to ${providerName}`}
-			description="Enter connection details. Click save when you're done."
+			title={connection ? t('integrationDrawer.title.edit', { providerName }) : t('integrationDrawer.title.connect', { providerName })}
+			description={t('integrationDrawer.description')}
 			trigger={trigger}
 			size='lg'>
 			<div className='space-y-4 mt-9'>
 				<Input
-					label='Connection Name'
-					placeholder='Enter Name'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('integrationDrawer.connectionNamePlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
-					description='A dummy name for this integration'
+					description={t('integrationDrawer.connectionNameHint')}
 				/>
 				<Input
-					label='API Secret Key'
-					placeholder='Enter API Secret Key'
+					label={t('integrationDrawer.apiSecretKey')}
+					placeholder={t('integrationDrawer.apiSecretPlaceholder')}
 					type='password'
 					value={formData.apiKey}
 					onChange={(value) => handleChange('apiKey', value)}
 					error={errors.apiKey}
 				/>
-				<p className='text-sm text-muted-foreground -mt-2'>Your API secret key from the provider</p>
+				<p className='text-sm text-muted-foreground -mt-2'>{t('integrationDrawer.apiSecretHint')}</p>
 				<Spacer className='!h-1' />
 				<div className='flex gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1'>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1'>
-						{connection ? 'Update' : 'Save'}
+						{connection ? t('common:actions.update') : t('common:actions.save')}
 					</Button>
 				</div>
 			</div>

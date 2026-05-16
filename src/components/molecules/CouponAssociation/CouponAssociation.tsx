@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 import FlexpriceTable, { ColumnData } from '../Table';
 import { AddButton, FormHeader, Button } from '@/components/atoms';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const CouponAssociation: FC<Props> = ({ data, onChange, currency, disabled }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 
 	const { data: availableCoupons = [] } = useQuery({
@@ -77,7 +79,7 @@ const CouponAssociation: FC<Props> = ({ data, onChange, currency, disabled }) =>
 	return (
 		<div className='space-y-4'>
 			<div className='flex items-center justify-between'>
-				<FormHeader className='mb-0' title='Linked Coupons' variant='sub-header' />
+				<FormHeader className='mb-0' title={t('labels.linkedCoupons')} variant='sub-header' />
 				<AddButton onClick={() => setIsOpen(true)} disabled={disabled} />
 			</div>
 

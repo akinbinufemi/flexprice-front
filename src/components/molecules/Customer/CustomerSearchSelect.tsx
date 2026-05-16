@@ -3,6 +3,7 @@ import AsyncSearchableSelect, { AsyncSearchableSelectProps } from '@/components/
 import CustomerApi from '@/api/CustomerApi';
 import { Customer, ENTITY_STATUS } from '@/models';
 import { SelectOption } from '@/components/atoms/Select/Select';
+import { useTranslation } from 'react-i18next';
 
 export interface CustomerSearchSelectProps extends Omit<AsyncSearchableSelectProps<Customer>, 'search' | 'extractors'> {
 	/** Maximum number of results to fetch (default: 20) */
@@ -29,12 +30,17 @@ export interface CustomerSearchSelectProps extends Omit<AsyncSearchableSelectPro
  */
 const CustomerSearchSelect: React.FC<CustomerSearchSelectProps> = ({
 	limit = 20,
-	searchPlaceholder = 'Search for customer...',
+	searchPlaceholder,
 	excludeId,
 	selfCustomer,
 	includeNoneOption = true,
 	...props
 }) => {
+	const { t } = useTranslation('customers');
+	const resolvedPlaceholder = searchPlaceholder ?? t('select.searchCustomer');
+	const noneLabel = t('select.none');
+	const selfLabel = t('select.self');
+
 	const searchFn = async (query: string) => {
 		const response = await CustomerApi.searchCustomers(query, limit);
 
@@ -46,7 +52,7 @@ const CustomerSearchSelect: React.FC<CustomerSearchSelectProps> = ({
 
 		const rootCustomer: Customer = {
 			id: '',
-			name: 'None',
+			name: noneLabel,
 			email: '',
 			external_id: 'root',
 			address_city: '',
@@ -66,7 +72,7 @@ const CustomerSearchSelect: React.FC<CustomerSearchSelectProps> = ({
 		};
 
 		const selfRow: Array<SelectOption & { data: Customer }> = selfCustomer
-			? [{ value: selfCustomer.id, label: 'Self', data: selfCustomer }]
+			? [{ value: selfCustomer.id, label: selfLabel, data: selfCustomer }]
 			: [];
 
 		const noneRow: Array<SelectOption & { data: Customer }> =
@@ -98,11 +104,11 @@ const CustomerSearchSelect: React.FC<CustomerSearchSelectProps> = ({
 			{...props}
 			search={{
 				searchFn,
-				placeholder: searchPlaceholder,
+				placeholder: resolvedPlaceholder,
 			}}
 			extractors={{
 				valueExtractor: (customer) => customer.id,
-				labelExtractor: (customer) => (selfCustomer && customer.id === selfCustomer.id ? 'Self' : customer.name),
+				labelExtractor: (customer) => (selfCustomer && customer.id === selfCustomer.id ? selfLabel : customer.name),
 			}}
 		/>
 	);

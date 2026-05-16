@@ -1,5 +1,6 @@
 import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
 import { ApiDocsContent, PriceUnitDrawer } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ColumnData } from '@/components/molecules/Table';
 import { PriceUnit } from '@/models/PriceUnit';
 import { QueryableDataArea } from '@/components/organisms';
@@ -16,73 +17,8 @@ import {
 	FilterCondition,
 } from '@/types/common/QueryBuilder';
 import { ENTITY_STATUS } from '@/models';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'code',
-		label: 'Code',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'code',
-		label: 'Code',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'base_currency',
-		label: 'Base Currency',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-];
+import { useTranslation } from 'react-i18next';
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -108,14 +44,6 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
 const formatConversionRate = (rate: string): string => {
 	if (!rate) return '-';
 	const numRate = parseFloat(rate);
@@ -127,8 +55,91 @@ const formatConversionRate = (rate: string): string => {
 };
 
 const PriceUnitsPage = () => {
+	const { t } = useTranslation('catalog');
 	const [activePriceUnit, setActivePriceUnit] = useState<PriceUnit | null>(null);
 	const [priceUnitDrawerOpen, setPriceUnitDrawerOpen] = useState(false);
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('priceUnits.listPage.sortLabels.name'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'code',
+				label: t('priceUnits.listPage.sortLabels.code'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'created_at',
+				label: t('priceUnits.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('priceUnits.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('priceUnits.listPage.filterLabels.name'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'code',
+				label: t('priceUnits.listPage.filterLabels.code'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'base_currency',
+				label: t('priceUnits.listPage.filterLabels.baseCurrency'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'status',
+				label: t('priceUnits.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('priceUnits.listPage.filterStatus.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('priceUnits.listPage.filterStatus.inactive') },
+				],
+			},
+			{
+				field: 'created_at',
+				label: t('priceUnits.listPage.filterLabels.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('priceUnits.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
 
 	const handleOnAdd = () => {
 		setActivePriceUnit(null);
@@ -144,37 +155,38 @@ const PriceUnitsPage = () => {
 		() => [
 			{
 				fieldName: 'name',
-				title: 'Name',
+				title: t('priceUnits.table.name'),
 			},
 			{
 				fieldName: 'code',
-				title: 'Code',
+				title: t('priceUnits.table.code'),
 			},
 			{
 				fieldName: 'symbol',
-				title: 'Symbol',
+				title: t('priceUnits.table.symbol'),
 			},
 			{
-				title: 'Base Currency',
+				title: t('priceUnits.table.baseCurrency'),
 				render: (row) => {
 					return row?.base_currency?.toUpperCase() || '-';
 				},
 			},
 			{
-				title: 'Conversion Rate',
+				title: t('priceUnits.table.conversionRate'),
 				render: (row) => {
 					return formatConversionRate(row?.conversion_rate || '');
 				},
 			},
 			{
-				title: 'Status',
+				title: t('priceUnits.table.status'),
 				render: (row) => {
-					const label = formatChips(row?.status);
-					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+					const isActive = row?.status === ENTITY_STATUS.PUBLISHED;
+					const label = isActive ? t('priceUnits.listPage.filterStatus.active') : t('priceUnits.listPage.filterStatus.inactive');
+					return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
-				title: 'Updated At',
+				title: t('priceUnits.table.updatedAt'),
 				render: (row) => {
 					return formatDate(row?.updated_at);
 				},
@@ -202,18 +214,18 @@ const PriceUnitsPage = () => {
 				},
 			},
 		],
-		[],
+		[t],
 	);
 
 	return (
-		<Page heading='Price Units' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('priceUnits.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<PriceUnitDrawer
 				data={activePriceUnit}
 				open={priceUnitDrawerOpen}
 				onOpenChange={setPriceUnitDrawerOpen}
 				refetchQueryKeys={['fetchPriceUnits']}
 			/>
-			<ApiDocsContent tags={['Price Units']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.PriceUnits} />
 			<div className='space-y-6'>
 				<QueryableDataArea<PriceUnit>
 					queryConfig={{
@@ -240,14 +252,14 @@ const PriceUnitsPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Price Units',
+						unit: t('priceUnits.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						heading: 'Price Units',
-						description: 'Create a price unit to define custom currencies or tokens for pricing.',
-						buttonLabel: 'Create Price Unit',
+						heading: t('priceUnits.listPage.emptyState.heading'),
+						description: t('priceUnits.listPage.emptyState.description'),
+						buttonLabel: t('priceUnits.listPage.emptyState.createButton'),
 						buttonAction: handleOnAdd,
-						tags: ['Price Units'],
+						tags: API_DOCS_TAGS.PriceUnits,
 					}}
 				/>
 			</div>

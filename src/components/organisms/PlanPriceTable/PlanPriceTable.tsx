@@ -23,7 +23,6 @@ import { ChargeValueCell } from '@/components/molecules';
 import { formatInvoiceCadence } from '@/pages';
 import { Dialog } from '@/components/ui';
 import { DeletePriceRequest } from '@/types/dto';
-import { ServerError } from '@/core/axios/types';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 import useFilterSorting from '@/hooks/useFilterSorting';
 import { FilterField, FilterFieldType, FilterOperator, DataType, SortDirection, FilterCondition } from '@/types/common/QueryBuilder';
@@ -31,6 +30,8 @@ import { sanitizeFilterConditions, sanitizeSortConditions } from '@/types/format
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import { ShortPagination } from '@/components/atoms';
 import type { SearchPricesResponse } from '@/types/dto';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 // ===== FILTER FIELD NAMES (no hardcoded strings in logic) =====
 const CHARGE_FILTER_FIELD = {
@@ -178,7 +179,7 @@ const getStatusChipVariant = (status: PRICE_STATUS): 'info' | 'default' | 'succe
 	}
 };
 
-const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?: string }): React.ReactNode => {
+const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?: string }, t: TFunction): React.ReactNode => {
 	const dateItems: React.ReactNode[] = [];
 
 	if (price.start_date && price.start_date.trim() !== '') {
@@ -187,7 +188,7 @@ const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?:
 			if (!isNaN(startDate.getTime())) {
 				dateItems.push(
 					<div key='start' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>Start</span>
+						<span className='text-xs font-medium text-gray-500'>{t('catalog:plans.organisms.planPriceTable.start')}</span>
 						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(startDate)}</span>
 					</div>,
 				);
@@ -203,7 +204,7 @@ const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?:
 			if (!isNaN(endDate.getTime())) {
 				dateItems.push(
 					<div key='end' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>End</span>
+						<span className='text-xs font-medium text-gray-500'>{t('catalog:plans.organisms.planPriceTable.end')}</span>
 						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(endDate)}</span>
 					</div>,
 				);
@@ -214,7 +215,7 @@ const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?:
 	}
 
 	if (dateItems.length === 0) {
-		return <span className='text-sm'>No date information</span>;
+		return <span className='text-sm'>{t('catalog:plans.organisms.planPriceTable.noDateInformation')}</span>;
 	}
 
 	return <div className='flex flex-col gap-2'>{dateItems}</div>;
@@ -244,6 +245,7 @@ const chargeSortOptions = [
 ];
 
 const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const navigate = useNavigate();
 	const [showTerminateModal, setShowTerminateModal] = useState(false);
 	const [selectedPriceForTermination, setSelectedPriceForTermination] = useState<Price | null>(null);
@@ -257,8 +259,8 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 		mutationFn: async ({ priceId, data }: { priceId: string; data?: DeletePriceRequest }) => {
 			return await PriceApi.DeletePrice(priceId, data);
 		},
-		onError: (error: ServerError) => {
-			toast.error(error?.error?.message || 'Error deleting price');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Error deleting price');
 		},
 	});
 
@@ -381,68 +383,71 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 	const totalItems = totalFromSearch || Math.max(offset + tableItems.length, limit * page);
 
 	// ===== TABLE COLUMNS =====
-	const chargeColumns: ColumnData<Price>[] = [
-		{
-			title: 'Display Name',
-			render: (row) => <span>{row.display_name ?? '--'}</span>,
-		},
-		{
-			title: 'Charge Type',
-			render: (row) => <span>{getPriceTypeLabel(row.type)}</span>,
-		},
-		{
-			title: 'Billing Timing',
-			render: (row) => <span>{formatInvoiceCadence(row.invoice_cadence as string)}</span>,
-		},
-		{
-			title: 'Billing Period',
-			render: (row) => <span>{formatBillingPeriod(row.billing_period as string)}</span>,
-		},
-		{
-			title: 'Status',
-			render: (row) => {
-				const status = getPriceStatus(row);
-				const variant = getStatusChipVariant(status);
-				const label = status.charAt(0).toUpperCase() + status.slice(1);
-				const tooltipContent = formatPriceDateTooltip(row);
-				return (
-					<Tooltip
-						content={tooltipContent}
-						delayDuration={0}
-						sideOffset={5}
-						className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[320px]'>
-						<span>
-							<Chip label={label} variant={variant} />
-						</span>
-					</Tooltip>
-				);
+	const chargeColumns: ColumnData<Price>[] = useMemo(
+		() => [
+			{
+				title: 'Display Name',
+				render: (row) => <span>{row.display_name ?? t('catalog:plans.organisms.planPriceTable.fallbackName')}</span>,
 			},
-		},
-		{
-			title: 'Value',
-			render: (row) => {
-				const priceWithPricingUnit = row as Price & { pricing_unit?: PriceUnit };
-				return <ChargeValueCell data={priceWithPricingUnit} />;
+			{
+				title: 'Charge Type',
+				render: (row) => <span>{getPriceTypeLabel(row.type)}</span>,
 			},
-		},
-		{
-			fieldVariant: 'interactive',
-			width: '30px',
-			hideOnEmpty: true,
-			render: (row) => {
-				const hasEndDate = !!(row.end_date && row.end_date.trim() !== '');
-				return (
-					<PriceDropdown
-						row={row}
-						hasEndDate={hasEndDate}
-						onEditPrice={handleEditPrice}
-						onEditDetails={handleEditDetails}
-						onTerminatePrice={handleTerminatePrice}
-					/>
-				);
+			{
+				title: 'Billing Timing',
+				render: (row) => <span>{formatInvoiceCadence(row.invoice_cadence as string)}</span>,
 			},
-		},
-	];
+			{
+				title: 'Billing Period',
+				render: (row) => <span>{formatBillingPeriod(row.billing_period as string)}</span>,
+			},
+			{
+				title: 'Status',
+				render: (row) => {
+					const status = getPriceStatus(row);
+					const variant = getStatusChipVariant(status);
+					const label = status.charAt(0).toUpperCase() + status.slice(1);
+					const tooltipContent = formatPriceDateTooltip(row, t);
+					return (
+						<Tooltip
+							content={tooltipContent}
+							delayDuration={0}
+							sideOffset={5}
+							className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[320px]'>
+							<span>
+								<Chip label={label} variant={variant} />
+							</span>
+						</Tooltip>
+					);
+				},
+			},
+			{
+				title: 'Value',
+				render: (row) => {
+					const priceWithPricingUnit = row as Price & { pricing_unit?: PriceUnit };
+					return <ChargeValueCell data={priceWithPricingUnit} />;
+				},
+			},
+			{
+				fieldVariant: 'interactive',
+				width: '30px',
+				hideOnEmpty: true,
+				render: (row) => {
+					const hasEndDate = !!(row.end_date && row.end_date.trim() !== '');
+					return (
+						<PriceDropdown
+							row={row}
+							hasEndDate={hasEndDate}
+							onEditPrice={handleEditPrice}
+							onEditDetails={handleEditDetails}
+							onTerminatePrice={handleTerminatePrice}
+						/>
+					);
+				},
+			},
+		],
+		[t],
+	);
 
 	// ===== RENDER =====
 	return (
@@ -484,10 +489,10 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 			{/* Charges Table - always show Card + QueryBuilder; inner content is filled or empty state */}
 			<Card variant='notched'>
 				<CardHeader
-					title='Charges'
+					title={t('catalog:plans.organisms.planPriceTable.charges')}
 					cta={
 						<Button prefixIcon={<Plus />} onClick={() => navigate(`${RouteNames.plan}/${plan.id}/add-charges`)}>
-							Add
+							{t('common:actions.add')}
 						</Button>
 					}
 				/>

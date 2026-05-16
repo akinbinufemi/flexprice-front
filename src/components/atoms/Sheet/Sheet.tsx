@@ -1,6 +1,8 @@
 import { FC, ReactNode, useRef, useEffect, useState, cloneElement, isValidElement } from 'react';
 import { Sheet as ShadcnSheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { useLocaleStore } from '@/store/useLocaleStore';
+import { Direction } from '@/config/branding';
 
 interface Props {
 	trigger?: ReactNode;
@@ -15,6 +17,8 @@ interface Props {
 
 const Sheet: FC<Props> = ({ children, trigger, description, title, isOpen, onOpenChange, className, size = 'sm' }) => {
 	const contentRef = useRef<HTMLDivElement>(null);
+	const direction = useLocaleStore((s) => s.direction);
+	const side = direction === Direction.RTL ? 'left' : 'right';
 	const [isScrollable, setIsScrollable] = useState(false);
 
 	useEffect(() => {
@@ -115,6 +119,7 @@ const Sheet: FC<Props> = ({ children, trigger, description, title, isOpen, onOpe
 			{trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
 			<SheetContent
 				ref={contentRef}
+				side={side}
 				className={cn('h-screen overflow-y-auto rounded-[10px]', className, {
 					'sm:max-w-sm': size === 'sm',
 					'sm:max-w-md': size === 'md',

@@ -6,9 +6,10 @@ import SubscriptionApi from '@/api/SubscriptionApi';
 import { SUBSCRIPTION_STATUS } from '@/models/Subscription';
 import { SubscriptionResponse, UpdateSubscriptionRequest } from '@/types/dto/Subscription';
 import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
+import { useTranslation } from 'react-i18next';
 
-function getPlanName(sub: SubscriptionResponse): string {
-	return sub.plan?.name ?? '—';
+function getPlanName(sub: SubscriptionResponse, fallbackPlanName: string): string {
+	return sub.plan?.name ?? fallbackPlanName;
 }
 
 export interface UpdateSubscriptionDrawerProps {
@@ -31,14 +32,16 @@ const UpdateSubscriptionDrawer: FC<UpdateSubscriptionDrawerProps> = ({
 	isSaving = false,
 	readOnly: readOnlyProp,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [parentId, setParentId] = useState<string>('');
 	const readOnly = readOnlyProp ?? (subscription ? isInheritedSubscription(subscription) : false);
+	const fallbackPlanName = t('updateSubscription.fallbackPlanName');
 
 	useEffect(() => {
 		if (open && subscription) {
 			setParentId(subscription.parent_subscription_id ?? '');
 		}
-	}, [open, subscription?.id, subscription?.parent_subscription_id]);
+	}, [open, subscription]);
 
 	const { data: subscriptionsData } = useQuery({
 		queryKey: ['updateSubscriptionDrawer', 'activeSubscriptions', open, subscriptionId],
@@ -52,19 +55,18 @@ const UpdateSubscriptionDrawer: FC<UpdateSubscriptionDrawerProps> = ({
 		enabled: open && !!subscriptionId,
 	});
 
-	const items = subscriptionsData?.items ?? [];
-	const excludedCurrent = useMemo(() => items.filter((sub) => sub.id !== subscriptionId), [items, subscriptionId]);
-
 	const parentOptions: SelectOption[] = useMemo(() => {
+		const rawItems = subscriptionsData?.items ?? [];
+		const excludedCurrent = rawItems.filter((sub) => sub.id !== subscriptionId);
 		const list = excludedCurrent.map((sub) => ({
 			value: sub.id,
-			label: getPlanName(sub),
+			label: getPlanName(sub, fallbackPlanName),
 		}));
 		if (parentId && !excludedCurrent.some((s) => s.id === parentId)) {
 			return [{ value: parentId, label: parentId }, ...list];
 		}
 		return list;
-	}, [excludedCurrent, parentId]);
+	}, [subscriptionsData?.items, subscriptionId, parentId, fallbackPlanName]);
 
 	const hasChanges = parentId !== (subscription?.parent_subscription_id ?? '');
 
@@ -83,18 +85,18 @@ const UpdateSubscriptionDrawer: FC<UpdateSubscriptionDrawerProps> = ({
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title='Update subscription'
-			description='Set parent subscription for this subscription.'
+			title={t('updateSubscription.title')}
+			description={t('updateSubscription.setParent')}
 			size='md'>
 			<div className='space-y-6 mt-4'>
 				<div>
 					<Select
-						label='Parent subscription'
-						placeholder='Select parent subscription'
+						label={t('updateSubscription.parentSubscription')}
+						placeholder={t('updateSubscription.selectParent')}
 						options={parentOptions}
 						value={parentId}
 						onChange={(value) => setParentId(value)}
-						noOptionsText='No subscriptions found'
+						noOptionsText={t('updateSubscription.noSubscriptionsFound')}
 						disabled={readOnly}
 					/>
 				</div>
@@ -102,10 +104,10 @@ const UpdateSubscriptionDrawer: FC<UpdateSubscriptionDrawerProps> = ({
 				<Spacer className='!h-4' />
 				<div className='flex justify-end gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)}>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} disabled={readOnly || !hasChanges || isSaving}>
-						{isSaving ? 'Saving…' : 'Save'}
+						{isSaving ? t('updateSubscription.saving') : t('common:actions.save')}
 					</Button>
 				</div>
 			</div>

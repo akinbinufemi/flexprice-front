@@ -4,11 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import PaymentApi from '@/api/PaymentApi';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { ApiDocsContent, CustomTabs } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { Loader, NoDataCard, ShortPagination } from '@/components/atoms';
 import { InvoicePaymentsTable, CreditNoteTable } from '@/components/molecules';
 import usePagination from '@/hooks/usePagination';
+import { useTranslation } from 'react-i18next';
 
 const CustomerInvoiceDetailsPage = () => {
+	const { t } = useTranslation('customers');
 	const { invoice_id } = useParams();
 	const { limit, offset } = usePagination();
 
@@ -37,36 +40,36 @@ const CustomerInvoiceDetailsPage = () => {
 	const tabs = [
 		{
 			value: 'Overview',
-			label: 'Overview',
+			label: t('detail.invoiceTabs.overview'),
 			content: <CustomerInvoiceDetail breadcrumb_index={4} invoice_id={invoice_id!} />,
 		},
 		{
 			value: 'payments',
-			label: 'Payments',
+			label: t('detail.invoiceTabs.payments'),
 			content: paymentsLoading ? (
 				<Loader />
 			) : (
 				<div>
 					<InvoicePaymentsTable data={payments?.items ?? []} />
-					<ShortPagination unit='Payments' totalItems={payments?.pagination.total ?? 0} />
+					<ShortPagination unit={t('detail.invoiceTabs.payments')} totalItems={payments?.pagination.total ?? 0} />
 				</div>
 			),
 		},
 		{
 			value: 'creditNotes',
-			label: 'Credit Notes',
+			label: t('detail.invoiceTabs.creditNotes'),
 			content: creditNotesLoading ? (
 				<Loader />
 			) : (
 				<div>
 					{creditNotes?.items?.length === 0 ? (
 						<div className='my-6'>
-							<NoDataCard title='Credit Notes' subtitle='No credit notes found' />
+							<NoDataCard title={t('detail.invoiceTabs.creditNotes')} subtitle={t('detail.creditNotesEmptySubtitle')} />
 						</div>
 					) : (
 						<>
 							<CreditNoteTable data={creditNotes?.items ?? []} />
-							<ShortPagination unit='Credit Notes' totalItems={creditNotes?.pagination.total ?? 0} />
+							<ShortPagination unit={t('detail.invoiceTabs.creditNotes')} totalItems={creditNotes?.pagination.total ?? 0} />
 						</>
 					)}
 				</div>
@@ -76,7 +79,7 @@ const CustomerInvoiceDetailsPage = () => {
 
 	return (
 		<div className='mt-5 '>
-			<ApiDocsContent tags={['Invoices']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<div className=''>
 				<CustomTabs tabs={tabs} defaultValue='Overview' />
 			</div>

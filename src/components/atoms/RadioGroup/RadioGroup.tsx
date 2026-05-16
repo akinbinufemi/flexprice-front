@@ -40,7 +40,7 @@ const RadioGroup: FC<Props> = ({ items, onChange, selected, title, disabled }) =
 								}
 							}}>
 							{item.icon && (
-								<div className='pl-2'>
+								<div className='ps-2'>
 									<item.icon className={'size-5'} />
 								</div>
 							)}

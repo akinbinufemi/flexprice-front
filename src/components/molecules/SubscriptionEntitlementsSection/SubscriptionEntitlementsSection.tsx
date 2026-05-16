@@ -1,4 +1,5 @@
 import { FC, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button, Card, CardHeader, Chip, Dialog, NoDataCard } from '@/components/atoms';
@@ -18,6 +19,7 @@ interface SubscriptionEntitlementsSectionProps {
 }
 
 const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> = ({ subscriptionId, readOnly = false }) => {
+	const { t } = useTranslation('common');
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -55,8 +57,8 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 			setIsDeleteDialogOpen(false);
 			setEntitlementToDelete(null);
 		},
-		onError: (error: any) => {
-			toast.error(error?.error?.message || 'Failed to delete entitlement');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to delete entitlement');
 		},
 	});
 
@@ -79,11 +81,11 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 		const type = featureType?.toLowerCase();
 		switch (type) {
 			case 'metered':
-				return <Chip label='Metered' variant='info' />;
+				return <Chip label={t('labels.metered')} variant='info' />;
 			case 'boolean':
-				return <Chip label='Boolean' variant='success' />;
+				return <Chip label={t('labels.boolean')} variant='success' />;
 			case 'static':
-				return <Chip label='Static' variant='warning' />;
+				return <Chip label={t('labels.static')} variant='warning' />;
 			default:
 				return <Chip label={featureType} variant='info' />;
 		}
@@ -98,11 +100,11 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 			const resetPeriod = entitlementData?.usage_reset_period;
 			return limit !== null && limit !== undefined
 				? `${limit.toLocaleString()}${resetPeriod ? ` / ${resetPeriod.toLowerCase()}` : ''}`
-				: 'Unlimited';
+				: t('labels.unlimited');
 		} else if (featureType === FEATURE_TYPE.STATIC) {
 			return entitlementData?.static_value || '--';
 		} else if (featureType === FEATURE_TYPE.BOOLEAN) {
-			return entitlementData?.is_enabled ? 'Enabled' : 'Disabled';
+			return entitlementData?.is_enabled ? t('labels.enabled') : t('labels.disabled');
 		}
 		return '--';
 	};
@@ -131,7 +133,7 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 	const columns: ColumnData<any>[] = [
 		{
 			title: 'Feature Name',
-			render: (row: any) => <span>{row.feature?.name || 'Unknown Feature'}</span>,
+			render: (row: any) => <span>{row.feature?.name || t('labels.unknownFeature')}</span>,
 		},
 		{
 			title: 'Feature Type',
@@ -175,7 +177,7 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 									}}
 									className='flex gap-2 items-center cursor-pointer text-red-600'>
 									<Trash2 className='h-4 w-4' />
-									<span>Delete</span>
+									<span>{t('actions.delete')}</span>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -196,9 +198,9 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 	if (isLoading) {
 		return (
 			<Card variant='notched'>
-				<CardHeader title='Entitlements' />
+				<CardHeader title={t('labels.entitlements')} />
 				<div className='flex justify-center items-center py-8'>
-					<span className='text-gray-500'>Loading entitlements...</span>
+					<span className='text-gray-500'>{t('labels.loadingEntitlements')}</span>
 				</div>
 			</Card>
 		);
@@ -213,10 +215,10 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 			{entitlements.length > 0 ? (
 				<Card variant='notched'>
 					<CardHeader
-						title='Entitlements'
+						title={t('labels.entitlements')}
 						cta={
 							<Button prefixIcon={<Plus />} onClick={() => setDrawerOpen(true)} disabled={readOnly}>
-								Add
+								{t('actions.add')}
 							</Button>
 						}
 					/>
@@ -224,11 +226,11 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 				</Card>
 			) : (
 				<NoDataCard
-					title='Entitlements'
-					subtitle='No entitlements added to this subscription yet'
+					title={t('labels.entitlements')}
+					subtitle={t('labels.noEntitlementsAddedYet')}
 					cta={
 						<Button prefixIcon={<Plus />} onClick={() => setDrawerOpen(true)} disabled={readOnly}>
-							Add
+							{t('actions.add')}
 						</Button>
 					}
 				/>
@@ -244,8 +246,8 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 
 			{/* Delete Confirmation Dialog */}
 			<Dialog
-				title={`Are you sure you want to delete the entitlement for "${entitlementToDelete?.feature?.name || 'this feature'}"?`}
-				description='This action cannot be undone.'
+				title={`Are you sure you want to delete the entitlement for "${entitlementToDelete?.feature?.name || t('labels.thisFeature')}"?`}
+				description={t('confirm.deleteDescription')}
 				titleClassName='text-lg font-normal text-gray-800'
 				isOpen={isDeleteDialogOpen}
 				onOpenChange={setIsDeleteDialogOpen}
@@ -253,10 +255,10 @@ const SubscriptionEntitlementsSection: FC<SubscriptionEntitlementsSectionProps> 
 				<div className='flex flex-col gap-4 items-end justify-center'>
 					<div className='flex gap-4'>
 						<Button variant='outline' onClick={cancelDelete} disabled={isDeletingEntitlement}>
-							Cancel
+							{t('actions.cancel')}
 						</Button>
 						<Button variant='destructive' onClick={confirmDelete} disabled={isDeletingEntitlement}>
-							{isDeletingEntitlement ? 'Deleting...' : 'Delete'}
+							{isDeletingEntitlement ? t('status.deleting') : t('actions.delete')}
 						</Button>
 					</div>
 				</div>

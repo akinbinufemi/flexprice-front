@@ -1,17 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { Button, SelectOption } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { UsageTable, SubscriptionForm } from '@/components/organisms';
 import { AlertTriangle } from 'lucide-react';
 
 import { AddonApi, CustomerApi, PlanApi, SubscriptionApi, TaxApi, CouponApi } from '@/api';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { RouteNames } from '@/core/routes/Routes';
-import { getApiErrorMessage } from '@/core/axios/types';
 
 import {
 	SubscriptionPhase,
@@ -54,6 +55,12 @@ import {
 	isOneTimePlanPrice,
 	uniqueRecurringBillingPeriodsFromPrices,
 } from '@/utils/subscription/planPricesForSubscriptionUi';
+
+const SANDBOX_END_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+};
 
 function subscriptionChargesHaveFixedPrice(
 	prices: SearchPricesResponse | null,
@@ -215,6 +222,7 @@ const usePlanDetails = (planId: string | undefined) => {
 };
 
 const CreateCustomerSubscriptionPage: React.FC = () => {
+	const { t } = useTranslation(['customers', 'common']);
 	const { id: customerId, subscription_id } = useParams<Params>();
 	const navigate = useNavigate();
 	const updateBreadcrumb = useBreadcrumbsStore((state) => state.updateBreadcrumb);
@@ -366,6 +374,13 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 					}
 					return { autoInvoiceThreshold: '' };
 				})(),
+				...(() => {
+					const ait = (subscriptionData.details as { auto_invoice_threshold?: number | null }).auto_invoice_threshold;
+					if (typeof ait === 'number' && Number.isFinite(ait)) {
+						return { autoInvoiceThresholdEnabled: true, autoInvoiceThreshold: String(ait) };
+					}
+					return { autoInvoiceThresholdEnabled: false, autoInvoiceThreshold: '' };
+				})(),
 			}));
 		}
 	}, [subscriptionData, customerId]);
@@ -419,15 +434,15 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		},
 		onSuccess: async (_, variables) => {
 			const isDraft = variables.subscription_status === SUBSCRIPTION_STATUS.DRAFT;
-			toast.success(isDraft ? 'Draft subscription saved successfully' : 'Subscription created successfully');
+			toast.success(isDraft ? t('subscriptionCreate.toast.draftSaved') : t('subscriptionCreate.toast.created'));
 
 			refetchQueries(['debug-customers']);
 			refetchQueries(['debug-subscriptions']);
 
 			navigate(`${RouteNames.customers}/${customerId}`);
 		},
-		onError: (error: unknown) => {
-			toast.error(getApiErrorMessage(error, 'Error creating subscription'));
+		onError: (error: Error) => {
+			toast.error(error.message || t('subscriptionCreate.toast.error'));
 		},
 	});
 
@@ -438,28 +453,28 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		const { billingPeriod, selectedPlan, startDate, phases } = subscriptionState;
 
 		if (!billingPeriod || !selectedPlan) {
-			return 'Please select a plan and billing period.';
+			return t('subscriptionCreate.validation.planAndPeriod');
 		}
 
 		if (!startDate) {
-			return 'Please select a start date for the subscription.';
+			return t('subscriptionCreate.validation.startDate');
 		}
 
 		for (let i = 0; i < phases.length; i++) {
 			if (!phases[i].start_date) {
-				return `Please select a start date for phase ${i + 1}`;
+				return t('subscriptionCreate.validation.phaseStartDate', { phase: i + 1 });
 			}
 		}
 
 		if (subscriptionState.isPhaseEditing) {
-			return 'Please save your changes before submitting.';
+			return t('subscriptionCreate.validation.saveEditsFirst');
 		}
 
 		const trialRaw = subscriptionState.subscriptionTrialPeriodDays.trim();
 		if (trialRaw !== '') {
 			const n = parseInt(trialRaw, 10);
 			if (!Number.isFinite(n) || n < 1) {
-				return 'Enter a valid trial length in days (at least 1), or leave empty to use the plan default.';
+				return t('subscriptionCreate.validation.trialDays');
 			}
 		}
 
@@ -472,11 +487,11 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		const thresholdRaw = subscriptionState.autoInvoiceThreshold.trim();
 		if (thresholdRaw !== '') {
 			if (hasFixedCharges) {
-				return 'Auto invoice threshold is not available when the plan includes fixed charges.';
+				return t('subscriptionCreate.validation.autoThresholdFixed');
 			}
 			const n = parseFloat(thresholdRaw);
 			if (!Number.isFinite(n) || n < 0) {
-				return 'Enter a valid auto invoice threshold (0 or greater), or leave empty to omit.';
+				return t('subscriptionCreate.validation.autoThresholdNonNegative');
 			}
 		}
 
@@ -668,13 +683,13 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 					const full = await CustomerApi.getCustomerById(invoicingCustomer.id);
 					ext = full.external_id?.trim() || undefined;
 				} catch {
-					toast.error('Could not load billing customer details.');
+					toast.error(t('subscriptionCreate.billingCustomer.loadFailed'));
 					return;
 				}
 			}
 			invoicingCustomerExternalId = ext;
 			if (!invoicingCustomerExternalId) {
-				toast.error('Billing customer must have an external ID.');
+				toast.error(t('subscriptionCreate.billingCustomer.missingExternalId'));
 				return;
 			}
 		}
@@ -753,7 +768,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 
 	return (
 		<div className={cn('flex gap-8 mt-5 relative mb-12')}>
-			<ApiDocsContent tags={['Subscriptions']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.SubscriptionsOnly} />
 			<div className='flex-[6] space-y-6 mb-12 overflow-y-auto pr-4'>
 				{subscriptionData?.usage?.charges && subscriptionData.usage.charges.length > 0 && (
 					<div>
@@ -786,15 +801,12 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 					<div className='w-full flex items-center gap-2.5 rounded-md border border-amber-300 bg-amber-50/80 px-3 py-2.5'>
 						<AlertTriangle className='h-4 w-4 flex-shrink-0 text-amber-600' />
 						<span className='text-sm font-medium text-amber-800 leading-relaxed'>
-							This is a sandbox subscription and will automatically end on{' '}
-							{new Date(
-								new Date(subscriptionState.startDate).getTime() + SANDBOX_AUTO_CANCELLATION_DAYS * 24 * 60 * 60 * 1000,
-							).toLocaleDateString('en-US', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric',
-							})}{' '}
-							({SANDBOX_AUTO_CANCELLATION_DAYS} days from now).
+							{t('subscriptionCreate.sandboxNotice', {
+								date: new Date(
+									new Date(subscriptionState.startDate).getTime() + SANDBOX_AUTO_CANCELLATION_DAYS * 24 * 60 * 60 * 1000,
+								).toLocaleDateString('en-US', SANDBOX_END_DATE_FORMAT),
+								days: SANDBOX_AUTO_CANCELLATION_DAYS,
+							})}
 						</span>
 					</div>
 				)}
@@ -803,14 +815,14 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 					<div className='flex items-center justify-between'>
 						<div className='flex items-center space-x-4'>
 							<Button onClick={navigateBack} variant={'outline'} disabled={isCreating}>
-								Cancel
+								{t('common:actions.cancel')}
 							</Button>
 							<Button onClick={handleDraftSubmit} isLoading={isCreating && isDraft} variant={'outline'} disabled={isCreating}>
-								Save as Draft
+								{t('subscriptionCreate.saveAsDraft')}
 							</Button>
 						</div>
 						<Button onClick={handleRegularSubmit} isLoading={isCreating && !isDraft} disabled={isCreating}>
-							Add
+							{t('common:actions.add')}
 						</Button>
 					</div>
 				)}

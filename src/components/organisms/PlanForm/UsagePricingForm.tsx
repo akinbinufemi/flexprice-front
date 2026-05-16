@@ -20,6 +20,7 @@ import FeatureApi from '@/api/FeatureApi';
 import { ENTITY_STATUS } from '@/models/base';
 import { CurrencyPriceUnitSelector } from '@/components/molecules';
 import { CurrencyPriceUnitSelection, isPriceUnitOption } from '@/types/common';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Enum for internal price states to avoid typos and provide better type safety
@@ -86,6 +87,7 @@ const UsagePricingForm: FC<Props> = ({
 	entityType = PRICE_ENTITY_TYPE.PLAN,
 	entityId,
 }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const [currency, setCurrency] = useState(price.currency || currencyOptions[0].value);
 	const [priceUnitType, setPriceUnitType] = useState<PRICE_UNIT_TYPE>(price.price_unit_type || PRICE_UNIT_TYPE.FIAT);
 	const [priceUnitConfig, setPriceUnitConfig] = useState(price.price_unit_config);
@@ -490,16 +492,16 @@ const UsagePricingForm: FC<Props> = ({
 					}
 				}}
 				value={selectedFeature?.id}
-				label='Feature'
-				placeholder='Select a metered feature'
+				label={t('catalog:plans.organisms.usageForm.feature')}
+				placeholder={t('catalog:plans.organisms.usageForm.selectMeteredFeature')}
 			/>
 			<Spacer height='8px' />
 			<Input
 				onChange={(value) => setDisplayName(value)}
 				value={displayName}
 				variant='text'
-				label='Display Name'
-				placeholder={selectedFeature?.name || 'Enter display name'}
+				label={t('catalog:plans.organisms.priceForm.displayName')}
+				placeholder={selectedFeature?.name || t('catalog:plans.organisms.priceForm.enterDisplayName')}
 				error={errors.display_name}
 			/>
 			<Spacer height='8px' />
@@ -507,7 +509,7 @@ const UsagePricingForm: FC<Props> = ({
 			<CurrencyPriceUnitSelector
 				value={currencyPriceUnitValue}
 				onChange={handleCurrencyPriceUnitChange}
-				label='Currency'
+				label={t('catalog:plans.organisms.priceForm.currency')}
 				error={errors.currency}
 			/>
 			<Spacer height='8px' />
@@ -517,8 +519,8 @@ const UsagePricingForm: FC<Props> = ({
 				onChange={(value) => {
 					setBillingPeriod(value as BILLING_PERIOD);
 				}}
-				label='Billing Period'
-				placeholder='Select The Billing Period'
+				label={t('catalog:plans.organisms.priceForm.billingPeriod')}
+				placeholder={t('catalog:plans.organisms.usageForm.selectBillingPeriod')}
 				error={errors.billing_period}
 			/>
 			<Spacer height={'8px'} />
@@ -527,19 +529,19 @@ const UsagePricingForm: FC<Props> = ({
 				value={billingModel}
 				options={billingModels}
 				onChange={setBillingModel}
-				label='Billing Model'
+				label={t('catalog:plans.organisms.usageForm.billingModel')}
 				error={errors.billing_model}
-				placeholder='Billing Model'
+				placeholder={t('catalog:plans.organisms.usageForm.billingModelPlaceholder')}
 			/>
 			<Spacer height='8px' />
 
 			{billingModel === billingModels[0].value && (
 				<div className='space-y-2'>
 					<Input
-						placeholder='0.00'
+						placeholder={t('catalog:plans.organisms.usageForm.amountPlaceholder')}
 						variant='formatted-number'
 						error={inputErrors.flatModelError}
-						label='Price'
+						label={t('catalog:plans.organisms.priceForm.price')}
 						value={flatFee}
 						inputPrefix={displayCurrencySymbol}
 						onChange={(e) => {
@@ -559,8 +561,8 @@ const UsagePricingForm: FC<Props> = ({
 					<div className='flex w-full gap-2 items-end'>
 						<Input
 							variant='formatted-number'
-							label='Price'
-							placeholder='0.00'
+							label={t('catalog:plans.organisms.priceForm.price')}
+							placeholder={t('catalog:plans.organisms.usageForm.amountPlaceholder')}
 							value={packagedFee.price}
 							inputPrefix={displayCurrencySymbol}
 							onChange={(e) => {
@@ -572,7 +574,7 @@ const UsagePricingForm: FC<Props> = ({
 							}}
 						/>
 						<div className='h-[50px] items-center flex gap-2'>
-							<p className='text-[#18181B] font-medium'>per</p>
+							<p className='text-[#18181B] font-medium'>{t('catalog:plans.organisms.usageForm.per')}</p>
 						</div>
 						<Input
 							value={packagedFee.unit}
@@ -611,9 +613,9 @@ const UsagePricingForm: FC<Props> = ({
 			<SelectGroup
 				value={groupId}
 				onChange={(group: Group | null) => setGroupId(group?.id)}
-				label='Group'
-				placeholder='Select a group (optional)'
-				description='Assign this price to a group for better organization'
+				label={t('catalog:plans.organisms.priceForm.group')}
+				placeholder={t('catalog:plans.organisms.priceForm.groupPlaceholder')}
+				description={t('catalog:plans.organisms.priceForm.groupDescription')}
 				showLookupKey={false}
 				hiddenIfEmpty
 			/>
@@ -648,17 +650,17 @@ const UsagePricingForm: FC<Props> = ({
 				popoverClassName='w-full'
 				popoverContentClassName='w-full'
 				setDate={setStartDate}
-				label='Start Date (Optional)'
-				placeholder='Select start date'
+				label={t('catalog:plans.organisms.priceForm.startDateOptional')}
+				placeholder={t('catalog:plans.organisms.priceForm.selectStartDate')}
 			/>
 
 			<Spacer height={'16px'} />
 			<div className='flex justify-end'>
-				<Button onClick={handleCancel} variant='secondary' className='mr-4 text-zinc-900'>
-					{price.internal_state === PriceInternalState.EDIT ? 'Delete' : 'Cancel'}
+				<Button onClick={handleCancel} variant='secondary' className='me-4 text-zinc-900'>
+					{price.internal_state === PriceInternalState.EDIT ? t('common:actions.delete') : t('common:actions.cancel')}
 				</Button>
-				<Button onClick={handleSubmit} variant='default' className='mr-4 font-normal'>
-					{price.internal_state === PriceInternalState.EDIT ? 'Update' : 'Add'}
+				<Button onClick={handleSubmit} variant='default' className='me-4 font-normal'>
+					{price.internal_state === PriceInternalState.EDIT ? t('common:actions.update') : t('common:actions.add')}
 				</Button>
 			</div>
 		</div>

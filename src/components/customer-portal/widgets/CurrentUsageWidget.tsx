@@ -2,6 +2,7 @@ import { Card, Progress } from '@/components/atoms';
 import { CustomerUsage } from '@/models';
 import { FEATURE_TYPE } from '@/models/Feature';
 import { formatAmount } from '@/components/atoms/Input/Input';
+import { useTranslation } from 'react-i18next';
 
 interface CurrentUsageWidgetProps {
 	usageData: CustomerUsage[];
@@ -9,6 +10,7 @@ interface CurrentUsageWidgetProps {
 }
 
 const CurrentUsageWidget = ({ usageData, label }: CurrentUsageWidgetProps) => {
+	const { t } = useTranslation('customer-portal');
 	const meteredUsage = usageData?.filter((item) => item.feature?.type === FEATURE_TYPE.METERED) || [];
 
 	// Return null if no data — no empty container shown
@@ -20,7 +22,7 @@ const CurrentUsageWidget = ({ usageData, label }: CurrentUsageWidgetProps) => {
 			style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
 			<div className='p-6' style={{ borderBottom: '1px solid var(--portal-border, #E9E9E9)' }}>
 				<h3 className='text-base font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-					{label || 'Usage Quota'}
+					{label || t('usage.quotaTitle')}
 				</h3>
 			</div>
 			<div className='p-6 space-y-4'>
@@ -34,11 +36,11 @@ const CurrentUsageWidget = ({ usageData, label }: CurrentUsageWidgetProps) => {
 						<div key={item.feature?.id || index} className='space-y-2'>
 							<div className='flex items-center justify-between'>
 								<span className='text-sm' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-									{item.feature?.name || 'Unknown Feature'}
+									{item.feature?.name || t('usage.unknownFeature')}
 								</span>
 								<span className='text-sm' style={{ color: 'var(--portal-text-secondary, #71717a)' }}>
 									{formatAmount(usage.toString())}
-									{limit ? ` / ${formatAmount(limit.toString())}` : ' / Unlimited'}
+									{limit ? ` / ${formatAmount(limit.toString())}` : ` / ${t('usage.unlimited')}`}
 								</span>
 							</div>
 							<Progress

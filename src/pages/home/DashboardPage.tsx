@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Page } from '@/components/atoms';
 import { Skeleton } from '@/components/ui';
@@ -8,18 +9,19 @@ import { GetMonitoringDataRequest } from '@/types';
 import { WindowSize } from '@/models';
 import { TIME_PERIOD } from '@/constants/constants';
 import {
-	ApiDocsContent,
 	EventsMonitoringChart,
 	DashboardControls,
 	RecentSubscriptionsCard,
 	// RevenueTrendCard,
 	InvoiceIssuesCard,
+	ApiDocsContent,
 } from '@/components/molecules';
 import { useRecentSubscriptions, /* useRevenueData, */ useInvoiceIssues } from '@/hooks/useDashboardData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui';
 import { AlertCircle } from 'lucide-react';
 import { getTypographyClass } from '@/lib/typography';
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 const getTimeRangeForPeriod = (period: TIME_PERIOD): { startDate: Date; endDate: Date } => {
 	const endDate = new Date();
@@ -44,6 +46,7 @@ const getTimeRangeForPeriod = (period: TIME_PERIOD): { startDate: Date; endDate:
 };
 
 const DashboardPage = () => {
+	const { t } = useTranslation('common');
 	const [timePeriod, setTimePeriod] = useState<TIME_PERIOD>(TIME_PERIOD.LAST_DAY);
 	const [windowSize, setWindowSize] = useState<WindowSize>(WindowSize.HOUR);
 
@@ -110,7 +113,7 @@ const DashboardPage = () => {
 
 	// Format "Updated just now" timestamp
 	const getUpdatedTime = () => {
-		return 'Updated just now';
+		return t('dashboardHome.updatedJustNow');
 	};
 
 	// Handle errors
@@ -143,9 +146,9 @@ const DashboardPage = () => {
 			<CardHeader className='pb-4'>
 				<div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
 					<div>
-						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>Events Monitoring</CardTitle>
+						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>{t('dashboardHome.eventsMonitoring')}</CardTitle>
 						<CardDescription className={getTypographyClass('helper-text', 'mt-1')}>
-							Event processing metrics and lag information
+							{t('dashboardHome.eventsMonitoringDescription')}
 						</CardDescription>
 					</div>
 				</div>
@@ -153,9 +156,7 @@ const DashboardPage = () => {
 			<CardContent className='pt-0'>
 				<div className='flex flex-col items-center justify-center py-12'>
 					<AlertCircle className='h-10 w-10 text-red-500 mb-3' />
-					<p className={getTypographyClass('body-default', 'text-zinc-600 text-center')}>
-						Failed to load monitoring data. Please try again later.
-					</p>
+					<p className={getTypographyClass('body-default', 'text-zinc-600 text-center')}>{t('dashboardHome.monitoringLoadFailed')}</p>
 				</div>
 			</CardContent>
 		</Card>
@@ -163,7 +164,7 @@ const DashboardPage = () => {
 
 	return (
 		<Page
-			heading='Home'
+			heading={t('dashboardHome.pageTitle')}
 			headingCTA={
 				<DashboardControls
 					timePeriod={timePeriod}
@@ -172,7 +173,7 @@ const DashboardPage = () => {
 					onWindowSizeChange={setWindowSize}
 				/>
 			}>
-			<ApiDocsContent tags={['Events']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Events} />
 			<div className='space-y-6'>
 				{/* Events Monitoring Chart */}
 				<div>
@@ -184,7 +185,7 @@ const DashboardPage = () => {
 						monitoringData && (
 							<EventsMonitoringChart
 								data={monitoringData}
-								title='Events Monitoring'
+								title={t('dashboardHome.eventsMonitoring')}
 								description={getUpdatedTime()}
 								onViewLatestData={() => setTimePeriod(TIME_PERIOD.LAST_30_DAYS)}
 							/>

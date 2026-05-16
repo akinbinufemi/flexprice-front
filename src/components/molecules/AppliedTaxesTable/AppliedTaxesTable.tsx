@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 import FlexpriceTable, { ColumnData, RedirectCell, TooltipCell } from '../Table';
 import { TaxApplied } from '@/models/Tax';
@@ -37,6 +38,7 @@ const formatTaxValue = (taxRate: TaxRateResponse | undefined, currency: string =
 };
 
 const AppliedTaxesTable: FC<Props> = ({ data }) => {
+	const { t } = useTranslation('common');
 	// Fetch tax rate details for each applied tax
 	const taxRateIds = [...new Set(data.map((tax) => tax.tax_rate_id))];
 
@@ -110,7 +112,7 @@ const AppliedTaxesTable: FC<Props> = ({ data }) => {
 		return (
 			<div className='my-6'>
 				<div className='text-center text-gray-500 py-8'>
-					<p className='text-sm'>No taxes applied to this invoice</p>
+					<p className='text-sm'>{t('labels.noTaxesApplied')}</p>
 				</div>
 			</div>
 		);

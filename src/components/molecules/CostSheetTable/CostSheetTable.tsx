@@ -3,11 +3,11 @@ import FlexpriceTable, { ColumnData } from '../Table';
 import CostSheet from '@/models/CostSheet';
 import { ENTITY_STATUS } from '@/models';
 import { ActionButton, Chip } from '@/components/atoms';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
 import CostSheetApi from '@/api/CostSheetApi';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data: CostSheet[];
@@ -16,25 +16,31 @@ interface Props {
 
 const CostSheetTable: FC<Props> = ({ data, onEdit }) => {
 	const navigate = useNavigate();
+	const { t } = useTranslation(['catalog', 'common']);
 
 	const columnData: ColumnData<CostSheet>[] = [
 		{
 			fieldName: 'name',
-			title: 'Cost Sheet Name',
+			title: t('catalog:costSheets.table.costSheetName'),
 		},
 		{
 			fieldName: 'lookup_key',
-			title: 'Lookup Key',
+			title: t('catalog:costSheets.table.lookupKey'),
 		},
 		{
-			title: 'Status',
+			title: t('catalog:costSheets.table.status'),
 			render: (row) => {
-				const label = formatChips(row?.status);
-				return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+				const isPublished = row?.status === ENTITY_STATUS.PUBLISHED;
+				return (
+					<Chip
+						variant={isPublished ? 'success' : 'default'}
+						label={isPublished ? t('common:status.active') : t('common:status.inactive')}
+					/>
+				);
 			},
 		},
 		{
-			title: 'Updated At',
+			title: t('catalog:costSheets.table.updatedAt'),
 			render: (row) => {
 				return formatDate(row?.updated_at);
 			},

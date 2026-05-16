@@ -1,5 +1,6 @@
 import { Button, Chip, FormHeader, Select, SelectOption, Sheet, Spacer } from '@/components/atoms';
 import { FC, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CSVBoxButton } from '@csvbox/react';
 import { cn } from '@/lib/utils';
 import { CircleAlert, Download, LoaderCircleIcon, RefreshCcw, X } from 'lucide-react';
@@ -37,16 +38,6 @@ interface ImportMeta {
 	sheet_id: number;
 	sheet_name: string;
 }
-
-const mapStatusChips = (status: string) => {
-	if (status === 'COMPLETED') {
-		return 'Successful';
-	} else if (status === 'FAILED') {
-		return 'Failed';
-	} else if (status === 'PROCESSING' || status === 'PENDING') {
-		return 'Queued';
-	}
-};
 
 const getLicenseKey = (tab: string): string => {
 	switch (tab.toLowerCase()) {
@@ -88,7 +79,13 @@ const getSampleFileUrl = (tab: string): string => {
 	}
 };
 
-const getTaskStatusChips = (status: string) => {
+const getTaskStatusChips = (status: string, t: (k: string) => string) => {
+	const mapStatusChips = (s: string) => {
+		if (s === 'COMPLETED') return t('import.taskStatus.successful');
+		if (s === 'FAILED') return t('import.taskStatus.failed');
+		if (s === 'PROCESSING' || s === 'PENDING') return t('import.taskStatus.queued');
+		return s;
+	};
 	if (status === 'COMPLETED') {
 		return <Chip variant='success' label={mapStatusChips(status)} />;
 	} else if (status === 'FAILED') {
@@ -101,45 +98,32 @@ const getTaskStatusChips = (status: string) => {
 };
 
 const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
-	const importTypeOptions: SelectOption[] = [
-		{
-			label: 'Events',
-			value: 'EVENTS',
-		},
-		{
-			label: 'Customers',
-			value: 'CUSTOMERS',
-		},
-		{
-			label: 'Features',
-			value: 'FEATURES',
-		},
-		{
-			label: 'Prices',
-			value: 'PRICES',
-		},
-	];
-	const fileTypeOptions: SelectOption[] = [
-		{
-			label: 'Csv',
-			value: 'CSV',
-		},
-		{
-			label: 'Json',
-			value: 'JSON',
-		},
-	];
+	const { t } = useTranslation(['settings', 'common']);
 
-	const taskTypeOptions: SelectOption[] = [
-		{
-			label: 'Import',
-			value: 'IMPORT',
-		},
-		{
-			label: 'Export',
-			value: 'EXPORT',
-		},
-	];
+	const importTypeOptions: SelectOption[] = useMemo(
+		() => [
+			{ label: t('import.entityTypes.events'), value: 'EVENTS' },
+			{ label: t('import.entityTypes.customers'), value: 'CUSTOMERS' },
+			{ label: t('import.entityTypes.features'), value: 'FEATURES' },
+			{ label: t('import.entityTypes.prices'), value: 'PRICES' },
+		],
+		[t],
+	);
+	const fileTypeOptions: SelectOption[] = useMemo(
+		() => [
+			{ label: t('import.fileTypes.csv'), value: 'CSV' },
+			{ label: t('import.fileTypes.json'), value: 'JSON' },
+		],
+		[t],
+	);
+
+	const taskTypeOptions: SelectOption[] = useMemo(
+		() => [
+			{ label: t('import.taskTypes.import'), value: 'IMPORT' },
+			{ label: t('import.taskTypes.export'), value: 'EXPORT' },
+		],
+		[t],
+	);
 
 	const [uploadedFile, setUploadedFile] = useState<Partial<ImportMeta>>();
 
@@ -178,8 +162,8 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 			setUploadedFile(undefined);
 			await refetchQueries('importTasks');
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Something went wrong. Please try again.');
+		onError: (error: Error) => {
+			toast.error(error.message || t('common:toast.genericError'));
 		},
 	});
 
@@ -215,53 +199,54 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 		}
 	}, [isOpen]);
 
-	const importDetails = [
-		{
-			label: 'Type',
-			value: uploadedTaskDetails?.entity_type && toSentenceCase(uploadedTaskDetails.entity_type),
-		},
-		// {
-		// 	label: 'Meter',
-		// 	value: 'Billable Meter',
-		// },
-		{
-			label: 'Status',
-			// value: getTaskStatusChips(uploadedTaskDetails?.task_status || ''),
-			value: getTaskStatusChips(uploadedTaskDetails?.task_status || ''),
-		},
-		{
-			label: 'Import Started at',
-			value: uploadedTaskDetails?.started_at ? formatDate(new Date(uploadedTaskDetails.started_at)) : formatDate(new Date()),
-		},
-		{
-			label: 'Import Completed at',
-			value: uploadedTaskDetails?.completed_at ? formatDate(new Date(uploadedTaskDetails.completed_at)) : formatDate(new Date()),
-		},
-	];
+	const importDetails = useMemo(
+		() => [
+			{
+				label: t('import.detailLabels.type'),
+				value: uploadedTaskDetails?.entity_type && toSentenceCase(uploadedTaskDetails.entity_type),
+			},
+			{
+				label: t('import.detailLabels.status'),
+				value: getTaskStatusChips(uploadedTaskDetails?.task_status || '', t),
+			},
+			{
+				label: t('import.detailLabels.importStartedAt'),
+				value: uploadedTaskDetails?.started_at ? formatDate(new Date(uploadedTaskDetails.started_at)) : formatDate(new Date()),
+			},
+			{
+				label: t('import.detailLabels.importCompletedAt'),
+				value: uploadedTaskDetails?.completed_at ? formatDate(new Date(uploadedTaskDetails.completed_at)) : formatDate(new Date()),
+			},
+		],
+		[uploadedTaskDetails, t],
+	);
 
-	const processedRows = [
-		{
-			label: 'Total Rows',
-			value:
-				uploadedTaskDetails?.total_records || uploadedTaskDetails?.successful_records || 0 + (uploadedTaskDetails?.failed_records || 0),
-		},
-		{
-			label: 'Failed Rows',
-			value: uploadedTaskDetails?.failed_records,
-		},
-		{
-			label: 'Successful Rows',
-			value: uploadedTaskDetails?.successful_records,
-		},
-	];
+	const processedRows = useMemo(
+		() => [
+			{
+				label: t('import.rowStats.totalRows'),
+				value:
+					uploadedTaskDetails?.total_records || uploadedTaskDetails?.successful_records || 0 + (uploadedTaskDetails?.failed_records || 0),
+			},
+			{
+				label: t('import.rowStats.failedRows'),
+				value: uploadedTaskDetails?.failed_records,
+			},
+			{
+				label: t('import.rowStats.successfulRows'),
+				value: uploadedTaskDetails?.successful_records,
+			},
+		],
+		[uploadedTaskDetails, t],
+	);
 
 	const handleImport = (file?: Partial<ImportMeta>) => {
 		seterrors({} as any);
 		if (!file && !uploadedFile) {
-			seterrors((prev) => ({ ...prev, file: 'Please upload a file' }));
+			seterrors((prev) => ({ ...prev, file: t('import.validation.uploadFile') }));
 		}
 		if (!entityType) {
-			seterrors((prev) => ({ ...prev, entity_type: 'Please select an entity type' }));
+			seterrors((prev) => ({ ...prev, entity_type: t('import.validation.selectEntityType') }));
 		}
 
 		if (file || (uploadedFile && entityType)) {
@@ -278,19 +263,19 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 			<Sheet
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
-				title={'Import File'}
-				description={'Easily upload and manage your bulk data imports.'}>
+				title={t('common:labels.importFile')}
+				description={t('common:labels.importFileDescription')}>
 				<div className='mt-6'>
 					{!uploadedTaskDetails && (
 						<Select
 							error={errors.entity_type}
 							options={importTypeOptions}
 							value={entityType?.value}
-							label='Import Type'
+							label={t('common:labels.importType')}
 							onChange={(value) => {
 								setEntityType(importTypeOptions.find((option) => option.value === value));
 							}}
-							description='Select the type of data you want to import'
+							description={t('common:labels.selectImportType')}
 						/>
 					)}
 					<Spacer height={12} />
@@ -301,7 +286,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 								'focus-within:border-black',
 								'mb-4',
 							)}>
-							{uploadedTaskDetails?.file_name || '--'}
+							{uploadedTaskDetails?.file_name || t('common:labels.na')}
 							<button
 								onClick={() => {
 									setuploadedTaskDetails(undefined);
@@ -346,9 +331,9 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 											setUploadedFile(meta);
 											if (data) {
 												handleImport(meta);
-												toast.success(`${meta.original_filename} uploaded successfully`);
+												toast.success(t('import.toast.uploadSuccess', { filename: meta.original_filename }));
 											} else {
-												toast.error(`${meta.original_filename} upload failed`);
+												toast.error(t('import.toast.uploadFailed', { filename: meta.original_filename }));
 											}
 										}}
 										licenseKey={getLicenseKey(entityType?.value || '')}
@@ -356,13 +341,13 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 											<div onClick={launch} className='cursor-pointer'>
 												<div className='space-y-1 w-full flex flex-col'>
 													{/* Label */}
-													<label className={cn(' block text-sm font-medium', 'text-zinc-950')}>Import file</label>
+													<label className={cn(' block text-sm font-medium', 'text-zinc-950')}>{t('import.importFileLabel')}</label>
 													<div aria-disabled={isLoading} className={cn(isLoading && 'text-zinc-500')}>
 														<button className={'p-2 border border-[#E4E4E7] rounded-lg py-2 px-4 w-full'}>
-															<p className='font-medium text-sm flex gap-2 items-center justify-start'>Choose File to Upload</p>
+															<p className='font-medium text-sm flex gap-2 items-center justify-start'>{t('import.chooseFile')}</p>
 														</button>
 													</div>
-													<p className={cn('text-sm', 'text-muted-foreground')}>Max File Size: 5 MB. .csv format accepted.</p>
+													<p className={cn('text-sm', 'text-muted-foreground')}>{t('import.maxFileSizeHint')}</p>
 													{errors.file && <p className='text-sm text-destructive'>{errors.file}</p>}
 												</div>
 											</div>
@@ -374,11 +359,11 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 										</div>
 										<div className='flex flex-col justify-start items-start'>
 											<FormHeader
-												title='Compare your file formatting'
+												title={t('common:labels.compareFileFormatting')}
 												variant='form-component-title'
 												className='mb-0'
 												titleClassName='mb-0'
-												subtitle='Max file size: 5 MB. Only .csv format is accepted.'
+												subtitle={t('common:labels.maxFileSizeSubtitle')}
 											/>
 											<Button
 												className='flex gap-2 !p-0 m-0 underline'
@@ -386,7 +371,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 												onClick={() => {
 													window.open(getSampleFileUrl(entityType?.value || ''), '_blank');
 												}}>
-												Sample CSV
+												{t('common:labels.sampleCsv')}
 												<Download className='size-4 underline' />
 											</Button>
 										</div>
@@ -399,13 +384,13 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 					<div>
 						{uploadedTaskDetails && (
 							<div>
-								<FormHeader title='Import Details' variant='form-component-title' />
+								<FormHeader title={t('common:labels.importDetails')} variant='form-component-title' />
 
 								<div className='space-y-4 mt-4'>
 									{importDetails.map((detail, index) => (
-										<div key={index} className='flex justify-between'>
+										<div key={index} className='flex justify-between items-start gap-2'>
 											<p className='text-sm text-muted-foreground'>{detail.label}</p>
-											<p className='text-sm text-zinc-950'>{detail.value}</p>
+											<div className='text-sm text-zinc-950 text-end'>{detail.value}</div>
 										</div>
 									))}
 								</div>
@@ -434,7 +419,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 									) : (
 										<>
 											<RefreshCcw />
-											Refresh
+											{t('common:actions.refresh')}
 										</>
 									)}
 								</Button>
@@ -447,7 +432,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 									onOpenChange(false);
 								}}
 								className='flex gap-2 items-center'>
-								Done
+								{t('common:actions.done')}
 							</Button>
 						)}
 
@@ -459,7 +444,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 									}}
 									variant={'outline'}
 									className='flex gap-2 items-center'>
-									Download CSV
+									{t('common:labels.downloadCsv')}
 								</Button>
 								<Button
 									onClick={() => {
@@ -473,7 +458,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 										}
 									}}
 									className='flex gap-2 items-center'>
-									Try Again
+									{t('common:labels.tryAgain')}
 								</Button>
 							</div>
 						)}
@@ -491,7 +476,7 @@ const ImportFileDrawer: FC<Props> = ({ isOpen, onOpenChange, taskId }) => {
 							onClick={() => {
 								handleImport();
 							}}>
-							{isPending ? <LoaderCircleIcon className='size-4 animate-spin' /> : 'Import Data'}
+							{isPending ? <LoaderCircleIcon className='size-4 animate-spin' /> : t('common:labels.importData')}
 						</Button>
 					)}
 				</div>

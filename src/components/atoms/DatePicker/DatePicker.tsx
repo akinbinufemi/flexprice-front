@@ -84,10 +84,10 @@ const DatePicker = ({
 				<PopoverTrigger asChild disabled={disabled}>
 					<Button
 						variant='outline'
-						className={cn('h-10 w-full min-w-0 justify-start text-left font-normal py-1', !date && 'text-muted-foreground', className)}
+						className={cn('h-10 w-full min-w-0 justify-start text-start font-normal py-1', !date && 'text-muted-foreground', className)}
 						disabled={disabled}
 						type='button'>
-						<CalendarIcon className='mr-2 h-4 w-4 shrink-0' />
+						<CalendarIcon className='me-2 h-4 w-4 shrink-0' />
 						<span className='min-w-0 truncate'>{displayLabel}</span>
 					</Button>
 				</PopoverTrigger>

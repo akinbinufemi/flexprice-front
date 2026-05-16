@@ -6,6 +6,7 @@ import { Invoice, INVOICE_STATUS, INVOICE_TYPE } from '@/models/Invoice';
 import { getPaymentStatusChip, getStatusChip } from './InvoiceTable';
 import Customer from '@/models/Customer';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
 
 const getPlanDisplayName = (invoice: Invoice): string => {
 	if (invoice.invoice_type !== INVOICE_TYPE.SUBSCRIPTION) return '--';
@@ -24,6 +25,8 @@ interface Props {
 }
 
 const CustomerInvoiceTable: FC<Props> = ({ data, onRowClick }) => {
+	const { t } = useTranslation(['billing', 'common']);
+	const naLabel = t('common:labels.na');
 	// Only show Subscription Customer column if at least one invoice has a different subscription_customer_id
 	const hasSubscriptionCustomer = useMemo(
 		() => data.some((inv) => inv.subscription_customer_id && inv.subscription_customer_id !== inv.customer_id),
@@ -33,38 +36,38 @@ const CustomerInvoiceTable: FC<Props> = ({ data, onRowClick }) => {
 	const columnData: ColumnData<EnrichedInvoice>[] = useMemo(() => {
 		const cols: ColumnData<EnrichedInvoice>[] = [
 			{
-				title: 'Invoice Number',
+				title: t('invoices.list.sort.invoiceNumber'),
 				render: (row) =>
 					row.invoice_status?.toUpperCase() === INVOICE_STATUS.DRAFT ? (
-						<span className='text-gray-400 italic text-[13px]'>To be generated</span>
+						<span className='text-gray-400 italic text-[13px]'>{t('invoices.list.toBeGenerated')}</span>
 					) : (
-						<>{row.invoice_number || '--'}</>
+						<>{row.invoice_number || naLabel}</>
 					),
 			},
 			{
-				title: 'Plan',
+				title: t('invoices.customerTable.plan'),
 				render: (row) => <>{getPlanDisplayName(row)}</>,
 			},
 			{
-				title: 'Status',
-				render: (row: EnrichedInvoice) => getStatusChip(row.invoice_status),
+				title: t('invoices.columns.status'),
+				render: (row: EnrichedInvoice) => getStatusChip(row.invoice_status, t),
 			},
 			{
-				title: 'Payment Status',
-				render: (row: EnrichedInvoice) => getPaymentStatusChip(row.payment_status),
+				title: t('invoices.list.columns.paymentStatus'),
+				render: (row: EnrichedInvoice) => getPaymentStatusChip(row.payment_status, t),
 			},
 		];
 
 		if (hasSubscriptionCustomer) {
 			cols.push({
-				title: 'Subscription Customer',
+				title: t('invoices.list.columns.subscriptionCustomer'),
 				render: (row: EnrichedInvoice) => {
 					if (!row.subscription_customer_id || row.subscription_customer_id === row.customer_id) {
-						return <>--</>;
+						return <>{naLabel}</>;
 					}
 					const subCust = row.subscription_customer;
 					if (!subCust?.name || !subCust?.id) {
-						return <>--</>;
+						return <>{naLabel}</>;
 					}
 					return <RedirectCell redirectUrl={`${RouteNames.customers}/${subCust.id}`}>{subCust.name}</RedirectCell>;
 				},
@@ -73,15 +76,15 @@ const CustomerInvoiceTable: FC<Props> = ({ data, onRowClick }) => {
 
 		cols.push(
 			{
-				title: 'Billing Period',
-				render: (row) => <>{row.period_start && row.period_end ? formatBillingPeriod(row.period_start, row.period_end) : '--'}</>,
+				title: t('invoices.customerTable.billingPeriod'),
+				render: (row) => <>{row.period_start && row.period_end ? formatBillingPeriod(row.period_start, row.period_end) : naLabel}</>,
 			},
 			{
-				title: 'Total',
+				title: t('invoices.customerTable.total'),
 				render: (row) => <>{`${getCurrencySymbol(row.currency)} ${row.total}`}</>,
 			},
 			{
-				title: 'Amount Due',
+				title: t('invoices.list.sort.amountDue'),
 				render: (row) => <>{`${getCurrencySymbol(row.currency)} ${row.amount_due}`}</>,
 			},
 			{
@@ -92,7 +95,7 @@ const CustomerInvoiceTable: FC<Props> = ({ data, onRowClick }) => {
 		);
 
 		return cols;
-	}, [hasSubscriptionCustomer]);
+	}, [hasSubscriptionCustomer, t, naLabel]);
 
 	return (
 		<div>

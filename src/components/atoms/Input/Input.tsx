@@ -53,6 +53,11 @@ export const removeFormatting = (amount: string, options: NumberFormatOptions = 
 	return amount.replace(new RegExp(escapedSeparator, 'g'), '');
 };
 
+/** Printable ASCII only (English keyboard characters). */
+const ENGLISH_ONLY_REGEX = /[^\x20-\x7E]/g;
+
+export const sanitizeEnglishOnly = (value: string): string => value.replace(ENGLISH_ONLY_REGEX, '');
+
 const getInputPattern = (variant: InputVariant, options: NumberFormatOptions = DEFAULT_FORMAT_OPTIONS): RegExp => {
 	const { allowNegative, allowDecimals, decimalSeparator } = { ...DEFAULT_FORMAT_OPTIONS, ...options };
 
@@ -85,6 +90,11 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
 	variant?: InputVariant;
 	formatOptions?: NumberFormatOptions;
 	size?: SizeVariant;
+	/**
+	 * Restrict to printable ASCII (English keyboard characters).
+	 * Defaults to true for `variant="text"`; set `englishOnly={false}` to allow other scripts.
+	 */
+	englishOnly?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -106,6 +116,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			variant = 'text',
 			size = 'default',
 			formatOptions = DEFAULT_FORMAT_OPTIONS,
+			englishOnly = true,
+			onBeforeInput: onBeforeInputProp,
+			onPaste: onPasteProp,
+			onCompositionEnd: onCompositionEndProp,
 			...props
 		},
 		ref,
@@ -113,8 +127,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		const inputRef = React.useRef<HTMLInputElement | null>(null);
 		const [cursorPosition, setCursorPosition] = React.useState<number | null>(null);
 
+		const enforceEnglishOnly = englishOnly ?? variant === 'text';
 		const isFormattedVariant = variant === 'formatted-number' || variant === 'integer';
 		const pattern = React.useMemo(() => getInputPattern(variant, formatOptions), [variant, formatOptions]);
+
+		const applyEnglishOnly = React.useCallback(
+			(raw: string) => (enforceEnglishOnly ? sanitizeEnglishOnly(raw) : raw),
+			[enforceEnglishOnly],
+		);
 
 		// Handle cursor position after formatting
 		React.useEffect(() => {
@@ -128,6 +148,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			let newValue = e.target.value;
 			const oldValue = (value as string) || '';
 			const currentCursorPosition = e.target.selectionStart || 0;
+
+			newValue = applyEnglishOnly(newValue);
+			if (enforceEnglishOnly && newValue !== e.target.value) {
+				const sanitizedBeforeCursor = sanitizeEnglishOnly(e.target.value.slice(0, currentCursorPosition));
+				setCursorPosition(sanitizedBeforeCursor.length);
+			}
 
 			// For number variants, validate and format
 			if (variant !== 'text') {
@@ -156,13 +182,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		};
 
 		const getValue = () => {
-			if (isFormattedVariant && value) {
-				return formatAmount(value as string, {
+			let displayValue = value;
+			if (enforceEnglishOnly && typeof displayValue === 'string') {
+				displayValue = sanitizeEnglishOnly(displayValue);
+			}
+			if (isFormattedVariant && displayValue) {
+				return formatAmount(displayValue as string, {
 					...formatOptions,
 					allowDecimals: variant !== 'integer',
 				});
 			}
-			return value;
+			return displayValue;
 		};
 
 		return (
@@ -181,7 +211,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 						'focus-within:border-black',
 						className,
 					)}>
-					{inputPrefix && <div className='mr-2'>{inputPrefix}</div>}
+					{inputPrefix && <div className='me-2'>{inputPrefix}</div>}
 					<input
 						{...props}
 						id={id}
@@ -205,7 +235,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 						}}
 					/>
 					{suffix && (
-						<div className='ml-2 flex shrink-0 items-center self-stretch pl-2 text-sm tabular-nums leading-none text-muted-foreground'>
+						<div className='ms-2 flex shrink-0 items-center self-stretch ps-2 text-sm tabular-nums leading-none text-muted-foreground'>
 							{suffix}
 						</div>
 					)}

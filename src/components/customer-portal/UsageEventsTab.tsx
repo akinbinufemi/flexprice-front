@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Card } from '@/components/atoms';
 import { Event } from '@/models/Event';
@@ -17,6 +18,7 @@ interface UsageEventsTabProps {
 }
 
 const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
+	const { t } = useTranslation('customer-portal');
 	const [events, setEvents] = useState<Event[]>([]);
 	const [hasMore, setHasMore] = useState(true);
 	const [loading, setLoading] = useState(false);
@@ -24,6 +26,7 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 	const [selectedPeriod, setSelectedPeriod] = useState<CustomerPortalTimePeriod>(DEFAULT_TIME_PERIOD);
 	const observer = useRef<IntersectionObserver | null>(null);
 	const loadingRef = useRef(false);
+	const periodLabel = t(`timePeriod.${selectedPeriod}`);
 
 	// Fetch customer to get external_id
 	const { data: customer, isLoading: customerLoading } = useQuery({
@@ -60,13 +63,13 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 				}
 			} catch (error) {
 				logger.error('Error fetching events:', error);
-				toast.error('Failed to load events');
+				toast.error(t('errors.loadEvents'));
 			} finally {
 				loadingRef.current = false;
 				setLoading(false);
 			}
 		},
-		[customer?.external_id, timeRange.start_time, timeRange.end_time],
+		[customer?.external_id, timeRange.start_time, timeRange.end_time, t],
 	);
 
 	const lastElementRef = useCallback(
@@ -116,7 +119,7 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 				}
 			} catch (error) {
 				logger.error('Error fetching events:', error);
-				toast.error('Failed to load events');
+				toast.error(t('errors.loadEvents'));
 			} finally {
 				loadingRef.current = false;
 				setLoading(false);
@@ -124,7 +127,7 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 		};
 
 		loadEvents();
-	}, [customer?.external_id, timeRange.start_time, timeRange.end_time]);
+	}, [customer?.external_id, timeRange.start_time, timeRange.end_time, t]);
 
 	if (customerLoading) {
 		return (
@@ -143,7 +146,7 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 	if (!customer?.external_id) {
 		return (
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-				<EmptyState title='Unable to load events' description='Customer information is missing' />
+				<EmptyState title={t('usageEvents.unableTitle')} description={t('usageEvents.unableDescription')} />
 			</Card>
 		);
 	}
@@ -153,7 +156,7 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 			{/* Events Table */}
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl overflow-hidden'>
 				<div className='flex items-center justify-between p-6 border-b border-[#E9E9E9]'>
-					<h3 className='text-base font-medium text-zinc-950'>Usage</h3>
+					<h3 className='text-base font-medium text-zinc-950'>{t('usage.title')}</h3>
 					<TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
 				</div>
 				{events.length > 0 ? (
@@ -170,7 +173,10 @@ const UsageEventsTab = ({ customerId }: UsageEventsTabProps) => {
 					</>
 				) : !loading ? (
 					<div className='py-8'>
-						<EmptyState title='No events found' description={`Your events from the last ${selectedPeriod} will appear here`} />
+						<EmptyState
+							title={t('usageEvents.noEventsTitle')}
+							description={t('usageEvents.noEventsDescription', { period: periodLabel })}
+						/>
 					</div>
 				) : (
 					<div className='space-y-4 p-4'>

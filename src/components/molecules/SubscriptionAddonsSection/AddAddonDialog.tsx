@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Select } from '@/components/atoms';
 import Dialog from '@/components/atoms/Dialog';
@@ -34,6 +35,7 @@ interface FormErrors {
 }
 
 const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId, billingPeriod, currency, currentPeriodEndIso }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [formData, setFormData] = useState<Partial<AddAddonRequest>>({});
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [selectedAddonDetails, setSelectedAddonDetails] = useState<AddonResponse | null>(null);
@@ -98,14 +100,14 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 		const newErrors: FormErrors = {};
 
 		if (!formData.addon_id) {
-			newErrors.addon_id = 'Addon is required';
+			newErrors.addon_id = t('billing:subscriptions.addAddonDialog.validation.addonRequired');
 		}
 
 		return {
 			isValid: Object.keys(newErrors).length === 0,
 			errors: newErrors,
 		};
-	}, [formData]);
+	}, [formData, t]);
 
 	// Add addon mutation
 	const { mutate: addAddon, isPending: isAddingAddon } = useMutation({
@@ -113,7 +115,7 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 			return await SubscriptionApi.addAddonToSubscription(payload);
 		},
 		onSuccess: () => {
-			toast.success('Addon added successfully');
+			toast.success(t('billing:subscriptions.addAddonDialog.toast.addonAddedSuccess'));
 			refetchQueries(['subscriptionActiveAddons', subscriptionId]);
 			refetchQueries(['subscriptionDetails', subscriptionId]);
 			refetchQueries(['subscriptionEdit', subscriptionId]);
@@ -122,10 +124,8 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 			setErrors({});
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			const message =
-				typeof error === 'object' && error && 'error' in error ? (error as { error?: { message?: string } }).error?.message : undefined;
-			toast.error(message || 'Failed to add addon');
+		onError: (error: Error) => {
+			toast.error(error.message || t('billing:subscriptions.addAddonDialog.toast.addonAddFailed'));
 		},
 	});
 
@@ -212,18 +212,20 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 	const addonChargeColumns: ColumnData<AddonChargeRow>[] = useMemo(
 		() => [
 			{
-				title: 'Charge',
-				render: (row) => <span>{row.price.display_name || row.price.meter?.name || 'Charge'}</span>,
+				title: t('billing:subscriptions.addAddonDialog.columns.charge'),
+				render: (row) => (
+					<span>{row.price.display_name || row.price.meter?.name || t('billing:subscriptions.addAddonDialog.chargeFallback')}</span>
+				),
 			},
 			{
-				title: 'Type',
-				render: (row) => <span>{toSentenceCase(row.price.type || '--')}</span>,
+				title: t('billing:subscriptions.addAddonDialog.columns.type'),
+				render: (row) => <span>{toSentenceCase(row.price.type || t('common:labels.na'))}</span>,
 			},
 			{
-				title: 'Commitment',
+				title: t('billing:subscriptions.addAddonDialog.columns.commitment'),
 				render: (row) => {
 					if (row.price.type !== PRICE_TYPE.USAGE) {
-						return <span className='text-sm text-gray-400'>Not available</span>;
+						return <span className='text-sm text-gray-400'>{t('billing:subscriptions.addAddonDialog.commitmentNotAvailable')}</span>;
 					}
 					const config = lineItemCommitments[row.price.id];
 					return config ? <span className='text-sm text-gray-600'>{formatCommitmentSummary(config)}</span> : <span>—</span>;
@@ -241,30 +243,35 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 					const hasConfig = lineItemCommitments[row.price.id] !== undefined;
 					return (
 						<Button variant='outline' onClick={() => handleConfigureCommitment(row.price)} type='button'>
-							{hasConfig ? 'Edit' : 'Configure'}
+							{hasConfig ? t('common:actions.edit') : t('billing:subscriptions.configure')}
 						</Button>
 					);
 				},
 			},
 		],
-		[lineItemCommitments, handleConfigureCommitment],
+		[lineItemCommitments, handleConfigureCommitment, t],
 	);
 
 	const filteredAddonOptions = useMemo(() => {
 		return (addonsResponse?.items || []).map((addon: AddonResponse) => ({
 			label: addon.name,
 			value: addon.id,
-			description: addon.description || 'No description',
+			description: addon.description || t('billing:subscriptions.addAddonDialog.noDescription'),
 		}));
-	}, [addonsResponse]);
+	}, [addonsResponse, t]);
 
 	return (
-		<Dialog isOpen={isOpen} showCloseButton={false} onOpenChange={onOpenChange} title='Add' className='sm:max-w-[600px]'>
+		<Dialog
+			isOpen={isOpen}
+			showCloseButton={false}
+			onOpenChange={onOpenChange}
+			title={t('common:actions.add')}
+			className='sm:max-w-[600px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2'>
 					<Select
-						label='Addon'
-						placeholder='Select addon'
+						label={t('billing:subscriptions.addon')}
+						placeholder={t('billing:subscriptions.selectAddon')}
 						options={filteredAddonOptions}
 						value={formData.addon_id || ''}
 						onChange={handleAddonSelect}
@@ -277,7 +284,7 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 					<div className='space-y-3'>
 						<div className='flex items-center justify-between'>
 							<div>
-								<p className='text-sm font-medium text-gray-700'>Charges</p>
+								<p className='text-sm font-medium text-gray-700'>{t('common:labels.charges')}</p>
 							</div>
 						</div>
 						{selectedAddonPrices.length > 0 ? (
@@ -286,7 +293,7 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 							</div>
 						) : (
 							<div className='rounded-xl border border-gray-200 p-4'>
-								<p className='text-sm text-gray-600'>No charges for this billing period/currency.</p>
+								<p className='text-sm text-gray-600'>{t('billing:subscriptions.addAddonDialog.emptyNoChargesForPeriodCurrency')}</p>
 							</div>
 						)}
 
@@ -304,7 +311,7 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 									<button
 										type='button'
 										className='w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 rounded-xl'>
-										<span>Advanced options</span>
+										<span>{t('billing:subscriptions.addAddonDialog.advancedOptions')}</span>
 										<ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${advancedOpen ? 'rotate-180' : 'rotate-0'}`} />
 									</button>
 								</CollapsibleTrigger>
@@ -312,33 +319,45 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 									<div className='px-4 pb-4 pt-1'>
 										<div className='flex flex-col gap-3'>
 											<DatePicker
-												label='Start date (optional)'
-												placeholder='Start date'
+												label={t('billing:subscriptions.startDateOptional')}
+												placeholder={t('billing:subscriptions.startDate')}
 												date={startDate}
 												setDate={setStartDate}
 												className='w-full'
 												popoverTriggerClassName='w-full'
 											/>
 											<Select
-												label='Cadence (optional)'
-												placeholder='Default'
+												label={t('billing:subscriptions.cadenceOptional')}
+												placeholder={t('common:labels.default')}
 												options={[
-													{ label: 'Recurring', value: ADDON_CADENCE.RECURRING, description: 'Renews each billing period.' },
-													{ label: 'One-time', value: ADDON_CADENCE.ONETIME, description: 'Applied once.' },
+													{
+														label: t('billing:subscriptions.addAddonDialog.cadence.recurring'),
+														value: ADDON_CADENCE.RECURRING,
+														description: t('billing:subscriptions.addAddonDialog.cadence.recurringDescription'),
+													},
+													{
+														label: t('billing:subscriptions.addAddonDialog.cadence.onetime'),
+														value: ADDON_CADENCE.ONETIME,
+														description: t('billing:subscriptions.addAddonDialog.cadence.onetimeDescription'),
+													},
 												]}
 												value={cadence}
 												onChange={(v) => setCadence(v as ADDON_CADENCE)}
 											/>
 											<Select
-												label='Proration (optional)'
-												placeholder='Default'
+												label={t('billing:subscriptions.prorationOptional')}
+												placeholder={t('common:labels.default')}
 												options={[
 													{
-														label: 'Prorate',
+														label: t('billing:subscriptions.addAddonDialog.proration.prorate'),
 														value: ADDON_PRORATION_BEHAVIOR.CREATE_PRORATIONS,
-														description: 'Creates proration credits/charges.',
+														description: t('billing:subscriptions.addAddonDialog.proration.prorateDescription'),
 													},
-													{ label: 'No proration', value: ADDON_PRORATION_BEHAVIOR.NONE, description: 'No proration adjustments.' },
+													{
+														label: t('billing:subscriptions.addAddonDialog.proration.none'),
+														value: ADDON_PRORATION_BEHAVIOR.NONE,
+														description: t('billing:subscriptions.addAddonDialog.proration.noneDescription'),
+													},
 												]}
 												value={prorationBehavior}
 												onChange={(v) => setProrationBehavior(v as ADDON_PRORATION_BEHAVIOR)}
@@ -353,7 +372,7 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 													setCadence(ADDON_CADENCE.RECURRING);
 													setProrationBehavior(ADDON_PRORATION_BEHAVIOR.NONE);
 												}}>
-												Reset advanced options
+												{t('billing:subscriptions.addAddonDialog.resetAdvancedOptions')}
 											</button>
 										</div>
 									</div>
@@ -380,10 +399,10 @@ const AddAddonDialog: React.FC<Props> = ({ isOpen, onOpenChange, subscriptionId,
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={handleCancel} disabled={isAddingAddon}>
-					Cancel
+					{t('common:actions.cancel')}
 				</Button>
 				<Button onClick={handleSave} disabled={isAddingAddon}>
-					{isAddingAddon ? 'Adding...' : 'Add'}
+					{isAddingAddon ? t('billing:subscriptions.addAddonDialog.adding') : t('common:actions.add')}
 				</Button>
 			</div>
 		</Dialog>

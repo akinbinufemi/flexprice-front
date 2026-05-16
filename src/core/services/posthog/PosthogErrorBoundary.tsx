@@ -1,5 +1,6 @@
 // src/components/ErrorBoundary.tsx
 import React, { Component, ReactNode } from 'react';
+import i18n from 'i18next';
 import posthog from 'posthog-js';
 import { config } from '@/config/config';
 
@@ -63,11 +64,11 @@ class PosthogErrorBoundary extends Component<Props, State> {
 			return (
 				this.props.fallback || (
 					<div>
-						<h1>Something went wrong.</h1>
-						<p>Please refresh or try again later.</p>
+						<h1>{i18n.t('chrome.posthogErrorTitle')}</h1>
+						<p>{i18n.t('chrome.posthogErrorDescription')}</p>
 						{this.state.errorId && (
 							<p style={{ fontSize: '0.8em', color: '#888' }}>
-								Error ID: <code>{this.state.errorId}</code>
+								{i18n.t('errorPage.errorIdLabel')}: <code>{this.state.errorId}</code>
 							</p>
 						)}
 					</div>

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, Skeleton } f
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { getTypographyClass } from '@/lib/typography';
 import { CalendarClock, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SubscriptionsByPlan {
 	count: number;
@@ -22,13 +23,19 @@ export const RecentSubscriptionsCard: React.FC<RecentSubscriptionsCardProps> = (
 	isLoading,
 	error,
 }) => {
+	const { t } = useTranslation('common');
+
 	return (
 		<Card className='shadow-sm'>
 			<CardHeader className='pb-8'>
 				<div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
 					<div>
-						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>Recent Subscriptions</CardTitle>
-						<CardDescription className={getTypographyClass('helper-text', 'mt-1')}>Created in the last 7 days</CardDescription>
+						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>
+							{t('dashboardHome.recentSubscriptionsTitle')}
+						</CardTitle>
+						<CardDescription className={getTypographyClass('helper-text', 'mt-1')}>
+							{t('dashboardHome.recentSubscriptionsSubtitle')}
+						</CardDescription>
 					</div>
 				</div>
 			</CardHeader>
@@ -52,14 +59,14 @@ export const RecentSubscriptionsCard: React.FC<RecentSubscriptionsCardProps> = (
 					<div className='flex flex-col items-center justify-center py-8'>
 						<AlertCircle className='h-8 w-8 text-red-500 mb-3' />
 						<p className={getTypographyClass('body-small', 'text-center text-zinc-600')}>
-							Failed to load subscription data. Please try again later.
+							{t('dashboardHome.recentSubscriptionsLoadError')}
 						</p>
 					</div>
 				) : (
 					<>
 						<div className='mb-8'>
 							<p className='text-4xl font-bold text-zinc-900'>{subscriptionsCount}</p>
-							<p className={getTypographyClass('body-small', 'text-zinc-600 mt-2')}>New subscriptions</p>
+							<p className={getTypographyClass('body-small', 'text-zinc-600 mt-2')}>{t('dashboardHome.newSubscriptions')}</p>
 						</div>
 						{subscriptionsByPlan.length > 0 ? (
 							<div>
@@ -89,7 +96,7 @@ export const RecentSubscriptionsCard: React.FC<RecentSubscriptionsCardProps> = (
 												padding: '8px 12px',
 											}}
 											formatter={(value: any, _name: any, props: any) => [
-												`${value} subscription${value !== 1 ? 's' : ''}`,
+												t('dashboardHome.subscriptionsChartTooltip', { count: Number(value) }),
 												props.payload.fullName,
 											]}
 										/>
@@ -107,7 +114,7 @@ export const RecentSubscriptionsCard: React.FC<RecentSubscriptionsCardProps> = (
 							<div className='flex flex-col items-center py-6'>
 								<CalendarClock className='w-8 h-8 text-zinc-300 mb-3' />
 								<p className={getTypographyClass('body-small', 'text-center text-zinc-400')}>
-									No subscriptions created in the last 24 hours
+									{t('dashboardHome.noSubscriptionsLast24Hours')}
 								</p>
 							</div>
 						)}

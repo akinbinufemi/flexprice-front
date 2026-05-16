@@ -7,6 +7,7 @@ import { CheckIcon, ChevronDown, Loader2, XCircle, XIcon } from 'lucide-react';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { SelectOption } from './SearchableSelect';
 import type { ExtractorsConfig, DisplayConfig, OptionsConfig } from './AsyncSearchableSelect';
 
@@ -85,12 +86,13 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 	onChange,
 	disabled = false,
 }: AsyncMultiSearchableSelectProps<T>) => {
-	const { searchFn, debounceTime = 300, placeholder: searchPlaceholder = 'Search...', fetchOnEmptyQuery = true } = search;
+	const { t } = useTranslation('common');
+	const { searchFn, debounceTime = 300, placeholder: searchPlaceholder = t('search.placeholderShort'), fetchOnEmptyQuery = true } = search;
 
 	const { valueExtractor, labelExtractor, descriptionExtractor } = extractors;
 
 	const {
-		placeholder = 'Select options',
+		placeholder = t('selectUi.selectOptions'),
 		label = '',
 		description,
 		error,
@@ -103,7 +105,12 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 		sideOffset = 4,
 	} = display;
 
-	const { noOptionsText = 'No options found', emptyText = 'No results found.', maxCount = 3, modalPopover = false } = options;
+	const {
+		noOptionsText = t('selectUi.noOptionsFound'),
+		emptyText = t('selectUi.noResultsFound'),
+		maxCount = 3,
+		modalPopover = false,
+	} = options;
 
 	const [open, setOpen] = useState(defaultOpen);
 	const [searchQuery, setSearchQuery] = useState('');
@@ -132,7 +139,7 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 		isLoading,
 		isError,
 		error: queryError,
-	} = useQuery<Array<SelectOption & { data: T }>>({
+	} = useQuery<Array<SelectOption & { data: T }>, Error>({
 		queryKey: ['async-multi-searchable-select', debouncedQuery, fetchOnEmptyQuery],
 		queryFn: () => searchFn(debouncedQuery),
 		enabled: shouldFetch,
@@ -245,7 +252,7 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 										)}
 									</div>
 								</div>
-								<div className='flex items-center gap-1 ml-2 shrink-0'>
+								<div className='flex items-center gap-1 ms-2 shrink-0'>
 									<XIcon
 										className='h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive'
 										onClick={(e) => {
@@ -259,7 +266,7 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 							</div>
 						) : (
 							<div className='flex items-center justify-between w-full'>
-								<span className='text-muted-foreground truncate pl-1 font-normal'>{placeholder}</span>
+								<span className='text-muted-foreground truncate ps-1 font-normal'>{placeholder}</span>
 								<ChevronDown className='h-4 w-4 text-muted-foreground shrink-0' />
 							</div>
 						)}
@@ -289,14 +296,12 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 							{showLoading && (
 								<div className='flex items-center justify-center py-6'>
 									<Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
-									<span className='ml-2 text-sm text-muted-foreground'>Searching...</span>
+									<span className='ms-2 text-sm text-muted-foreground'>{t('search.searching')}</span>
 								</div>
 							)}
 							{isError && shouldFetch && (
 								<CommandEmpty>
-									<div className='text-sm text-destructive'>
-										{queryError instanceof Error ? queryError.message : 'Error loading options'}
-									</div>
+									<div className='text-sm text-destructive'>{queryError.message || t('search.errorLoadingOptions')}</div>
 								</CommandEmpty>
 							)}
 							{!showLoading && !isError && (
@@ -320,7 +325,7 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 														disabled={isDisabled}>
 														<div
 															className={cn(
-																'mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-primary',
+																'me-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-primary',
 																isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible',
 															)}>
 															<CheckIcon className='h-4 w-4' />
@@ -345,13 +350,13 @@ const AsyncMultiSearchableSelect = <T = unknown,>({
 											{(value?.length ?? 0) > 0 && (
 												<>
 													<CommandItem onSelect={handleClear} className='flex-1 justify-center cursor-pointer'>
-														Clear
+														{t('multiSelectUi.clear')}
 													</CommandItem>
 													<Separator orientation='vertical' className='flex min-h-6 h-full' />
 												</>
 											)}
 											<CommandItem onSelect={() => setOpen(false)} className='flex-1 justify-center cursor-pointer max-w-full'>
-												Close
+												{t('multiSelectUi.close')}
 											</CommandItem>
 										</div>
 									</CommandGroup>

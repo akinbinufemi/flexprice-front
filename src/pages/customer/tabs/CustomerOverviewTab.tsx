@@ -30,6 +30,7 @@ import { BILLING_PERIOD } from '@/constants/constants';
 import { toSentenceCase } from '@/utils/common/helper_functions';
 import { searchPlansForFilter } from '@/utils/filterSearchHelpers';
 import { PlanApi } from '@/api';
+import { useTranslation } from 'react-i18next';
 
 type ContextType = {
 	isArchived: boolean;
@@ -105,6 +106,7 @@ const initialSubscriptionFilters: FilterCondition[] = [
 const initialSubscriptionSorts: SortOption[] = [{ field: 'updated_at', label: 'Updated At', direction: SortDirection.DESC }];
 
 const CustomerOverviewTab = () => {
+	const { t } = useTranslation('customers');
 	const navigate = useNavigate();
 	const { id: customerId } = useParams();
 	const { isArchived } = useOutletContext<ContextType>();
@@ -271,7 +273,10 @@ const CustomerOverviewTab = () => {
 
 	const renderSubscriptionContent = () => (
 		<Card variant='notched'>
-			<CardHeader title='Subscriptions' cta={!isArchived && <AddButton onClick={handleAddSubscription} />} />
+			<CardHeader
+				title={t('tabPanels.overview.subscriptionsCardTitle')}
+				cta={!isArchived && <AddButton onClick={handleAddSubscription} />}
+			/>
 			<QueryBuilder
 				filterOptions={subscriptionFilterOptions}
 				filters={filters}
@@ -290,7 +295,7 @@ const CustomerOverviewTab = () => {
 			/>
 			<Spacer className='!h-4' />
 			<ShortPagination
-				unit='Subscriptions'
+				unit={t('tabPanels.overview.subscriptionsPaginationUnit')}
 				totalItems={subscriptionsData?.pagination?.total ?? 0}
 				prefix={PAGINATION_PREFIX.CUSTOMER_SUBSCRIPTIONS}
 				pageSize={limit}
@@ -304,7 +309,7 @@ const CustomerOverviewTab = () => {
 
 			{(usageData?.features?.length || 0) > 0 && (
 				<Card variant='notched'>
-					<CardHeader title='Entitlements' />
+					<CardHeader title={t('tabPanels.overview.entitlementsCardTitle')} />
 					<CustomerUsageTable data={usageData?.features ?? []} />
 				</Card>
 			)}

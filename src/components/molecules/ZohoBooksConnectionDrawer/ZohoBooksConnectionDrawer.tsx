@@ -1,5 +1,6 @@
 import { config } from '@/config/config';
 import { FC, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 import { useMutation } from '@tanstack/react-query';
 import ConnectionApi from '@/api/ConnectionApi';
@@ -38,6 +39,8 @@ const ZOHO_SESSION_KEY = 'zoho_books_oauth_session_id';
 const OAUTH_PROVIDER_KEY = 'oauth_provider';
 
 const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
+	const { t } = useTranslation('settings');
+	const { t: tc } = useTranslation('common');
 	const { user } = useUser();
 	const { activeEnvironment } = useEnvironment();
 
@@ -79,13 +82,13 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 
 	const validateForm = () => {
 		const newErrors: Record<string, string> = {};
-		if (!formData.name.trim()) newErrors.name = 'Connection name is required';
-		if (!connection && !formData.client_id.trim()) newErrors.client_id = 'Client ID is required';
-		if (!connection && !formData.client_secret.trim()) newErrors.client_secret = 'Client secret is required';
-		if (!formData.organization_id.trim()) newErrors.organization_id = 'Organization ID is required';
-		if (!formData.accounts_server.trim()) newErrors.accounts_server = 'Accounts server is required';
+		if (!formData.name.trim()) newErrors.name = t('connection.validation.nameRequired');
+		if (!connection && !formData.client_id.trim()) newErrors.client_id = t('connection.validation.clientIdRequired');
+		if (!connection && !formData.client_secret.trim()) newErrors.client_secret = t('connection.validation.clientSecretRequired');
+		if (!formData.organization_id.trim()) newErrors.organization_id = t('connection.validation.organizationIdRequired');
+		if (!formData.accounts_server.trim()) newErrors.accounts_server = t('connection.validation.accountsServerRequired');
 		if (!connection && !formData.webhook_secret.trim()) {
-			newErrors.webhook_secret = 'Webhook secret is required';
+			newErrors.webhook_secret = t('connection.validation.webhookSecretRequired');
 		}
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
@@ -125,8 +128,8 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 			onOpenChange(false);
 			window.location.href = response.oauth_url;
 		},
-		onError: (error: unknown) => {
-			toast.error(error instanceof Error ? error.message : 'Failed to initiate Zoho OAuth');
+		onError: (error: Error) => {
+			toast.error(error.message || t('connection.toast.failedZohoOAuth'));
 		},
 	});
 
@@ -148,12 +151,12 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 			return await ConnectionApi.Update(connection.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('Zoho Books connection updated successfully');
+			toast.success(t('connection.zohoBooks.toastUpdated'));
 			if (response) onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: unknown) => {
-			toast.error(error instanceof Error ? error.message : 'Failed to update connection');
+		onError: (error: Error) => {
+			toast.error(error.message || t('connection.toast.failedToUpdate'));
 		},
 	});
 
@@ -169,7 +172,7 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 	const handleCopyRedirectUri = () => {
 		navigator.clipboard.writeText(redirectUri);
 		setRedirectUriCopied(true);
-		toast.success('Redirect URI copied to clipboard!');
+		toast.success(t('connection.toast.redirectUriCopied'));
 		setTimeout(() => setRedirectUriCopied(false), 2000);
 	};
 
@@ -177,7 +180,7 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 		if (!webhookUrl) return;
 		navigator.clipboard.writeText(webhookUrl);
 		setWebhookUrlCopied(true);
-		toast.success('Webhook URL copied to clipboard!');
+		toast.success(t('connection.toast.webhookUrlCopied'));
 		setTimeout(() => setWebhookUrlCopied(false), 2000);
 	};
 
@@ -187,13 +190,17 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? 'Edit Zoho Books Connection' : 'Connect to Zoho Books'}
-			description='Configure your Zoho Books integration and authorize via OAuth.'
+			title={
+				connection
+					? t('integrationDrawer.title.edit', { providerName: 'Zoho Books' })
+					: t('integrationDrawer.title.connect', { providerName: 'Zoho Books' })
+			}
+			description={t('connection.zohoBooks.description')}
 			size='lg'>
 			<div className='space-y-6 mt-4'>
 				<Input
-					label='Connection Name'
-					placeholder='e.g., Zoho Books Production'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('connection.zohoBooks.connectionPlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
@@ -202,17 +209,17 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 				{!connection && (
 					<>
 						<Input
-							label='Client ID'
+							label={t('connection.quickBooks.clientId')}
 							type='password'
-							placeholder='Zoho OAuth Client ID'
+							placeholder={t('connection.zohoBooks.clientIdPlaceholder')}
 							value={formData.client_id}
 							onChange={(value) => handleChange('client_id', value)}
 							error={errors.client_id}
 						/>
 						<Input
-							label='Client Secret'
+							label={t('connection.quickBooks.qbClientSecret')}
 							type='password'
-							placeholder='Zoho OAuth Client Secret'
+							placeholder={t('connection.zohoBooks.clientSecretPlaceholder')}
 							value={formData.client_secret}
 							onChange={(value) => handleChange('client_secret', value)}
 							error={errors.client_secret}
@@ -221,36 +228,39 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 				)}
 
 				<Input
-					label='Organization ID'
-					placeholder='Zoho Books organization_id'
+					label={t('connection.zohoBooks.organizationId')}
+					placeholder={t('connection.zohoBooks.organizationIdPlaceholder')}
 					value={formData.organization_id}
 					onChange={(value) => handleChange('organization_id', value)}
 					error={errors.organization_id}
-					description='Required for Zoho Books API operations.'
+					description={t('connection.zohoBooks.organizationIdHint')}
 					disabled={!!connection}
 				/>
 
 				<Input
-					label='Accounts Server'
-					placeholder='https://accounts.zoho.in'
+					label={t('connection.zohoBooks.accountsServer')}
+					placeholder={t('connection.zohoBooks.accountsServerPlaceholder')}
 					value={formData.accounts_server}
 					onChange={(value) => handleChange('accounts_server', value)}
 					error={errors.accounts_server}
-					description='Default is India (.in). Use another region if needed (e.g. accounts.zoho.com, accounts.zoho.eu).'
+					description={t('connection.zohoBooks.accountsServerHint')}
 					disabled={!!connection}
 				/>
 
 				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-blue-800 mb-3'>Webhook configuration</h3>
+					<h3 className='text-sm font-medium text-blue-800 mb-3'>{t('connection.zohoBooks.webhookSection')}</h3>
 					<p className='text-xs text-blue-700 mb-4'>
-						In Zoho Books, create Invoice and Contact webhooks and set this URL on each. Use the same secret here and in Zoho so Flexprice
-						can verify <code className='text-xs bg-white/80 px-1 rounded'>X-Zoho-Webhook-Signature</code>.
+						<Trans
+							ns='settings'
+							i18nKey='connection.zohoBooks.webhookBodyHtml'
+							components={{ header: <code className='text-xs bg-white/80 px-1 rounded' /> }}
+						/>
 					</p>
 					<div className='mb-4'>
-						<label className='block text-sm font-medium text-blue-800 mb-2'>Webhook URL</label>
+						<label className='block text-sm font-medium text-blue-800 mb-2'>{t('connection.webhook.url')}</label>
 						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md'>
 							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>
-								{webhookUrl || 'Select tenant and environment to generate URL'}
+								{webhookUrl || t('connection.zohoBooks.selectTenantForUrl')}
 							</code>
 							<Button
 								size='xs'
@@ -259,48 +269,38 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 								className='flex items-center gap-1 shrink-0'
 								disabled={!webhookUrl}>
 								{webhookUrlCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-								{webhookUrlCopied ? 'Copied!' : 'Copy'}
+								{webhookUrlCopied ? tc('actions.copied') : tc('actions.copy')}
 							</Button>
 						</div>
 					</div>
 					<Input
-						label='Webhook secret'
+						label={t('connection.zohoBooks.webhookSecret')}
 						type='password'
 						placeholder={
-							connection
-								? 'Leave blank to keep existing secret, or enter a new secret to rotate'
-								: 'Same value as in Zoho Books webhook settings'
+							connection ? t('connection.zohoBooks.webhookSecretPlaceholderEdit') : t('connection.zohoBooks.webhookSecretPlaceholderCreate')
 						}
 						value={formData.webhook_secret}
 						onChange={(value) => handleChange('webhook_secret', value)}
 						error={errors.webhook_secret}
-						description={
-							connection
-								? 'Stored encrypted. Leave blank to keep the current secret when updating.'
-								: 'Required. Must match the secret in Zoho Books so Flexprice can verify X-Zoho-Webhook-Signature. Stored encrypted with your connection.'
-						}
+						description={connection ? t('connection.zohoBooks.webhookSecretDescEdit') : t('connection.zohoBooks.webhookSecretDescCreate')}
 					/>
 				</div>
 
 				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-					<h3 className='text-sm font-medium text-blue-800 mb-2'>OAuth Redirect URI</h3>
-					<p className='text-xs text-blue-700 mb-2'>
-						This URI must exactly match your Zoho app Authorized Redirect URI and backend oauth redirect configuration.
-					</p>
+					<h3 className='text-sm font-medium text-blue-800 mb-2'>{t('connection.zohoBooks.oauthRedirectTitle')}</h3>
+					<p className='text-xs text-blue-700 mb-2'>{t('connection.zohoBooks.oauthRedirectBody')}</p>
 					<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md mt-2'>
 						<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{redirectUri}</code>
 						<Button size='xs' variant='outline' onClick={handleCopyRedirectUri} className='flex items-center gap-1'>
 							{redirectUriCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
-							{redirectUriCopied ? 'Copied!' : 'Copy'}
+							{redirectUriCopied ? tc('actions.copied') : tc('actions.copy')}
 						</Button>
 					</div>
 				</div>
 
 				{connection && (
 					<div className='p-4 bg-gray-50 border border-gray-200 rounded-lg'>
-						<p className='text-xs text-gray-500'>
-							OAuth credentials are encrypted and hidden. To update credentials, delete the connection and create a new one.
-						</p>
+						<p className='text-xs text-gray-500'>{t('connection.zohoBooks.credentialsHidden')}</p>
 					</div>
 				)}
 
@@ -308,10 +308,10 @@ const ZohoBooksConnectionDrawer: FC<ZohoBooksConnectionDrawerProps> = ({ isOpen,
 
 				<div className='flex gap-2'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1' disabled={isPending}>
-						Cancel
+						{tc('actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1' isLoading={isPending} disabled={isPending}>
-						{connection ? 'Update Connection' : 'Create Connection'}
+						{connection ? t('connection.buttons.updateConnection') : t('connection.buttons.createConnection')}
 					</Button>
 				</div>
 			</div>

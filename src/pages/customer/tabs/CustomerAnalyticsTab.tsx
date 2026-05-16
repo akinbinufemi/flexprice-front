@@ -29,8 +29,10 @@ const CHEVRON_UP_SVG = '/assets/svg/chevron-up-svgrepo-com.svg';
 const CHEVRON_DOWN_SVG = '/assets/svg/chevron-down-svgrepo-com.svg';
 import { cn } from '@/lib/utils';
 import { Checkbox as UiCheckbox } from '@/components/ui/checkbox';
+import { useTranslation } from 'react-i18next';
 
 const CustomerAnalyticsTab = () => {
+	const { t } = useTranslation('customers');
 	const { id: customerId } = useParams();
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 
@@ -181,8 +183,8 @@ const CustomerAnalyticsTab = () => {
 	});
 
 	useEffect(() => {
-		updateBreadcrumb(4, 'Analytics');
-	}, [updateBreadcrumb]);
+		updateBreadcrumb(4, t('detail.tabs.analytics'));
+	}, [updateBreadcrumb, t]);
 
 	useEffect(() => {
 		if (customerError) {
@@ -292,7 +294,7 @@ const CustomerAnalyticsTab = () => {
 	return (
 		<div className='space-y-6'>
 			<h3 className='text-lg font-medium flex items-center gap-2 text-gray-900 mb-8 mt-1'>
-				<span>Analytics</span>
+				<span>{t('tabPanels.analytics.heading')}</span>
 				<PremiumFeatureIcon />
 			</h3>
 
@@ -314,8 +316,8 @@ const CustomerAnalyticsTab = () => {
 					<>
 						<div className='flex-1 min-w-[200px] max-w-md'>
 							<FeatureMultiSelect
-								label='Features'
-								placeholder='Select features'
+								label={t('tabPanels.analytics.featuresLabel')}
+								placeholder={t('tabPanels.analytics.featuresPlaceholder')}
 								values={selectedFeatures.map((f) => f.id)}
 								onChange={setSelectedFeatures}
 								className='text-sm'
@@ -326,8 +328,8 @@ const CustomerAnalyticsTab = () => {
 							<DatePicker
 								date={startDate}
 								setDate={handleStartDateChange}
-								placeholder='Select start date'
-								label='Start Date'
+								placeholder={t('tabPanels.analytics.startDatePlaceholder')}
+								label={t('tabPanels.analytics.startDateLabel')}
 								maxDate={maxStartDate}
 							/>
 						</div>
@@ -337,13 +339,13 @@ const CustomerAnalyticsTab = () => {
 							<DatePicker
 								date={endDate}
 								setDate={handleEndDateChange}
-								placeholder='Select end date'
-								label='End Date'
+								placeholder={t('tabPanels.analytics.endDatePlaceholder')}
+								label={t('tabPanels.analytics.endDateLabel')}
 								minDate={minEndDate}
 							/>
 						</div>
 						<div className='ml-auto min-w-[200px]'>
-							<div className='mb-1 w-full text-start text-sm text-zinc-600'>Options</div>
+							<div className='mb-1 w-full text-start text-sm text-zinc-600'>{t('tabPanels.analytics.options')}</div>
 							<label
 								htmlFor='include-children'
 								className={cn(
@@ -351,7 +353,7 @@ const CustomerAnalyticsTab = () => {
 									'cursor-pointer select-none',
 								)}>
 								<UiCheckbox id='include-children' checked={includeChildren} onCheckedChange={(v) => setIncludeChildren(Boolean(v))} />
-								<span className='text-sm font-medium text-zinc-900'>Include children</span>
+								<span className='text-sm font-medium text-zinc-900'>{t('tabPanels.analytics.includeChildren')}</span>
 							</label>
 						</div>
 					</>
@@ -393,17 +395,17 @@ const CustomerAnalyticsTab = () => {
 										const marginPercent = parseFloat(costData.margin_percent || '0');
 										return (
 											<>
-												<MetricCard title='Revenue' value={totalRevenue} currency={costData.currency} />
-												<MetricCard title='Cost' value={totalCost} currency={costData.currency} />
+												<MetricCard title={t('tabPanels.analytics.metricRevenue')} value={totalRevenue} currency={costData.currency} />
+												<MetricCard title={t('tabPanels.analytics.metricCost')} value={totalCost} currency={costData.currency} />
 												<MetricCard
-													title='Margin'
+													title={t('tabPanels.analytics.metricMargin')}
 													value={margin}
 													currency={costData.currency}
 													showChangeIndicator={true}
 													isNegative={margin < 0}
 												/>
 												<MetricCard
-													title='Margin %'
+													title={t('tabPanels.analytics.metricMarginPercent')}
 													value={marginPercent}
 													isPercent={true}
 													showChangeIndicator={true}
@@ -413,7 +415,12 @@ const CustomerAnalyticsTab = () => {
 										);
 									})()}
 								{featureCustomAnalytics.map((item) => (
-									<MetricCard key={item.id} title={`CPM`} value={parseFloat(item.value) || 0} currency={usageData?.currency ?? 'usd'} />
+									<MetricCard
+										key={item.id}
+										title={t('tabPanels.analytics.metricCpm')}
+										value={parseFloat(item.value) || 0}
+										currency={usageData?.currency ?? 'usd'}
+									/>
 								))}
 							</div>
 						</div>
@@ -453,6 +460,12 @@ interface GroupBucket {
 	items: UsageAnalyticItem[];
 }
 
+/** API sort field keys — not user-visible copy */
+const USAGE_BREAKDOWN_SORT_FIELDS = {
+	totalUsage: 'total_usage',
+	totalCost: 'total_cost',
+} as const;
+
 /** Unique key for a usage row (same feature can appear multiple times under different prices/meters). */
 function usageRowKey(row: UsageAnalyticItem, fallbackIndex: number): string {
 	return row.sub_line_item_id ?? ([row.price_id, row.meter_id, row.feature_id].filter(Boolean).join(':') || `row-${fallbackIndex}`);
@@ -460,6 +473,7 @@ function usageRowKey(row: UsageAnalyticItem, fallbackIndex: number): string {
 
 /** Renders only the child rows of a group so expanding/collapsing doesn't re-render the whole table. */
 const GroupChildRows = React.memo(function GroupChildRows({ bucket, isExpanded }: { bucket: GroupBucket; isExpanded: boolean }) {
+	const { t } = useTranslation('customers');
 	if (!isExpanded || bucket.items.length === 0) return null;
 	return (
 		<>
@@ -473,7 +487,7 @@ const GroupChildRows = React.memo(function GroupChildRows({ bucket, isExpanded }
 								{row.name}
 							</RedirectCell>
 						) : (
-							<span>{row.name || 'Unknown'}</span>
+							<span>{row.name || t('tabPanels.common.unknown')}</span>
 						)}
 					</TableCell>
 					<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalUsage(row)}</TableCell>
@@ -526,6 +540,7 @@ function renderTotalCost(row: UsageAnalyticItem) {
 }
 
 const UsageDataTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => {
+	const { t } = useTranslation('customers');
 	type UsageSortField = 'total_usage' | 'total_cost';
 	type SortDirection = 'asc' | 'desc';
 
@@ -620,13 +635,13 @@ const UsageDataTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => 
 	return (
 		<>
 			<div className='flex items-center justify-between mb-4'>
-				<h1 className='text-lg font-medium text-gray-900'>Usage Breakdown</h1>
+				<h1 className='text-lg font-medium text-gray-900'>{t('tabPanels.analytics.usageBreakdown')}</h1>
 				{hasGroups && (
 					<button
 						type='button'
 						onClick={toggleExpandAll}
 						className='inline-flex items-center justify-center text-gray-600 hover:text-gray-900'
-						aria-label={allExpanded ? 'Collapse all' : 'Expand all'}>
+						aria-label={allExpanded ? t('tabPanels.analytics.collapseAll') : t('tabPanels.analytics.expandAll')}>
 						<img src={allExpanded ? COLLAPSE_ALL_SVG : EXPAND_ALL_SVG} alt='' className='h-4 w-4' />
 					</button>
 				)}
@@ -636,12 +651,14 @@ const UsageDataTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => 
 				<Table>
 					<TableHeader className='h-10 bg-gray-50 border-b border-gray-200 rounded-t-md'>
 						<TableRow className='rounded-t-md border-b border-gray-200'>
-							<TableHead className='rounded-tl-md pl-4 font-semibold text-gray-700 text-[13px]'>Feature</TableHead>
+							<TableHead className='rounded-tl-md pl-4 font-semibold text-gray-700 text-[13px]'>
+								{t('usageTable.columns.feature')}
+							</TableHead>
 							<TableHead className='font-semibold text-gray-700 text-[13px]'>
-								{renderSortableHeader('total_usage', 'Total Usage')}
+								{renderSortableHeader(USAGE_BREAKDOWN_SORT_FIELDS.totalUsage, t('tabPanels.analytics.totalUsage'))}
 							</TableHead>
 							<TableHead className='rounded-tr-md font-semibold text-gray-700 text-[13px]'>
-								{renderSortableHeader('total_cost', 'Total Cost')}
+								{renderSortableHeader(USAGE_BREAKDOWN_SORT_FIELDS.totalCost, t('tabPanels.analytics.totalCost'))}
 							</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -701,7 +718,7 @@ const UsageDataTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => 
 											{row.name}
 										</RedirectCell>
 									) : (
-										<span>{row.name || 'Unknown'}</span>
+										<span>{row.name || t('tabPanels.common.unknown')}</span>
 									)}
 								</TableCell>
 								<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalUsage(row)}</TableCell>
@@ -711,7 +728,7 @@ const UsageDataTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => 
 						{items.length === 0 && (
 							<TableRow className='bg-white'>
 								<TableCell colSpan={3} className='pl-4 py-4 font-normal text-gray-500 text-[13px]'>
-									--
+									{t('tabPanels.analytics.tableEmpty')}
 								</TableCell>
 							</TableRow>
 						)}

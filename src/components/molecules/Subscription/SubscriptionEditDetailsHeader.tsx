@@ -12,6 +12,7 @@ import type { SubscriptionResponse, UpdateSubscriptionRequest } from '@/types/dt
 import { SUBSCRIPTION_STATUS } from '@/models/Subscription';
 import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
 import { formatSubscriptionTypeDisplayLabel } from '@/utils/subscription/formatSubscriptionTypeDisplay';
+import { useTranslation } from 'react-i18next';
 
 /** Subscription edit page: details header and update drawer. */
 export interface SubscriptionEditDetailsHeaderProps {
@@ -31,35 +32,36 @@ const SubscriptionEditDetailsHeader: FC<SubscriptionEditDetailsHeaderProps> = ({
 	updateDrawerOpen,
 	onUpdateDrawerOpenChange,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const subscriptionReadOnly = isInheritedSubscription(subscription);
 
 	const detailsData = useMemo(
 		() => [
-			{ label: 'Plan', value: subscription?.plan?.name },
+			{ label: t('subscriptions.editDetailsHeader.plan'), value: subscription?.plan?.name },
 			{
-				label: 'Status',
-				value: getSubscriptionStatus(subscription?.subscription_status ?? ''),
+				label: t('subscriptions.editDetailsHeader.status'),
+				value: getSubscriptionStatus(subscription?.subscription_status ?? '', t),
 			},
 			{
-				label: 'Subscription type',
+				label: t('subscriptions.editDetailsHeader.subscriptionType'),
 				value: formatSubscriptionTypeDisplayLabel(subscription?.subscription_type),
 			},
-			{ label: 'Billing Cycle', value: subscription?.billing_cycle || '--' },
-			{ label: 'Start Date', value: formatDate(subscription?.start_date ?? '') },
-			{ label: 'Current Period End', value: formatDate(subscription?.current_period_end ?? '') },
+			{ label: t('subscriptions.editDetailsHeader.billingCycle'), value: subscription?.billing_cycle || t('common:labels.na') },
+			{ label: t('subscriptions.editDetailsHeader.startDate'), value: formatDate(subscription?.start_date ?? '') },
+			{ label: t('subscriptions.editDetailsHeader.currentPeriodEnd'), value: formatDate(subscription?.current_period_end ?? '') },
 			...(subscription?.commitment_amount
 				? [
 						{
-							label: 'Commitment Amount',
+							label: t('subscriptions.editDetailsHeader.commitmentAmount'),
 							value: `${getCurrencySymbol(subscription?.currency || '')} ${subscription?.commitment_amount}`,
 						},
 					]
 				: []),
 			...(subscription?.overage_factor && subscription?.overage_factor > 1
-				? [{ label: 'Overage Factor', value: subscription?.overage_factor.toString() }]
+				? [{ label: t('subscriptions.editDetailsHeader.overageFactor'), value: subscription?.overage_factor.toString() }]
 				: []),
 			{
-				label: 'Parent subscription',
+				label: t('subscriptions.editDetailsHeader.parentSubscription'),
 				value: subscription?.parent_subscription_id ? (
 					<Link
 						to={`${RouteNames.subscriptions}/${subscription.parent_subscription_id}/edit`}
@@ -68,25 +70,25 @@ const SubscriptionEditDetailsHeader: FC<SubscriptionEditDetailsHeaderProps> = ({
 						<ExternalLink className='w-3.5 h-3.5' />
 					</Link>
 				) : (
-					'None'
+					t('subscriptions.editDetailsHeader.none')
 				),
 			},
 		],
-		[subscription],
+		[subscription, t],
 	);
 
 	return (
 		<div>
 			<Spacer className='!h-4' />
 			<div className='flex justify-between items-center'>
-				<h3 className={getTypographyClass('card-header') + ' !text-[16px]'}>Subscription Details</h3>
+				<h3 className={getTypographyClass('card-header') + ' !text-[16px]'}>{t('subscriptions.editDetailsHeader.title')}</h3>
 				{subscription?.subscription_status !== SUBSCRIPTION_STATUS.CANCELLED && (
 					<Tooltip
 						delayDuration={0}
 						content={
 							subscriptionReadOnly
-								? 'Inherited subscriptions mirror the parent; update the parent subscription instead.'
-								: 'Update subscription'
+								? t('subscriptions.editDetailsHeader.inheritedReadOnlyTooltip')
+								: t('subscriptions.editDetailsHeader.updateTooltip')
 						}>
 						<span className='inline-flex'>
 							<Button
@@ -95,7 +97,9 @@ const SubscriptionEditDetailsHeader: FC<SubscriptionEditDetailsHeaderProps> = ({
 								disabled={subscriptionReadOnly}
 								onClick={() => !subscriptionReadOnly && onUpdateDrawerOpenChange(true)}
 								title={
-									subscriptionReadOnly ? 'Inherited subscriptions are read-only; edit the parent subscription.' : 'Update subscription'
+									subscriptionReadOnly
+										? t('subscriptions.editDetailsHeader.inheritedReadOnlyTitle')
+										: t('subscriptions.editDetailsHeader.updateTitle')
 								}>
 								<Pencil className='size-4' />
 							</Button>

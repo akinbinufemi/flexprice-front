@@ -8,6 +8,7 @@ import { formatExpirationPeriod } from '@/utils/common/credit_grant_helpers';
 import { formatBillingPeriodForPrice } from '@/utils/common/helper_functions';
 import { formatAmount } from '@/components/atoms/Input/Input';
 import type { CreditGrant } from '@/models';
+import { useTranslation } from 'react-i18next';
 
 /** Subscription edit page: credit grants card, add/cancel modals. */
 export interface SubscriptionEditCreditGrantsSectionProps {
@@ -44,6 +45,7 @@ const SubscriptionEditCreditGrantsSection: FC<SubscriptionEditCreditGrantsSectio
 	onConfirmCancelCreditGrant,
 	onCloseCancelModal,
 }) => {
+	const { t } = useTranslation('common');
 	const addDisabled = isAddDisabled || readOnly;
 
 	const columns: ColumnData<CreditGrant>[] = useMemo(
@@ -58,7 +60,7 @@ const SubscriptionEditCreditGrantsSection: FC<SubscriptionEditCreditGrantsSectio
 			},
 			{
 				title: 'Priority',
-				render: (row) => <span>{row.priority ?? '--'}</span>,
+				render: (row) => <span>{row.priority ?? t('labels.na')}</span>,
 			},
 			{
 				title: 'Cadence',
@@ -89,7 +91,7 @@ const SubscriptionEditCreditGrantsSection: FC<SubscriptionEditCreditGrantsSectio
 						archive={{ enabled: false }}
 						customActions={[
 							{
-								text: 'Delete',
+								text: t('actions.delete'),
 								onClick: () => onRequestCancel(row),
 								enabled: !readOnly,
 							},
@@ -106,7 +108,7 @@ const SubscriptionEditCreditGrantsSection: FC<SubscriptionEditCreditGrantsSectio
 			{creditGrants.length > 0 ? (
 				<Card variant='notched'>
 					<div className='flex items-center justify-between mb-4'>
-						<FormHeader title='Credit Grants' variant='sub-header' titleClassName='font-semibold' className='mb-0' />
+						<FormHeader title={t('labels.creditGrants')} variant='sub-header' titleClassName='font-semibold' className='mb-0' />
 						<AddButton onClick={onAddClick} disabled={addDisabled} />
 					</div>
 					<div className='mt-4'>
@@ -115,7 +117,7 @@ const SubscriptionEditCreditGrantsSection: FC<SubscriptionEditCreditGrantsSectio
 				</Card>
 			) : (
 				<NoDataCard
-					title='Credit Grants'
+					title={t('labels.creditGrants')}
 					subtitle='No credit grants added to this subscription yet'
 					cta={<AddButton onClick={onAddClick} disabled={addDisabled} />}
 				/>

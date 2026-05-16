@@ -12,18 +12,17 @@ import { getCurrencySymbol } from '@/utils';
 import { cn } from '@/lib/utils';
 import RevenueDashboardApi from '@/api/RevenueDashboardApi';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
 import type { RevenueDashboardGraphPoint } from '@/types/dto/RevenueDashboard';
 
 type RevenueFilterValue = 'this_month' | 'this_quarter' | 'this_year' | 'last_month' | 'last_quarter' | 'last_year';
 
-const FILTER_OPTIONS = [
-	{ value: 'this_month', label: 'This month' },
-	{ value: 'this_quarter', label: 'This quarter' },
-	{ value: 'this_year', label: 'This year' },
-	{ value: 'last_month', label: 'Last month' },
-	{ value: 'last_quarter', label: 'Last quarter' },
-	{ value: 'last_year', label: 'Last year' },
-] satisfies { value: RevenueFilterValue; label: string }[];
+const UTC_SHORT_DATE = {
+	month: 'short',
+	day: 'numeric',
+	year: 'numeric',
+	timeZone: 'UTC',
+} as const satisfies Intl.DateTimeFormatOptions;
 
 const getDateRangeForPeriod = (period: RevenueFilterValue) => {
 	const now = new Date();
@@ -55,18 +54,18 @@ const getDateRangeForPeriod = (period: RevenueFilterValue) => {
 	}
 };
 
-const formatCurrency = (value: number | null, currency: string) => {
-	if (value == null) return 'N/A';
+const formatCurrency = (value: number | null, currency: string, naLabel: string) => {
+	if (value == null) return naLabel;
 	return `${getCurrencySymbol(currency)} ${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 };
 
-const formatDecimal = (value: number | null) => {
-	if (value == null) return 'N/A';
+const formatDecimal = (value: number | null, naLabel: string) => {
+	if (value == null) return naLabel;
 	return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 };
 
-const formatInteger = (value: number | null) => {
-	if (value == null) return 'N/A';
+const formatInteger = (value: number | null, naLabel: string) => {
+	if (value == null) return naLabel;
 	return value.toLocaleString();
 };
 
@@ -80,6 +79,22 @@ const GRAPH_ELIGIBLE: RevenueFilterValue[] = ['this_quarter', 'last_quarter', 't
 const PAGE_SIZE = 20;
 
 const Revenue = () => {
+	const { t } = useTranslation('settings');
+	const { i18n } = useTranslation();
+	const naLabel = i18n.t('labels.notApplicable', { ns: 'common' });
+	const unknownLabel = i18n.t('labels.unknown', { ns: 'common' });
+	const FILTER_OPTIONS = useMemo(
+		() =>
+			[
+				{ value: 'this_month' as const, label: t('insightsTools.revenue.filterThisMonth') },
+				{ value: 'this_quarter' as const, label: t('insightsTools.revenue.filterThisQuarter') },
+				{ value: 'this_year' as const, label: t('insightsTools.revenue.filterThisYear') },
+				{ value: 'last_month' as const, label: t('insightsTools.revenue.filterLastMonth') },
+				{ value: 'last_quarter' as const, label: t('insightsTools.revenue.filterLastQuarter') },
+				{ value: 'last_year' as const, label: t('insightsTools.revenue.filterLastYear') },
+			] satisfies { value: RevenueFilterValue; label: string }[],
+		[t],
+	);
 	const [selectedFilter, setSelectedFilter] = useState<RevenueFilterValue>('this_quarter');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [search, setSearch] = useState('');
@@ -140,19 +155,21 @@ const Revenue = () => {
 	};
 
 	const graph = data?.graph;
-	const graphCharts: { key: 'total_revenue' | 'voice_minutes'; title: string; type: 'currency' | 'minutes' }[] = [];
-	if (showGraph && graph) {
+	const graphCharts = useMemo(() => {
+		const charts: { key: 'total_revenue' | 'voice_minutes'; title: string; type: 'currency' | 'minutes' }[] = [];
+		if (!showGraph || !graph) return charts;
 		if ((graph.total_revenue ?? []).length > 0) {
-			graphCharts.push({ key: 'total_revenue', title: 'Net Revenue', type: 'currency' });
+			charts.push({ key: 'total_revenue', title: t('insightsTools.revenue.metricNetRevenue'), type: 'currency' });
 		}
 		if ((graph.voice_minutes ?? []).length > 0) {
-			graphCharts.push({ key: 'voice_minutes', title: 'Voice Minutes', type: 'minutes' });
+			charts.push({ key: 'voice_minutes', title: t('insightsTools.revenue.metricVoiceMinutes'), type: 'minutes' });
 		}
-	}
+		return charts;
+	}, [showGraph, graph, t]);
 
 	return (
 		<Page
-			heading='Revenue'
+			heading={t('insightsTools.revenue.pageHeading')}
 			headingCTA={
 				<div className='w-[220px]'>
 					<Select options={FILTER_OPTIONS} value={selectedFilter} onChange={(value) => handleFilterChange(value as RevenueFilterValue)} />
@@ -164,26 +181,40 @@ const Revenue = () => {
 						<div className='rounded-xl border border-gray-200 bg-white overflow-hidden'>
 							<div className={`grid grid-cols-1 sm:grid-cols-2 ${showVoiceColumns ? 'lg:grid-cols-5' : 'lg:grid-cols-3'}`}>
 								<MetricTile
-									title='Net Revenue'
-									value={formatCurrency(normalizedSummary.netRevenue, normalizedSummary.currency)}
+									title={t('insightsTools.revenue.metricNetRevenue')}
+									value={formatCurrency(normalizedSummary.netRevenue, normalizedSummary.currency, naLabel)}
 									loading={isLoading}
+									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
 								/>
 								<MetricTile
-									title='Contract Revenue'
-									value={formatCurrency(normalizedSummary.fixedContractRevenue, normalizedSummary.currency)}
+									title={t('insightsTools.revenue.metricContractRevenue')}
+									value={formatCurrency(normalizedSummary.fixedContractRevenue, normalizedSummary.currency, naLabel)}
 									loading={isLoading}
+									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
 								/>
 								<MetricTile
-									title='Usage Revenue'
-									value={formatCurrency(normalizedSummary.usageRevenue, normalizedSummary.currency)}
+									title={t('insightsTools.revenue.metricUsageRevenue')}
+									value={formatCurrency(normalizedSummary.usageRevenue, normalizedSummary.currency, naLabel)}
 									loading={isLoading}
+									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
 									isLast={!showVoiceColumns}
 								/>
 								{showVoiceColumns && (
-									<MetricTile title='Voice Minutes' value={formatInteger(normalizedSummary.totalMinutes)} loading={isLoading} />
+									<MetricTile
+										title={t('insightsTools.revenue.metricVoiceMinutes')}
+										value={formatInteger(normalizedSummary.totalMinutes, naLabel)}
+										loading={isLoading}
+										loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
+									/>
 								)}
 								{showVoiceColumns && (
-									<MetricTile title='Cost / Minute' value={formatDecimal(normalizedSummary.cpm)} loading={isLoading} isLast />
+									<MetricTile
+										title={t('insightsTools.revenue.metricCostPerMinute')}
+										value={formatDecimal(normalizedSummary.cpm, naLabel)}
+										loading={isLoading}
+										loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
+										isLast
+									/>
 								)}
 							</div>
 						</div>
@@ -192,12 +223,10 @@ const Revenue = () => {
 					{showGlobalEmpty && (
 						<div className='absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-md bg-white/45'>
 							<div className='text-center max-w-sm px-4'>
-								<h3 className='text-xl font-semibold text-zinc-900'>This range is empty</h3>
-								<p className='text-sm text-zinc-600 mt-2'>
-									Not enough revenue data is available in the selected range to show this statistics.
-								</p>
+								<h3 className='text-xl font-semibold text-zinc-900'>{t('insightsTools.revenue.emptyRangeTitle')}</h3>
+								<p className='text-sm text-zinc-600 mt-2'>{t('insightsTools.revenue.emptyRangeBody')}</p>
 								<Button onClick={() => setSelectedFilter('this_quarter')} className='mt-4'>
-									View latest data
+									{t('insightsTools.revenue.viewLatestData')}
 								</Button>
 							</div>
 						</div>
@@ -231,7 +260,7 @@ const Revenue = () => {
 							<div className='relative flex items-center w-64'>
 								<Search className='absolute left-2.5 h-3.5 w-3.5 text-gray-400 pointer-events-none' />
 								<Input
-									placeholder='Search customers...'
+									placeholder={t('insightsTools.revenue.searchCustomersPlaceholder')}
 									value={search}
 									onChange={(e) => handleSearch(e.target.value)}
 									className='pl-8 h-8 text-[13px] border-gray-200 bg-gray-50 focus:bg-white placeholder:text-gray-400'
@@ -240,28 +269,40 @@ const Revenue = () => {
 							<div className='flex items-center gap-4'>
 								{search.trim() && (
 									<p className='text-[12px] text-gray-400'>
-										{filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}
+										{filteredItems.length === 1
+											? i18n.t('search.resultsCountSingular', { ns: 'common', count: filteredItems.length })
+											: i18n.t('search.resultsCountPlural', { ns: 'common', count: filteredItems.length })}
 									</p>
 								)}
 								<p className='text-[12px] text-gray-400'>
-									{start.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
+									{start.toLocaleDateString(undefined, UTC_SHORT_DATE)}
 									{' – '}
-									{end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
+									{end.toLocaleDateString(undefined, UTC_SHORT_DATE)}
 								</p>
 							</div>
 						</div>
 						<Table>
 							<TableHeader className='h-10 bg-gray-50 border-b border-gray-200 rounded-t-md'>
 								<TableRow className='rounded-t-md border-b border-gray-200'>
-									<TableHead className='rounded-tl-md pl-4 font-semibold text-gray-700 text-[13px]'>Customer</TableHead>
-									<TableHead className='font-semibold text-gray-700 text-[13px]'>Net Revenue</TableHead>
-									<TableHead className='font-semibold text-gray-700 text-[13px]'>Contract Revenue</TableHead>
-									<TableHead className={`font-semibold text-gray-700 text-[13px] ${!showVoiceColumns ? 'rounded-tr-md' : ''}`}>
-										Usage Revenue
+									<TableHead className='rounded-tl-md pl-4 font-semibold text-gray-700 text-[13px]'>
+										{t('insightsTools.revenue.colCustomer')}
 									</TableHead>
-									{showVoiceColumns && <TableHead className='font-semibold text-gray-700 text-[13px]'>Voice Minutes</TableHead>}
+									<TableHead className='font-semibold text-gray-700 text-[13px]'>{t('insightsTools.revenue.metricNetRevenue')}</TableHead>
+									<TableHead className='font-semibold text-gray-700 text-[13px]'>
+										{t('insightsTools.revenue.metricContractRevenue')}
+									</TableHead>
+									<TableHead className={`font-semibold text-gray-700 text-[13px] ${!showVoiceColumns ? 'rounded-tr-md' : ''}`}>
+										{t('insightsTools.revenue.metricUsageRevenue')}
+									</TableHead>
 									{showVoiceColumns && (
-										<TableHead className='rounded-tr-md font-semibold text-gray-700 text-[13px]'>Cost / Minute</TableHead>
+										<TableHead className='font-semibold text-gray-700 text-[13px]'>
+											{t('insightsTools.revenue.metricVoiceMinutes')}
+										</TableHead>
+									)}
+									{showVoiceColumns && (
+										<TableHead className='rounded-tr-md font-semibold text-gray-700 text-[13px]'>
+											{t('insightsTools.revenue.metricCostPerMinute')}
+										</TableHead>
 									)}
 								</TableRow>
 							</TableHeader>
@@ -272,7 +313,7 @@ const Revenue = () => {
 										className='h-10 align-middle border-b border-gray-200 bg-white hover:bg-gray-50/50 transition-colors'>
 										<TableCell className='py-2.5 pl-4 font-normal text-gray-700 text-[13px] align-middle'>
 											<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`} allowRedirect={Boolean(row.customer_id)}>
-												{row.customer_name || row.external_customer_id || 'Unknown'}
+												{row.customer_name || row.external_customer_id || unknownLabel}
 											</RedirectCell>
 										</TableCell>
 										<TableCell className='py-2.5 font-semibold text-gray-700 text-[13px]'>
@@ -280,22 +321,23 @@ const Revenue = () => {
 												toNumberOrNull(row.total_revenue) ??
 													(toNumberOrNull(row.total_usage_revenue) ?? 0) + (toNumberOrNull(row.total_fixed_revenue) ?? 0),
 												normalizedSummary.currency,
+												naLabel,
 											)}
 										</TableCell>
 										<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-											{formatCurrency(toNumberOrNull(row.total_fixed_revenue), normalizedSummary.currency)}
+											{formatCurrency(toNumberOrNull(row.total_fixed_revenue), normalizedSummary.currency, naLabel)}
 										</TableCell>
 										<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-											{formatCurrency(toNumberOrNull(row.total_usage_revenue), normalizedSummary.currency)}
+											{formatCurrency(toNumberOrNull(row.total_usage_revenue), normalizedSummary.currency, naLabel)}
 										</TableCell>
 										{showVoiceColumns && (
 											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-												{formatInteger(toNumberOrNull(row.voice_minutes))}
+												{formatInteger(toNumberOrNull(row.voice_minutes), naLabel)}
 											</TableCell>
 										)}
 										{showVoiceColumns && (
 											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-												{formatDecimal(toNumberOrNull(row.cpm))}
+												{formatDecimal(toNumberOrNull(row.cpm), naLabel)}
 											</TableCell>
 										)}
 									</TableRow>
@@ -303,7 +345,7 @@ const Revenue = () => {
 								{pagedItems.length === 0 && (
 									<TableRow className='bg-white'>
 										<TableCell colSpan={showVoiceColumns ? 6 : 4} className='pl-4 py-4 font-normal text-gray-500 text-[13px]'>
-											{search.trim() ? 'No customers match your search.' : '--'}
+											{search.trim() ? t('insightsTools.revenue.noSearchMatches') : i18n.t('labels.na', { ns: 'common' })}
 										</TableCell>
 									</TableRow>
 								)}
@@ -313,9 +355,13 @@ const Revenue = () => {
 					{filteredItems.length > 0 && totalPages > 1 && (
 						<div className='flex items-center justify-between py-4'>
 							<p className='text-sm text-gray-500 font-light'>
-								Showing <span className='font-normal'>{(currentPage - 1) * PAGE_SIZE + 1}</span> to{' '}
-								<span className='font-normal'>{Math.min(currentPage * PAGE_SIZE, filteredItems.length)}</span> of{' '}
-								<span className='font-normal'>{filteredItems.length}</span> Customers
+								{i18n.t('pagination.showingRange', {
+									ns: 'common',
+									start: (currentPage - 1) * PAGE_SIZE + 1,
+									end: Math.min(currentPage * PAGE_SIZE, filteredItems.length),
+									total: filteredItems.length,
+									unit: i18n.t('pagination.unitCustomers', { ns: 'common' }),
+								})}
 							</p>
 							<div className='flex items-center space-x-2'>
 								<Button
@@ -349,18 +395,20 @@ const MetricTile = ({
 	title,
 	value,
 	loading = false,
+	loadingLabel,
 	isLast = false,
 }: {
 	title: string;
 	value: string;
 	loading?: boolean;
+	loadingLabel: string;
 	isLast?: boolean;
 }) => {
 	return (
 		<div
 			className={`px-5 py-4 min-h-[104px] flex flex-col ${!isLast ? 'lg:border-r lg:border-gray-200' : ''} border-b sm:border-b-0 border-gray-200`}>
 			<p className='text-[12px] leading-4 text-zinc-600 whitespace-normal break-words'>{title}</p>
-			<p className='mt-4 text-[22px] leading-[1.2] font-medium text-zinc-900'>{loading ? '...' : value}</p>
+			<p className='mt-4 text-[22px] leading-[1.2] font-medium text-zinc-900'>{loading ? loadingLabel : value}</p>
 		</div>
 	);
 };

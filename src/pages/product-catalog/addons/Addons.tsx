@@ -3,8 +3,9 @@ import { ApiDocsContent, AddonDrawer } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import Addon from '@/models/Addon';
-import GUIDES from '@/constants/guides';
-import { useState, useMemo } from 'react';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
+import { useState, useMemo, useCallback } from 'react';
 import AddonApi from '@/api/AddonApi';
 import {
 	FilterField,
@@ -19,61 +20,8 @@ import {
 import { ENTITY_STATUS } from '@/models';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'lookup_key',
-		label: 'Lookup Key',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-];
+import { useTranslation } from 'react-i18next';
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -92,48 +40,114 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
 const AddonsPage = () => {
+	const { t } = useTranslation('catalog');
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const [activeAddon, setActiveAddon] = useState<Addon | null>(null);
 	const [addonDrawerOpen, setAddonDrawerOpen] = useState(false);
 	const navigate = useNavigate();
 
-	const handleOnAdd = () => {
+	const handleOnAdd = useCallback(() => {
 		setActiveAddon(null);
 		setAddonDrawerOpen(true);
-	};
+	}, []);
 
-	const handleEdit = (addon: Addon) => {
+	const handleEdit = useCallback((addon: Addon) => {
 		setActiveAddon(addon);
 		setAddonDrawerOpen(true);
-	};
+	}, []);
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('addons.listPage.sortLabels.name'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'created_at',
+				label: t('addons.listPage.sortLabels.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: t('addons.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'name',
+				label: t('addons.listPage.filterLabels.name'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'lookup_key',
+				label: t('addons.listPage.filterLabels.lookupKey'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'created_at',
+				label: t('addons.listPage.filterLabels.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'status',
+				label: t('addons.listPage.filterLabels.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('addons.listPage.filterStatus.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('addons.listPage.filterStatus.inactive') },
+				],
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'updated_at',
+				label: t('addons.listPage.sortLabels.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
 
 	const columns: ColumnData<Addon>[] = useMemo(
 		() => [
 			{
 				fieldName: 'name',
-				title: 'Addon Name',
+				title: t('addons.listPage.columns.addonName'),
 			},
 			{
 				fieldName: 'lookup_key',
-				title: 'Lookup Key',
+				title: t('addons.listPage.columns.lookupKey'),
 			},
 			{
-				title: 'Status',
+				title: t('addons.listPage.columns.status'),
 				render: (row) => {
-					const label = formatChips(row?.status);
-					return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+					const isActive = row?.status === ENTITY_STATUS.PUBLISHED;
+					const label = isActive ? t('addons.listPage.filterStatus.active') : t('addons.listPage.filterStatus.inactive');
+					return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
-				title: 'Updated At',
+				title: t('addons.listPage.columns.updatedAt'),
 				render: (row) => {
 					return formatDate(row?.updated_at);
 				},
@@ -161,13 +175,13 @@ const AddonsPage = () => {
 				},
 			},
 		],
-		[],
+		[t, handleEdit],
 	);
 
 	return (
-		<Page heading='Addons' headingCTA={<AddButton onClick={handleOnAdd} />}>
+		<Page heading={t('addons.listPage.title')} headingCTA={<AddButton onClick={handleOnAdd} />}>
 			<AddonDrawer data={activeAddon} open={addonDrawerOpen} onOpenChange={setAddonDrawerOpen} refetchQueryKeys={['fetchAddons']} />
-			<ApiDocsContent tags={['Addons']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Addons} />
 			<div className='space-y-6'>
 				<QueryableDataArea<Addon>
 					queryConfig={{
@@ -197,15 +211,15 @@ const AddonsPage = () => {
 						showEmptyRow: true,
 					}}
 					paginationConfig={{
-						unit: 'Addons',
+						unit: t('addons.listPage.paginationUnit'),
 					}}
 					emptyStateConfig={{
-						heading: 'Addons',
-						description: 'Create your first addon to define additional services customers can purchase.',
-						buttonLabel: 'Create Addon',
+						heading: t('addons.listPage.emptyState.heading'),
+						description: t('addons.listPage.emptyState.description'),
+						buttonLabel: t('addons.listPage.emptyState.createButton'),
 						buttonAction: handleOnAdd,
-						tags: ['Addons'],
-						tutorials: GUIDES.addons.tutorials,
+						tags: API_DOCS_TAGS.Addons,
+						tutorials: guides.addons.tutorials,
 					}}
 				/>
 			</div>

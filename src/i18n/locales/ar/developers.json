@@ -1,0 +1,311 @@
+{
+	"labels": {
+		"missingValue": "—",
+		"name": "الاسم",
+		"token": "الرمز",
+		"type": "النوع",
+		"roles": "الأدوار",
+		"createdAt": "تاريخ الإنشاء",
+		"id": "المعرّف",
+		"expiration": "انتهاء الصلاحية",
+		"accountType": "نوع الحساب",
+		"mappedToIdentity": "مرتبط بهوية",
+		"selectedRoles": "الأدوار المحددة",
+		"accountRolesPermissions": "أدوار الحساب والصلاحيات",
+		"apiKey": "مفتاح API",
+		"lineItem": "بند",
+		"qty": "الكمية",
+		"values": "القيم",
+		"customer": "العميل",
+		"subscription": "الاشتراك",
+		"feature": "الميزة",
+		"meter": "العداد",
+		"price": "السعر",
+		"workflowId": "معرّف سير العمل",
+		"runId": "معرّف التشغيل",
+		"workflowType": "نوع سير العمل",
+		"taskQueue": "طابور المهام",
+		"entity": "الكيان",
+		"entityId": "معرّف الكيان",
+		"activityId": "معرّف النشاط",
+		"activityType": "نوع النشاط",
+		"close": "إغلاق",
+		"closeTime": "وقت الإغلاق",
+		"status": "الحالة",
+		"start": "بدء",
+		"error": "خطأ",
+		"duration": "المدة",
+		"startTime": "وقت البدء",
+		"endTime": "وقت الانتهاء",
+		"eventId": "معرّف الحدث",
+		"eventsName": "اسم الأحداث",
+		"externalCustomerId": "معرّف العميل الخارجي",
+		"source": "المصدر",
+		"timestamp": "الطابع الزمني",
+		"response": "الاستجابة",
+		"eventDetails": "تفاصيل الحدث",
+		"eventFilter": "مرشح الأحداث",
+		"roleRequiredHint": "الأدوار",
+		"placeholders": {
+			"key": "مفتاح",
+			"value": "قيمة",
+			"secretKeyName": "المفتاح السري",
+			"selectServiceAccount": "اختر حساب خدمة"
+		}
+	},
+	"apiKeys": {
+		"toastFetchError": "خطأ في جلب المفاتيح السرية",
+		"paginationUnit": "مفاتيح سرية",
+		"emptyCard": {
+			"heading": "إنشاء مفتاح سري",
+			"description": "أنشئ مفتاحاً سرياً لمصادقة طلبات API وتأمين الوصول.",
+			"button": "إنشاء مفتاح سري"
+		},
+		"roles": {
+			"fullAccess": "وصول كامل"
+		},
+		"accountTypes": {
+			"serviceAccount": "حساب خدمة",
+			"userAccount": "حساب مستخدم"
+		},
+		"entityName": "مفتاح API",
+		"permissionDisplay": {
+			"none": "بدون",
+			"read": "قراءة",
+			"write": "كتابة",
+			"fullAccess": "وصول كامل"
+		}
+	},
+	"serviceAccounts": {
+		"toastFetchError": "خطأ في جلب حسابات الخدمة",
+		"paginationUnit": "حسابات الخدمة",
+		"noRoles": "لا أدوار",
+		"emptyCard": {
+			"heading": "إنشاء حساب خدمة",
+			"description": "أنشئ حساب خدمة لإدارة الوصول البرمجي بأدوار وصلاحيات محددة.",
+			"button": "إنشاء حساب خدمة"
+		}
+	},
+	"secretKeyDrawer": {
+		"title": "إنشاء مفتاح API",
+		"description": "أنشئ مفتاح API جديداً للوصول إلى واجهة Flexprice",
+		"createFailed": "فشل إنشاء مفتاح API. يرجى المحاولة مجدداً.",
+		"inheritedPrefix": "موروث من حساب الخدمة:",
+		"fullAccess": {
+			"title": "وصول كامل",
+			"body": "سيكون لمفتاح API هذا وصول كامل مع جميع الصلاحيات الموروثة من حساب المستخدم."
+		},
+		"serviceAccountsUnavailable": {
+			"title": "حسابات الخدمة غير متاحة",
+			"body": "لم يُنفَّذ بعد مسار الخادم لحسابات الخدمة. يرجى إنشاء مفتاح API لحساب مستخدم بدلاً من ذلك، أو التواصل مع المسؤول."
+		},
+		"noServiceAccounts": {
+			"title": "لم يُعثر على حسابات خدمة",
+			"body": "أنشئ حساب خدمة أولاً لإنشاء مفاتيح API للخدمات الآلية."
+		},
+		"expiration": {
+			"never": "أبداً",
+			"oneHour": "ساعة واحدة",
+			"oneDay": "يوم واحد",
+			"oneWeek": "أسبوع واحد",
+			"oneMonth": "شهر واحد"
+		},
+		"accountTypes": {
+			"user": "حساب مستخدم",
+			"service": "حساب خدمة"
+		},
+		"serviceAccountFallback": "حساب الخدمة {{index}}",
+		"modal": {
+			"title": "عرض مفتاح API",
+			"warning": "يمكنك رؤية هذا المفتاح مرة واحدة فقط. احفظه في مكان آمن."
+		}
+	},
+	"serviceAccountDrawer": {
+		"title": "إنشاء حساب خدمة",
+		"description": "أنشئ حساب خدمة جديداً بأدوار محددة للخدمات الآلية",
+		"createSuccess": "تم إنشاء حساب الخدمة بنجاح!",
+		"createFailed": "فشل إنشاء حساب الخدمة. يرجى المحاولة مجدداً.",
+		"intro": {
+			"title": "حساب الخدمة",
+			"body": "تُستخدم حسابات الخدمة للعمليات الآلية وتكاملات API. لها أدوار وصلاحيات ثابتة."
+		},
+		"rolesUnavailable": {
+			"title": "الأدوار غير متاحة",
+			"body": "تعذّر تحميل الأدوار المتاحة. يرجى التواصل مع المسؤول."
+		},
+		"rolesHint": "حدد دوراً واحداً أو أكثر لتحديد صلاحيات حساب الخدمة هذا",
+		"loadingRoles": "جارٍ تحميل الأدوار...",
+		"noRolesAvailable": "لا أدوار متاحة",
+		"submit": "إنشاء حساب خدمة"
+	},
+	"webhooks": {
+		"toastFetchError": "خطأ في جلب لوحة الويب هوكس: {{message}}",
+		"unknownError": "خطأ غير معروف",
+		"emptyLoadFailed": {
+			"heading": "تعذّر تحميل الويب هوكس",
+			"description": "حدث خطأ أثناء تحميل لوحة الويب هوكس. يرجى تحديث الصفحة."
+		},
+		"disabled": {
+			"heading": "الويب هوكس",
+			"description": "الويب هوكس غير مفعّلة. يرجى التواصل مع الدعم لتفعيلها."
+		}
+	},
+	"workflows": {
+		"paginationUnit": "سير العمل",
+		"empty": {
+			"description": "ستظهر عمليات سير عمل Temporal هنا عند تسجيل التشغيلات."
+		},
+		"filters": {
+			"workflowId": "معرّف سير العمل",
+			"workflowType": "نوع سير العمل",
+			"taskQueue": "طابور المهام",
+			"status": "الحالة",
+			"entity": "الكيان",
+			"entityId": "معرّف الكيان",
+			"running": "قيد التشغيل",
+			"completed": "مكتمل",
+			"failed": "فاشل",
+			"canceled": "ملغى",
+			"terminated": "منتهي",
+			"continuedAsNew": "متابعة كجديد",
+			"timedOut": "انتهت المهلة"
+		},
+		"sort": {
+			"startTime": "وقت البدء",
+			"endTime": "وقت الانتهاء",
+			"createdAt": "تاريخ الإنشاء"
+		},
+		"columns": {
+			"workflowId": "معرّف سير العمل",
+			"runId": "معرّف التشغيل",
+			"workflowType": "نوع سير العمل",
+			"status": "الحالة",
+			"startTime": "وقت البدء",
+			"endTime": "وقت الانتهاء",
+			"duration": "المدة"
+		},
+		"statusChip": {
+			"completed": "مكتمل",
+			"failed": "فاشل"
+		},
+		"durationUnits": {
+			"ms": "مللي ثانية",
+			"s": "ث",
+			"min": "دقيقة",
+			"hr": "ساعة"
+		}
+	},
+	"workflowDetail": {
+		"heading": "تفاصيل سير العمل",
+		"headingShort": "سير العمل",
+		"notFoundTitle": "لم يُعثر على سير العمل",
+		"notFoundDescription": "فشل تحميل سير العمل أو ربما حُذف.",
+		"backToWorkflows": "العودة إلى سير العمل",
+		"summaryTitle": "ملخص",
+		"activitiesTitle": "الأنشطة",
+		"noActivities": "لم يُسجَّل أي نشاط.",
+		"columns": {
+			"retries": "المحاولات"
+		},
+		"activityStatus": {
+			"COMPLETED": "مكتمل",
+			"FAILED": "فاشل",
+			"RUNNING": "قيد التشغيل",
+			"CANCELED": "ملغى",
+			"TIMED_OUT": "انتهت المهلة"
+		}
+	},
+	"events": {
+		"listPage": {
+			"title": "الأحداث"
+		},
+		"queryBuilder": {
+			"filters": {
+				"eventId": "معرّف الحدث",
+				"eventName": "اسم الحدث",
+				"externalCustomerId": "المعرّف الخارجي للعميل",
+				"source": "المصدر",
+				"startTime": "وقت البداية",
+				"endTime": "وقت النهاية"
+			},
+			"sort": {
+				"createdAt": "تاريخ الإنشاء",
+				"updatedAt": "تاريخ التحديث"
+			}
+		},
+		"debugger": {
+			"processedEventsTitle": "أحداث معالجة",
+			"eventDetailsTitle": "تفاصيل الحدث",
+			"loadFailedTitle": "فشل تحميل تفاصيل تصحيح الحدث",
+			"noTrackerData": "لا تتوفر بيانات متتبع لهذا الحدث.",
+			"couldNotResolveCustomer": "تعذّر تحديد العميل لهذا الاشتراك",
+			"openSubscriptionFailed": "فشل فتح الاشتراك",
+			"propertiesCopied": "تم نسخ الخصائص إلى الحافظة!"
+		},
+		"processed": {
+			"eventNumber": "الحدث رقم {{n}}"
+		},
+		"tracker": {
+			"ingested": "مُستلام",
+			"customerLookup": "بحث عن عميل",
+			"featureLookup": "بحث عن ميزة",
+			"priceLookup": "بحث عن سعر",
+			"subscriptionLineItemLookup": "بحث عن بند اشتراك",
+			"attributedToCustomer": "نُسب إلى عميل",
+			"stepStatus": {
+				"processing": "قيد المعالجة",
+				"failed": "فاشل",
+				"successful": "ناجح",
+				"skipped": "تخطّي"
+			}
+		},
+		"monitoring": {
+			"title": "مراقبة الأحداث",
+			"description": "مقاييس معالجة الأحداث ومعلومات التأخير",
+			"eventCount": "عدد الأحداث",
+			"emptyRangeTitle": "هذا النطاق فارغ",
+			"emptyRangeDescription": "لا تتوفر بيانات كافية في النطاق المحدد لعرض هذه الإحصائية.",
+			"viewLatestData": "عرض أحدث البيانات"
+		},
+		"list": {
+			"noEventsFound": "لم يتم العثور على أحداث"
+		}
+	},
+	"usage": {
+		"costAnalytics": {
+			"pageTitle": "التحليلات",
+			"featuresLabel": "الميزات",
+			"selectFeaturesPlaceholder": "اختر الميزات",
+			"customerIdLabel": "معرّف العميل",
+			"externalCustomerIdPlaceholder": "المعرّف الخارجي للعميل",
+			"selectDateRangePlaceholder": "اختر نطاق التاريخ",
+			"dateRangeTitle": "نطاق التاريخ",
+			"revenueMetric": "الإيرادات",
+			"costMetric": "التكلفة",
+			"marginMetric": "الهامش",
+			"marginPercentMetric": "الهامش %"
+		},
+		"query": {
+			"pageTitle": "الاستعلام",
+			"selectMeteredFeaturePlaceholder": "اختر ميزة مقياسية",
+			"filters": {
+				"customerId": "معرّف العميل",
+				"startTime": "وقت البداية",
+				"endTime": "وقت النهاية"
+			},
+			"windowSizes": {
+				"MINUTE": "دقيقة",
+				"15MIN": "15 دقيقة",
+				"30MIN": "30 دقيقة",
+				"HOUR": "ساعة",
+				"3HOUR": "3 ساعات",
+				"6HOUR": "6 ساعات",
+				"12HOUR": "12 ساعة",
+				"DAY": "يوم",
+				"WEEK": "أسبوع"
+			},
+			"sortTimeWindow": "النافذة الزمنية",
+			"chartSeriesUsage": "الاستخدام"
+		}
+	}
+}

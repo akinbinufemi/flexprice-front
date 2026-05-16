@@ -5,6 +5,8 @@ export const API_DOCS_TAGS = {
 	Costs: tag(['Costs']),
 	Coupons: tag(['Coupons']),
 	CreditNotes: tag(['Credit Notes']),
+	/** Credit note detail views that also surface feature-related operations */
+	CreditNotesWithFeatures: tag(['Credit Notes', 'Features']),
 	Customers: tag(['Customers']),
 	Events: tag(['Events']),
 	Features: tag(['Features']),
@@ -17,6 +19,8 @@ export const API_DOCS_TAGS = {
 	PriceUnits: tag(['Price Units']),
 	Secrets: tag(['secrets']),
 	Subscriptions: tag(['Subscriptions', 'Subscription']),
+	/** Subset used where only the Subscriptions tag is needed for OpenAPI matching */
+	SubscriptionsOnly: tag(['Subscriptions']),
 	Tasks: tag(['Tasks', 'ScheduledTasks']),
 	TaxAssociations: tag(['Tax Associations']),
 	TaxRates: tag(['Taxes', 'Tax', 'Tax Rates']),
@@ -24,4 +28,5 @@ export const API_DOCS_TAGS = {
 	Users: tag(['Users']),
 	Wallets: tag(['Wallets', 'Topup']),
 	Webhooks: tag(['Webhooks']),
+	Workflows: tag(['Workflows']),
 };

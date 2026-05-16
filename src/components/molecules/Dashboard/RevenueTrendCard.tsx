@@ -5,11 +5,22 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getTypographyClass } from '@/lib/typography';
 import { Info, AlertCircle } from 'lucide-react';
 import { currencyOptions } from '@/constants/constants';
+import { useTranslation } from 'react-i18next';
 
 interface RevenueMonth {
 	month: string;
 	revenue: number;
 	currency: string;
+}
+
+function formatDashboardRevenueAmount(revenue: number, currencyCode: string, notAvailableLabel: string): string {
+	if (revenue === 0) return notAvailableLabel;
+	return new Intl.NumberFormat(undefined, {
+		style: 'currency',
+		currency: currencyCode,
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0,
+	}).format(revenue);
 }
 
 interface RevenueTrendCardProps {
@@ -20,6 +31,7 @@ interface RevenueTrendCardProps {
 }
 
 export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData, isLoading, error, className }) => {
+	const { t } = useTranslation('common');
 	// Extract unique currencies from revenue data
 	const availableCurrencies = useMemo(() => {
 		const currencies = new Set<string>();
@@ -63,14 +75,14 @@ export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData,
 			<CardHeader className='pb-2'>
 				<div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
 					<div className='flex items-center gap-2'>
-						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>Revenue Trend</CardTitle>
+						<CardTitle className={getTypographyClass('section-title', 'font-medium')}>{t('dashboardHome.revenueTrendTitle')}</CardTitle>
 						<TooltipProvider delayDuration={0}>
 							<Tooltip>
 								<TooltipTrigger className='cursor-pointer'>
 									<Info className='h-4 w-4 text-zinc-400 hover:text-zinc-600 transition-colors duration-150' />
 								</TooltipTrigger>
 								<TooltipContent sideOffset={5} className='bg-zinc-900 text-xs text-white px-3 py-1.5 rounded-lg max-w-[250px]'>
-									Sum of finalized invoices for the selected currency in the respective time periods.
+									{t('dashboardHome.revenueTrendTooltip')}
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -81,13 +93,13 @@ export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData,
 								value={selectedCurrency}
 								options={currencySelectOptions}
 								onChange={setSelectedCurrency}
-								placeholder='Select currency'
+								placeholder={t('dashboardHome.revenueSelectCurrencyPlaceholder')}
 								disabled={isLoading}
 							/>
 						</div>
 					)}
 				</div>
-				<CardDescription className={getTypographyClass('helper-text', 'mt-1')}>Last 3 months</CardDescription>
+				<CardDescription className={getTypographyClass('helper-text', 'mt-1')}>{t('dashboardHome.revenueLast3Months')}</CardDescription>
 			</CardHeader>
 			<CardContent className='pt-0 pb-5'>
 				{isLoading ? (
@@ -99,18 +111,20 @@ export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData,
 				) : error ? (
 					<div className='flex flex-col items-center justify-center py-8 px-6'>
 						<AlertCircle className='h-8 w-8 text-red-500 mb-3' />
-						<p className={getTypographyClass('body-small', 'text-center text-zinc-600')}>
-							Failed to load revenue data. Please try again later.
-						</p>
+						<p className={getTypographyClass('body-small', 'text-center text-zinc-600')}>{t('dashboardHome.revenueLoadError')}</p>
 					</div>
 				) : revenueData.length === 0 ? (
-					<p className={getTypographyClass('body-small', 'text-center text-zinc-500 py-6 px-6')}>No revenue data available</p>
+					<p className={getTypographyClass('body-small', 'text-center text-zinc-500 py-6 px-6')}>{t('dashboardHome.revenueNoData')}</p>
 				) : !selectedCurrency ? (
-					<p className={getTypographyClass('body-small', 'text-center text-zinc-500 py-6 px-6')}>Please select a currency</p>
+					<p className={getTypographyClass('body-small', 'text-center text-zinc-500 py-6 px-6')}>
+						{t('dashboardHome.revenueSelectCurrencyPrompt')}
+					</p>
 				) : filteredRevenueData && filteredRevenueData.length > 0 ? (
 					<div>
 						{filteredRevenueData.map((month, index) => {
 							const isLast = index === filteredRevenueData.length - 1;
+							const revenueFormatted = formatDashboardRevenueAmount(month.revenue, month.currency, t('labels.na'));
+
 							return (
 								<div
 									key={index}
@@ -118,17 +132,8 @@ export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData,
 									<div className='flex-1'>
 										<p className={getTypographyClass('body-default', 'font-medium text-zinc-900')}>{month.month}</p>
 									</div>
-									<div className='text-right'>
-										<p className={`text-lg font-semibold ${month.revenue === 0 ? 'text-zinc-400' : 'text-zinc-900'}`}>
-											{month.revenue === 0
-												? '--'
-												: new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: month.currency,
-														minimumFractionDigits: 0,
-														maximumFractionDigits: 0,
-													}).format(month.revenue)}
-										</p>
+									<div className='text-end'>
+										<p className={`text-lg font-semibold ${month.revenue === 0 ? 'text-zinc-400' : 'text-zinc-900'}`}>{revenueFormatted}</p>
 									</div>
 								</div>
 							);
@@ -136,7 +141,7 @@ export const RevenueTrendCard: React.FC<RevenueTrendCardProps> = ({ revenueData,
 					</div>
 				) : (
 					<p className={getTypographyClass('body-small', 'text-center text-zinc-500 py-6 px-6')}>
-						No revenue data available for selected currency
+						{t('dashboardHome.revenueNoDataForCurrency')}
 					</p>
 				)}
 			</CardContent>

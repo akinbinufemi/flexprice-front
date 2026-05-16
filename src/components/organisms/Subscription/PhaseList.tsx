@@ -11,6 +11,7 @@ import { ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
 import { BILLING_MODEL, TIER_MODE, PRICE_TYPE } from '@/models/Price';
 import { convertSubscriptionToPhaseData } from '@/utils/subscription/phaseConversion';
 import { formatDateShort } from '@/utils/common/helper_functions';
+import { useTranslation } from 'react-i18next';
 
 interface PhaseListProps {
 	phases: SubscriptionPhaseCreateRequest[];
@@ -56,6 +57,7 @@ const PhaseList: React.FC<PhaseListProps> = ({
 	onConvertToPhases,
 	onConvertBackToSubscription,
 }) => {
+	const { t } = useTranslation('customers');
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 
@@ -328,7 +330,7 @@ const PhaseList: React.FC<PhaseListProps> = ({
 		<div className='space-y-6'>
 			{phases.length > 0 && (
 				<div className='flex items-center justify-between mb-4'>
-					<h3 className='text-base font-semibold text-gray-900'>Subscription Phases</h3>
+					<h3 className='text-base font-semibold text-gray-900'>{t('organisms.phaseList.title')}</h3>
 				</div>
 			)}
 
@@ -336,7 +338,7 @@ const PhaseList: React.FC<PhaseListProps> = ({
 			{phases.map((phase, index) => {
 				const isEditing = editingIndex === index;
 				const startDate = formatDateShort(phase.start_date);
-				const endDate = phase.end_date ? formatDateShort(phase.end_date) : 'Forever';
+				const endDate = phase.end_date ? formatDateShort(phase.end_date) : t('organisms.phaseList.forever');
 
 				if (isEditing) {
 					const isAfterFirstPhase = index > 0;
@@ -377,16 +379,23 @@ const PhaseList: React.FC<PhaseListProps> = ({
 									{startDate} → {endDate}
 								</div>
 								<div className='text-xs text-gray-500 mt-1'>
-									Phase {index + 1}
+									{t('organisms.phaseList.phaseIndex', { index: index + 1 })}
 									{phase.coupons && phase.coupons.length > 0 && (
-										<span className='ml-2 text-blue-600'>
-											• {phase.coupons.length} coupon{phase.coupons.length > 1 ? 's' : ''}
+										<span className='ms-2 text-blue-600'>
+											{phase.coupons.length > 1
+												? t('organisms.phaseList.couponPlural', { count: phase.coupons.length })
+												: t('organisms.phaseList.couponSingle', { count: phase.coupons.length })}
 										</span>
 									)}
 									{phase.line_item_coupons && Object.keys(phase.line_item_coupons).length > 0 && (
-										<span className='ml-2 text-green-600'>
-											• {Object.keys(phase.line_item_coupons).length} line item coupon
-											{Object.keys(phase.line_item_coupons).length > 1 ? 's' : ''}
+										<span className='ms-2 text-green-600'>
+											{Object.keys(phase.line_item_coupons).length > 1
+												? t('organisms.phaseList.lineItemCouponPlural', {
+														count: Object.keys(phase.line_item_coupons).length,
+													})
+												: t('organisms.phaseList.lineItemCouponSingle', {
+														count: Object.keys(phase.line_item_coupons).length,
+													})}
 										</span>
 									)}
 								</div>
@@ -398,14 +407,14 @@ const PhaseList: React.FC<PhaseListProps> = ({
 								<button
 									onClick={() => handleEditPhase(index)}
 									className='p-2 hover:bg-gray-100 rounded-md transition-colors'
-									title='Edit phase'>
+									title={t('organisms.phaseList.editPhase')}>
 									<Pencil size={16} className='text-gray-600' />
 								</button>
 								<div className='border-r h-4 border-gray-300' />
 								<button
 									onClick={() => handleDeletePhase(index)}
 									className='p-2 hover:bg-red-50 rounded-md transition-colors'
-									title='Delete phase'>
+									title={t('organisms.phaseList.deletePhase')}>
 									<Trash2 size={16} className='text-red-500' />
 								</button>
 							</div>
@@ -453,7 +462,7 @@ const PhaseList: React.FC<PhaseListProps> = ({
 					variant='outline'
 					className='w-full !mt-4'
 					disabled={disabled || editingIndex !== null || isCreating}>
-					+ Add phase
+					{t('organisms.phaseList.addPhase')}
 				</Button>
 			)}
 		</div>

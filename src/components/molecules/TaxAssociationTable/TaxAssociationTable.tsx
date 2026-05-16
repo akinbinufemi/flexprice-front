@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import FlexpriceTable, { ColumnData, RedirectCell } from '../Table';
 import { TaxAssociationResponse } from '@/types/dto/tax';
 import { Chip, ActionButton } from '@/components/atoms';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const TaxAssociationTable: FC<Props> = ({ data, onEdit, showDelete = true }) => {
+	const { t } = useTranslation('common');
 	const columns: ColumnData<TaxAssociationResponse>[] = [
 		{
 			title: 'Tax ID',
@@ -27,7 +29,7 @@ const TaxAssociationTable: FC<Props> = ({ data, onEdit, showDelete = true }) => 
 		},
 		{
 			title: 'Auto Apply',
-			render: (row) => <Chip variant={row.auto_apply ? 'success' : 'default'} label={row.auto_apply ? 'Yes' : 'No'} />,
+			render: (row) => <Chip variant={row.auto_apply ? 'success' : 'default'} label={row.auto_apply ? t('labels.yes') : t('labels.no')} />,
 		},
 		{
 			title: 'Currency',

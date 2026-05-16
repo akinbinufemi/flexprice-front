@@ -106,6 +106,34 @@ describe('Input Component', () => {
 		});
 	});
 
+	describe('English only', () => {
+		it('strips non-ASCII by default on text variant', () => {
+			const onChangeMock = vi.fn();
+			render(<Input onChange={onChangeMock} />);
+			const inputElement = screen.getByRole('textbox');
+
+			fireEvent.change(inputElement, { target: { value: 'hello世界🙂' } });
+			expect(onChangeMock).toHaveBeenCalledWith('hello');
+		});
+
+		it('allows printable ASCII when english only is enforced', () => {
+			const onChangeMock = vi.fn();
+			render(<Input onChange={onChangeMock} />);
+			const inputElement = screen.getByRole('textbox');
+
+			fireEvent.change(inputElement, { target: { value: 'Hello, world! 123' } });
+			expect(onChangeMock).toHaveBeenCalledWith('Hello, world! 123');
+		});
+
+		it('does not strip non-ASCII when englishOnly is false', () => {
+			const onChangeMock = vi.fn();
+			render(<Input englishOnly={false} onChange={onChangeMock} />);
+			const inputElement = screen.getByRole('textbox');
+
+			fireEvent.change(inputElement, { target: { value: 'café' } });
+			expect(onChangeMock).toHaveBeenCalledWith('café');
+		});
+	});
 	// Interaction Tests
 	describe('Interaction', () => {
 		it('should call onChange when input value changes', () => {

@@ -39,7 +39,7 @@ const RadioSelectItem = React.forwardRef<
 	<SelectPrimitive.Item
 		ref={ref}
 		className={cn(
-			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 ps-8 pe-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 			className,
 		)}
 		{...props}>
@@ -115,7 +115,7 @@ const FlexPriceSelect: React.FC<Props> = ({
 											key={option.value}
 											value={option.value}>
 											<div className='flex items-center space-x-2 w-full'>
-												<div className='flex flex-col mr-2 w-full'>
+												<div className='flex flex-col me-2 w-full'>
 													<span className='break-words'>{option.label}</span>
 													{option.description && (
 														<span className='text-sm text-gray-500 break-words whitespace-normal'>{option.description}</span>
@@ -140,7 +140,7 @@ const FlexPriceSelect: React.FC<Props> = ({
 												className={cn(
 													'flex w-full items-center space-x-2 justify-between',
 													option.disabled && 'opacity-50 pointer-events-none',
-													option.suffixIcon && 'pr-8',
+													option.suffixIcon && 'pe-8',
 													hideSelectedTick && '!pl-0',
 												)}>
 												{option.prefixIcon && option.prefixIcon}
@@ -160,7 +160,7 @@ const FlexPriceSelect: React.FC<Props> = ({
 						{options.length === 0 && noOptionsText && (
 							<ShadcnSelect value='no-items' disabled>
 								<div className='flex items-center space-x-2 w-full'>
-									<div className='flex flex-col mr-2 w-full'>
+									<div className='flex flex-col me-2 w-full'>
 										<span className='break-words'>{noOptionsText}</span>
 									</div>
 								</div>

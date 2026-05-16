@@ -2,6 +2,7 @@ import { Card, Progress } from '@/components/atoms';
 import { CustomerUsage } from '@/models';
 import { FEATURE_TYPE } from '@/models/Feature';
 import { formatAmount } from '@/components/atoms/Input/Input';
+import { useTranslation } from 'react-i18next';
 
 interface UsageSectionProps {
 	usageData: CustomerUsage[];
@@ -9,6 +10,7 @@ interface UsageSectionProps {
 }
 
 const UsageSection = ({ usageData, isLoading }: UsageSectionProps) => {
+	const { t } = useTranslation('customer-portal');
 	if (isLoading) {
 		return (
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
@@ -33,7 +35,7 @@ const UsageSection = ({ usageData, isLoading }: UsageSectionProps) => {
 
 	return (
 		<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-			<h3 className='text-base font-medium text-zinc-950 mb-4'>Current Usage</h3>
+			<h3 className='text-base font-medium text-zinc-950 mb-4'>{t('usage.currentTitle')}</h3>
 			<div className='space-y-4'>
 				{meteredUsage.map((item, index) => {
 					const usage = Number(item.current_usage || 0);
@@ -44,10 +46,10 @@ const UsageSection = ({ usageData, isLoading }: UsageSectionProps) => {
 					return (
 						<div key={item.feature?.id || index} className='space-y-2'>
 							<div className='flex items-center justify-between'>
-								<span className='text-sm text-zinc-700'>{item.feature?.name || 'Unknown Feature'}</span>
+								<span className='text-sm text-zinc-700'>{item.feature?.name || t('usage.unknownFeature')}</span>
 								<span className='text-sm text-zinc-500'>
 									{formatAmount(usage.toString())}
-									{limit ? ` / ${formatAmount(limit.toString())}` : ' / Unlimited'}
+									{limit ? ` / ${formatAmount(limit.toString())}` : ` / ${t('usage.unlimited')}`}
 								</span>
 							</div>
 							<Progress

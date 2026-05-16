@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card, Chip } from '@/components/atoms';
@@ -9,21 +10,23 @@ import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { Wallet as WalletIcon } from 'lucide-react';
 import EmptyState from '../EmptyState';
 
-const getWalletStatusChip = (status: WALLET_STATUS) => {
-	const statusConfig: Record<WALLET_STATUS, { label: string; variant: 'success' | 'warning' | 'failed' | 'default' }> = {
-		[WALLET_STATUS.ACTIVE]: { label: 'Active', variant: 'success' },
-		[WALLET_STATUS.FROZEN]: { label: 'Frozen', variant: 'warning' },
-		[WALLET_STATUS.CLOSED]: { label: 'Closed', variant: 'failed' },
-	};
-	const config = statusConfig[status] || { label: status, variant: 'default' as const };
-	return <Chip label={config.label} variant={config.variant} />;
-};
-
 /**
  * Shows real-time balance for the first active wallet.
  * Used as a summary card on the Overview section.
  */
 const WalletBalanceWidget = () => {
+	const { t } = useTranslation('customer-portal');
+
+	const getWalletStatusChip = (status: WALLET_STATUS) => {
+		const variantMap: Record<WALLET_STATUS, 'success' | 'warning' | 'failed' | 'default'> = {
+			[WALLET_STATUS.ACTIVE]: 'success',
+			[WALLET_STATUS.FROZEN]: 'warning',
+			[WALLET_STATUS.CLOSED]: 'failed',
+		};
+		const variant = variantMap[status] ?? 'default';
+		return <Chip label={t(`walletStatus.${status}`)} variant={variant} />;
+	};
+
 	const {
 		data: wallets,
 		isLoading,
@@ -42,8 +45,8 @@ const WalletBalanceWidget = () => {
 	});
 
 	useEffect(() => {
-		if (isError) toast.error('Failed to load wallet');
-	}, [isError]);
+		if (isError) toast.error(t('errors.loadWallet'));
+	}, [isError, t]);
 
 	if (isError) return null;
 
@@ -70,7 +73,7 @@ const WalletBalanceWidget = () => {
 			<Card
 				className='rounded-xl p-6'
 				style={{ backgroundColor: 'var(--portal-surface, white)', border: '1px solid var(--portal-border, #E9E9E9)' }}>
-				<EmptyState title='No wallet' description='No wallet has been set up for this account' />
+				<EmptyState title={t('wallet.emptyTitle')} description={t('wallet.emptyDescription')} />
 			</Card>
 		);
 	}
@@ -90,7 +93,7 @@ const WalletBalanceWidget = () => {
 					</div>
 					<div>
 						<h3 className='text-base font-medium' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
-							{wallet.name || 'Wallet'}
+							{wallet.name || t('wallet.defaultName')}
 						</h3>
 						{wallet.wallet_status && getWalletStatusChip(wallet.wallet_status)}
 					</div>
@@ -106,19 +109,19 @@ const WalletBalanceWidget = () => {
 				) : (
 					<div>
 						<span className='text-sm block mb-2' style={{ color: 'var(--portal-text-secondary, #71717a)' }}>
-							Balance
+							{t('wallet.balance')}
 						</span>
 						<div className='flex items-baseline gap-2'>
 							<span className='text-4xl font-semibold' style={{ color: 'var(--portal-text-primary, #09090b)' }}>
 								{formatAmount(walletBalance?.real_time_credit_balance ?? wallet.credit_balance?.toString() ?? '0')}
 							</span>
 							<span className='text-base font-normal' style={{ color: 'var(--portal-text-secondary, #71717a)' }}>
-								credits
+								{t('wallet.credits')}
 							</span>
 						</div>
 						<p className='text-sm mt-1' style={{ color: 'var(--portal-text-secondary, #71717a)' }}>
 							{currencySymbol}
-							{formatAmount(walletBalance?.real_time_balance ?? wallet.balance?.toString() ?? '0')} value
+							{formatAmount(walletBalance?.real_time_balance ?? wallet.balance?.toString() ?? '0')} {t('wallet.valueSuffix')}
 						</p>
 					</div>
 				)}

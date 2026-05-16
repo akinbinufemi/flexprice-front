@@ -2,6 +2,7 @@ import { Button, Input } from '@/components/atoms';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ArrowUpDown, Search } from 'lucide-react';
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Define more comprehensive filter and configuration types
 export interface FilterOption {
@@ -39,7 +40,9 @@ interface ToolbarProps {
 
 // TODO: Deprecate this component and use QueryBuilder instead
 const Toolbar = ({ config, filters, onFilterChange }: ToolbarProps) => {
-	const { searchPlaceholder = 'Search', enableSearch = true, sortOptions = [] } = config;
+	const { t } = useTranslation('common');
+	const { searchPlaceholder, enableSearch = true, sortOptions = [] } = config;
+	const resolvedPlaceholder = searchPlaceholder ?? t('actions.search');
 
 	const handleSortChange = (sortKey: string) => {
 		const currentSort = filters.sortBy === sortKey ? (filters.sortDirection === 'asc' ? 'desc' : 'asc') : 'asc';
@@ -58,8 +61,8 @@ const Toolbar = ({ config, filters, onFilterChange }: ToolbarProps) => {
 					<Popover>
 						<PopoverTrigger disabled asChild>
 							<Button variant='outline' size='xs' className='text-gray-700 hover:bg-gray-50 border-gray-300'>
-								<ArrowUpDown className='w-4 h-4 mr-2 text-gray-500' />
-								Sort
+								<ArrowUpDown className='w-4 h-4 me-2 text-gray-500' />
+								{t('labels.sort')}
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className='w-48 bg-white shadow-2xl rounded-xl border-none p-2' align='start'>
@@ -69,8 +72,8 @@ const Toolbar = ({ config, filters, onFilterChange }: ToolbarProps) => {
 										size='xs'
 										key={sort.key}
 										variant={filters.sortBy === sort.key ? 'secondary' : 'ghost'}
-										className='w-full justify-start text-gray-700 
-                                            hover:bg-gray-100 
+										className='w-full justify-start text-gray-700
+                                            hover:bg-gray-100
                                             data-[state=open]:bg-gray-100'
 										onClick={() => handleSortChange(sort.key)}>
 										{sort.label}
@@ -88,7 +91,7 @@ const Toolbar = ({ config, filters, onFilterChange }: ToolbarProps) => {
 				<div className='w-1/2'>
 					<Input
 						suffix={<Search className='size-[14px] text-gray-500' />}
-						placeholder={searchPlaceholder}
+						placeholder={resolvedPlaceholder}
 						value={filters.searchQuery}
 						onChange={(e) => onFilterChange({ searchQuery: e })}
 						size='xs'

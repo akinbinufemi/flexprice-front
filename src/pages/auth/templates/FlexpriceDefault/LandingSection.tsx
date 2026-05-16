@@ -1,7 +1,9 @@
+// src/pages/auth/templates/FlexpriceDefault/LandingSection.tsx
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TestimonialCard } from '@/components/molecules';
 import { Testimonial } from '@/types';
-import authBg from '../../../assets/toolright.jpg';
+import authBg from '../../../../../assets/toolright.jpg';
 
 const testimonials: Testimonial[] = [
 	{
@@ -38,7 +40,7 @@ const testimonials: Testimonial[] = [
 		dpUrl: '/assets/company-founders/wizcommerce.webp',
 		logoUrl: '/assets/svg/wizcommerce.svg',
 		testimonial:
-			'We had to launch our new product and needed a billing solution that could handle billions of events without any latency issues or downtime. Flexprice delivered exactly that, ensuring smooth operations.',
+			'We had to launch our new product and needed a billing solution that could handle billions of events without any latency issues or downtime. Flexprice delivered exactly that.',
 		name: 'Divyanshu Makkar',
 		designation: 'Founder and CEO',
 		companyName: 'WizCommerce',
@@ -75,9 +77,10 @@ const customerLogos = [
 	'/assets/svg/supervity_logo.svg',
 ];
 
-const ANIMATION_DURATION = 90; // seconds for one full loop
+const ANIMATION_DURATION = 90;
 
-const LandingSection = () => {
+const LandingSection: React.FC = () => {
+	const { t } = useTranslation('auth');
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -100,7 +103,6 @@ const LandingSection = () => {
 		return () => cancelAnimationFrame(animationFrame);
 	}, []);
 
-	// Duplicate testimonials for seamless infinite scroll
 	const cards = testimonials.concat(testimonials);
 
 	return (
@@ -112,24 +114,22 @@ const LandingSection = () => {
 				backgroundPosition: 'center',
 				backgroundRepeat: 'no-repeat',
 			}}>
-			<h2 className='text-[28px] font-normal text-zinc-950 text-center mb-[44px]'>
-				Focus on <span className='font-medium'>building</span>, not billing.
-			</h2>
+			<h2 className='text-[28px] font-normal text-zinc-950 mb-[44px] text-center'>{t('landing.defaultTagline')}</h2>
 			<div className='relative flex justify-center items-center w-full max-w-7xl h-[340px] mb-10'>
 				<div ref={scrollRef} className='w-full overflow-x-hidden' style={{ height: 320 }}>
 					<div className='flex gap-x-7 w-max'>
-						{cards.map((t, idx) => (
+						{cards.map((card, idx) => (
 							<TestimonialCard
-								key={idx}
-								testimonial={t}
+								key={`${card.companyName}-${idx}`}
+								testimonial={card}
 								logoHeightClass={
-									t.companyName === 'Clueso'
+									card.companyName === 'Clueso'
 										? 'max-h-4'
-										: t.companyName === 'Aftershoot'
+										: card.companyName === 'Aftershoot'
 											? 'max-h-7'
-											: t.companyName === 'KRUTRIM'
+											: card.companyName === 'KRUTRIM'
 												? 'max-h-5'
-												: t.companyName === 'Truffle AI'
+												: card.companyName === 'Truffle AI'
 													? 'max-h-4'
 													: 'max-h-6'
 								}
@@ -139,14 +139,14 @@ const LandingSection = () => {
 				</div>
 			</div>
 			<div className='w-full flex flex-col items-center mt-8'>
-				<div className='text-center font-inter text-black font-medium mb-14 text-lg'>Trusted by</div>
+				<div className='text-center font-inter text-black font-medium mb-14 text-lg'>{t('landing.trustedBy')}</div>
 				<div className='w-full max-w-3xl grid grid-cols-3 grid-rows-2 gap-y-12 gap-x-12 justify-items-center items-center'>
-					{customerLogos.map((logo, idx) => (
-						<div key={idx} className='flex items-center justify-center'>
+					{customerLogos.map((logo) => (
+						<div key={logo} className='flex items-center justify-center'>
 							<img
 								src={logo}
-								alt='customer logo'
-								className='max-h-10 object-contain  transition-all duration-200'
+								alt={t('landing.customerLogoAlt')}
+								className='max-h-10 object-contain transition-all duration-200'
 								style={{ maxWidth: 140 }}
 							/>
 						</div>

@@ -47,7 +47,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, InputProps>(
 						}}
 						ref={ref}
 					/>
-					{suffix && <div className='ml-2'>{suffix}</div>}
+					{suffix && <div className='ms-2'>{suffix}</div>}
 				</div>
 
 				{/* Description */}

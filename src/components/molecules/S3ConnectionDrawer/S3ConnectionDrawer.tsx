@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { useMutation } from '@tanstack/react-query';
@@ -29,6 +30,8 @@ interface ValidationErrors {
 }
 
 const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
+	const { t } = useTranslation('settings');
+	const { t: tc } = useTranslation('common');
 	const [formData, setFormData] = useState<S3FormData>({
 		name: '',
 		is_flexprice_managed: false,
@@ -74,17 +77,17 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 		const isEditMode = !!connection;
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'Connection name is required';
+			newErrors.name = t('connection.validation.nameRequired');
 		}
 
 		// Only require AWS credentials when creating a new connection AND not using Flexprice Managed
 		if (!isEditMode && !formData.is_flexprice_managed) {
 			if (!formData.aws_access_key_id.trim()) {
-				newErrors.aws_access_key_id = 'AWS Access Key ID is required';
+				newErrors.aws_access_key_id = t('connection.validation.awsAccessKeyRequired');
 			}
 
 			if (!formData.aws_secret_access_key.trim()) {
-				newErrors.aws_secret_access_key = 'AWS Secret Access Key is required';
+				newErrors.aws_secret_access_key = t('connection.validation.awsSecretRequired');
 			}
 		}
 
@@ -119,12 +122,12 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 			return await ConnectionApi.Create(payload);
 		},
 		onSuccess: (response) => {
-			toast.success('S3 connection created successfully');
+			toast.success(t('connection.toast.created', { provider: 'S3' }));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to create connection');
+		onError: (error: Error) => {
+			toast.error(error.message || t('connection.toast.failedToCreate'));
 		},
 	});
 
@@ -137,12 +140,12 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 			return await ConnectionApi.Update(connection.id, payload);
 		},
 		onSuccess: (response) => {
-			toast.success('S3 connection updated successfully');
+			toast.success(t('connection.toast.updated', { provider: 'S3' }));
 			onSave(response);
 			onOpenChange(false);
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to update connection');
+		onError: (error: Error) => {
+			toast.error(error.message || t('connection.toast.failedToUpdate'));
 		},
 	});
 
@@ -162,17 +165,17 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={connection ? 'Edit S3 Connection' : 'Connect to Amazon S3'}
-			description="Enter your AWS credentials to connect to S3. Click save when you're done."
+			title={connection ? t('connection.s3.titleEdit') : t('connection.s3.titleConnect')}
+			description={t('connection.s3.description')}
 			size='lg'>
 			<div className='space-y-6 mt-9'>
 				<Input
-					label='Connection Name'
-					placeholder='Enter connection name'
+					label={t('integrationDrawer.connectionName')}
+					placeholder={t('connection.s3.connectionNamePlaceholder')}
 					value={formData.name}
 					onChange={(value) => handleChange('name', value)}
 					error={errors.name}
-					description='A descriptive name for this S3 connection'
+					description={t('connection.s3.connectionNameHint')}
 				/>
 
 				{!connection && (
@@ -181,9 +184,9 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 						<div className='flex items-center justify-between p-4 border rounded-lg bg-gray-50'>
 							<div className='flex-1'>
 								<label htmlFor='flexprice-managed' className='text-sm font-medium text-gray-900 cursor-pointer'>
-									Flexprice Managed Storage
+									{t('connection.s3.flexpriceManaged')}
 								</label>
-								<p className='text-xs text-gray-500 mt-1'>No AWS configuration required</p>
+								<p className='text-xs text-gray-500 mt-1'>{t('connection.s3.flexpriceManagedHint')}</p>
 							</div>
 							<Switch
 								id='flexprice-managed'
@@ -196,31 +199,31 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 						{!formData.is_flexprice_managed && (
 							<>
 								<Input
-									label='AWS Access Key ID'
-									placeholder='Enter AWS Access Key ID'
+									label={t('connection.s3.awsAccessKey')}
+									placeholder={t('connection.s3.awsAccessKeyPlaceholder')}
 									value={formData.aws_access_key_id}
 									onChange={(value) => handleChange('aws_access_key_id', value)}
 									error={errors.aws_access_key_id}
-									description='Your AWS Access Key ID'
+									description={t('connection.s3.awsAccessKeyHint')}
 								/>
 
 								<Input
-									label='AWS Secret Access Key'
-									placeholder='Enter AWS Secret Access Key'
+									label={t('connection.s3.awsSecretKey')}
+									placeholder={t('connection.s3.awsSecretKeyPlaceholder')}
 									type='password'
 									value={formData.aws_secret_access_key}
 									onChange={(value) => handleChange('aws_secret_access_key', value)}
 									error={errors.aws_secret_access_key}
-									description='Your AWS Secret Access Key'
+									description={t('connection.s3.awsSecretKeyHint')}
 								/>
 
 								<Input
-									label='AWS Session Token (Optional)'
-									placeholder='Enter AWS Session Token'
+									label={t('connection.s3.sessionToken')}
+									placeholder={t('connection.s3.sessionTokenPlaceholder')}
 									type='password'
 									value={formData.aws_session_token}
 									onChange={(value) => handleChange('aws_session_token', value)}
-									description='Required only for temporary credentials'
+									description={t('connection.s3.sessionTokenHint')}
 								/>
 							</>
 						)}
@@ -229,21 +232,19 @@ const S3ConnectionDrawer: FC<S3ConnectionDrawerProps> = ({ isOpen, onOpenChange,
 
 				{/* Security Note */}
 				<div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
-					<h4 className='font-medium text-blue-900 mb-2'>Security Note</h4>
+					<h4 className='font-medium text-blue-900 mb-2'>{t('connection.s3.securityNote')}</h4>
 					<p className='text-sm text-blue-800'>
-						{formData.is_flexprice_managed
-							? 'Your data will be stored securely in Flexprice-managed S3 buckets. Files are encrypted at rest and accessible via secure download links.'
-							: 'Your AWS credentials are encrypted and stored securely. We recommend using IAM roles with minimal required permissions for S3 access.'}
+						{formData.is_flexprice_managed ? t('connection.s3.securityFlexprice') : t('connection.s3.securityAws')}
 					</p>
 				</div>
 
 				<Spacer className='!h-1' />
 				<div className='flex gap-1'>
 					<Button variant='outline' onClick={() => onOpenChange(false)} className='flex-1'>
-						Cancel
+						{tc('actions.cancel')}
 					</Button>
 					<Button onClick={handleSave} className='flex-1' isLoading={isPending}>
-						{connection ? 'Update' : 'Save'}
+						{connection ? tc('actions.update') : tc('actions.save')}
 					</Button>
 				</div>
 			</div>

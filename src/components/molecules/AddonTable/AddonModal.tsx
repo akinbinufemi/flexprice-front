@@ -5,6 +5,7 @@ import { Sheet } from '@/components/atoms';
 import { useQuery } from '@tanstack/react-query';
 import AddonApi from '@/api/AddonApi';
 import { Select } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: AddAddonToSubscriptionRequest;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const AddonModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave, onCancel, getEmptyAddon }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const [formData, setFormData] = useState<Partial<AddAddonToSubscriptionRequest>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -44,7 +46,7 @@ const AddonModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave, onCan
 		const newErrors: Record<string, string> = {};
 
 		if (!formData.addon_id) {
-			newErrors.addon_id = 'Addon is required';
+			newErrors.addon_id = t('addons.subscriptionSheet.addonRequiredError');
 		}
 
 		setErrors(newErrors);
@@ -74,19 +76,23 @@ const AddonModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave, onCan
 	const addonOptions = addons.map((addon) => ({
 		label: addon.name,
 		value: addon.id,
-		description: addon.description || 'No description',
+		description: addon.description || t('addons.subscriptionSheet.noDescription'),
 	}));
+
+	const primaryLabel = t('addons.subscriptionSheet.updateAddAddon', {
+		action: data ? t('addons.subscriptionSheet.update') : t('addons.subscriptionSheet.add'),
+	});
 
 	return (
 		<Sheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={data ? 'Edit Addon' : 'Add Addon'}
-			description={data ? 'Edit addon configuration' : 'Add an addon to the subscription'}>
+			title={data ? t('addons.subscriptionSheet.editTitle') : t('addons.subscriptionSheet.addTitle')}
+			description={data ? t('addons.subscriptionSheet.descriptionEdit') : t('addons.subscriptionSheet.descriptionAdd')}>
 			<div className='space-y-4 mt-6'>
 				<Select
-					label='Addon*'
-					placeholder='Select addon'
+					label={t('addons.subscriptionSheet.addonRequired')}
+					placeholder={t('addons.subscriptionSheet.selectAddon')}
 					options={addonOptions}
 					value={formData.addon_id || ''}
 					onChange={(value) => setFormData({ ...formData, addon_id: value })}
@@ -94,17 +100,17 @@ const AddonModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave, onCan
 				/>
 
 				<DatePicker
-					label='Start Date'
-					placeholder='Select start date'
+					label={t('addons.subscriptionSheet.startDate')}
+					placeholder={t('addons.subscriptionSheet.selectStartDate')}
 					date={formData.start_date ? new Date(formData.start_date) : undefined}
 					setDate={(date) => setFormData({ ...formData, start_date: date?.toISOString() })}
 				/>
 
 				<div className='flex justify-end space-x-2 pt-4'>
 					<Button variant='outline' onClick={handleCancel}>
-						Cancel
+						{t('common:actions.cancel')}
 					</Button>
-					<Button onClick={handleSave}>{data ? 'Update' : 'Add'} Addon</Button>
+					<Button onClick={handleSave}>{primaryLabel}</Button>
 				</div>
 			</div>
 		</Sheet>

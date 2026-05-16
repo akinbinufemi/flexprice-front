@@ -33,7 +33,7 @@ const Stepper: FC<StepperProps> = ({ steps, activeStep }) => {
 
 							{/* Step Label */}
 							<div
-								className={cn('ml-2 text-xs font-semibold', {
+								className={cn('ms-2 text-xs font-semibold', {
 									'text-[#333333]': isCompleted || isActive,
 									'text-[#999999]': !isCompleted && !isActive,
 								})}>

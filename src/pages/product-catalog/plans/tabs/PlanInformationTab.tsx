@@ -12,8 +12,10 @@ import { PlanApi } from '@/api';
 import { useState, useEffect } from 'react';
 import { logger } from '@/utils/common/Logger';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const PlanInformationTab = () => {
+	const { t } = useTranslation(['catalog']);
 	const { planId } = useParams<{ planId: string }>();
 	const [showMetadataModal, setShowMetadataModal] = useState(false);
 	const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
@@ -72,7 +74,7 @@ const PlanInformationTab = () => {
 	if (isLoading) {
 		return (
 			<div className='py-6 px-4 rounded-xl border border-gray-300'>
-				<p className='text-gray-600'>Loading plan details...</p>
+				<p className='text-gray-600'>{t('catalog:plans.information.loading')}</p>
 			</div>
 		);
 	}
@@ -88,7 +90,7 @@ const PlanInformationTab = () => {
 				<div>
 					<Spacer className='!h-4' />
 					<div className='flex justify-between items-center'>
-						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>Plan Details</h3>
+						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>{t('catalog:plans.information.planDetails')}</h3>
 						<div className='flex gap-2'>
 							{!isArchived && (
 								<PlanDrawer
@@ -112,7 +114,7 @@ const PlanInformationTab = () => {
 					<Divider className='my-4' />
 					<div className='mt-8'>
 						<div className='flex justify-between items-center mb-2'>
-							<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>Metadata</h3>
+							<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>{t('catalog:plans.information.metadata')}</h3>
 							{!isArchived && (
 								<Button variant='outline' size='icon' onClick={() => setShowMetadataModal(true)}>
 									<Pencil className='size-5' />

@@ -6,6 +6,7 @@ import { formatBillingPeriodForPrice } from '@/utils/common/helper_functions';
 import { formatExpirationPeriod } from '@/utils/common/credit_grant_helpers';
 import { InternalCreditGrantRequest } from '@/types/dto/CreditGrant';
 import { CreditGrant, CREDIT_GRANT_SCOPE } from '@/models';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data: InternalCreditGrantRequest[];
@@ -26,6 +27,7 @@ const SubscriptionCreditGrantTable: React.FC<Props> = ({
 	onMarkAsEdited,
 	subscriptionId,
 }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedCreditGrant, setSelectedCreditGrant] = useState<InternalCreditGrantRequest | null>(null);
 
@@ -120,7 +122,7 @@ const SubscriptionCreditGrantTable: React.FC<Props> = ({
 						}}
 						archive={{
 							enabled: !disabled,
-							text: 'Delete',
+							text: t('actions.delete'),
 						}}
 					/>
 				);
@@ -140,7 +142,7 @@ const SubscriptionCreditGrantTable: React.FC<Props> = ({
 			/>
 			<div className='space-y-4'>
 				<div className='flex items-center justify-between'>
-					<FormHeader className='mb-0' title='Credit Grants' variant='sub-header' />
+					<FormHeader className='mb-0' title={t('labels.creditGrants')} variant='sub-header' />
 					<AddButton onClick={() => setIsOpen(true)} disabled={disabled} />
 				</div>
 				<div className='rounded-[6px] border border-gray-300'>

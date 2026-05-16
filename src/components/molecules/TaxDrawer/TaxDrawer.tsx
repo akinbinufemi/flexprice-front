@@ -1,11 +1,12 @@
 import { Button, Input, Sheet, Spacer, Textarea, Select, SelectOption } from '@/components/atoms';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import TaxApi from '@/api/TaxApi';
 import toast from 'react-hot-toast';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { TAX_RATE_TYPE, TAX_RATE_SCOPE, TaxRate } from '@/models/Tax';
 import { CreateTaxRateRequest, UpdateTaxRateRequest } from '@/types/dto/tax';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data?: TaxRate | null;
@@ -20,19 +21,17 @@ type FormData = {
 	id?: string; // Only present in edit mode
 } & Partial<CreateTaxRateRequest>;
 
-const taxTypeOptions: SelectOption[] = [
-	{ label: 'Percentage', value: TAX_RATE_TYPE.PERCENTAGE },
-	{ label: 'Fixed Amount', value: TAX_RATE_TYPE.FIXED },
-];
-
-// const scopeOptions: SelectOption[] = [
-// 	{ label: 'Internal', value: TAX_RATE_SCOPE.INTERNAL },
-// 	{ label: 'External', value: TAX_RATE_SCOPE.EXTERNAL },
-// 	{ label: 'One-time', value: TAX_RATE_SCOPE.ONETIME },
-// ];
-
 const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation('billing');
 	const isEdit = !!data;
+
+	const taxTypeOptions = useMemo<SelectOption[]>(
+		() => [
+			{ label: t('taxes.rateType.percentage'), value: TAX_RATE_TYPE.PERCENTAGE },
+			{ label: t('taxes.rateType.fixedAmount'), value: TAX_RATE_TYPE.FIXED },
+		],
+		[t],
+	);
 
 	const [formData, setFormData] = useState<FormData>({
 		name: '',
@@ -71,12 +70,12 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 			}
 		},
 		onSuccess: () => {
-			toast.success(isEdit ? 'Tax rate updated successfully' : 'Tax rate created successfully');
+			toast.success(isEdit ? t('taxes.toast.updatedSuccess') : t('taxes.toast.createdSuccess'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 		},
-		onError: (error: any) => {
-			toast.error(error.error?.message || `Failed to ${isEdit ? 'update' : 'create'} tax rate. Please try again.`);
+		onError: (error: Error) => {
+			toast.error(error.message || (isEdit ? t('taxes.toast.saveFailedUpdate') : t('taxes.toast.saveFailedCreate')));
 		},
 	});
 
@@ -112,25 +111,25 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 		const newErrors: Partial<Record<keyof CreateTaxRateRequest, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('taxes.validation.nameRequired');
 		}
 
 		// Only validate code for create operation
 		if (!isEdit && !formData.code?.trim()) {
-			newErrors.code = 'Code is required';
+			newErrors.code = t('taxes.validation.codeRequired');
 		}
 
 		// Only validate tax values for create operation (they can't be updated)
 		if (!isEdit) {
 			if (formData.tax_rate_type === TAX_RATE_TYPE.PERCENTAGE) {
 				if (formData.percentage_value === undefined || formData.percentage_value < 0 || formData.percentage_value > 100) {
-					newErrors.percentage_value = 'Percentage value must be between 0 and 100';
+					newErrors.percentage_value = t('taxes.validation.percentageRange');
 				}
 			}
 
 			if (formData.tax_rate_type === TAX_RATE_TYPE.FIXED) {
 				if (formData.fixed_value === undefined || formData.fixed_value < 0) {
-					newErrors.fixed_value = 'Fixed value must be greater than or equal to 0';
+					newErrors.fixed_value = t('taxes.validation.fixedNonNegative');
 				}
 			}
 		}
@@ -151,7 +150,7 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 			...formData,
 			name: value,
 			// Only auto-generate code for create operation
-			code: isEdit ? formData.code : 'tax-' + value.replace(/\s/g, '-').toLowerCase(),
+			code: isEdit ? formData.code : t('taxes.drawer.codeAutoPrefix') + value.replace(/\s/g, '-').toLowerCase(),
 		});
 	};
 
@@ -159,14 +158,14 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Tax Rate' : 'Create Tax Rate'}
-			description={isEdit ? 'Update tax rate details.' : 'Create a new tax rate for your billing system.'}
+			title={isEdit ? t('taxes.drawer.titleEdit') : t('taxes.drawer.titleCreate')}
+			description={isEdit ? t('taxes.drawer.descEdit') : t('taxes.drawer.descCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter tax rate name'
-				description={'A descriptive name for this tax rate (e.g., "GST", "VAT", "Sales Tax").'}
-				label='Tax Rate Name'
+				placeholder={t('taxes.drawer.namePlaceholder')}
+				description={t('taxes.drawer.nameHint')}
+				label={t('taxes.drawer.nameLabel')}
 				value={formData.name}
 				error={errors.name}
 				onChange={handleNameChange}
@@ -174,50 +173,48 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Code'
+				label={t('taxes.drawer.codeLabel')}
 				disabled={isEdit}
 				error={errors.code}
 				onChange={(e) => setFormData({ ...formData, code: e })}
 				value={formData.code}
-				placeholder='Enter unique code'
-				description={
-					isEdit ? 'Tax rate code cannot be changed after creation.' : 'A unique identifier for this tax rate (e.g., "GST", "VAT").'
-				}
+				placeholder={t('taxes.drawer.codePlaceholder')}
+				description={isEdit ? t('taxes.drawer.codeHintEdit') : t('taxes.drawer.codeHintCreate')}
 			/>
 
 			<Spacer height={'20px'} />
 			<Select
-				label='Tax Type'
+				label={t('taxes.drawer.taxTypeLabel')}
 				options={taxTypeOptions}
 				value={formData.tax_rate_type}
 				onChange={(e) => setFormData({ ...formData, tax_rate_type: e as TAX_RATE_TYPE })}
-				description={isEdit ? 'Tax type cannot be changed after creation.' : 'Choose how the tax is calculated.'}
+				description={isEdit ? t('taxes.drawer.taxTypeHintEdit') : t('taxes.drawer.taxTypeHintCreate')}
 				disabled={isEdit}
 			/>
 
 			<Spacer height={'20px'} />
 			{formData.tax_rate_type === TAX_RATE_TYPE.PERCENTAGE ? (
 				<Input
-					label='Percentage Value'
+					label={t('taxes.drawer.percentageLabel')}
 					type='number'
-					placeholder='0.00'
+					placeholder={t('taxes.drawer.numericPlaceholder')}
 					value={formData.percentage_value?.toString() || ''}
 					onChange={(e) => setFormData({ ...formData, percentage_value: parseFloat(e) || undefined })}
 					error={errors.percentage_value}
-					description={isEdit ? 'Percentage value cannot be changed after creation.' : 'Enter the percentage value (0-100).'}
-					suffix='%'
+					description={isEdit ? t('taxes.drawer.percentageHintEdit') : t('taxes.drawer.percentageHintCreate')}
+					suffix={t('taxes.drawer.percentSuffix')}
 					disabled={isEdit}
 				/>
 			) : (
 				<Input
-					label='Fixed Amount'
+					label={t('taxes.drawer.fixedAmountLabel')}
 					type='number'
-					placeholder='0.00'
+					placeholder={t('taxes.drawer.numericPlaceholder')}
 					value={formData.fixed_value?.toString() || ''}
 					onChange={(e) => setFormData({ ...formData, fixed_value: parseFloat(e) || undefined })}
 					error={errors.fixed_value}
-					description={isEdit ? 'Fixed amount cannot be changed after creation.' : 'Enter the fixed amount in your default currency.'}
-					inputPrefix='$'
+					description={isEdit ? t('taxes.drawer.fixedHintEdit') : t('taxes.drawer.fixedHintCreate')}
+					inputPrefix={t('taxes.drawer.fixedAmountPrefix')}
 					disabled={isEdit}
 				/>
 			)}
@@ -229,16 +226,16 @@ const TaxDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryK
 					setFormData({ ...formData, description: e });
 				}}
 				className='min-h-[100px]'
-				placeholder='Enter description'
-				label='Description'
-				description='Optional description to help your team understand this tax rate.'
+				placeholder={t('taxes.drawer.descriptionPlaceholder')}
+				label={t('taxes.drawer.descriptionLabel')}
+				description={t('taxes.drawer.descriptionHint')}
 			/>
 			<Spacer height={'20px'} />
 			<Button
 				isLoading={isPending}
 				disabled={isPending || !formData.name?.trim() || (!isEdit && !formData.code?.trim())}
 				onClick={handleSave}>
-				{isEdit ? 'Save Changes' : 'Create Tax Rate'}
+				{isEdit ? t('taxes.drawer.saveChanges') : t('taxes.drawer.createSubmit')}
 			</Button>
 		</Sheet>
 	);

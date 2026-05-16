@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import ExportRunApi, { ExportRun } from '@/api/ExportRunApi';
 import { FormHeader, Loader } from '@/components/atoms';
@@ -11,6 +12,7 @@ interface ExportRunsListProps {
 }
 
 const ExportRunsList: FC<ExportRunsListProps> = ({ taskId, limit = 10 }) => {
+	const { t } = useTranslation(['settings', 'common']);
 	const { data: runsResponse, isLoading } = useQuery({
 		queryKey: ['export-runs', taskId, limit],
 		queryFn: () => ExportRunApi.getExportRunsByTaskId(taskId, { limit }),
@@ -26,15 +28,15 @@ const ExportRunsList: FC<ExportRunsListProps> = ({ taskId, limit = 10 }) => {
 		return (
 			<div className='card text-center py-8'>
 				<Clock className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-				<h3 className='text-lg font-medium text-gray-900 mb-2'>No Export Runs</h3>
-				<p className='text-gray-500'>This export task hasn't run yet.</p>
+				<h3 className='text-lg font-medium text-gray-900 mb-2'>{t('exportRuns.emptyTitle')}</h3>
+				<p className='text-gray-500'>{t('exportRuns.emptyDescription')}</p>
 			</div>
 		);
 	}
 
 	return (
 		<div className='space-y-4'>
-			<FormHeader variant='form-component-title' title='Recent Export Runs' />
+			<FormHeader variant='form-component-title' title={t('exportRuns.recentTitle')} />
 			<div className='card'>
 				{runs.map((run) => (
 					<ExportRunItem key={run.id} run={run} />
@@ -49,6 +51,8 @@ interface ExportRunItemProps {
 }
 
 const ExportRunItem: FC<ExportRunItemProps> = ({ run }) => {
+	const { t } = useTranslation(['settings', 'common']);
+
 	const getStatusIcon = (status: ExportRun['status']) => {
 		switch (status) {
 			case 'completed':
@@ -84,16 +88,23 @@ const ExportRunItem: FC<ExportRunItemProps> = ({ run }) => {
 	};
 
 	const formatFileSize = (bytes?: number) => {
-		if (!bytes) return 'N/A';
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(1024));
+		if (!bytes) return t('exportRuns.notAvailable');
+		const sizes = [
+			t('exportRuns.sizeUnits.bytes'),
+			t('exportRuns.sizeUnits.kb'),
+			t('exportRuns.sizeUnits.mb'),
+			t('exportRuns.sizeUnits.gb'),
+		];
+		const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
 		return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
 	};
 
 	const formatDate = (dateString?: string) => {
-		if (!dateString) return 'N/A';
+		if (!dateString) return t('exportRuns.notAvailable');
 		return new Date(dateString).toLocaleString();
 	};
+
+	const statusLabel = t(`exportRuns.runStatus.${run.status}`, { defaultValue: run.status });
 
 	return (
 		<div className='flex items-center justify-between text-sm p-4 border-b last:border-b-0'>
@@ -102,26 +113,30 @@ const ExportRunItem: FC<ExportRunItemProps> = ({ run }) => {
 					{getStatusIcon(run.status)}
 					<div>
 						<div className='flex items-center gap-2'>
-							<span className='font-medium capitalize'>{run.status}</span>
-							<span className={cn('px-2 py-1 rounded-full text-xs font-medium', getStatusColor(run.status))}>{run.status}</span>
+							<span className='font-medium capitalize'>{statusLabel}</span>
+							<span className={cn('px-2 py-1 rounded-full text-xs font-medium', getStatusColor(run.status))}>{statusLabel}</span>
 						</div>
 						<div className='text-xs text-gray-500 mt-1'>
-							{run.started_at ? `Started: ${formatDate(run.started_at)}` : 'Not started'}
-							{run.completed_at && ` • Completed: ${formatDate(run.completed_at)}`}
+							{run.started_at ? t('exportRuns.started', { time: formatDate(run.started_at) }) : t('exportRuns.notStarted')}
+							{run.completed_at && ` • ${t('exportRuns.completed', { time: formatDate(run.completed_at) })}`}
 						</div>
-						{run.error_message && <div className='text-xs text-red-600 mt-1'>Error: {run.error_message}</div>}
+						{run.error_message && (
+							<div className='text-xs text-red-600 mt-1'>
+								{t('exportRuns.errorPrefix')} {run.error_message}
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
 			<div className='flex items-center gap-4 text-xs text-gray-500'>
 				{run.records_processed !== undefined && (
 					<div>
-						<span className='font-medium'>{run.records_processed}</span> processed
+						<span className='font-medium'>{run.records_processed}</span> {t('exportRuns.processed')}
 					</div>
 				)}
 				{run.records_exported !== undefined && (
 					<div>
-						<span className='font-medium'>{run.records_exported}</span> exported
+						<span className='font-medium'>{run.records_exported}</span> {t('exportRuns.exported')}
 					</div>
 				)}
 				{run.file_size_bytes && (

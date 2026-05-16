@@ -9,6 +9,7 @@ import { WALLET_TRANSACTION_REASON } from '@/models';
 import { v4 as uuidv4 } from 'uuid';
 import { getCurrencyAmountFromCredits } from '@/utils';
 import { DebitWalletPayload } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface DebitPayload extends Partial<DebitWalletPayload> {
 	credits?: number;
@@ -25,6 +26,7 @@ interface DebitCardProps {
 }
 
 const DebitCard: FC<DebitCardProps> = ({ walletId, currency, conversion_rate = 1, onSuccess, isOpen, onOpenChange }) => {
+	const { t } = useTranslation('billing');
 	// State management
 	const [debitPayload, setDebitPayload] = useState<DebitPayload>({
 		credits: undefined,
@@ -55,8 +57,8 @@ const DebitCard: FC<DebitCardProps> = ({ walletId, currency, conversion_rate = 1
 			});
 			await refetchWalletData();
 		},
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Failed to debit wallet');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to debit wallet');
 		},
 	});
 
@@ -93,7 +95,9 @@ const DebitCard: FC<DebitCardProps> = ({ walletId, currency, conversion_rate = 1
 	// Calculate description text
 	const getDescriptionText = (): string => {
 		if (debitPayload.credits && debitPayload.credits > 0) {
-			return `${getCurrencySymbol(currency || '')}${getCurrencyAmountFromCredits(conversion_rate, debitPayload.credits)} will be debited from the wallet`;
+			return t('wallet.debit.preview', {
+				amount: `${getCurrencySymbol(currency || '')}${getCurrencyAmountFromCredits(conversion_rate, debitPayload.credits)}`,
+			});
 		}
 		return '';
 	};
@@ -102,34 +106,34 @@ const DebitCard: FC<DebitCardProps> = ({ walletId, currency, conversion_rate = 1
 		<Dialog
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title='Manual Debit'
-			description='Manually debit the credits from your wallet. This action will reduce the wallet balance.'
+			title={t('wallet.debit.title')}
+			description={t('wallet.debit.description')}
 			className='sm:max-w-[600px]'>
 			<div className='grid gap-4'>
 				<Input
 					variant='formatted-number'
 					onChange={(e) => updateDebitPayload({ credits: e as unknown as number })}
 					value={debitPayload.credits ?? ''}
-					suffix='credits'
-					label='Credits to Deduct'
-					placeholder='Enter credits amount'
+					suffix={t('payments.transactions.creditsSuffix')}
+					label={t('wallet.debit.creditsToDeduct')}
+					placeholder={t('wallet.debit.creditsPlaceholder')}
 					description={getDescriptionText()}
 				/>
 
 				<Input
-					label='Reference ID (Optional)'
+					label={t('wallet.debit.referenceIdOptional')}
 					className='w-full'
-					placeholder='Enter reference ID'
+					placeholder={t('wallet.debit.referenceIdPlaceholder')}
 					value={debitPayload.reference_id || ''}
 					onChange={(e) => updateDebitPayload({ reference_id: e as string })}
-					description='This reference ID will be used as the idempotency key for the transaction.'
+					description={t('wallet.debit.referenceIdDescription')}
 				/>
 
 				<Spacer className='!mt-4' />
 
 				<div className='w-full justify-end flex'>
 					<Button isLoading={isPending} onClick={handleDebit} disabled={isPending || !debitPayload.credits}>
-						Submit
+						{t('wallet.debit.submit')}
 					</Button>
 				</div>
 			</div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
 import { Card, Chip, Loader, Select, ShortPagination } from '@/components/atoms';
@@ -11,20 +12,20 @@ import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { Wallet as WalletIcon } from 'lucide-react';
 import usePagination from '@/hooks/usePagination';
 
-const getWalletStatusChip = (status: WALLET_STATUS) => {
-	const statusConfig: Record<WALLET_STATUS, { label: string; variant: 'success' | 'warning' | 'failed' | 'default' }> = {
-		[WALLET_STATUS.ACTIVE]: { label: 'Active', variant: 'success' },
-		[WALLET_STATUS.FROZEN]: { label: 'Frozen', variant: 'warning' },
-		[WALLET_STATUS.CLOSED]: { label: 'Closed', variant: 'failed' },
-	};
-
-	const config = statusConfig[status] || { label: status, variant: 'default' as const };
-	return <Chip label={config.label} variant={config.variant} />;
-};
-
 const WalletTab = () => {
+	const { t } = useTranslation('customer-portal');
 	const { limit, offset } = usePagination();
 	const [selectedWalletId, setSelectedWalletId] = useState<string>('');
+
+	const getWalletStatusChip = (status: WALLET_STATUS) => {
+		const variantMap: Record<WALLET_STATUS, 'success' | 'warning' | 'failed' | 'default'> = {
+			[WALLET_STATUS.ACTIVE]: 'success',
+			[WALLET_STATUS.FROZEN]: 'warning',
+			[WALLET_STATUS.CLOSED]: 'failed',
+		};
+		const variant = variantMap[status] ?? 'default';
+		return <Chip label={t(`walletStatus.${status}`)} variant={variant} />;
+	};
 
 	// Fetch wallets
 	const {
@@ -65,10 +66,10 @@ const WalletTab = () => {
 	});
 
 	if (walletsError) {
-		toast.error('Failed to load wallets');
+		toast.error(t('errors.loadWallets'));
 	}
 	if (transactionsError) {
-		toast.error('Failed to load transactions');
+		toast.error(t('errors.loadTransactions'));
 	}
 
 	if (walletsLoading) {
@@ -82,7 +83,7 @@ const WalletTab = () => {
 	if (!wallets || wallets.length === 0) {
 		return (
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-				<EmptyState title='No wallet' description='No wallet has been set up for this account' />
+				<EmptyState title={t('wallet.emptyTitle')} description={t('wallet.emptyDescription')} />
 			</Card>
 		);
 	}
@@ -91,7 +92,7 @@ const WalletTab = () => {
 
 	const walletOptions = wallets.map((w) => ({
 		value: w.id,
-		label: w.name || `Wallet ${w.id.slice(0, 8)}`,
+		label: w.name || t('wallet.fallbackName', { id: w.id.slice(0, 8) }),
 	}));
 
 	return (
@@ -113,7 +114,7 @@ const WalletTab = () => {
 						<WalletIcon className='h-5 w-5 text-blue-600' />
 					</div>
 					<div>
-						<h3 className='text-base font-medium text-zinc-950'>{activeWallet?.name || 'Wallet'}</h3>
+						<h3 className='text-base font-medium text-zinc-950'>{activeWallet?.name || t('wallet.defaultName')}</h3>
 						{activeWallet?.wallet_status && getWalletStatusChip(activeWallet.wallet_status)}
 					</div>
 				</div>
@@ -127,16 +128,16 @@ const WalletTab = () => {
 					</div>
 				) : (
 					<div>
-						<span className='text-sm text-zinc-500 block mb-2'>Balance</span>
+						<span className='text-sm text-zinc-500 block mb-2'>{t('wallet.balance')}</span>
 						<div className='flex items-baseline gap-2'>
 							<span className='text-4xl font-semibold text-zinc-950'>
 								{formatAmount(walletBalance?.real_time_credit_balance ?? activeWallet?.credit_balance?.toString() ?? '0')}
 							</span>
-							<span className='text-base font-normal text-zinc-500'>credits</span>
+							<span className='text-base font-normal text-zinc-500'>{t('wallet.credits')}</span>
 						</div>
 						<p className='text-sm text-zinc-500 mt-1'>
 							{currencySymbol}
-							{formatAmount(walletBalance?.real_time_balance ?? activeWallet?.balance?.toString() ?? '0')}
+							{formatAmount(walletBalance?.real_time_balance ?? activeWallet?.balance?.toString() ?? '0')} {t('wallet.valueSuffix')}
 						</p>
 					</div>
 				)}
@@ -144,7 +145,7 @@ const WalletTab = () => {
 
 			{/* Transactions */}
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-				<h3 className='text-base font-medium text-zinc-950 mb-4'>Transaction History</h3>
+				<h3 className='text-base font-medium text-zinc-950 mb-4'>{t('wallet.transactionHistory')}</h3>
 
 				{transactionsLoading ? (
 					<div className='animate-pulse space-y-3'>
@@ -158,7 +159,7 @@ const WalletTab = () => {
 						<ShortPagination unit='transactions' totalItems={transactionsData.pagination?.total || 0} />
 					</>
 				) : (
-					<EmptyState title='No transactions' description='Your transaction history will appear here' />
+					<EmptyState title={t('wallet.noTransactionsTitle')} description={t('wallet.noTransactionsDescription')} />
 				)}
 			</Card>
 		</div>

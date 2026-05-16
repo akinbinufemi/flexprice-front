@@ -1,6 +1,6 @@
 import { Button, CardHeader, Chip, Loader, Page, Spacer, Card } from '@/components/atoms';
-import { ApiDocsContent } from '@/components/molecules';
-import { DetailsCard } from '@/components/molecules';
+import { ApiDocsContent, DetailsCard } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { RouteNames } from '@/core/routes/Routes';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import TaxApi from '@/api/TaxApi';
@@ -8,6 +8,7 @@ import formatDate from '@/utils/common/format_date';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { EyeOff, Pencil } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router';
 import { TaxRateResponse } from '@/types/dto/tax';
@@ -19,42 +20,9 @@ type Params = {
 	taxrateId: string;
 };
 
-const getTaxTypeLabel = (type: TAX_RATE_TYPE) => {
-	switch (type) {
-		case TAX_RATE_TYPE.PERCENTAGE:
-			return 'Percentage';
-		case TAX_RATE_TYPE.FIXED:
-			return 'Fixed Amount';
-		default:
-			return 'Unknown';
-	}
-};
-
-const getScopeLabel = (scope: TAX_RATE_SCOPE) => {
-	switch (scope) {
-		case TAX_RATE_SCOPE.INTERNAL:
-			return 'Internal';
-		case TAX_RATE_SCOPE.EXTERNAL:
-			return 'External';
-		case TAX_RATE_SCOPE.ONETIME:
-			return 'One-time';
-		default:
-			return 'Unknown';
-	}
-};
-
-const formatTaxValue = (tax: TaxRateResponse) => {
-	if (tax.tax_rate_type === TAX_RATE_TYPE.PERCENTAGE && tax.percentage_value !== undefined) {
-		return `${tax.percentage_value}%`;
-	}
-	if (tax.tax_rate_type === TAX_RATE_TYPE.FIXED && tax.fixed_value !== undefined) {
-		return `${tax.fixed_value}`;
-	}
-	return '--';
-};
-
 const TaxrateDetailsPage = () => {
 	const navigate = useNavigate();
+	const { t } = useTranslation(['billing', 'common']);
 	const { taxrateId } = useParams<Params>();
 	const [taxDrawerOpen, setTaxDrawerOpen] = useState(false);
 
@@ -75,13 +43,49 @@ const TaxrateDetailsPage = () => {
 			return await TaxApi.deleteTaxRate(taxrateId!);
 		},
 		onSuccess: () => {
-			toast.success('Tax rate archived successfully');
+			toast.success(t('taxes.toast.archivedSuccess'));
 			navigate(RouteNames.taxes);
 		},
-		onError: (error: any) => {
-			toast.error(error.error?.message || 'Failed to archive tax rate');
+		onError: (error: Error) => {
+			toast.error(error.message || t('taxes.toast.archiveFailed'));
 		},
 	});
+
+	const naLabel = t('common:labels.na');
+
+	const getTaxTypeLabel = (type: TAX_RATE_TYPE | undefined) => {
+		switch (type) {
+			case TAX_RATE_TYPE.PERCENTAGE:
+				return t('taxes.rateType.percentage');
+			case TAX_RATE_TYPE.FIXED:
+				return t('taxes.rateType.fixedAmount');
+			default:
+				return t('taxes.rateType.unknown');
+		}
+	};
+
+	const getScopeLabel = (scope: TAX_RATE_SCOPE | undefined) => {
+		switch (scope) {
+			case TAX_RATE_SCOPE.INTERNAL:
+				return t('taxes.rateScope.internal');
+			case TAX_RATE_SCOPE.EXTERNAL:
+				return t('taxes.rateScope.external');
+			case TAX_RATE_SCOPE.ONETIME:
+				return t('taxes.rateScope.onetime');
+			default:
+				return t('taxes.rateScope.unknown');
+		}
+	};
+
+	const formatTaxValue = (tax: TaxRateResponse) => {
+		if (tax.tax_rate_type === TAX_RATE_TYPE.PERCENTAGE && tax.percentage_value !== undefined) {
+			return `${tax.percentage_value}%`;
+		}
+		if (tax.tax_rate_type === TAX_RATE_TYPE.FIXED && tax.fixed_value !== undefined) {
+			return `${tax.fixed_value}`;
+		}
+		return naLabel;
+	};
 
 	const { updateBreadcrumb } = useBreadcrumbsStore();
 
@@ -96,25 +100,25 @@ const TaxrateDetailsPage = () => {
 	}
 
 	if (isError) {
-		toast.error('Error loading tax rate data');
+		toast.error(t('taxes.toast.loadError'));
 		return null;
 	}
 
 	if (!taxData) {
-		toast.error('No tax rate data available');
+		toast.error(t('taxes.toast.noData'));
 		return null;
 	}
 
 	const taxDetails = [
-		{ label: 'Tax Rate Name', value: taxData?.name },
-		{ label: 'Code', value: taxData?.code },
-		{ label: 'Description', value: taxData?.description || '--' },
-		{ label: 'Type', value: getTaxTypeLabel(taxData?.tax_rate_type) },
-		{ label: 'Value', value: formatTaxValue(taxData) },
-		{ label: 'Scope', value: getScopeLabel(taxData?.scope) },
-		{ label: 'Created Date', value: formatDate(taxData?.created_at ?? '') },
+		{ label: t('taxes.detail.taxRateName'), value: taxData?.name },
+		{ label: t('taxes.detail.code'), value: taxData?.code },
+		{ label: t('taxes.detail.description'), value: taxData?.description || naLabel },
+		{ label: t('taxes.detail.type'), value: getTaxTypeLabel(taxData?.tax_rate_type) },
+		{ label: t('taxes.detail.value'), value: formatTaxValue(taxData) },
+		{ label: t('taxes.detail.scope'), value: getScopeLabel(taxData?.scope) },
+		{ label: t('taxes.detail.createdDate'), value: formatDate(taxData?.created_at ?? '') },
 		{
-			label: 'Status',
+			label: t('taxes.detail.status'),
 			value: (
 				<Chip
 					label={formatChips(taxData?.tax_rate_status)}
@@ -132,7 +136,7 @@ const TaxrateDetailsPage = () => {
 				<>
 					<Button onClick={() => setTaxDrawerOpen(true)} variant={'outline'} className='flex gap-2'>
 						<Pencil />
-						Edit
+						{t('common:actions.edit')}
 					</Button>
 
 					<Button
@@ -141,20 +145,20 @@ const TaxrateDetailsPage = () => {
 						variant={'outline'}
 						className='flex gap-2'>
 						<EyeOff />
-						Archive
+						{t('common:actions.archive')}
 					</Button>
 				</>
 			}>
 			<TaxDrawer data={taxData as TaxRate} open={taxDrawerOpen} onOpenChange={setTaxDrawerOpen} refetchQueryKeys={['fetchTaxRate']} />
-			<ApiDocsContent tags={['Taxes', 'Tax', 'Tax Rates']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.TaxRates} />
 
 			<div className='space-y-6'>
-				<DetailsCard variant='stacked' title='Tax Rate Details' data={taxDetails} />
+				<DetailsCard variant='stacked' title={t('taxes.taxRateDetails')} data={taxDetails} />
 
 				{/* Metadata Section */}
 				{taxData.metadata && Object.keys(taxData.metadata).length > 0 && (
 					<Card variant='notched'>
-						<CardHeader title='Metadata' />
+						<CardHeader title={t('taxes.metadata')} />
 						<div className='p-4'>
 							<div className='grid grid-cols-2 gap-4'>
 								{Object.entries(taxData.metadata).map(([key, value]) => (

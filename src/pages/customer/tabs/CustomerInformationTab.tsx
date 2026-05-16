@@ -18,6 +18,7 @@ import { RouteNames } from '@/core/routes/Routes';
 import { CustomerResponse } from '@/types/dto';
 import { uniq } from 'lodash';
 import { Skeleton } from '@/components/ui';
+import { useTranslation } from 'react-i18next';
 
 type ContextType = {
 	isArchived: boolean;
@@ -33,6 +34,7 @@ const filterStringMetadata = (meta: Record<string, unknown> | undefined): Record
 };
 
 const CustomerInformationTab = () => {
+	const { t } = useTranslation('customers');
 	const { id: customerId } = useParams();
 	const navigate = useNavigate();
 	const { isArchived } = useOutletContext<ContextType>();
@@ -187,7 +189,7 @@ const CustomerInformationTab = () => {
 	if (isLoading) {
 		return (
 			<div className='py-6 px-4 rounded-xl border border-gray-300'>
-				<p className='text-gray-600'>Loading customer details...</p>
+				<p className='text-gray-600'>{t('overview.loadingCustomerDetails')}</p>
 			</div>
 		);
 	}
@@ -198,17 +200,17 @@ const CustomerInformationTab = () => {
 				<div>
 					<Spacer className='!h-4' />
 					<div className='flex justify-between items-center'>
-						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>Customer Details</h3>
+						<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>{t('overview.cardTitle')}</h3>
 						<div className='flex gap-2'>
 							{!isArchived && hasStripeConnection && (
 								<Button variant='outline' size='sm' onClick={() => setShowSaveCardModal(true)} className='flex items-center gap-2'>
 									<CreditCard className='size-4' />
-									Save Card on Stripe
+									{t('tabPanels.information.saveCardOnStripe')}
 								</Button>
 							)}
 							{!isArchived && (
 								<>
-									<Button variant='outline' size='icon' onClick={copyToClipboard} title='Share Customer Portal Link'>
+									<Button variant='outline' size='icon' onClick={copyToClipboard} title={t('tabPanels.information.sharePortalLinkTitle')}>
 										<Share2 className='size-4' />
 									</Button>
 									<CreateCustomerDrawer
@@ -232,7 +234,7 @@ const CustomerInformationTab = () => {
 					<Divider className='my-4' />
 					<div className='mt-8'>
 						<div className='flex justify-between items-center mb-2'>
-							<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>Metadata</h3>
+							<h3 className={getTypographyClass('card-header') + '!text-[16px]'}>{t('tabPanels.common.metadata')}</h3>
 							{!isArchived && (
 								<Button variant='outline' size='icon' onClick={() => setShowMetadataModal(true)}>
 									<Pencil className='size-5' />
@@ -277,7 +279,7 @@ const CustomerInformationTab = () => {
 				<>
 					<Spacer className='!h-8' />
 					<Card variant='notched'>
-						<CardHeader title='Child customers' titleClassName='font-semibold' />
+						<CardHeader title={t('tabPanels.information.childCustomersTitle')} titleClassName='font-semibold' />
 						{isInvoicedSubsLoading || isSubscribersCustomersLoading ? (
 							<Skeleton className='h-40 w-full mt-2' />
 						) : (

@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { FaFileExcel, FaFilePdf } from 'react-icons/fa';
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface InvoiceDownloadFormatDialogProps {
 	open: boolean;
@@ -21,6 +22,7 @@ const InvoiceDownloadFormatDialog: FC<InvoiceDownloadFormatDialogProps> = ({
 	isPdfPending = false,
 	isCsvPending = false,
 }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const busy = isPdfPending || isCsvPending;
 
 	const handlePdf = async () => {
@@ -43,8 +45,8 @@ const InvoiceDownloadFormatDialog: FC<InvoiceDownloadFormatDialogProps> = ({
 		<Dialog
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title='Download invoice'
-			description='Choose a format for this invoice.'
+			title={t('invoices.details.downloadInvoice')}
+			description={t('invoices.details.chooseFormat')}
 			className='sm:max-w-md'>
 			<div className='grid grid-cols-2 gap-3 w-full'>
 				<button
@@ -67,7 +69,7 @@ const InvoiceDownloadFormatDialog: FC<InvoiceDownloadFormatDialogProps> = ({
 							<FaFilePdf className='h-10 w-10 text-[#EC1C24] drop-shadow-sm' aria-hidden />
 						)}
 					</span>
-					<span className='text-sm font-medium text-zinc-900'>PDF</span>
+					<span className='text-sm font-medium text-zinc-900'>{t('invoices.details.downloadFormatPdf')}</span>
 				</button>
 				<button
 					type='button'
@@ -89,7 +91,7 @@ const InvoiceDownloadFormatDialog: FC<InvoiceDownloadFormatDialogProps> = ({
 							<FaFileExcel className='h-10 w-10 text-[#217346] drop-shadow-sm' aria-hidden />
 						)}
 					</span>
-					<span className='text-sm font-medium text-zinc-900'>CSV</span>
+					<span className='text-sm font-medium text-zinc-900'>{t('invoices.details.downloadFormatCsv')}</span>
 				</button>
 			</div>
 		</Dialog>

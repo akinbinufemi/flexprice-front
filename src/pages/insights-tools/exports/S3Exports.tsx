@@ -1,5 +1,6 @@
 import { FormHeader, Loader, Page, Button } from '@/components/atoms';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Plus, Settings, Trash2, Eye, BarChart3 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -7,10 +8,12 @@ import { ConnectionApi, TaskApi } from '@/api';
 import { ENTITY_STATUS, CONNECTION_PROVIDER_TYPE } from '@/models';
 import toast from 'react-hot-toast';
 import S3ConnectionDrawer from '@/components/molecules/S3ConnectionDrawer/S3ConnectionDrawer';
-import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 
 const S3Exports = () => {
+	const { t } = useTranslation('settings');
+	const { i18n } = useTranslation();
 	const navigate = useNavigate();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -40,7 +43,7 @@ const S3Exports = () => {
 						// Filter out deleted tasks
 						const activeTasks = response.items.filter((task) => task.status !== ENTITY_STATUS.DELETED);
 						counts[connection.id] = activeTasks.length;
-					} catch (error) {
+					} catch {
 						counts[connection.id] = 0;
 					}
 				}),
@@ -57,8 +60,8 @@ const S3Exports = () => {
 			toast.success('Connection deleted successfully');
 			refetchConnections();
 		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to delete connection');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to delete connection');
 		},
 	});
 
@@ -81,14 +84,14 @@ const S3Exports = () => {
 	}
 
 	return (
-		<Page heading='S3 Data Exports'>
+		<Page heading={t('insightsTools.exports.s3PageHeading')}>
 			<ApiDocsContent tags={API_DOCS_TAGS.Tasks} />
 
 			{/* Back button and Add Connection Button */}
 			<div className='mb-6 flex items-center justify-between'>
 				<Button variant='outline' onClick={() => navigate('/tools/exports')} className='flex items-center gap-2'>
 					<ArrowLeft className='w-4 h-4' />
-					Back to Exports
+					{t('insightsTools.exports.backToExports')}
 				</Button>
 				<Button
 					onClick={() => {
@@ -96,14 +99,14 @@ const S3Exports = () => {
 					}}
 					className='flex items-center gap-2'>
 					<Plus className='w-4 h-4' />
-					Add
+					{i18n.t('actions.add', { ns: 'common' })}
 				</Button>
 			</div>
 
 			{/* Connections List */}
 			{connections.length > 0 ? (
 				<div className='mb-8'>
-					<FormHeader variant='form-component-title' title='Connections' />
+					<FormHeader variant='form-component-title' title={t('insightsTools.exports.connectionsTitle')} />
 					<div className='card'>
 						{connections.map((connection, idx) => (
 							<div key={idx} className='flex items-center justify-between text-sm p-4 border-b last:border-b-0'>
@@ -114,7 +117,9 @@ const S3Exports = () => {
 										</div>
 										<div>
 											<p className='text-gray-900 font-medium'>{connection.name}</p>
-											<p className='text-xs text-gray-500 capitalize'>{connection.connection_status} • S3</p>
+											<p className='text-xs text-gray-500 capitalize'>
+												{connection.connection_status} • {t('insightsTools.exports.providerS3Suffix')}
+											</p>
 										</div>
 									</div>
 								</div>
@@ -123,7 +128,9 @@ const S3Exports = () => {
 									<div className='flex items-center gap-2 text-sm text-gray-600'>
 										<BarChart3 className='w-4 h-4' />
 										<span>
-											{exportCounts?.[connection.id] || 0} export{exportCounts?.[connection.id] !== 1 ? 's' : ''}
+											{(exportCounts?.[connection.id] ?? 0) === 1
+												? t('insightsTools.exports.exportCountSingular', { count: 1 })
+												: t('insightsTools.exports.exportCountPlural', { count: exportCounts?.[connection.id] ?? 0 })}
 										</span>
 									</div>
 									{/* Action Buttons */}
@@ -134,7 +141,7 @@ const S3Exports = () => {
 											onClick={() => handleViewExports(connection.id)}
 											className='flex items-center gap-1'>
 											<Eye className='w-3 h-3' />
-											View Exports
+											{t('insightsTools.exports.viewExports')}
 										</Button>
 										<Button
 											variant='outline'
@@ -153,8 +160,8 @@ const S3Exports = () => {
 			) : (
 				<div className='card text-center !py-12'>
 					<div className='text-gray-500 mb-4'>
-						<h3 className='text-lg font-medium text-gray-900 mb-2'>No S3 Connections</h3>
-						<p className='text-gray-500 mb-6'>Create your first S3 connection to start exporting data.</p>
+						<h3 className='text-lg font-medium text-gray-900 mb-2'>{t('insightsTools.exports.noS3Connections')}</h3>
+						<p className='text-gray-500 mb-6'>{t('insightsTools.exports.noS3ConnectionsHint')}</p>
 						<Button
 							variant='outline'
 							onClick={() => {
@@ -162,7 +169,7 @@ const S3Exports = () => {
 							}}
 							className='flex items-center gap-2 mx-auto'>
 							<Plus className='w-4 h-4' />
-							Add S3 Connection
+							{t('insightsTools.exports.addS3Connection')}
 						</Button>
 					</div>
 				</div>
@@ -170,29 +177,23 @@ const S3Exports = () => {
 
 			{/* Overview Section */}
 			<div className='card space-y-6 mt-8'>
-				<h3 className='text-xl font-semibold text-gray-900'>S3 Export Features</h3>
+				<h3 className='text-xl font-semibold text-gray-900'>{t('insightsTools.exports.s3FeaturesTitle')}</h3>
 				<div className='space-y-4'>
 					<div>
-						<h4 className='text-sm font-semibold text-gray-900 mb-1'>Data Export</h4>
-						<p className='text-xs text-gray-600'>
-							Automatically export events, invoices, and other Flexprice data to your S3 bucket on a scheduled basis.
-						</p>
+						<h4 className='text-sm font-semibold text-gray-900 mb-1'>{t('insightsTools.exports.s3FeatureDataExportTitle')}</h4>
+						<p className='text-xs text-gray-600'>{t('insightsTools.exports.s3FeatureDataExportBody')}</p>
 					</div>
 					<div>
-						<h4 className='text-sm font-semibold text-gray-900 mb-1'>Flexible Scheduling</h4>
-						<p className='text-xs text-gray-600'>Choose between hourly or daily export schedules to match your data processing needs.</p>
+						<h4 className='text-sm font-semibold text-gray-900 mb-1'>{t('insightsTools.exports.s3FeatureSchedulingTitle')}</h4>
+						<p className='text-xs text-gray-600'>{t('insightsTools.exports.s3FeatureSchedulingBody')}</p>
 					</div>
 					<div>
-						<h4 className='text-sm font-semibold text-gray-900 mb-1'>Secure Storage</h4>
-						<p className='text-xs text-gray-600'>
-							Your data is encrypted and securely stored in your own S3 bucket with configurable encryption options.
-						</p>
+						<h4 className='text-sm font-semibold text-gray-900 mb-1'>{t('insightsTools.exports.s3FeatureSecureTitle')}</h4>
+						<p className='text-xs text-gray-600'>{t('insightsTools.exports.s3FeatureSecureBody')}</p>
 					</div>
 					<div>
-						<h4 className='text-sm font-semibold text-gray-900 mb-1'>Data Format Options</h4>
-						<p className='text-xs text-gray-600'>
-							Export data in various formats with configurable compression and file size limits for optimal storage efficiency.
-						</p>
+						<h4 className='text-sm font-semibold text-gray-900 mb-1'>{t('insightsTools.exports.s3FeatureFormatsTitle')}</h4>
+						<p className='text-xs text-gray-600'>{t('insightsTools.exports.s3FeatureFormatsBody')}</p>
 					</div>
 				</div>
 			</div>

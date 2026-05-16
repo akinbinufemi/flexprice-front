@@ -3,11 +3,11 @@ import FlexpriceTable, { ColumnData } from '../Table';
 import Addon from '@/models/Addon';
 import { ENTITY_STATUS } from '@/models';
 import { ActionButton, Chip } from '@/components/atoms';
-import formatChips from '@/utils/common/format_chips';
 import formatDate from '@/utils/common/format_date';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
 import AddonApi from '@/api/AddonApi';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data: Addon[];
@@ -15,26 +15,28 @@ interface Props {
 }
 
 const AddonTable: FC<Props> = ({ data, onEdit }) => {
+	const { t } = useTranslation('catalog');
 	const navigate = useNavigate();
 
 	const columnData: ColumnData<Addon>[] = [
 		{
 			fieldName: 'name',
-			title: 'Addon Name',
+			title: t('addons.drawer.addonName'),
 		},
 		{
 			fieldName: 'lookup_key',
-			title: 'Lookup Key',
+			title: t('shared.lookupKey'),
 		},
 		{
-			title: 'Status',
+			title: t('addons.table.status'),
 			render: (row) => {
-				const label = formatChips(row?.status);
-				return <Chip variant={label === 'Active' ? 'success' : 'default'} label={label} />;
+				const isActive = row?.status === ENTITY_STATUS.PUBLISHED;
+				const label = isActive ? t('addons.table.statusActive') : t('addons.table.statusInactive');
+				return <Chip variant={isActive ? 'success' : 'default'} label={label} />;
 			},
 		},
 		{
-			title: 'Updated At',
+			title: t('addons.table.updatedAt'),
 			render: (row) => {
 				return formatDate(row?.updated_at);
 			},

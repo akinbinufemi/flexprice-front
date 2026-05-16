@@ -3,7 +3,8 @@ import { ApiDocsContent, RedirectCell } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import InvoiceTableMenu from '@/components/molecules/InvoiceTable/InvoiceTableMenu';
 import { QueryableDataArea } from '@/components/organisms';
-import GUIDES from '@/constants/guides';
+import { buildGuides } from '@/constants/guides';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import InvoiceApi from '@/api/InvoiceApi';
 import CustomerApi from '@/api/CustomerApi';
 import {
@@ -25,114 +26,8 @@ import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
 import { formatDateShort, getCurrencySymbol } from '@/utils/common/helper_functions';
 import { useCallback, useMemo, useState } from 'react';
-
-const sortingOptions: SortOption[] = [
-	{
-		field: 'invoice_number',
-		label: 'Invoice Number',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'amount_due',
-		label: 'Amount Due',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'due_date',
-		label: 'Due Date',
-		direction: SortDirection.ASC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'invoice_number',
-		label: 'Invoice Number',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'customer_id',
-		label: 'Customer',
-		fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		asyncConfig: {
-			searchFn: searchCustomersForFilter,
-		},
-	},
-	{
-		field: 'invoice_status',
-		label: 'Invoice Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: INVOICE_STATUS.DRAFT, label: 'Draft' },
-			{ value: INVOICE_STATUS.FINALIZED, label: 'Finalized' },
-			{ value: INVOICE_STATUS.VOIDED, label: 'Voided' },
-		],
-	},
-	{
-		field: 'payment_status',
-		label: 'Payment Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: PAYMENT_STATUS.PENDING, label: 'Pending' },
-			{ value: PAYMENT_STATUS.PROCESSING, label: 'Processing' },
-			{ value: PAYMENT_STATUS.INITIATED, label: 'Initiated' },
-			{ value: PAYMENT_STATUS.SUCCEEDED, label: 'Succeeded' },
-			{ value: PAYMENT_STATUS.FAILED, label: 'Failed' },
-			{ value: PAYMENT_STATUS.REFUNDED, label: 'Refunded' },
-			{ value: PAYMENT_STATUS.PARTIALLY_REFUNDED, label: 'Partially Refunded' },
-		],
-	},
-	{
-		field: 'invoice_type',
-		label: 'Invoice Type',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: INVOICE_TYPE.SUBSCRIPTION, label: 'Subscription' },
-			{ value: INVOICE_TYPE.ONE_OFF, label: 'One Off' },
-			{ value: INVOICE_TYPE.CREDIT, label: 'Credit' },
-		],
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'due_date',
-		label: 'Due Date',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'status',
-		label: 'Status',
-		fieldType: FilterFieldType.MULTI_SELECT,
-		operators: [FilterOperator.IN, FilterOperator.NOT_IN],
-		dataType: DataType.ARRAY,
-		options: [
-			{ value: ENTITY_STATUS.PUBLISHED, label: 'Active' },
-			{ value: ENTITY_STATUS.ARCHIVED, label: 'Inactive' },
-		],
-	},
-];
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 const initialFilters: FilterCondition[] = [
 	{
@@ -151,47 +46,39 @@ const initialFilters: FilterCondition[] = [
 	},
 ];
 
-const initialSorts: SortOption[] = [
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const getStatusChip = (status: string) => {
+const getStatusChip = (status: string, t: TFunction) => {
 	switch (status.toUpperCase()) {
 		case INVOICE_STATUS.VOIDED:
-			return <Chip variant='default' label='Void' />;
+			return <Chip variant='default' label={t('invoices.status.void')} />;
 		case INVOICE_STATUS.FINALIZED:
-			return <Chip variant='success' label='Finalized' />;
+			return <Chip variant='success' label={t('invoices.status.finalized')} />;
 		case INVOICE_STATUS.DRAFT:
-			return <Chip variant='default' label='Draft' />;
+			return <Chip variant='default' label={t('common:status.draft')} />;
 		case INVOICE_STATUS.SKIPPED:
-			return <Chip variant='default' label='Skipped' />;
+			return <Chip variant='default' label={t('invoices.status.skipped')} />;
 		default:
-			return <Chip variant='default' label={status || 'Unknown'} />;
+			return <Chip variant='default' label={status || t('invoices.status.unknown')} />;
 	}
 };
 
-const getPaymentStatusChip = (status: string) => {
+const getPaymentStatusChip = (status: string, t: TFunction) => {
 	switch (status.toUpperCase()) {
 		case PAYMENT_STATUS.PENDING:
-			return <Chip variant='warning' label='Pending' />;
+			return <Chip variant='warning' label={t('invoices.status.pending')} />;
 		case PAYMENT_STATUS.INITIATED:
-			return <Chip variant='warning' label='Initiated' />;
+			return <Chip variant='warning' label={t('invoices.status.initiated')} />;
 		case PAYMENT_STATUS.SUCCEEDED:
-			return <Chip variant='success' label='Succeeded' />;
+			return <Chip variant='success' label={t('invoices.status.succeeded')} />;
 		case PAYMENT_STATUS.FAILED:
-			return <Chip variant='failed' label='Failed' />;
+			return <Chip variant='failed' label={t('invoices.status.failed')} />;
 		case PAYMENT_STATUS.REFUNDED:
-			return <Chip variant='default' label='Refunded' />;
+			return <Chip variant='default' label={t('invoices.status.refunded')} />;
 		case PAYMENT_STATUS.PARTIALLY_REFUNDED:
-			return <Chip variant='default' label='Partially Refunded' />;
+			return <Chip variant='default' label={t('invoices.status.partiallyRefunded')} />;
 		case PAYMENT_STATUS.OVERPAID:
-			return <Chip variant='warning' label='Overpaid' />;
+			return <Chip variant='warning' label={t('invoices.status.overpaid')} />;
 		default:
-			return <Chip variant='default' label='Unknown' />;
+			return <Chip variant='default' label={t('invoices.status.unknown')} />;
 	}
 };
 
@@ -237,6 +124,9 @@ function invoiceHasDistinctSubscriptionCustomer(inv: Invoice): boolean {
 
 const InvoicesPage = () => {
 	const navigate = useNavigate();
+	const { t } = useTranslation(['billing', 'common']);
+	const { t: tGuide } = useTranslation('guides');
+	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
 	const [showSubscriptionCustomerColumn, setShowSubscriptionCustomerColumn] = useState(false);
 
 	const onInvoicesDataChange = useCallback((d: { items: EnrichedInvoice[]; pagination: { total?: number } } | undefined) => {
@@ -262,16 +152,141 @@ const InvoicesPage = () => {
 		return { ...result, items };
 	}, []);
 
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'invoice_number',
+				label: t('invoices.list.sort.invoiceNumber'),
+				direction: SortDirection.ASC,
+			},
+			{
+				field: 'amount_due',
+				label: t('invoices.list.sort.amountDue'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'created_at',
+				label: t('invoices.list.sort.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'due_date',
+				label: t('invoices.list.sort.dueDate'),
+				direction: SortDirection.ASC,
+			},
+		],
+		[t],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'invoice_number',
+				label: t('invoices.list.filters.invoiceNumber'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'customer_id',
+				label: t('invoices.list.filters.customer'),
+				fieldType: FilterFieldType.ASYNC_MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				asyncConfig: {
+					searchFn: searchCustomersForFilter,
+				},
+			},
+			{
+				field: 'invoice_status',
+				label: t('invoices.list.filters.invoiceStatus'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: INVOICE_STATUS.DRAFT, label: t('invoices.list.invoiceStatuses.draft') },
+					{ value: INVOICE_STATUS.FINALIZED, label: t('invoices.list.invoiceStatuses.finalized') },
+					{ value: INVOICE_STATUS.VOIDED, label: t('invoices.list.invoiceStatuses.voided') },
+				],
+			},
+			{
+				field: 'payment_status',
+				label: t('invoices.list.filters.paymentStatus'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: PAYMENT_STATUS.PENDING, label: t('invoices.status.pending') },
+					{ value: PAYMENT_STATUS.PROCESSING, label: t('invoices.status.processing') },
+					{ value: PAYMENT_STATUS.INITIATED, label: t('invoices.status.initiated') },
+					{ value: PAYMENT_STATUS.SUCCEEDED, label: t('invoices.status.succeeded') },
+					{ value: PAYMENT_STATUS.FAILED, label: t('invoices.status.failed') },
+					{ value: PAYMENT_STATUS.REFUNDED, label: t('invoices.status.refunded') },
+					{ value: PAYMENT_STATUS.PARTIALLY_REFUNDED, label: t('invoices.status.partiallyRefunded') },
+				],
+			},
+			{
+				field: 'invoice_type',
+				label: t('invoices.list.filters.invoiceType'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: INVOICE_TYPE.SUBSCRIPTION, label: t('invoices.list.invoiceTypes.subscription') },
+					{ value: INVOICE_TYPE.ONE_OFF, label: t('invoices.list.invoiceTypes.oneOff') },
+					{ value: INVOICE_TYPE.CREDIT, label: t('invoices.list.invoiceTypes.credit') },
+				],
+			},
+			{
+				field: 'created_at',
+				label: t('invoices.list.filters.createdAt'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'due_date',
+				label: t('invoices.list.filters.dueDate'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.DATE],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'status',
+				label: t('invoices.list.filters.status'),
+				fieldType: FilterFieldType.MULTI_SELECT,
+				operators: [FilterOperator.IN, FilterOperator.NOT_IN],
+				dataType: DataType.ARRAY,
+				options: [
+					{ value: ENTITY_STATUS.PUBLISHED, label: t('common:status.active') },
+					{ value: ENTITY_STATUS.ARCHIVED, label: t('common:status.inactive') },
+				],
+			},
+		],
+		[t],
+	);
+
+	const initialSorts: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'created_at',
+				label: t('invoices.list.sort.createdAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[t],
+	);
+
 	const columns: ColumnData<EnrichedInvoice>[] = useMemo(() => {
 		const subscriptionCustomerColumn: ColumnData<EnrichedInvoice> = {
-			title: 'Subscription Customer',
+			title: t('invoices.list.columns.subscriptionCustomer'),
 			render: (row: EnrichedInvoice) => {
 				if (!invoiceHasDistinctSubscriptionCustomer(row)) {
-					return '--';
+					return t('common:labels.na');
 				}
 				const subCust = row.subscription_customer;
 				if (!subCust?.name || !subCust?.id) {
-					return '--';
+					return t('common:labels.na');
 				}
 				return <RedirectCell redirectUrl={`${RouteNames.customers}/${subCust.id}`}>{subCust.name}</RedirectCell>;
 			},
@@ -279,39 +294,39 @@ const InvoicesPage = () => {
 
 		return [
 			{
-				title: 'Invoice Number',
+				title: t('invoices.list.columns.invoiceNumber'),
 				render: (row: EnrichedInvoice) =>
 					row.invoice_status?.toUpperCase() === INVOICE_STATUS.DRAFT ? (
-						<span className='text-gray-400 italic text-[13px]'>To be generated</span>
+						<span className='text-gray-400 italic text-[13px]'>{t('invoices.list.toBeGenerated')}</span>
 					) : (
-						<span>{row.invoice_number || '--'}</span>
+						<span>{row.invoice_number || t('common:labels.na')}</span>
 					),
 			},
 			{
-				title: 'Amount',
+				title: t('invoices.list.columns.amount'),
 				render: (row) => <span>{`${getCurrencySymbol(row.currency)}${row.amount_due}`}</span>,
 			},
 			{
-				title: 'Invoice Status',
-				render: (row: EnrichedInvoice) => getStatusChip(row.invoice_status),
+				title: t('invoices.list.columns.invoiceStatus'),
+				render: (row: EnrichedInvoice) => getStatusChip(row.invoice_status, t),
 			},
 			{
-				title: 'Billing Entity',
+				title: t('invoices.list.columns.billingEntity'),
 				render: (row: EnrichedInvoice) => {
 					if (!row.customer?.name || !row.customer?.id) {
-						return '--';
+						return t('common:labels.na');
 					}
 					return <RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer.id}`}>{row.customer.name}</RedirectCell>;
 				},
 			},
 			...(showSubscriptionCustomerColumn ? [subscriptionCustomerColumn] : []),
 			{
-				title: 'Payment Status',
-				render: (row: EnrichedInvoice) => getPaymentStatusChip(row.payment_status),
+				title: t('invoices.list.columns.paymentStatus'),
+				render: (row: EnrichedInvoice) => getPaymentStatusChip(row.payment_status, t),
 			},
 			{
-				title: 'Due Date',
-				render: (row: EnrichedInvoice) => <span>{row.due_date ? formatDateShort(row.due_date) : '--'}</span>,
+				title: t('invoices.list.columns.dueDate'),
+				render: (row: EnrichedInvoice) => <span>{row.due_date ? formatDateShort(row.due_date) : t('common:labels.na')}</span>,
 			},
 			{
 				fieldVariant: 'interactive',
@@ -321,11 +336,11 @@ const InvoicesPage = () => {
 				},
 			},
 		];
-	}, [showSubscriptionCustomerColumn]);
+	}, [showSubscriptionCustomerColumn, t]);
 
 	return (
-		<Page heading='Invoices'>
-			<ApiDocsContent tags={['Invoices']} />
+		<Page heading={t('invoices.title')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.Invoices} />
 			<QueryableDataArea<EnrichedInvoice>
 				queryConfig={{
 					filterOptions,
@@ -355,13 +370,13 @@ const InvoicesPage = () => {
 					showEmptyRow: true,
 				}}
 				paginationConfig={{
-					unit: 'Invoices',
+					unit: t('invoices.list.paginationUnit'),
 				}}
 				emptyStateConfig={{
-					heading: 'Invoices',
-					description: 'Generate an invoice to initiate billing and manage customer payments.',
-					tags: ['Invoices'],
-					tutorials: GUIDES.invoices.tutorials,
+					heading: t('invoices.title'),
+					description: t('invoices.list.emptyDescription'),
+					tags: API_DOCS_TAGS.Invoices,
+					tutorials: guides.invoices.tutorials,
 				}}
 			/>
 		</Page>

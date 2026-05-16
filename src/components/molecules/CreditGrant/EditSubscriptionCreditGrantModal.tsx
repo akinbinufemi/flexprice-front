@@ -6,6 +6,9 @@ import { useCallback, useEffect, useState } from 'react';
 import RectangleRadiogroup, { RectangleRadiogroupOption } from '../RectangleRadiogroup';
 import { creditGrantPeriodOptions } from '@/constants/constants';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+
+const SUBSCRIPTION_PERIOD_END_DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: 'medium' };
 
 interface Props {
 	isOpen: boolean;
@@ -65,6 +68,7 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 	subscriptionStartDate,
 	subscriptionCurrentPeriodEnd,
 }) => {
+	const { t } = useTranslation('billing');
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [formData, setFormData] = useState<Partial<CreateCreditGrantRequest>>({
 		scope: CREDIT_GRANT_SCOPE.SUBSCRIPTION,
@@ -245,10 +249,15 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 	const selectedCadenceDescription = billingCadenceOptions.find((o) => o.value === formData.cadence)?.description;
 
 	return (
-		<Dialog isOpen={isOpen} showCloseButton={false} onOpenChange={onOpenChange} title='Add Credit Grant' className='sm:max-w-[600px]'>
+		<Dialog
+			isOpen={isOpen}
+			showCloseButton={false}
+			onOpenChange={onOpenChange}
+			title={t('creditGrant.subscriptionModal.title')}
+			className='sm:max-w-[600px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2 !mb-6'>
-					<Label label='Credit Type' />
+					<Label label={t('creditGrant.modal.creditType')} />
 					<RectangleRadiogroup
 						options={billingCadenceOptions.map((option) => ({
 							...option,
@@ -262,8 +271,8 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				<div className='space-y-2'>
 					<Input
-						label='Credit Name'
-						placeholder='e.g. Welcome Credits'
+						label={t('creditGrant.modal.creditName')}
+						placeholder={t('creditGrant.modal.creditNamePlaceholder')}
 						value={formData.name || ''}
 						onChange={(value) => handleFieldChange('name', value)}
 						error={errors.name}
@@ -272,20 +281,18 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				{formData.cadence === CREDIT_GRANT_CADENCE.RECURRING ? (
 					<div className='space-y-2'>
-						<Label label='Start Date' />
+						<Label label={t('creditGrant.subscriptionModal.startDate')} />
 						<p className='text-sm text-muted-foreground'>
 							{subscriptionCurrentPeriodEnd
-								? new Date(subscriptionCurrentPeriodEnd).toLocaleDateString(undefined, {
-										dateStyle: 'medium',
-									})
-								: '—'}
+								? new Date(subscriptionCurrentPeriodEnd).toLocaleDateString(undefined, SUBSCRIPTION_PERIOD_END_DATE_FORMAT)
+								: t('creditGrant.subscriptionModal.fallbackDash')}
 						</p>
-						<p className='text-xs text-gray-500'>The effective date is the current period end.</p>
+						<p className='text-xs text-gray-500'>{t('creditGrant.subscriptionModal.periodEndHint')}</p>
 						{errors.start_date && <p className='text-sm text-destructive'>{errors.start_date}</p>}
 					</div>
 				) : (
 					<div className='space-y-2'>
-						<Label label='Start Date *' />
+						<Label label={t('creditGrant.subscriptionModal.startDateRequired')} />
 						<DatePicker
 							date={formData.start_date ? new Date(formData.start_date) : undefined}
 							setDate={(date) => {
@@ -293,7 +300,7 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 									handleFieldChange('start_date', date.toISOString());
 								}
 							}}
-							placeholder='Select start date'
+							placeholder={t('creditGrant.subscriptionModal.startDatePlaceholder')}
 						/>
 						{errors.start_date && <p className='text-sm text-destructive'>{errors.start_date}</p>}
 					</div>
@@ -301,9 +308,9 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				<div className='space-y-2'>
 					<Input
-						label='Credits'
+						label={t('creditGrant.modal.credits')}
 						error={errors.credits}
-						placeholder='e.g. 1000'
+						placeholder={t('creditGrant.modal.creditsPlaceholder')}
 						variant='formatted-number'
 						formatOptions={{
 							allowDecimals: true,
@@ -318,7 +325,7 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				{/* Conversion Rate */}
 				<div className='flex flex-col items-start gap-2 w-full'>
-					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Conversion Rate</label>
+					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('creditGrant.modal.conversionRate')}</label>
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
@@ -331,15 +338,13 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 							}}
 						/>
 					</div>
-					<p className='text-sm text-muted-foreground'>
-						Amount in currency equivalent to 1 credit. For example, if conversion rate is 2, then 1 credit = 2 units of currency.
-					</p>
+					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.conversionRateHint')}</p>
 					{errors.conversion_rate && <p className='text-sm text-destructive'>{errors.conversion_rate}</p>}
 				</div>
 
 				{/* Top-up Conversion Rate */}
 				<div className='flex flex-col items-start gap-2 w-full'>
-					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>Top-up Conversion Rate</label>
+					<label className={cn('block text-sm font-medium', 'text-zinc-950')}>{t('creditGrant.modal.topupConversionRate')}</label>
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
@@ -352,16 +357,14 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 							}}
 						/>
 					</div>
-					<p className='text-sm text-muted-foreground'>
-						Conversion rate for top-ups. Defaults to the main conversion rate if not specified.
-					</p>
+					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.topupConversionRateHint')}</p>
 					{errors.topup_conversion_rate && <p className='text-sm text-destructive'>{errors.topup_conversion_rate}</p>}
 				</div>
 
 				{formData.cadence === CREDIT_GRANT_CADENCE.RECURRING && (
 					<div className='space-y-2'>
 						<Select
-							label='Grant Period'
+							label={t('creditGrant.modal.grantPeriod')}
 							error={errors.period}
 							options={creditGrantPeriodOptions}
 							value={formData.period}
@@ -372,7 +375,7 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				<div className='space-y-2'>
 					<Select
-						label='Expiry Type'
+						label={t('creditGrant.modal.expiryType')}
 						error={errors.expiration_type}
 						options={expirationTypeOptions}
 						value={formData.expiration_type}
@@ -383,9 +386,9 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 				{formData.expiration_type === CREDIT_GRANT_EXPIRATION_TYPE.DURATION && (
 					<div className='space-y-2'>
 						<Input
-							label='Expiry (days)'
+							label={t('creditGrant.modal.expiryDays')}
 							error={errors.expiration_duration}
-							placeholder='e.g. 30'
+							placeholder={t('creditGrant.modal.expiryDaysPlaceholder')}
 							variant='formatted-number'
 							formatOptions={{
 								allowDecimals: false,
@@ -402,9 +405,9 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 				<div className='space-y-2'>
 					<Input
-						label='Priority'
+						label={t('creditGrant.modal.priority')}
 						error={errors.priority}
-						placeholder='e.g. 0'
+						placeholder={t('creditGrant.modal.priorityPlaceholder')}
 						variant='formatted-number'
 						formatOptions={{
 							allowDecimals: false,
@@ -420,9 +423,9 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={onCancel}>
-					Cancel
+					{t('creditGrant.modal.cancel')}
 				</Button>
-				<Button onClick={handleSave}>Add Credit</Button>
+				<Button onClick={handleSave}>{t('creditGrant.subscriptionModal.addCredit')}</Button>
 			</div>
 		</Dialog>
 	);

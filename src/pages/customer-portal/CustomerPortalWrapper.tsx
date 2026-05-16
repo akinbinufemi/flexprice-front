@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +54,7 @@ const ErrorState = ({ icon, title, description, actionLabel, onAction }: ErrorSt
 	</div>
 );
 const CustomerPortalWrapper = () => {
+	const { t } = useTranslation('customer-portal');
 	const [searchParams] = useSearchParams();
 	const token = searchParams.get('token');
 
@@ -61,9 +63,9 @@ const CustomerPortalWrapper = () => {
 		return (
 			<ErrorState
 				icon={<Shield className='h-9 w-9 text-zinc-700' />}
-				title='Invalid Customer Portal Link'
-				description='Dashboard session token is missing from the URL. Please check your link and try again.'
-				actionLabel='Refresh Page'
+				title={t('wrapper.invalidLinkTitle')}
+				description={t('wrapper.invalidLinkDescription')}
+				actionLabel={t('wrapper.refreshPage')}
 				onAction={() => window.location.reload()}
 			/>
 		);

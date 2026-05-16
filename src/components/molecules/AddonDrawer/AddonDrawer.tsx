@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
+import type { CreateAddonRequest, UpdateAddonRequest } from '@/types/dto/Addon';
 
 interface Props {
 	data?: Addon | null;
@@ -17,6 +19,7 @@ interface Props {
 }
 
 const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQueryKeys }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const isEdit = !!data;
 	const navigate = useNavigate();
 
@@ -30,21 +33,20 @@ const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 	const [errors, setErrors] = useState<Partial<Record<keyof Addon, string>>>({});
 
 	const { mutate: updateAddon, isPending } = useMutation({
-		mutationFn: (data: Partial<Addon>) => {
-			if (isEdit) {
-				return AddonApi.Update(data.id!, data as any);
-			} else {
-				return AddonApi.Create(data as any);
+		mutationFn: (payload: Partial<Addon>) => {
+			if (isEdit && payload.id) {
+				return AddonApi.Update(payload.id, payload as UpdateAddonRequest);
 			}
+			return AddonApi.Create(payload as CreateAddonRequest);
 		},
 		onSuccess: (data: Addon) => {
-			toast.success(isEdit ? 'Addon updated successfully' : 'Addon created successfully');
+			toast.success(isEdit ? t('addons.drawer.toast.updated') : t('addons.drawer.toast.created'));
 			onOpenChange?.(false);
 			refetchQueries(refetchQueryKeys);
 			navigate(`${RouteNames.addonDetails}/${data.id}`);
 		},
-		onError: (error: any) => {
-			toast.error(error.error?.message || `Failed to ${isEdit ? 'update' : 'create'} addon. Please try again.`);
+		onError: (error: Error) => {
+			toast.error(error.message || (isEdit ? t('addons.drawer.toast.failedUpdate') : t('addons.drawer.toast.failedCreate')));
 		},
 	});
 
@@ -64,11 +66,11 @@ const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 		const newErrors: Partial<Record<keyof Addon, string>> = {};
 
 		if (!formData.name?.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = t('addons.drawer.validation.nameRequired');
 		}
 
 		if (!formData.lookup_key?.trim()) {
-			newErrors.lookup_key = 'Lookup key is required';
+			newErrors.lookup_key = t('addons.drawer.validation.lookupKeyRequired');
 		}
 
 		setErrors(newErrors);
@@ -86,14 +88,14 @@ const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 		<Sheet
 			isOpen={open}
 			onOpenChange={onOpenChange}
-			title={isEdit ? 'Edit Addon' : 'Create Addon'}
-			description={isEdit ? 'Enter addon details to update the addon.' : 'Enter addon details to create a new addon.'}
+			title={isEdit ? t('addons.drawer.editTitle') : t('addons.drawer.createTitle')}
+			description={isEdit ? t('addons.drawer.descriptionEdit') : t('addons.drawer.descriptionCreate')}
 			trigger={trigger}>
 			<Spacer height={'20px'} />
 			<Input
-				placeholder='Enter a name for the addon'
-				description={'A descriptive name for this addon.'}
-				label='Addon Name'
+				placeholder={t('addons.drawer.namePlaceholder')}
+				description={t('addons.drawer.nameHelp')}
+				label={t('addons.drawer.addonName')}
 				value={formData.name}
 				error={errors.name}
 				onChange={(e) => {
@@ -107,13 +109,13 @@ const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 
 			<Spacer height={'20px'} />
 			<Input
-				label='Lookup Key'
+				label={t('shared.lookupKey')}
 				disabled={isEdit}
 				error={errors.lookup_key}
 				onChange={(e) => setFormData({ ...formData, lookup_key: e })}
 				value={formData.lookup_key}
-				placeholder='Enter a slug for the addon'
-				description={'A system identifier used for API calls and integrations.'}
+				placeholder={t('addons.drawer.lookupPlaceholder')}
+				description={t('shared.lookupKeyDescription')}
 			/>
 
 			<Spacer height={'20px'} />
@@ -123,13 +125,13 @@ const AddonDrawer: FC<Props> = ({ data, open, onOpenChange, trigger, refetchQuer
 					setFormData({ ...formData, description: e });
 				}}
 				className='min-h-[100px]'
-				placeholder='Enter description'
-				label='Description'
-				description='Helps your team to understand the purpose of this addon.'
+				placeholder={t('shared.enterDescription')}
+				label={t('shared.description')}
+				description={t('addons.drawer.purposeDescription')}
 			/>
 			<Spacer height={'20px'} />
 			<Button isLoading={isPending} disabled={isPending || !formData.name?.trim() || !formData.lookup_key?.trim()} onClick={handleSave}>
-				{isEdit ? 'Save' : 'Create'}
+				{isEdit ? t('common:actions.save') : t('common:actions.create')}
 			</Button>
 		</Sheet>
 	);

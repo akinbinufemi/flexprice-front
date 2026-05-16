@@ -1,5 +1,6 @@
 import { Page, Spacer, Chip, Card, CardHeader, Loader } from '@/components/atoms';
 import { Detail, ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import CouponApi from '@/api/CouponApi';
@@ -10,8 +11,10 @@ import formatDate from '@/utils/common/format_date';
 import toast from 'react-hot-toast';
 import formatCadenceChip from '@/utils/common/format_cadence_chip';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
+import { useTranslation } from 'react-i18next';
 
 const CouponDetails = () => {
+	const { t } = useTranslation(['catalog', 'common']);
 	const { id } = useParams<{ id: string }>();
 
 	const {
@@ -31,9 +34,9 @@ const CouponDetails = () => {
 	if (isError || !coupon) {
 		toast.error('Error loading coupon details');
 		return (
-			<Page heading='Error'>
+			<Page heading={t('common:errors.loadFailedShort')}>
 				<div className='flex items-center justify-center h-64'>
-					<div className='text-muted-foreground'>Failed to load coupon details</div>
+					<div className='text-muted-foreground'>{t('catalog:coupons.details.loadError')}</div>
 				</div>
 			</Page>
 		);
@@ -42,7 +45,12 @@ const CouponDetails = () => {
 	const details: Detail[] = [
 		{
 			label: 'Type',
-			value: <Chip variant='default' label={coupon.type === COUPON_TYPE.FIXED ? 'Fixed Amount' : 'Percentage'} />,
+			value: (
+				<Chip
+					variant='default'
+					label={coupon.type === COUPON_TYPE.FIXED ? t('catalog:coupons.drawer.fixedAmount') : t('catalog:coupons.drawer.percentage')}
+				/>
+			),
 		},
 		{
 			label: 'Discount',
@@ -94,13 +102,13 @@ const CouponDetails = () => {
 
 	return (
 		<Page documentTitle={coupon.name} heading={coupon.name}>
-			<ApiDocsContent tags={['Coupons']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.Coupons} />
 
 			<Spacer className='!h-6' />
 
 			<div className='space-y-6'>
 				<Card variant='notched'>
-					<CardHeader title='Details' />
+					<CardHeader title={t('catalog:coupons.details.detailsTitle')} />
 					<div className='p-6'>
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
 							<div className='space-y-4'>

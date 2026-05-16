@@ -19,6 +19,7 @@ import { INVOICE_CADENCE } from '@/models/Invoice';
 import { BILLING_MODEL, PRICE_TYPE, PRICE_ENTITY_TYPE, PRICE_UNIT_TYPE, BILLING_PERIOD } from '@/models/Price';
 import { logger } from '@/utils/common/Logger';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
+import { useTranslation } from 'react-i18next';
 
 // ===== TYPES & CONSTANTS =====
 
@@ -157,6 +158,7 @@ interface EntityChargesPageProps {
 }
 
 const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entityId, entityName, onSuccess }) => {
+	const { t } = useTranslation(['catalog', 'common']);
 	// ===== HOOKS & STATE =====
 	const navigate = useNavigate();
 	const { updateBreadcrumb } = useBreadcrumbsStore();
@@ -219,6 +221,11 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 		if (entityType === ENTITY_TYPE.ADDON) return RouteNames.addonDetails;
 		return RouteNames.costSheetDetails;
 	}, [entityType]);
+
+	const chargesPageHeading = useMemo(() => {
+		const displayName = entityName || t(`entityChargesPage.entityTypeDisplay.${entityType}`);
+		return t('entityChargesPage.addChargesPageTitle', { name: displayName });
+	}, [entityName, entityType, t]);
 
 	// ===== MEMOIZED CALLBACKS =====
 	const handleAddNewPrice = useCallback((type: PRICE_TYPE) => {
@@ -311,9 +318,12 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 
 			navigate(`${routeName}/${entityId}`);
 			onSuccess?.();
-		} catch (error: any) {
+		} catch (error: unknown) {
 			logger.error('Error saving charges:', error);
-			const errorMessage = error?.error?.message || error?.message || 'An error occurred while processing charges';
+			const errorMessage =
+				error instanceof Error
+					? error.message || 'An error occurred while processing charges'
+					: 'An error occurred while processing charges';
 			toast.error(errorMessage);
 		}
 	}, [state.recurringCharges, state.usageCharges, priceEntityType, entityId, createBulkPrices, navigate, entityType, routeName, onSuccess]);
@@ -396,7 +406,7 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 
 	// ===== RENDER =====
 	return (
-		<Page documentTitle={`Add Charges to ${entityName || entityType}`} heading={`Add Charges to ${entityName || entityType}`}>
+		<Page documentTitle={chargesPageHeading} heading={chargesPageHeading}>
 			<div className='space-y-6'>
 				{/* Fixed charges section */}
 				{state.recurringCharges.map((charge, index) => (
@@ -433,22 +443,22 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 				{!hasAnyCharges ? (
 					<div>
 						<RectangleRadiogroup
-							title='Select Charge Type'
+							title={t('entityChargesPage.selectChargeTypeTitle')}
 							options={CHARGE_OPTIONS}
 							onChange={(value) => handleAddNewPrice(value as PRICE_TYPE)}
 							aria-label={`Select charge type for your ${entityType.toLowerCase()}`}
 						/>
 					</div>
 				) : (
-					<div className='flex gap-2' role='group' aria-label='Add charge options'>
+					<div className='flex gap-2' role='group' aria-label={t('entityChargesPage.addChargeOptionsGroupAria')}>
 						<AddChargesButton
 							onClick={() => handleAddNewPrice(PRICE_TYPE.FIXED)}
-							label='Add fixed charge'
+							label={t('entityChargesPage.addFixedCharge')}
 							aria-label={`Add fixed charge to ${entityType.toLowerCase()}`}
 						/>
 						<AddChargesButton
 							onClick={() => handleAddNewPrice(PRICE_TYPE.USAGE)}
-							label='Add Usage Based Charges'
+							label={t('entityChargesPage.addUsageBasedCharges')}
 							aria-label={`Add usage-based charges to ${entityType.toLowerCase()}`}
 						/>
 					</div>
@@ -460,8 +470,14 @@ const EntityChargesPage: React.FC<EntityChargesPageProps> = ({ entityType, entit
 						isLoading={isPending}
 						disabled={!canSave}
 						onClick={handleSaveConfirm}
-						aria-label={canSave ? `Save ${entityType.toLowerCase()} charges` : 'Cannot save - complete all charge forms first'}>
-						Save
+						aria-label={
+							canSave
+								? t('entityChargesPage.saveChargesAria', {
+										entity: t(`entityChargesPage.entityLabelsLower.${entityType}`),
+									})
+								: t('entityChargesPage.cannotSaveChargesAria')
+						}>
+						{t('common:actions.save')}
 					</Button>
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 
 interface ShortPaginationProps {
@@ -14,11 +15,13 @@ interface ShortPaginationProps {
 const ShortPagination = ({
 	totalItems,
 	pageSize,
-	unit = 'items',
+	unit: unitProp,
 	showPages = false,
 	prefix,
 	// Keep these for backward compatibility
 }: ShortPaginationProps) => {
+	const { t } = useTranslation('common');
+	const unit = unitProp ?? t('pagination.unitItems');
 	const { page, setPage, limit } = usePagination({
 		initialLimit: pageSize,
 		prefix,
@@ -46,8 +49,7 @@ const ShortPagination = ({
 	return (
 		<div className='flex items-center justify-between py-4'>
 			<div className='text-sm text-gray-500 font-light'>
-				Showing <span className='font-normal'>{startItem}</span> to <span className='font-normal'>{endItem}</span> of{' '}
-				<span className='font-normal'>{totalItems}</span> {unit}
+				{t('pagination.showingRange', { start: startItem, end: endItem, total: totalItems, unit })}
 			</div>
 			<div className='flex items-center space-x-2'>
 				<Button
@@ -59,11 +61,7 @@ const ShortPagination = ({
 					className={cn('size-8', page === 1 && 'text-gray-300 cursor-not-allowed')}>
 					<ChevronLeft className='h-4 w-4' />
 				</Button>
-				{showPages && (
-					<div className='text-sm font-light text-gray-500'>
-						Page {page} of {totalPages}
-					</div>
-				)}
+				{showPages && <div className='text-sm font-light text-gray-500'>{t('pagination.page', { current: page, total: totalPages })}</div>}
 				<Button
 					type='button'
 					variant='outline'

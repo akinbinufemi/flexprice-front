@@ -4,6 +4,7 @@ import { TaxRateOverride } from '@/types/dto/tax';
 import { Chip, ActionButton, AddButton, FormHeader } from '@/components/atoms';
 import TaxAssociationDialog from '../TaxAssociationDialog/TaxAssociationDialog';
 import { TAXRATE_ENTITY_TYPE } from '@/models/Tax';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
 	data: TaxRateOverride[];
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const SubscriptionTaxAssociationTable: FC<Props> = ({ data, onChange, disabled }) => {
+	const { t } = useTranslation('common');
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedTaxOverride, setSelectedTaxOverride] = useState<TaxRateOverride | null>(null);
 
@@ -57,7 +59,7 @@ const SubscriptionTaxAssociationTable: FC<Props> = ({ data, onChange, disabled }
 		},
 		{
 			title: 'Auto Apply',
-			render: (row) => <Chip variant={row.auto_apply ? 'success' : 'default'} label={row.auto_apply ? 'Yes' : 'No'} />,
+			render: (row) => <Chip variant={row.auto_apply ? 'success' : 'default'} label={row.auto_apply ? t('labels.yes') : t('labels.no')} />,
 		},
 		{
 			title: 'Currency',
@@ -78,7 +80,7 @@ const SubscriptionTaxAssociationTable: FC<Props> = ({ data, onChange, disabled }
 					}}
 					archive={{
 						enabled: !disabled,
-						text: 'Delete',
+						text: t('actions.delete'),
 					}}
 				/>
 			),
@@ -108,7 +110,7 @@ const SubscriptionTaxAssociationTable: FC<Props> = ({ data, onChange, disabled }
 			/>
 			<div className='space-y-4'>
 				<div className='flex items-center justify-between'>
-					<FormHeader className='mb-0' title='Taxes' variant='sub-header' />
+					<FormHeader className='mb-0' title={t('labels.taxes')} variant='sub-header' />
 					<AddButton
 						onClick={() => {
 							setSelectedTaxOverride(null);

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Card } from '@/components/atoms';
 import CustomerPortalApi from '@/api/CustomerPortalApi';
@@ -20,8 +21,13 @@ const CHEVRON_UP_SVG = '/assets/svg/chevron-up-svgrepo-com.svg';
 const CHEVRON_DOWN_SVG = '/assets/svg/chevron-down-svgrepo-com.svg';
 import { cn } from '@/lib/utils';
 
+const SORT_TOTAL_USAGE = 'total_usage' as const;
+const SORT_TOTAL_COST = 'total_cost' as const;
+
 const UsageAnalyticsTab = () => {
+	const { t } = useTranslation('customer-portal');
 	const [selectedPeriod, setSelectedPeriod] = useState<CustomerPortalTimePeriod>(DEFAULT_TIME_PERIOD);
+	const periodLabel = t(`timePeriod.${selectedPeriod}`);
 
 	// Prepare analytics params based on selected period (expand price so group-by works)
 	const analyticsParams: DashboardAnalyticsRequest | null = useMemo(() => {
@@ -68,16 +74,16 @@ const UsageAnalyticsTab = () => {
 
 	useEffect(() => {
 		if (usageError) {
-			toast.error('Failed to load usage analytics');
+			toast.error(t('errors.loadUsageAnalytics'));
 		}
-	}, [usageError]);
+	}, [usageError, t]);
 
 	return (
 		<div className='space-y-6'>
 			{/* Usage Chart */}
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
 				<div className='flex items-center justify-between mb-4'>
-					<h3 className='text-base font-medium text-zinc-950'>Usage</h3>
+					<h3 className='text-base font-medium text-zinc-950'>{t('usage.title')}</h3>
 					<TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
 				</div>
 				{usageLoading ? (
@@ -88,7 +94,10 @@ const UsageAnalyticsTab = () => {
 					<CustomerUsageChart data={usageData} />
 				) : (
 					<div className='py-8'>
-						<EmptyState title='No usage data found' description={`Your usage from the last ${selectedPeriod} will appear here`} />
+						<EmptyState
+							title={t('usageAnalytics.noDataTitle')}
+							description={t('usageAnalytics.noDataDescription', { period: periodLabel })}
+						/>
 					</div>
 				)}
 			</Card>
@@ -96,7 +105,7 @@ const UsageAnalyticsTab = () => {
 			{/* Usage Breakdown Table */}
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl overflow-hidden'>
 				<div className='p-6'>
-					<h3 className='text-base font-medium text-zinc-950'>Usage Breakdown</h3>
+					<h3 className='text-base font-medium text-zinc-950'>{t('usage.breakdownTitle')}</h3>
 				</div>
 				{usageLoading ? (
 					<div className='space-y-4 p-6'>
@@ -108,7 +117,10 @@ const UsageAnalyticsTab = () => {
 					<UsageBreakdownTable items={usageData.items} />
 				) : (
 					<div className='py-8'>
-						<EmptyState title='No usage data found' description={`Your usage from the last ${selectedPeriod} will appear here`} />
+						<EmptyState
+							title={t('usageAnalytics.noDataTitle')}
+							description={t('usageAnalytics.noDataDescription', { period: periodLabel })}
+						/>
 					</div>
 				)}
 			</Card>
@@ -162,6 +174,7 @@ function renderTotalCostPortal(row: UsageAnalyticItem) {
 }
 
 const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }) => {
+	const { t } = useTranslation('customer-portal');
 	const [sortField, setSortField] = useState<'total_usage' | 'total_cost'>('total_cost');
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 	const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(() => new Set());
@@ -183,7 +196,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 		for (const item of sortedItems) {
 			const group = item.price?.group;
 			const groupKey = group?.id ?? UNGROUPED_KEY;
-			const groupName = group?.name ?? 'No group';
+			const groupName = group?.name ?? t('usageBreakdown.noGroup');
 			if (!map.has(groupKey)) map.set(groupKey, { groupKey, groupName, items: [] });
 			map.get(groupKey)!.items.push(item);
 		}
@@ -192,7 +205,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 			.filter((b) => b.groupKey !== UNGROUPED_KEY)
 			.sort((a, b) => a.groupName.localeCompare(b.groupName));
 		return { groupedBuckets: grouped, ungroupedItems: ungrouped };
-	}, [sortedItems]);
+	}, [sortedItems, t]);
 
 	useEffect(() => {
 		if (groupedBuckets.length > 0 && !hasInitializedExpand.current) {
@@ -221,7 +234,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 			<button
 				type='button'
 				className={cn(
-					'group -ml-1 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-left transition-colors',
+					'group -ms-1 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-start transition-colors',
 					isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
 				)}
 				onClick={() => {
@@ -252,7 +265,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 						type='button'
 						onClick={toggleExpandAll}
 						className='inline-flex items-center justify-center text-gray-600 hover:text-gray-900'
-						aria-label={allExpanded ? 'Collapse all' : 'Expand all'}>
+						aria-label={allExpanded ? t('usageBreakdown.collapseAllAria') : t('usageBreakdown.expandAllAria')}>
 						<img src={allExpanded ? COLLAPSE_ALL_SVG : EXPAND_ALL_SVG} alt='' className='h-4 w-4' />
 					</button>
 				</div>
@@ -261,11 +274,13 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 				<Table>
 					<TableHeader className='h-10 border-b border-gray-200'>
 						<TableRow className='border-b border-gray-200'>
-							<TableHead className='pl-0 font-semibold text-gray-700 text-[13px]'>Feature</TableHead>
+							<TableHead className='pl-0 font-semibold text-gray-700 text-[13px]'>{t('usageBreakdown.feature')}</TableHead>
 							<TableHead className='font-semibold text-gray-700 text-[13px]'>
-								{renderSortableHeader('total_usage', 'Total Usage')}
+								{renderSortableHeader(SORT_TOTAL_USAGE, t('usageBreakdown.totalUsage'))}
 							</TableHead>
-							<TableHead className='font-semibold text-gray-700 text-[13px]'>{renderSortableHeader('total_cost', 'Total Cost')}</TableHead>
+							<TableHead className='font-semibold text-gray-700 text-[13px]'>
+								{renderSortableHeader(SORT_TOTAL_COST, t('usageBreakdown.totalCost'))}
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -291,14 +306,14 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 											bucket.items.length === 0 && 'cursor-default',
 										)}>
 										<TableCell className='pl-0 py-2.5 align-middle'>
-											<div className='inline-flex items-center gap-2 text-left'>
+											<div className='inline-flex items-center gap-2 text-start'>
 												<span className='font-semibold text-gray-900 text-[13px]'>{bucket.groupName}</span>
 												{bucket.items.length > 0 ? (
 													<img src={isExpanded ? CHEVRON_UP_SVG : CHEVRON_DOWN_SVG} alt='' className='h-4 w-4 shrink-0' aria-hidden />
 												) : null}
 											</div>
 										</TableCell>
-										<TableCell className='py-2.5 font-normal text-gray-700 text-[13px]'>—</TableCell>
+										<TableCell className='py-2.5 font-normal text-gray-700 text-[13px]'>{t('usageBreakdown.cellEmDash')}</TableCell>
 										<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
 											{firstCurrency ? (
 												<>
@@ -306,7 +321,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 													{formatNumber(aggregateCost, 2)}
 												</>
 											) : (
-												'—'
+												t('usageBreakdown.cellEmDash')
 											)}
 										</TableCell>
 									</TableRow>
@@ -316,7 +331,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 												key={`${bucket.groupKey}:${row.feature_id ?? row.price_id ?? row.meter_id ?? childIndex}`}
 												className='h-10 align-middle border-b border-gray-200 bg-white hover:bg-gray-50/50'>
 												<TableCell className='py-2.5 pl-0 font-normal text-gray-700 text-[13px] align-middle'>
-													<span>{row.name || row.feature?.name || row.event_name || 'Unknown'}</span>
+													<span>{row.name || row.feature?.name || row.event_name || t('usageBreakdown.unknownRow')}</span>
 												</TableCell>
 												<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalUsagePortal(row)}</TableCell>
 												<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalCostPortal(row)}</TableCell>
@@ -330,7 +345,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 								key={`ungrouped:${row.feature_id ?? row.price_id ?? row.meter_id ?? index}`}
 								className='h-10 align-middle border-b border-gray-200 bg-white hover:bg-gray-50/50'>
 								<TableCell className='pl-0 py-2.5 font-normal text-gray-700 text-[13px]'>
-									<span>{row.name || row.feature?.name || row.event_name || 'Unknown'}</span>
+									<span>{row.name || row.feature?.name || row.event_name || t('usageBreakdown.unknownRow')}</span>
 								</TableCell>
 								<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalUsagePortal(row)}</TableCell>
 								<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>{renderTotalCostPortal(row)}</TableCell>
@@ -339,7 +354,7 @@ const UsageBreakdownTable: React.FC<{ items: UsageAnalyticItem[] }> = ({ items }
 						{items.length === 0 && (
 							<TableRow className='bg-white'>
 								<TableCell colSpan={3} className='pl-0 py-4 font-normal text-gray-500 text-[13px]'>
-									--
+									{t('usageBreakdown.cellEmpty')}
 								</TableCell>
 							</TableRow>
 						)}

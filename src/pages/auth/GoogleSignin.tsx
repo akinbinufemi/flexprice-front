@@ -3,8 +3,10 @@ import supabase from '@/core/services/supbase/config';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
 
 const GoogleSignin = () => {
+	const { t } = useTranslation('auth');
 	// Use React Query for Google auth mutation
 	const googleAuthMutation = useMutation({
 		mutationFn: async () => {
@@ -38,8 +40,8 @@ const GoogleSignin = () => {
 			}
 		},
 
-		onError: (error: ServerError) => {
-			toast.error(error.error.message || 'Authentication failed');
+		onError: (error: Error) => {
+			toast.error(error.message || 'Authentication failed');
 		},
 	});
 
@@ -72,7 +74,7 @@ const GoogleSignin = () => {
 						fill='#EA4335'
 					/>
 				</svg>
-				Continue with Google
+				{t('buttons.continueWithGoogle')}
 			</Button>
 		</div>
 	);

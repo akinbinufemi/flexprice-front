@@ -1,4 +1,5 @@
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import FlexpriceTable, { ColumnData, TooltipCell } from '../Table';
 import { formatDateWithMilliseconds } from '@/utils/common/format_date';
 import EventPropertiesDrawer from './EventPropertiesDrawer';
@@ -9,39 +10,44 @@ interface Props {
 }
 
 const EventsTable: FC<Props> = ({ data }) => {
+	const { t } = useTranslation(['developers', 'common']);
+
+	const columns: ColumnData[] = useMemo(
+		() => [
+			{
+				title: t('labels.eventId'),
+				render(rowData) {
+					return <TooltipCell tooltipContent={rowData.id} tooltipText={rowData.id} />;
+				},
+			},
+			{
+				title: t('labels.eventsName'),
+				render(rowData) {
+					return <span>{rowData.event_name || t('common:labels.na')}</span>;
+				},
+			},
+			{
+				title: t('labels.externalCustomerId'),
+				fieldName: 'external_customer_id',
+			},
+			{
+				title: t('labels.source'),
+				render(rowData) {
+					return <span>{rowData.source || t('common:labels.na')}</span>;
+				},
+			},
+			{
+				title: t('labels.timestamp'),
+				render(rowData) {
+					return <span>{formatDateWithMilliseconds(rowData.timestamp)}</span>;
+				},
+			},
+		],
+		[t],
+	);
+
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-	const columns: ColumnData[] = [
-		{
-			title: 'Event Id',
-			render(rowData) {
-				return <TooltipCell tooltipContent={rowData.id} tooltipText={rowData.id} />;
-			},
-		},
-		{
-			title: 'Events name',
-			render(rowData) {
-				return <span>{rowData.event_name || '--'}</span>;
-			},
-		},
-		{
-			title: 'External Customer ID',
-			fieldName: 'external_customer_id',
-		},
-		{
-			title: 'Source',
-			render(rowData) {
-				return <span>{rowData.source || '--'}</span>;
-			},
-		},
-		{
-			title: 'Timestamp',
-			render(rowData) {
-				return <span>{formatDateWithMilliseconds(rowData.timestamp)}</span>;
-			},
-		},
-	];
 
 	const handleRowClick = (event: Event) => {
 		setSelectedEvent(event);

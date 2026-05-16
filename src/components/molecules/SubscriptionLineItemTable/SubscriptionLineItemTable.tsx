@@ -1,4 +1,6 @@
 import { Card, CardHeader, NoDataCard, Chip, Tooltip } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 import type { SubscriptionCommitmentInfo } from '@/models/Subscription';
 import { ChargeValueCell, ColumnData, FlexpriceTable, TerminateLineItemModal, DropdownMenu } from '@/components/molecules';
 import { PriceTooltip } from '@/components/molecules/PriceTooltip';
@@ -147,7 +149,7 @@ const getStatusChipVariant = (status: PRICE_STATUS): 'info' | 'default' | 'succe
 	}
 };
 
-const formatLineItemDateTooltip = (lineItem: LineItem): React.ReactNode => {
+const formatLineItemDateTooltip = (lineItem: LineItem, t: TFunction): React.ReactNode => {
 	const dateItems: React.ReactNode[] = [];
 	const defaultEndDate = '0001-01-01T00:00:00Z';
 
@@ -157,7 +159,7 @@ const formatLineItemDateTooltip = (lineItem: LineItem): React.ReactNode => {
 			if (!isNaN(startDate.getTime())) {
 				dateItems.push(
 					<div key='start' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>Start</span>
+						<span className='text-xs font-medium text-gray-500'>{t('labels.start')}</span>
 						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(startDate)}</span>
 					</div>,
 				);
@@ -173,7 +175,7 @@ const formatLineItemDateTooltip = (lineItem: LineItem): React.ReactNode => {
 			if (!isNaN(endDate.getTime())) {
 				dateItems.push(
 					<div key='end' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>End</span>
+						<span className='text-xs font-medium text-gray-500'>{t('labels.end')}</span>
 						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(endDate)}</span>
 					</div>,
 				);
@@ -184,7 +186,7 @@ const formatLineItemDateTooltip = (lineItem: LineItem): React.ReactNode => {
 	}
 
 	if (dateItems.length === 0) {
-		return <span className='text-sm'>No date information</span>;
+		return <span className='text-sm'>{t('labels.noDateInformation')}</span>;
 	}
 
 	return <div className='flex flex-col gap-2'>{dateItems}</div>;
@@ -195,13 +197,13 @@ const shouldShowCommitmentIcon = (lineItem: LineItem, commitmentInfo?: Subscript
 	return commitmentInfo?.enable_true_up === true && lineItem.price_type?.toUpperCase() === 'USAGE';
 };
 
-const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo): React.ReactNode => {
+const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo, t: TFunction): React.ReactNode => {
 	const rows: React.ReactNode[] = [];
 
 	if (info.commitment_amount != null) {
 		rows.push(
 			<div key='amount' className='flex items-center gap-2'>
-				<span className='text-xs font-medium text-gray-500'>Commitment Amount</span>
+				{t('labels.commitmentAmount')}
 				<span className='text-sm font-medium'>{`${getCurrencySymbol(info.currency ?? '')}${info.commitment_amount}`}</span>
 			</div>,
 		);
@@ -209,7 +211,7 @@ const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo): React.ReactN
 	if (info.overage_factor != null) {
 		rows.push(
 			<div key='overage' className='flex items-center gap-2'>
-				<span className='text-xs font-medium text-gray-500'>Overage Factor</span>
+				{t('labels.overageFactor')}
 				<span className='text-sm font-medium'>{info.overage_factor}×</span>
 			</div>,
 		);
@@ -217,15 +219,15 @@ const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo): React.ReactN
 	if (info.enable_true_up != null) {
 		rows.push(
 			<div key='trueup' className='flex items-center gap-2'>
-				<span className='text-xs font-medium text-gray-500'>True-up</span>
-				<span className='text-sm font-medium'>{info.enable_true_up ? 'Enabled' : 'Disabled'}</span>
+				{t('labels.trueUp')}
+				<span className='text-sm font-medium'>{info.enable_true_up ? t('labels.enabled') : t('labels.disabled')}</span>
 			</div>,
 		);
 	}
 	if (info.commitment_duration) {
 		rows.push(
 			<div key='duration' className='flex items-center gap-2'>
-				<span className='text-xs font-medium text-gray-500'>Duration</span>
+				{t('labels.duration')}
 				<span className='text-sm font-medium capitalize'>{info.commitment_duration.toLowerCase()}</span>
 			</div>,
 		);
@@ -246,6 +248,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 	showNoDataCard = true,
 	noDataSubtitle,
 }) => {
+	const { t } = useTranslation('common');
 	const [showTerminateModal, setShowTerminateModal] = useState(false);
 	const [selectedLineItem, setSelectedLineItem] = useState<LineItem | null>(null);
 
@@ -289,7 +292,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 				precomputedStatus: status,
 				statusVariant: getStatusChipVariant(status),
 				statusLabel: status.charAt(0).toUpperCase() + status.slice(1),
-				tooltipContent: formatLineItemDateTooltip(lineItem),
+				tooltipContent: formatLineItemDateTooltip(lineItem, t),
 			};
 		});
 
@@ -300,7 +303,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 		};
 
 		return lineItemsWithStatus.sort((a, b) => statusOrder[a.precomputedStatus] - statusOrder[b.precomputedStatus]);
-	}, [data]);
+	}, [data, t]);
 
 	const hasMultipleEntityTypes = useMemo(() => {
 		if (!data?.length) return false;
@@ -317,7 +320,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 						<span>{row.display_name}</span>
 						{shouldShowCommitmentIcon(row, commitmentInfo) && (
 							<Tooltip
-								content={formatCommitmentTooltip(commitmentInfo!)}
+								content={formatCommitmentTooltip(commitmentInfo!, t)}
 								delayDuration={0}
 								sideOffset={5}
 								className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[320px]'>
@@ -356,11 +359,11 @@ const SubscriptionLineItemTable: FC<Props> = ({
 				title: 'Quantity',
 				render: (row) => {
 					if (row.price_type === PRICE_TYPE.USAGE) {
-						return <span className='text-gray-500'>--</span>;
+						return <span className='text-gray-500'>{t('labels.na')}</span>;
 					}
 
 					const q = row.quantity;
-					if (q == null || !Number.isFinite(Number(q))) return <span className='text-gray-500'>--</span>;
+					if (q == null || !Number.isFinite(Number(q))) return <span className='text-gray-500'>{t('labels.na')}</span>;
 					const n = Number(q);
 					return (
 						<span className='tabular-nums'>{Number.isInteger(n) ? n : n.toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
@@ -447,7 +450,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 		}
 		return (
 			<Card variant='notched'>
-				<CardHeader title='Subscription Line Items' />
+				<CardHeader title={t('labels.subscriptionLineItems')} />
 				<div className='p-4'>
 					<div className='animate-pulse space-y-4'>
 						<div className='h-4 bg-gray-200 rounded w-3/4'></div>
@@ -460,7 +463,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 	}
 
 	if ((!processedLineItems || processedLineItems.length === 0) && showNoDataCard) {
-		return <NoDataCard title='Charges' subtitle={noDataSubtitle ?? 'No charges found for this subscription'} />;
+		return <NoDataCard title={t('labels.charges')} subtitle={noDataSubtitle ?? t('labels.noChargesFound')} />;
 	}
 
 	const isEmpty = !processedLineItems || processedLineItems.length === 0;
@@ -487,7 +490,7 @@ const SubscriptionLineItemTable: FC<Props> = ({
 				/>
 			) : (
 				<Card variant='notched'>
-					<CardHeader title='Charges' />
+					<CardHeader title={t('labels.charges')} />
 					<FlexpriceTable
 						showEmptyRow={isEmpty}
 						data={processedLineItems ?? []}

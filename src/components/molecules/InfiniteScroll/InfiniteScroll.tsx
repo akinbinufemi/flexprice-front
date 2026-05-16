@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { logger } from '@/utils/common/Logger';
+import { useTranslation } from 'react-i18next';
 
 interface InfiniteScrollProps<T> {
 	fetchData: (pageKey: string | undefined) => Promise<{
@@ -12,6 +13,7 @@ interface InfiniteScrollProps<T> {
 }
 
 const InfiniteScroll = <T,>({ fetchData, children }: InfiniteScrollProps<T>): JSX.Element => {
+	const { t } = useTranslation('common');
 	const [items, setItems] = useState<T[]>([]);
 	const [hasMore, setHasMore] = useState(true);
 	const [loading, setLoading] = useState(false);
@@ -52,8 +54,8 @@ const InfiniteScroll = <T,>({ fetchData, children }: InfiniteScrollProps<T>): JS
 		<div>
 			{children(items)}
 			{hasMore && <div ref={lastElementRef}></div>}
-			{loading && <p>Loading...</p>}
-			{!hasMore && <p>No more items to load</p>}
+			{loading && <p>{t('status.loading')}</p>}
+			{!hasMore && <p>{t('empty.noData')}</p>}
 		</div>
 	);
 };

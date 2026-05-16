@@ -1,0 +1,155 @@
+{
+	"wrapper": {
+		"invalidLinkTitle": "رابط بوابة العميل غير صالح",
+		"invalidLinkDescription": "رمز جلسة لوحة التحكم غير موجود في عنوان URL. يُرجى التحقق من الرابط والمحاولة مرة أخرى.",
+		"refreshPage": "تحديث الصفحة"
+	},
+	"footer": {
+		"poweredBy": "مدعوم بواسطة",
+		"brand": "Flexprice"
+	},
+	"header": {
+		"defaultInitials": "ع"
+	},
+	"errors": {
+		"fetchCustomer": "تعذر جلب بيانات العميل",
+		"loadSubscriptions": "تعذر تحميل الاشتراكات",
+		"loadUsage": "تعذر تحميل بيانات الاستخدام",
+		"loadUsageAnalytics": "تعذر تحميل تحليلات الاستخدام",
+		"loadWallet": "تعذر تحميل المحفظة",
+		"loadInvoices": "تعذر تحميل الفواتير",
+		"downloadInvoice": "تعذر تنزيل الفاتورة",
+		"exportInvoice": "تعذر تصدير الفاتورة",
+		"loadEvents": "تعذر تحميل الأحداث",
+		"loadWallets": "تعذر تحميل المحافظ",
+		"loadTransactions": "تعذر تحميل المعاملات",
+		"loadAnalytics": "تعذر تحميل التحليلات",
+		"loadCostAnalytics": "تعذر تحميل تحليلات التكلفة",
+		"loadUsageBreakdown": "تعذر تحميل تفصيل الاستخدام"
+	},
+	"toast": {
+		"invoiceDownloaded": "تم تنزيل الفاتورة",
+		"invoiceCsvDownloaded": "تم تنزيل الفاتورة بصيغة CSV",
+		"noBillableLineItems": "لا توجد بنود قابلة للفوترة للتصدير"
+	},
+	"datePreset": {
+		"today": "اليوم",
+		"last_7_days": "٧ أيام",
+		"last_30_days": "٣٠ يومًا",
+		"current_month": "هذا الشهر",
+		"last_month": "الشهر الماضي"
+	},
+	"datePicker": {
+		"startDate": "تاريخ البداية",
+		"endDate": "تاريخ النهاية"
+	},
+	"timePeriod": {
+		"1d": "1d",
+		"7d": "7d",
+		"30d": "30d"
+	},
+	"billingOverview": {
+		"title": "نظرة عامة على الفوترة",
+		"totalInvoiced": "إجمالي المفوتر",
+		"totalOverdue": "إجمالي المتأخر",
+		"overdueTooltip": "فواتير غير مدفوعة بعد تاريخ الاستحقاق"
+	},
+	"subscriptionStatus": {
+		"active": "نشط",
+		"trialing": "تجريبي",
+		"cancelled": "ملغى",
+		"incomplete": "غير مكتمل",
+		"draft": "مسودة"
+	},
+	"walletStatus": {
+		"active": "نشط",
+		"frozen": "مجمّد",
+		"closed": "مغلق"
+	},
+	"invoiceChip": {
+		"paid": "مدفوع",
+		"voided": "ملغى",
+		"draft": "مسودة",
+		"overdue": "متأخر",
+		"pending": "قيد الانتظار"
+	},
+	"subscriptions": {
+		"title": "الاشتراكات",
+		"emptyTitle": "لا توجد اشتراكات نشطة",
+		"emptyDescription": "ليس لديك اشتراكات نشطة في الوقت الحالي",
+		"unknownPlan": "خطة غير معروفة",
+		"nextBilling": "الفوترة التالية: {{date}}",
+		"trialEnds": "تنتهي التجربة: {{date}}"
+	},
+	"usage": {
+		"title": "الاستخدام",
+		"currentTitle": "الاستخدام الحالي",
+		"quotaTitle": "حصة الاستخدام",
+		"breakdownTitle": "تفصيل الاستخدام",
+		"trendTitle": "اتجاه الاستخدام",
+		"unknownFeature": "ميزة غير معروفة",
+		"unlimited": "غير محدود"
+	},
+	"events": {
+		"columnEventName": "اسم الحدث",
+		"columnTimestamp": "الطابع الزمني",
+		"columnEventId": "معرّف الحدث",
+		"columnProperties": "الخصائص",
+		"propertyCount_one": "{{count}} خاصية",
+		"propertyCount_other": "{{count}} خصائص",
+		"noProperties": "لا توجد خصائص"
+	},
+	"invoices": {
+		"searchPlaceholder": "البحث في الفواتير...",
+		"columnDate": "التاريخ",
+		"columnInvoiceNumber": "رقم الفاتورة",
+		"columnStatus": "الحالة",
+		"columnAmount": "المبلغ",
+		"columnDownload": "تنزيل",
+		"emptyTitle": "لا توجد فواتير",
+		"emptyDescription": "لم يتم إنشاء أي فواتير بعد",
+		"noMatchTitle": "لم يتم العثور على فواتير",
+		"noMatchDescription": "لا توجد فواتير تطابق معايير البحث",
+		"numberPrefix": "INV-{{id}}"
+	},
+	"wallet": {
+		"defaultName": "محفظة",
+		"fallbackName": "محفظة {{id}}",
+		"balance": "الرصيد",
+		"credits": "أرصدة",
+		"valueSuffix": "قيمة",
+		"emptyTitle": "لا توجد محفظة",
+		"emptyDescription": "لم يتم إعداد محفظة لهذا الحساب",
+		"transactionHistory": "سجل المعاملات",
+		"noTransactionsTitle": "لا توجد معاملات",
+		"noTransactionsDescription": "سيظهر سجل معاملاتك هنا"
+	},
+	"usageAnalytics": {
+		"noDataTitle": "لا توجد بيانات استخدام",
+		"noDataDescription": "سيظهر استخدامك خلال آخر {{period}} هنا"
+	},
+	"usageEvents": {
+		"unableTitle": "تعذر تحميل الأحداث",
+		"unableDescription": "معلومات العميل غير متوفرة",
+		"noEventsTitle": "لم يتم العثور على أحداث",
+		"noEventsDescription": "ستظهر أحداثك خلال آخر {{period}} هنا"
+	},
+	"usageBreakdown": {
+		"feature": "الميزة",
+		"totalUsage": "إجمالي الاستخدام",
+		"totalCost": "إجمالي التكلفة",
+		"noGroup": "بلا مجموعة",
+		"expandAllAria": "توسيع الكل",
+		"collapseAllAria": "طي الكل",
+		"unknownRow": "غير معروف",
+		"cellEmDash": "—",
+		"cellEmpty": "--"
+	},
+	"metrics": {
+		"revenue": "الإيرادات",
+		"cost": "التكلفة",
+		"margin": "الهامش",
+		"marginPercent": "الهامش %",
+		"cpm": "CPM"
+	}
+}

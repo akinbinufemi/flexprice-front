@@ -1,6 +1,6 @@
 import { Card, CardHeader, FormHeader, Loader, Page, Button } from '@/components/atoms';
-import { Detail, DetailsCard, FlatTabs } from '@/components/molecules';
-import { ApiDocsContent } from '@/components/molecules';
+import { Detail, DetailsCard, FlatTabs, ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import CustomerUsageTable from '@/components/molecules/CustomerUsageTable/CustomerUsageTable';
 import SubscriptionTable from '@/components/organisms/Subscription/SubscriptionTable';
 import useUser from '@/hooks/useUser';
@@ -9,9 +9,11 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { UpdateTenantDrawer } from '@/components/molecules';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pencil } from 'lucide-react';
 
 const BillingPage = () => {
+	const { t } = useTranslation(['settings', 'common']);
 	const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ['billing'],
@@ -27,17 +29,17 @@ const BillingPage = () => {
 	}
 
 	if (isError) {
-		toast.error('Error fetching billing details');
+		toast.error(t('billingPage.errorFetchBilling'));
 	}
 
 	const billingDetails: Detail[] = [
 		{
-			label: 'Name',
+			label: t('billingPage.labels.name'),
 			value: user?.tenant?.name || '--',
 			labelStyle: 'normal',
 		},
 		{
-			label: 'Billing Email',
+			label: t('billingPage.labels.billingEmail'),
 			value: user?.email || '	--',
 			labelStyle: 'normal',
 		},
@@ -45,46 +47,46 @@ const BillingPage = () => {
 			variant: 'divider',
 		},
 		{
-			label: 'Billing Address',
+			label: t('billingPage.labels.billingAddress'),
 			value: user?.tenant?.billing_details?.address?.address_line1 + ' ' + user?.tenant?.billing_details?.address?.address_line2 || '--',
 			labelStyle: 'normal',
 		},
 		{
-			label: 'Billing City',
+			label: t('billingPage.labels.billingCity'),
 			value: user?.tenant?.billing_details?.address?.address_city || '--',
 			labelStyle: 'normal',
 		},
 		{
-			label: 'Billing State',
+			label: t('billingPage.labels.billingState'),
 			value: user?.tenant?.billing_details?.address?.address_state || '--',
 			labelStyle: 'normal',
 		},
 		{
-			label: 'Billing Country',
+			label: t('billingPage.labels.billingCountry'),
 			value: user?.tenant?.billing_details?.address?.address_country || '--',
 			labelStyle: 'normal',
 		},
 		{
-			label: 'Billing Postal Code',
+			label: t('billingPage.labels.billingPostalCode'),
 			value: user?.tenant?.billing_details?.address?.address_postal_code || '--',
 			labelStyle: 'normal',
 		},
 	];
 
 	return (
-		<Page heading='Billing'>
-			<ApiDocsContent tags={['Tenants']} />
+		<Page heading={t('page.billing')}>
+			<ApiDocsContent tags={API_DOCS_TAGS.Tenants} />
 
 			<FlatTabs
 				tabs={[
 					{
 						value: 'usage',
-						label: 'Usage',
+						label: t('billingPage.tabs.usage'),
 						content: (
 							<div className='space-y-6'>
 								{/* customer entitlements table */}
 								<Card variant='notched'>
-									<CardHeader title='Usage' />
+									<CardHeader title={t('billingPage.cards.usage')} />
 									<CustomerUsageTable data={data?.usage.features ?? []} allowRedirect={false} />
 								</Card>
 							</div>
@@ -92,12 +94,12 @@ const BillingPage = () => {
 					},
 					{
 						value: 'subscriptions',
-						label: 'Subscriptions',
+						label: t('billingPage.tabs.subscriptions'),
 						content: (
 							<div className='space-y-6'>
 								{/* customer subscriptions table */}
 								<Card variant='notched'>
-									<CardHeader title='Subscriptions' />
+									<CardHeader title={t('billingPage.cards.subscriptions')} />
 									<SubscriptionTable data={data?.subscriptions ?? []} allowRedirect={false} />
 								</Card>
 							</div>
@@ -105,12 +107,12 @@ const BillingPage = () => {
 					},
 					{
 						value: 'information',
-						label: 'General',
+						label: t('billingPage.tabs.general'),
 						content: (
 							<div className='space-y-6'>
 								{/* billing email */}
 								<div className='flex items-center justify-between'>
-									<FormHeader title={'Billing Details'} variant='form-component-title' />
+									<FormHeader title={t('billingPage.cards.billingDetails')} variant='form-component-title' />
 									<Button variant='outline' size='sm' onClick={() => setIsEditDrawerOpen(true)}>
 										<Pencil className='size-4' />
 									</Button>

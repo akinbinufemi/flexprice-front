@@ -6,6 +6,7 @@ import CouponApi from '@/api/CouponApi';
 import filterValidCoupons from '@/utils/helpers/coupons';
 import { CouponModal } from '@/components/molecules';
 import formatCouponName from '@/utils/common/format_coupon_name';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
 	currency?: string;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 const SubscriptionCoupon: React.FC<Props> = ({ currency, selectedCoupon, onChange, disabled, allLineItemCoupons = {} }) => {
+	const { t } = useTranslation(['billing', 'common']);
 	const [isOpen, setIsOpen] = useState(false);
 	const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
 
@@ -94,10 +96,10 @@ const SubscriptionCoupon: React.FC<Props> = ({ currency, selectedCoupon, onChang
 	return (
 		<div className='space-y-4'>
 			<div className='flex items-center justify-between'>
-				<FormHeader className='mb-0' title='Subscription Coupon' variant='sub-header' />
+				<FormHeader className='mb-0' title={t('subscriptions.subscriptionCoupon')} variant='sub-header' />
 				{!selectedCoupon && (
 					<AddButton
-						label='Add Coupon'
+						label={t('subscriptions.addCoupon')}
 						onClick={() => {
 							setEditingCouponId(null);
 							setIsOpen(true);
@@ -118,17 +120,17 @@ const SubscriptionCoupon: React.FC<Props> = ({ currency, selectedCoupon, onChang
 						{!disabled && (
 							<div className='flex gap-2'>
 								<button onClick={handleEdit} className='text-sm text-blue-600 hover:text-blue-800 underline'>
-									Change
+									{t('subscriptions.coupon.change')}
 								</button>
 								<button onClick={handleDelete} className='text-sm text-red-600 hover:text-red-800 underline'>
-									Remove
+									{t('subscriptions.coupon.remove')}
 								</button>
 							</div>
 						)}
 					</div>
 				</div>
 			) : (
-				<div className='rounded-xl border border-gray-300 p-4 text-center text-gray-500'>No subscription coupon applied</div>
+				<div className='rounded-xl border border-gray-300 p-4 text-center text-gray-500'>{t('subscriptions.coupon.emptyState')}</div>
 			)}
 
 			<CouponModal

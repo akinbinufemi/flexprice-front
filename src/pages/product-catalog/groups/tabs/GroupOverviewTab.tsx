@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useCallback } from 'react';
 import { GroupApi } from '@/api/GroupApi';
 import FeatureApi from '@/api/FeatureApi';
 import { PriceApi } from '@/api/PriceApi';
@@ -36,6 +36,7 @@ import { ENTITY_STATUS } from '@/models';
 import useFilterSorting from '@/hooks/useFilterSorting';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import { sanitizeFilterConditions, sanitizeSortConditions } from '@/types/formatters/QueryBuilder';
+import { useTranslation } from 'react-i18next';
 
 const GROUP_CHARGES_PAGE_SIZE = 10;
 
@@ -62,39 +63,6 @@ const getStatusChipVariant = (status: PRICE_STATUS): 'info' | 'default' | 'succe
 		default:
 			return 'success';
 	}
-};
-
-const formatPriceDateTooltip = (price: Price & { start_date?: string; end_date?: string }): React.ReactNode => {
-	const items: React.ReactNode[] = [];
-	if (price.start_date?.trim()) {
-		try {
-			const d = new Date(price.start_date);
-			if (!isNaN(d.getTime()))
-				items.push(
-					<div key='start' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>Start</span>
-						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(d)}</span>
-					</div>,
-				);
-		} catch {
-			/* ignore */
-		}
-	}
-	if (price.end_date?.trim()) {
-		try {
-			const d = new Date(price.end_date);
-			if (!isNaN(d.getTime()))
-				items.push(
-					<div key='end' className='flex items-center gap-2'>
-						<span className='text-xs font-medium text-gray-500'>End</span>
-						<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(d)}</span>
-					</div>,
-				);
-		} catch {
-			/* ignore */
-		}
-	}
-	return items.length ? <div className='flex flex-col gap-2'>{items}</div> : <span className='text-sm'>No date information</span>;
 };
 
 const CHARGE_FILTER_FIELD = {
@@ -182,6 +150,47 @@ const getFeatureTypeChips = (type: string, addIcon = false) => {
 const GroupOverviewTab = () => {
 	const { id: groupId } = useParams();
 	const [searchParams] = useSearchParams();
+	const { t } = useTranslation(['catalog', 'common']);
+
+	const formatPriceDateTooltip = useCallback(
+		(price: Price & { start_date?: string; end_date?: string }): React.ReactNode => {
+			const items: React.ReactNode[] = [];
+			if (price.start_date?.trim()) {
+				try {
+					const d = new Date(price.start_date);
+					if (!isNaN(d.getTime()))
+						items.push(
+							<div key='start' className='flex items-center gap-2'>
+								<span className='text-xs font-medium text-gray-500'>{t('common:labels.start')}</span>
+								<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(d)}</span>
+							</div>,
+						);
+				} catch {
+					/* ignore */
+				}
+			}
+			if (price.end_date?.trim()) {
+				try {
+					const d = new Date(price.end_date);
+					if (!isNaN(d.getTime()))
+						items.push(
+							<div key='end' className='flex items-center gap-2'>
+								<span className='text-xs font-medium text-gray-500'>{t('common:labels.end')}</span>
+								<span className='text-sm font-medium'>{formatDateTimeWithSecondsAndTimezone(d)}</span>
+							</div>,
+						);
+				} catch {
+					/* ignore */
+				}
+			}
+			return items.length ? (
+				<div className='flex flex-col gap-2'>{items}</div>
+			) : (
+				<span className='text-sm'>{t('common:labels.noDateInformation')}</span>
+			);
+		},
+		[t],
+	);
 
 	const { data: group, isLoading } = useQuery({
 		queryKey: ['fetchGroupDetails', groupId],
@@ -383,7 +392,7 @@ const GroupOverviewTab = () => {
 				title: 'Display Name',
 				render: (row) => {
 					const url = getPriceRedirectUrl(row);
-					const label = row.display_name ?? '--';
+					const label = row.display_name ?? t('common:labels.na');
 					return url ? <RedirectCell redirectUrl={url}>{label}</RedirectCell> : <span>{label}</span>;
 				},
 			},
@@ -415,7 +424,7 @@ const GroupOverviewTab = () => {
 				render: (row) => <ChargeValueCell data={row as Price & { pricing_unit?: PriceUnit }} />,
 			},
 		],
-		[],
+		[formatPriceDateTooltip, t],
 	);
 
 	const features = featuresResponse?.items ?? [];
@@ -448,7 +457,7 @@ const GroupOverviewTab = () => {
 	if (!group) {
 		return (
 			<div className='flex items-center justify-center h-64'>
-				<p className='text-muted-foreground'>Group not found.</p>
+				<p className='text-muted-foreground'>{t('catalog:groups.profile.notFound')}</p>
 			</div>
 		);
 	}
@@ -458,8 +467,11 @@ const GroupOverviewTab = () => {
 		return (
 			<div className='space-y-6'>
 				<p className='text-muted-foreground text-sm'>
-					Add <code className='rounded bg-muted px-1'>?entity_type=price</code> or{' '}
-					<code className='rounded bg-muted px-1'>?entity_type=feature</code> to the URL to view charges or features in this group.
+					{t('catalog:groups.overview.urlHintAdd')}{' '}
+					<code className='rounded bg-muted px-1'>{t('catalog:groups.overview.urlQueryPrice')}</code>{' '}
+					{t('catalog:groups.overview.urlHintOr')}{' '}
+					<code className='rounded bg-muted px-1'>{t('catalog:groups.overview.urlQueryFeature')}</code>{' '}
+					{t('catalog:groups.overview.urlHintSuffix')}
 				</p>
 			</div>
 		);
@@ -470,14 +482,17 @@ const GroupOverviewTab = () => {
 		if (!priceIds.length) {
 			return (
 				<div className='space-y-6'>
-					<NoDataCard title='Charges' subtitle='This group has no prices. Add prices to the group to see them here.' />
+					<NoDataCard
+						title={t('catalog:addons.details.charges')}
+						subtitle='This group has no prices. Add prices to the group to see them here.'
+					/>
 				</div>
 			);
 		}
 		return (
 			<div className='space-y-6'>
 				<Card variant='notched'>
-					<CardHeader title='Charges' />
+					<CardHeader title={t('catalog:addons.details.charges')} />
 					<div className='pb-3'>
 						<QueryBuilder
 							filterOptions={chargeFilterOptions}
@@ -510,7 +525,7 @@ const GroupOverviewTab = () => {
 	return (
 		<div className='space-y-6'>
 			<Card variant='notched'>
-				<CardHeader title='Features' />
+				<CardHeader title={t('common:features.title')} />
 				<div className='pb-3'>
 					<QueryBuilder
 						filterOptions={featureFilterOptions}

@@ -23,6 +23,7 @@ import { TypedBackendFilter } from '@/types/formatters/QueryBuilder';
 import { GetEventsPayload } from '@/types/dto/Events';
 import { logger } from '@/utils/common/Logger';
 import EmptyState from '@/components/customer-portal/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 // Helper function to convert sanitized filters to Events API parameters
 const convertFiltersToEventParams = (filters: TypedBackendFilter[]): Partial<GetEventsPayload> => {
@@ -61,68 +62,9 @@ const convertFiltersToEventParams = (filters: TypedBackendFilter[]): Partial<Get
 	return params;
 };
 
-const sortingOptions: SortOption[] = [
-	{
-		field: 'name',
-		label: 'Name',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'email',
-		label: 'Email',
-		direction: SortDirection.ASC,
-	},
-	{
-		field: 'created_at',
-		label: 'Created At',
-		direction: SortDirection.DESC,
-	},
-	{
-		field: 'updated_at',
-		label: 'Updated At',
-		direction: SortDirection.DESC,
-	},
-];
-
-const filterOptions: FilterField[] = [
-	{
-		field: 'event_id',
-		label: 'EventID',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'event_name',
-		label: 'Events Name',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'source',
-		label: 'Source',
-		fieldType: FilterFieldType.INPUT,
-		operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
-		dataType: DataType.STRING,
-	},
-	{
-		field: 'start_time',
-		label: 'Start Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: [FilterOperator.AFTER],
-		dataType: DataType.DATE,
-	},
-	{
-		field: 'end_time',
-		label: 'End Time',
-		fieldType: FilterFieldType.DATEPICKER,
-		operators: [FilterOperator.BEFORE],
-		dataType: DataType.DATE,
-	},
-];
-
 const CustomerUsageEventsTab = () => {
+	const { t } = useTranslation('customers');
+	const { t: tDev } = useTranslation('developers');
 	const { id: customerId } = useParams();
 	const { reset } = usePagination();
 	const [events, setEvents] = useState<Event[]>([]);
@@ -130,6 +72,63 @@ const CustomerUsageEventsTab = () => {
 	const [loading, setLoading] = useState(false);
 	const [iterLastKey, setIterLastKey] = useState<string | undefined>(undefined);
 	const observer = useRef<IntersectionObserver | null>(null);
+
+	const sortingOptions: SortOption[] = useMemo(
+		() => [
+			{
+				field: 'created_at',
+				label: tDev('events.queryBuilder.sort.createdAt'),
+				direction: SortDirection.DESC,
+			},
+			{
+				field: 'updated_at',
+				label: tDev('events.queryBuilder.sort.updatedAt'),
+				direction: SortDirection.DESC,
+			},
+		],
+		[tDev],
+	);
+
+	const filterOptions: FilterField[] = useMemo(
+		() => [
+			{
+				field: 'event_id',
+				label: tDev('events.queryBuilder.filters.eventId'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'event_name',
+				label: tDev('events.queryBuilder.filters.eventName'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'source',
+				label: tDev('events.queryBuilder.filters.source'),
+				fieldType: FilterFieldType.INPUT,
+				operators: DEFAULT_OPERATORS_PER_DATA_TYPE[DataType.STRING],
+				dataType: DataType.STRING,
+			},
+			{
+				field: 'start_time',
+				label: tDev('events.queryBuilder.filters.startTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: [FilterOperator.AFTER],
+				dataType: DataType.DATE,
+			},
+			{
+				field: 'end_time',
+				label: tDev('events.queryBuilder.filters.endTime'),
+				fieldType: FilterFieldType.DATEPICKER,
+				operators: [FilterOperator.BEFORE],
+				dataType: DataType.DATE,
+			},
+		],
+		[tDev],
+	);
 
 	const { data: customer, isLoading: customerLoading } = useQuery({
 		queryKey: ['fetchCustomerDetails', customerId],
@@ -170,15 +169,20 @@ const CustomerUsageEventsTab = () => {
 		];
 	}, []);
 
-	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
-		initialFilters: initialFilters,
-		initialSorts: [
+	const initialSorts: SortOption[] = useMemo(
+		() => [
 			{
 				field: 'updated_at',
-				label: 'Updated At',
+				label: tDev('events.queryBuilder.sort.updatedAt'),
 				direction: SortDirection.DESC,
 			},
 		],
+		[tDev],
+	);
+
+	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
+		initialFilters: initialFilters,
+		initialSorts,
 		debounceTime: 300,
 	});
 
@@ -276,7 +280,7 @@ const CustomerUsageEventsTab = () => {
 	if (!customer?.external_id) {
 		return (
 			<Card className='bg-white border border-[#E9E9E9] rounded-xl p-6'>
-				<EmptyState title='Unable to load events' description='Customer information is missing' />
+				<EmptyState title={t('tabPanels.usageEvents.loadErrorTitle')} description={t('tabPanels.usageEvents.loadErrorDescription')} />
 			</Card>
 		);
 	}
@@ -306,7 +310,9 @@ const CustomerUsageEventsTab = () => {
 						<Skeleton className='h-8 w-full' />
 					</div>
 				)}
-				{!hasMore && events.length === 0 && <p className=' text-[#64748B] text-xs font-normal font-sans mt-4'>No events found</p>}
+				{!hasMore && events.length === 0 && (
+					<p className=' text-[#64748B] text-xs font-normal font-sans mt-4'>{t('tabPanels.usageEvents.noEventsFound')}</p>
+				)}
 			</div>
 		</>
 	);

@@ -1,13 +1,16 @@
 import { AddButton, CardHeader, Loader, NoDataCard } from '@/components/atoms';
 import { ApiDocsContent } from '@/components/molecules';
+import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import { CreditNoteTable } from '@/components/molecules/CreditNoteTable';
 import CreditNoteApi from '@/api/CreditNoteApi';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, useOutletContext } from 'react-router';
 import { Card } from '@/components/atoms';
 import { RouteNames } from '@/core/routes/Routes';
+import { useTranslation } from 'react-i18next';
 
 const CreditNote = () => {
+	const { t } = useTranslation('billing');
 	const { id: customerId } = useParams();
 	const navigate = useNavigate();
 
@@ -39,8 +42,8 @@ const CreditNote = () => {
 	if (data?.items?.length === 0) {
 		return (
 			<NoDataCard
-				title='Credit Notes'
-				subtitle='No credit notes found'
+				title={t('creditNotes.title')}
+				subtitle={t('creditNotes.empty')}
 				cta={
 					!isArchived && (
 						<AddButton
@@ -58,10 +61,10 @@ const CreditNote = () => {
 
 	return (
 		<div>
-			<ApiDocsContent tags={['Credit Notes']} />
+			<ApiDocsContent tags={API_DOCS_TAGS.CreditNotes} />
 			<Card variant='notched'>
 				<CardHeader
-					title='Credit Notes'
+					title={t('creditNotes.title')}
 					cta={
 						!isArchived && (
 							<AddButton

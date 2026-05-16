@@ -1,4 +1,6 @@
 import { FC } from 'react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { BILLING_MODEL, Price, PRICE_TYPE, TIER_MODE, CreatePriceTier } from '@/models';
 import { PriceUnit } from '@/models/PriceUnit';
 import {
@@ -25,15 +27,15 @@ interface Props {
 	isSubscriptionOverride?: boolean;
 }
 
-// ===== SUB-COMPONENTS =====
+type TierBlockRow = { variant: 'tier'; tierNumber: number; detailLines: string[] };
+type SimpleBulletRow = { variant: 'simple'; text: string };
+type OverrideRow = TierBlockRow | SimpleBulletRow;
 
-/**
- * Display tier breakdown in tooltip (Volume/Slab header + per unit, flat fee like ChargeValueCell)
- */
-const TierBreakdown: FC<{
-	normalized: NormalizedPriceDisplay;
-	hasOverrides?: boolean;
-}> = ({ normalized, hasOverrides }) => {
+const TierBreakdown: FC<{ normalized: NormalizedPriceDisplay; hasOverrides?: boolean; t: TFunction<'common'> }> = ({
+	normalized,
+	hasOverrides,
+	t,
+}) => {
 	const { tiers, tierMode, symbol } = normalized;
 
 	if (!tiers || tiers.length === 0) return null;
@@ -46,26 +48,34 @@ const TierBreakdown: FC<{
 		return `${from} - ${tier.up_to}`;
 	};
 
+	const title = tierMode === TIER_MODE.VOLUME ? t('priceTooltip.volumeTierPricing') : t('priceTooltip.slabTierPricing');
+
 	return (
 		<div className='space-y-3'>
 			<div className='font-medium border-b border-gray-200 pb-2 text-base text-gray-900'>
-				{tierMode === TIER_MODE.VOLUME ? 'Volume' : 'Slab'} Tier Pricing
-				{hasOverrides && <span className='text-xs text-orange-600 ml-2'>(Overridden)</span>}
+				{title}
+				{hasOverrides && <span className='text-xs text-orange-600 ms-2'>{t('priceTooltip.overriddenBadge')}</span>}
 			</div>
 			<div className='space-y-2'>
 				{tiers.map((tier, index) => (
 					<div key={index} className='flex flex-col gap-1'>
 						<div className='flex items-center justify-between gap-6'>
-							<div className='text-sm text-muted-foreground'>{formatRange(tier, index, tiers)} units</div>
-							<div className='text-right'>
+							<div className='text-sm text-muted-foreground'>
+								{t('priceTooltip.rangeUnits', { range: formatRange(tier, index, tiers) })}
+							</div>
+							<div className='text-end'>
 								<div className='text-sm text-muted-foreground'>
-									{symbol}
-									{formatAmount(tier.unit_amount)} per unit
+									{t('priceTooltip.perUnit', {
+										symbol,
+										amount: formatAmount(tier.unit_amount),
+									})}
 								</div>
 								{Number(tier.flat_amount) > 0 && (
 									<div className='text-xs text-gray-500'>
-										+ {symbol}
-										{formatAmount(tier.flat_amount || '0')} flat fee
+										{t('priceTooltip.flatFeeLine', {
+											symbol,
+											amount: formatAmount(tier.flat_amount || '0'),
+										})}
 									</div>
 								)}
 							</div>
@@ -78,38 +88,52 @@ const TierBreakdown: FC<{
 	);
 };
 
-/**
- * Display override changes (billing model, tier mode, amount, quantity, package size, tier diff - same as ChargeValueCell)
- */
-const OverrideChanges: FC<{
-	original: NormalizedPriceDisplay;
-	overridden: NormalizedPriceDisplay;
-	originalPrice: Price;
-}> = ({ original, overridden, originalPrice }) => {
-	const changes: string[] = [];
+function buildOverrideRows(
+	original: NormalizedPriceDisplay,
+	overridden: NormalizedPriceDisplay,
+	originalPrice: Price,
+	t: TFunction<'common'>,
+): OverrideRow[] {
+	const rows: OverrideRow[] = [];
 
-	// Billing model changes
 	if (overridden.billingModel !== original.billingModel) {
-		changes.push(`Billing Model: ${getBillingModelLabel(original.billingModel)} → ${getBillingModelLabel(overridden.billingModel)}`);
+		rows.push({
+			variant: 'simple',
+			text: t('priceTooltip.billingModelChange', {
+				from: getBillingModelLabel(original.billingModel),
+				to: getBillingModelLabel(overridden.billingModel),
+			}),
+		});
 	}
 
-	// Tier mode changes
 	if (overridden.tierMode !== original.tierMode) {
-		changes.push(`Tier Mode: ${getTierModeLabel(original.tierMode)} → ${getTierModeLabel(overridden.tierMode)}`);
+		rows.push({
+			variant: 'simple',
+			text: t('priceTooltip.tierModeChange', {
+				from: getTierModeLabel(original.tierMode),
+				to: getTierModeLabel(overridden.tierMode),
+			}),
+		});
 	}
 
-	// Amount changes
 	if (overridden.amount !== original.amount) {
-		changes.push(`Amount: ${original.symbol}${formatAmount(original.amount)} → ${overridden.symbol}${formatAmount(overridden.amount)}`);
+		rows.push({
+			variant: 'simple',
+			text: t('priceTooltip.amountChange', {
+				from: `${original.symbol}${formatAmount(original.amount)}`,
+				to: `${overridden.symbol}${formatAmount(overridden.amount)}`,
+			}),
+		});
 	}
 
-	// Quantity changes - only show if original price was usage-based
-	const quantityOverride = (overridden as any).quantity;
+	const quantityOverride = (overridden as { quantity?: number }).quantity;
 	if (quantityOverride && quantityOverride !== 1 && originalPrice.type === PRICE_TYPE.USAGE) {
-		changes.push(`Quantity: 1 → ${quantityOverride}`);
+		rows.push({
+			variant: 'simple',
+			text: t('priceTooltip.quantityChange', { to: quantityOverride }),
+		});
 	}
 
-	// Transform quantity (package size) changes
 	if (
 		overridden.transformQuantity &&
 		(original.billingModel === BILLING_MODEL.PACKAGE || overridden.billingModel === BILLING_MODEL.PACKAGE)
@@ -117,116 +141,135 @@ const OverrideChanges: FC<{
 		const originalDivideBy = original.transformQuantity?.divide_by || 1;
 		const newDivideBy = overridden.transformQuantity.divide_by;
 		if (originalDivideBy !== newDivideBy) {
-			changes.push(`Package Size: ${originalDivideBy} units → ${newDivideBy} units`);
+			rows.push({
+				variant: 'simple',
+				text: t('priceTooltip.packageSizeChange', { from: originalDivideBy, to: newDivideBy }),
+			});
 		}
 	}
 
-	// Tier changes (full diff: From, Up to, Per unit, Flat fee)
 	if (overridden.tiers && overridden.tiers.length > 0) {
 		const originalTiers = original.tiers || [];
 		const newTiers = overridden.tiers;
 
 		if (originalTiers.length !== newTiers.length) {
-			changes.push(`Tiers: ${originalTiers.length} tiers → ${newTiers.length} tiers`);
+			rows.push({
+				variant: 'simple',
+				text: t('priceTooltip.tiersCountChange', { from: originalTiers.length, to: newTiers.length }),
+			});
 		} else {
-			const tierChanges: string[] = [];
+			let addedNewTierMessage = false;
+			const tierBlocks: TierBlockRow[] = [];
+
 			newTiers.forEach((newTier: CreatePriceTier, index: number) => {
 				const originalTier = originalTiers[index];
 				if (originalTier) {
-					const tierChangesForThisTier: string[] = [];
+					const detailLines: string[] = [];
 
-					// From value changes
 					const originalFrom = index === 0 ? 0 : originalTiers[index - 1]?.up_to || 0;
 					const newFrom = index === 0 ? 0 : newTiers[index - 1]?.up_to || 0;
 					if (originalFrom !== newFrom) {
-						tierChangesForThisTier.push(`From (>): ${originalFrom} → ${newFrom}`);
+						detailLines.push(t('priceTooltip.tierFromChange', { from: originalFrom, to: newFrom }));
 					}
 
-					// Up to value changes
 					const originalUpTo = originalTier.up_to;
 					const newUpTo = newTier.up_to;
 					if (originalUpTo !== newUpTo) {
 						const originalUpToDisplay = originalUpTo === null || originalUpTo === undefined ? '∞' : originalUpTo.toString();
 						const newUpToDisplay = newUpTo === null || newUpTo === undefined ? '∞' : newUpTo.toString();
-						tierChangesForThisTier.push(`Up to (<=): ${originalUpToDisplay} → ${newUpToDisplay}`);
+						detailLines.push(t('priceTooltip.tierUpToChange', { from: originalUpToDisplay, to: newUpToDisplay }));
 					}
 
-					// Per unit price changes
 					if (originalTier.unit_amount !== newTier.unit_amount) {
-						tierChangesForThisTier.push(
-							`Per unit price: ${overridden.symbol}${formatAmount(originalTier.unit_amount)} → ${overridden.symbol}${formatAmount(newTier.unit_amount)}`,
+						detailLines.push(
+							t('priceTooltip.tierPerUnitChange', {
+								from: `${overridden.symbol}${formatAmount(originalTier.unit_amount)}`,
+								to: `${overridden.symbol}${formatAmount(newTier.unit_amount)}`,
+							}),
 						);
 					}
 
-					// Flat amount changes
 					if ((originalTier.flat_amount || '0') !== (newTier.flat_amount || '0')) {
-						tierChangesForThisTier.push(
-							`Flat fee: ${overridden.symbol}${formatAmount(originalTier.flat_amount || '0')} → ${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+						detailLines.push(
+							t('priceTooltip.tierFlatFeeChange', {
+								from: `${overridden.symbol}${formatAmount(originalTier.flat_amount || '0')}`,
+								to: `${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+							}),
 						);
 					}
 
-					if (tierChangesForThisTier.length > 0) {
-						tierChanges.push(`Tier ${index + 1}: ${tierChangesForThisTier.join(', ')}`);
+					if (detailLines.length > 0) {
+						tierBlocks.push({ variant: 'tier', tierNumber: index + 1, detailLines });
 					}
 				} else {
-					// New tier added
 					const newFrom = index === 0 ? 0 : newTiers[index - 1]?.up_to || 0;
 					const newUpToDisplay = newTier.up_to === null || newTier.up_to === undefined ? '∞' : newTier.up_to.toString();
-					tierChanges.push(
-						`Tier ${index + 1} added: From (>): ${newFrom}, Up to (<=): ${newUpToDisplay}, Per unit price: ${overridden.symbol}${formatAmount(newTier.unit_amount)}, Flat fee: ${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
-					);
+					addedNewTierMessage = true;
+					rows.push({
+						variant: 'simple',
+						text: t('priceTooltip.tierNAdded', {
+							n: index + 1,
+							from: newFrom,
+							upTo: newUpToDisplay,
+							perUnit: `${overridden.symbol}${formatAmount(newTier.unit_amount)}`,
+							flat: `${overridden.symbol}${formatAmount(newTier.flat_amount || '0')}`,
+						}),
+					});
 				}
 			});
 
-			if (tierChanges.length > 0) {
-				changes.push(...tierChanges);
-			} else {
-				changes.push('Tier structure modified');
+			if (tierBlocks.length > 0) {
+				rows.push(...tierBlocks);
+			} else if (!addedNewTierMessage) {
+				rows.push({ variant: 'simple', text: t('priceTooltip.tierStructureModified') });
 			}
 		}
 	}
 
-	if (changes.length === 0) {
-		changes.push('Price configuration modified');
+	if (rows.length === 0) {
+		rows.push({ variant: 'simple', text: t('priceTooltip.priceConfigModified') });
 	}
+
+	return rows;
+}
+
+function OverrideChangesList({
+	original,
+	overridden,
+	originalPrice,
+	t,
+}: {
+	original: NormalizedPriceDisplay;
+	overridden: NormalizedPriceDisplay;
+	originalPrice: Price;
+	t: TFunction<'common'>;
+}) {
+	const rows = buildOverrideRows(original, overridden, originalPrice, t);
 
 	return (
 		<div className='space-y-2'>
-			{changes.map((change, index) => {
-				// Check if this is a tier change that should be formatted
-				if (change.startsWith('Tier ') && change.includes(':')) {
-					const tierInfo = change.split(': ');
-					const tierHeader = tierInfo[0];
-					const tierDetails = tierInfo[1];
-
-					return (
-						<div key={index} className='text-sm text-gray-600 space-y-1'>
-							<div className='font-medium'>{tierHeader}:</div>
-							<div className='ml-2 space-y-1'>
-								{tierDetails.split(', ').map((detail, detailIndex) => (
-									<div key={detailIndex} className='text-xs'>
-										• {detail}
-									</div>
-								))}
-							</div>
+			{rows.map((change, index) =>
+				change.variant === 'tier' ? (
+					<div key={index} className='text-sm text-gray-600 space-y-1'>
+						<div className='font-medium'>{t('priceTooltip.tierNDetailsHeader', { n: change.tierNumber })}</div>
+						<div className='ms-2 space-y-1'>
+							{change.detailLines.map((detail, detailIndex) => (
+								<div key={detailIndex} className='text-xs'>
+									• {detail}
+								</div>
+							))}
 						</div>
-					);
-				}
-
-				// Regular change format
-				return (
-					<div key={index} className='text-sm text-gray-600'>
-						• {change}
 					</div>
-				);
-			})}
+				) : (
+					<div key={index} className='text-sm text-gray-600'>
+						• {change.text}
+					</div>
+				),
+			)}
 		</div>
 	);
-};
+}
 
-/**
- * Main tooltip content component
- */
 const PriceTooltipContent: FC<{
 	normalized: NormalizedPriceDisplay;
 	hasOverrides: boolean;
@@ -237,6 +280,7 @@ const PriceTooltipContent: FC<{
 	originalPrice?: Price;
 	isSubscriptionOverride?: boolean;
 }> = ({ normalized, hasOverrides, hasDiscount, discountInfo, couponName, originalNormalized, originalPrice, isSubscriptionOverride }) => {
+	const { t } = useTranslation('common');
 	const isTiered =
 		(normalized.billingModel === BILLING_MODEL.TIERED || normalized.billingModel === 'SLAB_TIERED') &&
 		Array.isArray(normalized.tiers) &&
@@ -247,26 +291,27 @@ const PriceTooltipContent: FC<{
 			sideOffset={5}
 			className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-lg max-w-[320px]'>
 			<div className='space-y-3'>
-				{/* Subscription override: Overridden price + same amount/data as standard display */}
 				{isSubscriptionOverride && (
 					<div className='space-y-2'>
-						<div className='font-medium text-gray-900'>Overridden price</div>
+						<div className='font-medium text-gray-900'>{t('priceTooltip.overriddenPrice')}</div>
 						{isTiered ? (
-							<TierBreakdown normalized={normalized} hasOverrides={false} />
+							<TierBreakdown normalized={normalized} hasOverrides={false} t={t} />
 						) : (
 							<div className='text-sm text-gray-900'>
 								{normalized.billingModel === BILLING_MODEL.FLAT_FEE
-									? `${normalized.symbol}${formatAmount(normalized.amount)} / unit`
+									? t('priceTooltip.displayPerUnit', {
+											symbol: normalized.symbol,
+											amount: formatAmount(normalized.amount),
+										})
 									: formatPriceDisplay(normalized)}
 							</div>
 						)}
 					</div>
 				)}
 
-				{/* Discount Information */}
 				{!isSubscriptionOverride && hasDiscount && discountInfo && (
 					<div className='space-y-2'>
-						<div className='font-medium text-gray-900'>Price</div>
+						<div className='font-medium text-gray-900'>{t('priceTooltip.priceHeading')}</div>
 						<div className='space-y-1'>
 							<div className='line-through text-gray-400 text-sm'>
 								{normalized.symbol}
@@ -281,28 +326,28 @@ const PriceTooltipContent: FC<{
 					</div>
 				)}
 
-				{/* Override Changes */}
 				{!isSubscriptionOverride && hasOverrides && !isTiered && originalNormalized && originalPrice && (
 					<div className='space-y-2'>
-						<div className='font-medium text-gray-900'>Price Override Applied</div>
-						<OverrideChanges original={originalNormalized} overridden={normalized} originalPrice={originalPrice} />
+						<div className='font-medium text-gray-900'>{t('priceTooltip.priceOverrideApplied')}</div>
+						<OverrideChangesList original={originalNormalized} overridden={normalized} originalPrice={originalPrice} t={t} />
 					</div>
 				)}
 
-				{/* Tier Breakdown (Volume/Slab header + per unit, flat fee) */}
 				{!isSubscriptionOverride && isTiered && (
 					<div className='space-y-2'>
-						<TierBreakdown normalized={normalized} hasOverrides={hasOverrides} />
+						<TierBreakdown normalized={normalized} hasOverrides={hasOverrides} t={t} />
 					</div>
 				)}
 
-				{/* Simple Price Display: Flat Fee = X / unit, Package = X / N units, else formatPriceDisplay */}
 				{!isSubscriptionOverride && !hasDiscount && !hasOverrides && !isTiered && (
 					<div className='space-y-1'>
-						<div className='font-medium text-gray-900'>Price</div>
+						<div className='font-medium text-gray-900'>{t('priceTooltip.priceHeading')}</div>
 						<div className='text-sm text-gray-900'>
 							{normalized.billingModel === BILLING_MODEL.FLAT_FEE
-								? `${normalized.symbol}${formatAmount(normalized.amount)} / unit`
+								? t('priceTooltip.displayPerUnit', {
+										symbol: normalized.symbol,
+										amount: formatAmount(normalized.amount),
+									})
 								: formatPriceDisplay(normalized)}
 						</div>
 					</div>
@@ -312,27 +357,19 @@ const PriceTooltipContent: FC<{
 	);
 };
 
-// ===== MAIN COMPONENT =====
-
 const PriceTooltip: FC<Props> = ({ data, appliedCoupon, priceOverride, isSubscriptionOverride }) => {
-	// Step 1: Normalize the data
 	const originalNormalized = normalizePriceDisplay(data);
 	const overriddenNormalized = priceOverride ? normalizePriceDisplay(data, priceOverride) : null;
 
-	// Step 2: Determine what to display
 	const displayData = overriddenNormalized || originalNormalized;
 	const hasOverrides = !!overriddenNormalized;
 
-	// Step 3: Handle coupon discount
-	// Coupons and overrides are mutually exclusive - only apply coupon if no override exists
 	const discountInfo = appliedCoupon && !priceOverride ? calculateDiscountedPrice(data, appliedCoupon) : null;
 	const hasDiscount = !!discountInfo;
 	const couponName = appliedCoupon ? formatCouponName(appliedCoupon) : undefined;
 
-	// Step 4: Determine icon color (orange for override or subscription override, blue for discount, gray default)
 	const iconColor = hasOverrides || isSubscriptionOverride ? 'text-orange-600' : hasDiscount ? 'text-blue-500' : 'text-gray-500';
 
-	// Step 5: Render
 	return (
 		<TooltipProvider delayDuration={0}>
 			<Tooltip>
