@@ -57,7 +57,7 @@ const MainLayout: React.FC = () => {
 	}, [user]);
 
 	return (
-		<SidebarProvider className='flex h-screen bg-gray-100 relative font-open-sans'>
+		<SidebarProvider className='flex h-screen bg-gray-100 relative'>
 			<AppPrefetcher />
 			<CommandPalette />
 			{/* Sidebar */}

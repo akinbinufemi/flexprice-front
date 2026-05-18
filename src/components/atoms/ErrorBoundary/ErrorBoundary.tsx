@@ -98,7 +98,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 						</div>
 					</div>
 
-					<h1 id='error-title' className='text-4xl lg:text-5xl font-qanelas font-medium mb-6 tracking-tight' tabIndex={0}>
+					<h1 id='error-title' className='text-4xl lg:text-5xl font-medium mb-6 tracking-tight' tabIndex={0}>
 						{t('errorPage.title')}
 					</h1>
 
@@ -178,7 +178,7 @@ export const ErrorFallback = ({ error, errorInfo, errorId, resetError }: ErrorFa
 
 				{/* Right Side - Support & Details */}
 				<div className='bg-white/5 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-muted/10 h-fit'>
-					<h2 className='text-xl font-qanelas font-medium mb-6 text-center'>{t('errorPage.getHelp')}</h2>
+					<h2 className='text-xl font-medium mb-6 text-center'>{t('errorPage.getHelp')}</h2>
 
 					{/* Contact Support Section */}
 					<div className='grid grid-cols-2 gap-4 mb-8'>

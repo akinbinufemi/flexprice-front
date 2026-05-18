@@ -68,7 +68,7 @@ interface RestrictionsConfig {
 	rawEnvs: string;
 }
 
-/** Primary defaults to **Qanelas** (`@font-face` in `src/assets/fonts/qanelas/`, imported from `src/index.css`). Override via `VITE_FONT_CONFIG`. */
+/** Primary defaults to **Geist** (Google Fonts in `src/index.css`). Override via `VITE_FONT_CONFIG`. */
 export interface TypographyConfig {
 	primaryFont: string;
 	fallbackFont: string;
@@ -76,8 +76,8 @@ export interface TypographyConfig {
 	fontFamily: string;
 }
 
-const DEFAULT_FONT_PRIMARY = 'Qanelas';
-const DEFAULT_FONT_FALLBACK = 'ui-sans-serif, system-ui, sans-serif';
+const DEFAULT_FONT_PRIMARY = 'Geist';
+const DEFAULT_FONT_FALLBACK = 'sans-serif';
 
 /** Wrap family name in quotes when needed for valid CSS `font-family`. */
 function cssFontFamilyToken(name: string): string {
