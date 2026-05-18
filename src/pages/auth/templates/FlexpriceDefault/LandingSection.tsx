@@ -139,7 +139,7 @@ const LandingSection: React.FC = () => {
 				</div>
 			</div>
 			<div className='w-full flex flex-col items-center mt-8'>
-				<div className='text-center font-inter text-black font-medium mb-14 text-lg'>{t('landing.trustedBy')}</div>
+				<div className='text-center text-black font-medium mb-14 text-lg'>{t('landing.trustedBy')}</div>
 				<div className='w-full max-w-3xl grid grid-cols-3 grid-rows-2 gap-y-12 gap-x-12 justify-items-center items-center'>
 					{customerLogos.map((logo) => (
 						<div key={logo} className='flex items-center justify-center'>
