@@ -131,79 +131,96 @@ const VolumeTieredPricingForm: FC<Props> = ({ setTieredPrices, tieredPrices, cur
 	};
 
 	return (
-		<div className='space-y-4'>
-			<div className={cn('w-full', tieredPrices.length > 0 ? '' : 'hidden')}>
-				<table className='table-auto w-full border-collapse border border-gray-200 overflow-x-auto'>
-					<thead>
-						<tr className='bg-gray-100 text-start border-b'>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>
-								{t('plans.organisms.volumeTier.from')} {t('plans.organisms.volumeTier.fromSuffix')}
-							</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>
-								{t('plans.organisms.volumeTier.upTo')} {t('plans.organisms.volumeTier.upToSuffix')}
-							</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>{t('plans.organisms.volumeTier.perUnitPrice')}</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'>{t('plans.organisms.volumeTier.flatFee')}</th>
-							<th className='px-4 py-2 font-normal bg-white text-nowrap text-[#71717A]'></th>
-						</tr>
-					</thead>
-					<tbody>
-						{tieredPrices.map((tier, index) => (
-							<tr key={index}>
-								<td className='px-4 py-2'>
-									<Input
-										disabled
-										className='h-9'
-										// onChange={(e) => updateTier(index, 'from', e)}
-										value={tier.from.toString()}
-									/>
-								</td>
-								<td className='px-4 py-2'>
-									<DecimalUsageInput
-										label=''
-										value={tier.up_to === null ? '∞' : tier.up_to.toString()}
-										onChange={(e) => updateTier(index, 'up_to', e)}
-										disabled={tier.up_to === null}
-										precision={3}
-										min={0}
-										placeholder='∞'
-									/>
-								</td>
-								<td className='px-4 py-2'>
-									<Input
-										className='h-9'
-										onChange={(e) => {
-											if (validateDecimal(e)) {
-												updatePrice(index, 'unit_amount', e);
-											}
-										}}
-										value={tier.unit_amount?.toString() || ''}
-										inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
-										placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
-									/>
-								</td>
-								<td className='px-4 py-2'>
-									<Input
-										className='h-9'
-										onChange={(e) => {
-											if (validateDecimal(e)) {
-												updatePrice(index, 'flat_amount', e);
-											}
-										}}
-										value={tier.flat_amount?.toString() ?? '0'}
-										inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
-										placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
-									/>
-								</td>
-								<td className='px-4 py-2 text-center'>
-									<button className='flex justify-center items-center size-9 rounded-md border text-zinc' onClick={() => removeTier(index)}>
-										<RiDeleteBin6Line className='text-zinc' />
-									</button>
-								</td>
+		<div className='w-full min-w-0 space-y-4'>
+			<div className={cn('w-full min-w-0', tieredPrices.length > 0 ? '' : 'hidden')}>
+				<div className='w-full min-w-0 overflow-x-auto'>
+					<table className='w-full min-w-0 table-fixed border-collapse border border-gray-200'>
+						<colgroup>
+							<col className='w-[18%]' />
+							<col className='w-[18%]' />
+							<col className='w-[28%]' />
+							<col className='w-[28%]' />
+							<col className='w-10' />
+						</colgroup>
+						<thead>
+							<tr className='border-b bg-gray-100 text-start'>
+								<th className='bg-white px-2 py-2 text-left text-xs font-normal whitespace-normal text-[#71717A]'>
+									{t('plans.organisms.volumeTier.from')} {t('plans.organisms.volumeTier.fromSuffix')}
+								</th>
+								<th className='bg-white px-2 py-2 text-left text-xs font-normal whitespace-normal text-[#71717A]'>
+									{t('plans.organisms.volumeTier.upTo')} {t('plans.organisms.volumeTier.upToSuffix')}
+								</th>
+								<th className='bg-white px-2 py-2 text-left text-xs font-normal whitespace-normal text-[#71717A]'>
+									{t('plans.organisms.volumeTier.perUnitPrice')}
+								</th>
+								<th className='bg-white px-2 py-2 text-left text-xs font-normal whitespace-normal text-[#71717A]'>
+									{t('plans.organisms.volumeTier.flatFee')}
+								</th>
+								<th className='bg-white px-1 py-2' />
 							</tr>
-						))}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{tieredPrices.map((tier, index) => (
+								<tr key={index}>
+									<td className='min-w-0 px-2 py-2'>
+										<Input
+											disabled
+											className='h-9 w-full min-w-0'
+											// onChange={(e) => updateTier(index, 'from', e)}
+											value={tier.from.toString()}
+										/>
+									</td>
+									<td className='min-w-0 px-2 py-2'>
+										<DecimalUsageInput
+											label=''
+											className='h-9 w-full min-w-0'
+											value={tier.up_to === null ? '∞' : tier.up_to.toString()}
+											onChange={(e) => updateTier(index, 'up_to', e)}
+											disabled={tier.up_to === null}
+											precision={3}
+											min={0}
+											placeholder='∞'
+										/>
+									</td>
+									<td className='min-w-0 px-2 py-2'>
+										<Input
+											className='h-9 w-full min-w-0'
+											onChange={(e) => {
+												if (validateDecimal(e)) {
+													updatePrice(index, 'unit_amount', e);
+												}
+											}}
+											value={tier.unit_amount?.toString() || ''}
+											inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
+											placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
+										/>
+									</td>
+									<td className='min-w-0 px-2 py-2'>
+										<Input
+											className='h-9 w-full min-w-0'
+											onChange={(e) => {
+												if (validateDecimal(e)) {
+													updatePrice(index, 'flat_amount', e);
+												}
+											}}
+											value={tier.flat_amount?.toString() ?? '0'}
+											inputPrefix={currency ? getDisplaySymbol(currency) : undefined}
+											placeholder={t('plans.organisms.volumeTier.zeroPlaceholder')}
+										/>
+									</td>
+									<td className='px-1 py-2 text-center'>
+										<button
+											type='button'
+											className='mx-auto flex size-9 shrink-0 items-center justify-center rounded-md border text-zinc'
+											onClick={() => removeTier(index)}>
+											<RiDeleteBin6Line className='text-zinc' />
+										</button>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 			<div className='flex justify-between items-center mt-4'>
 				<AddChargesButton onClick={addTieredPrice} label={t('plans.organisms.volumeTier.addTier')} />
