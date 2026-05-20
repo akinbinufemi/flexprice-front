@@ -19,6 +19,7 @@ export enum CONNECTION_PROVIDER_TYPE {
 	NOMOD = 'nomod',
 	MOYASAR = 'moyasar',
 	PADDLE = 'paddle',
+	WHOP = 'whop',
 	// Add more providers as needed
 }
 
