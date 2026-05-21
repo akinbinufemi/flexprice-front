@@ -1,4 +1,4 @@
-import { Button, Input, Label, Select, SelectOption } from '@/components/atoms';
+import { Button, DecimalUsageInput, Input, Label, Select, SelectOption } from '@/components/atoms';
 import Dialog from '@/components/atoms/Dialog';
 import { CREDIT_GRANT_CADENCE, CREDIT_GRANT_EXPIRATION_TYPE, CREDIT_GRANT_PERIOD, CREDIT_GRANT_SCOPE } from '@/models/CreditGrant';
 import { InternalCreditGrantRequest } from '@/types/dto/CreditGrant';
@@ -89,7 +89,7 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 			priority: Math.max(0, Math.floor(Number(data.priority) || 0)),
 			metadata: data.metadata,
 			conversion_rate: data.conversion_rate,
-			topup_conversion_rate: data.topup_conversion_rate,
+			topup_conversion_rate: data.topup_conversion_rate ?? data.conversion_rate,
 		};
 
 		// Remove expiration_duration if not needed
@@ -261,7 +261,7 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 					<Input
 						error={errors.credits}
 						placeholder={t('creditGrant.modal.creditsPlaceholder')}
-						variant='formatted-number'
+						variant='number'
 						formatOptions={{
 							allowDecimals: true,
 							allowNegative: false,
@@ -279,13 +279,10 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
-						<Input
+						<DecimalUsageInput
 							className='w-full'
-							variant='number'
-							value={formData.conversion_rate || 1}
-							onChange={(value) => {
-								handleFieldChange('conversion_rate', parseFloat(value) || 1);
-							}}
+							value={formData.conversion_rate?.toString() || ''}
+							onChange={(value) => handleFieldChange('conversion_rate', value)}
 						/>
 					</div>
 					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.conversionRateHint')}</p>
@@ -298,13 +295,10 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 					<div className='flex items-center gap-2 w-full'>
 						<Input className='w-full' value={'1'} disabled suffix='credit' />
 						<span>=</span>
-						<Input
+						<DecimalUsageInput
 							className='w-full'
-							variant='number'
-							value={formData.topup_conversion_rate || formData.conversion_rate || 1}
-							onChange={(value) => {
-								handleFieldChange('topup_conversion_rate', parseFloat(value) || formData.conversion_rate || 1);
-							}}
+							value={formData.topup_conversion_rate?.toString() || formData.conversion_rate?.toString() || ''}
+							onChange={(value) => handleFieldChange('topup_conversion_rate', value)}
 						/>
 					</div>
 					<p className='text-sm text-muted-foreground'>{t('creditGrant.modal.topupConversionRateHint')}</p>
