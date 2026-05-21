@@ -121,7 +121,7 @@ const EditSubscriptionCreditGrantModal: React.FC<Props> = ({
 				priority: Math.max(0, Math.floor(Number(data.priority) || 0)),
 				metadata: data.metadata || {},
 				conversion_rate: data.conversion_rate,
-				topup_conversion_rate: data.topup_conversion_rate,
+				topup_conversion_rate: data.topup_conversion_rate ?? data.conversion_rate,
 				start_date: isRecurring && subscriptionCurrentPeriodEnd ? subscriptionCurrentPeriodEnd : data.start_date,
 			};
 

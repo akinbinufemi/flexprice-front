@@ -89,7 +89,7 @@ const CreditGrantModal: React.FC<Props> = ({ data, isOpen, onOpenChange, onSave,
 			priority: Math.max(0, Math.floor(Number(data.priority) || 0)),
 			metadata: data.metadata,
 			conversion_rate: data.conversion_rate,
-			topup_conversion_rate: data.topup_conversion_rate,
+			topup_conversion_rate: data.topup_conversion_rate ?? data.conversion_rate,
 		};
 
 		// Remove expiration_duration if not needed
