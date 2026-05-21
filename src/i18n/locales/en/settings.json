@@ -937,7 +937,7 @@
 				},
 				"whop": {
 					"name": "Whop",
-					"description": "Sync Flexprice invoices to Whop.",
+					"description": "Sync invoices to Whop with automatic payment status updates.",
 					"sections": {
 						"overview": {
 							"title": "Overview",

@@ -1,3 +1,4 @@
+import { config } from '@/config/config';
 import { FC, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Sheet, Spacer } from '@/components/atoms';
@@ -5,6 +6,9 @@ import { Switch } from '@/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import ConnectionApi from '@/api/ConnectionApi';
 import toast from 'react-hot-toast';
+import { Copy, CheckCircle } from 'lucide-react';
+import { useUser } from '@/hooks/UserContext';
+import { useEnvironment } from '@/hooks/useEnvironment';
 import { CONNECTION_PROVIDER_TYPE } from '@/models';
 
 interface WhopConnectionDrawerProps {
@@ -27,6 +31,14 @@ interface WhopFormData {
 const WhopConnectionDrawer: FC<WhopConnectionDrawerProps> = ({ isOpen, onOpenChange, connection, onSave }) => {
 	const { t } = useTranslation('settings');
 	const { t: tc } = useTranslation('common');
+	const { user } = useUser();
+	const { activeEnvironment } = useEnvironment();
+	const [webhookCopied, setWebhookCopied] = useState(false);
+
+	const webhookUrl =
+		user?.tenant?.id && activeEnvironment?.id
+			? `${config.api.baseUrl}/webhooks/whop/${user.tenant.id}/${activeEnvironment.id}`
+			: '';
 
 	const [formData, setFormData] = useState<WhopFormData>({
 		name: '',
@@ -63,6 +75,7 @@ const WhopConnectionDrawer: FC<WhopConnectionDrawerProps> = ({ isOpen, onOpenCha
 				});
 			}
 			setErrors({});
+		setWebhookCopied(false);
 		}
 	}, [isOpen, connection]);
 
@@ -146,6 +159,15 @@ const WhopConnectionDrawer: FC<WhopConnectionDrawerProps> = ({ isOpen, onOpenCha
 
 	const isPending = isCreating || isUpdating;
 
+	const handleCopyWebhookUrl = () => {
+		if (webhookUrl) {
+			navigator.clipboard.writeText(webhookUrl);
+			setWebhookCopied(true);
+			toast.success(t('connection.toast.webhookUrlCopied'));
+			setTimeout(() => setWebhookCopied(false), 2000);
+		}
+	};
+
 	return (
 		<Sheet
 			isOpen={isOpen}
@@ -155,7 +177,7 @@ const WhopConnectionDrawer: FC<WhopConnectionDrawerProps> = ({ isOpen, onOpenCha
 					? t('integrationDrawer.title.edit', { providerName: 'Whop' })
 					: t('integrationDrawer.title.connect', { providerName: 'Whop' })
 			}
-			description='Connect Flexprice to Whop to sync invoices and enable Whop-hosted checkout.'
+			description='Connect Flexprice to Whop to sync invoices.'
 			size='lg'>
 			<div className='space-y-6 mt-4'>
 				{/* Connection Name */}
@@ -211,6 +233,25 @@ const WhopConnectionDrawer: FC<WhopConnectionDrawerProps> = ({ isOpen, onOpenCha
 								<p className='text-xs text-gray-500'>Push Flexprice invoices to Whop as send_invoice payments</p>
 							</div>
 							<Switch checked={formData.sync_config.invoice} onCheckedChange={handleSyncConfigChange} />
+						</div>
+					</div>
+				</div>
+
+				{/* Webhook Section */}
+				<div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
+					<h3 className='text-sm font-medium text-blue-800 mb-2'>{t('connection.webhook.sectionTitle')}</h3>
+					<p className='text-xs text-blue-700 mb-3'>
+						Register this URL in your Whop dashboard under Webhooks. Flexprice will listen for{' '}
+						<code className='font-mono'>invoice.paid</code> events to automatically mark invoices as paid.
+					</p>
+					<div>
+						<label className='text-sm font-medium text-blue-800 mb-2 block'>{t('connection.webhook.url')}</label>
+						<div className='flex items-center gap-2 p-2 bg-white border border-blue-200 rounded-md'>
+							<code className='flex-1 text-xs text-gray-800 font-mono break-all'>{webhookUrl}</code>
+							<Button size='xs' variant='outline' onClick={handleCopyWebhookUrl} className='flex items-center gap-1'>
+								{webhookCopied ? <CheckCircle className='w-3 h-3' /> : <Copy className='w-3 h-3' />}
+								{webhookCopied ? tc('actions.copied') : tc('actions.copy')}
+							</Button>
 						</div>
 					</div>
 				</div>
