@@ -3,11 +3,12 @@ import FlexpriceTable, { ColumnData, TooltipCell } from '../Table';
 import { TaxRateResponse } from '@/types/dto/tax';
 import { Chip, ActionButton } from '@/components/atoms';
 import { formatDateShort } from '@/utils/common/helper_functions';
-import { TAX_RATE_TYPE, TAX_RATE_STATUS, TaxRate } from '@/models/Tax';
+import { TAX_RATE_TYPE, TaxRate } from '@/models/Tax';
 import TaxApi from '@/api/TaxApi';
 import { RouteNames } from '@/core/routes/Routes';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { ENTITY_STATUS } from '@/models';
 
 interface Props {
 	data: TaxRateResponse[];
@@ -41,13 +42,11 @@ const TaxTable: FC<Props> = ({ data, onEdit }) => {
 			return naLabel;
 		};
 
-		const statusLabel = (status: TAX_RATE_STATUS | undefined) => {
+		const statusLabel = (status: ENTITY_STATUS | undefined) => {
 			switch (status) {
-				case TAX_RATE_STATUS.ACTIVE:
+				case ENTITY_STATUS.PUBLISHED:
 					return t('taxes.table.chipStatus.active');
-				case TAX_RATE_STATUS.INACTIVE:
-					return t('taxes.table.chipStatus.inactive');
-				case TAX_RATE_STATUS.DELETED:
+				case ENTITY_STATUS.ARCHIVED:
 					return t('taxes.table.chipStatus.archived');
 				default:
 					return t('taxes.table.chipStatus.inactive');
@@ -74,8 +73,8 @@ const TaxTable: FC<Props> = ({ data, onEdit }) => {
 			{
 				title: t('taxes.table.status'),
 				render: (row) => {
-					const label = statusLabel(row.tax_rate_status);
-					return <Chip variant={row.tax_rate_status === TAX_RATE_STATUS.ACTIVE ? 'success' : 'default'} label={label} />;
+					const label = statusLabel(row.status);
+					return <Chip variant={row.status === ENTITY_STATUS.PUBLISHED ? 'success' : 'default'} label={label} />;
 				},
 			},
 			{
@@ -98,7 +97,7 @@ const TaxTable: FC<Props> = ({ data, onEdit }) => {
 								onClick: () => onEdit?.(row),
 							}}
 							archive={{
-								enabled: row?.tax_rate_status !== TAX_RATE_STATUS.DELETED,
+								enabled: row?.status !== ENTITY_STATUS.ARCHIVED,
 							}}
 						/>
 					);

@@ -12,9 +12,10 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router';
 import { TaxRateResponse } from '@/types/dto/tax';
-import { TAX_RATE_TYPE, TAX_RATE_STATUS, TAX_RATE_SCOPE, TaxRate } from '@/models/Tax';
+import { TAX_RATE_TYPE, TAX_RATE_SCOPE, TaxRate } from '@/models/Tax';
 import formatChips from '@/utils/common/format_chips';
 import TaxDrawer from '@/components/molecules/TaxDrawer/TaxDrawer';
+import { ENTITY_STATUS } from '@/models';
 
 type Params = {
 	taxrateId: string;
@@ -119,12 +120,7 @@ const TaxrateDetailsPage = () => {
 		{ label: t('taxes.detail.createdDate'), value: formatDate(taxData?.created_at ?? '') },
 		{
 			label: t('taxes.detail.status'),
-			value: (
-				<Chip
-					label={formatChips(taxData?.tax_rate_status)}
-					variant={taxData?.tax_rate_status === TAX_RATE_STATUS.ACTIVE ? 'success' : 'default'}
-				/>
-			),
+			value: <Chip label={formatChips(taxData?.status)} variant={taxData?.status === ENTITY_STATUS.PUBLISHED ? 'success' : 'default'} />,
 		},
 	];
 
@@ -141,7 +137,7 @@ const TaxrateDetailsPage = () => {
 
 					<Button
 						onClick={() => archiveTaxRate()}
-						disabled={taxData?.tax_rate_status === TAX_RATE_STATUS.DELETED}
+						disabled={taxData?.status === ENTITY_STATUS.ARCHIVED}
 						variant={'outline'}
 						className='flex gap-2'>
 						<EyeOff />
