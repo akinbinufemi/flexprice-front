@@ -657,7 +657,9 @@
 					"sections": {
 						"overview": {
 							"title": "Overview",
-							"paragraphs": ["The Flexprice Stripe app enables invoicing, tax collection, and payment via Stripe."]
+							"paragraphs": [
+								"The Flexprice Stripe app enables invoicing, tax collection, and payment via Stripe."
+							]
 						},
 						"stripeInvoicing": {
 							"title": "Stripe Invoicing",
@@ -751,7 +753,9 @@
 						},
 						"invoiceSync": {
 							"title": "Invoice Sync",
-							"paragraphs": ["Push invoices from Flexprice to HubSpot to keep your CRM up to date with billing information."]
+							"paragraphs": [
+								"Push invoices from Flexprice to HubSpot to keep your CRM up to date with billing information."
+							]
 						},
 						"customerSync": {
 							"title": "Customer Sync",
@@ -761,11 +765,15 @@
 						},
 						"paymentsSync": {
 							"title": "Payments Sync",
-							"paragraphs": ["Keep payment records synchronized between both platforms for accurate financial reporting."]
+							"paragraphs": [
+								"Keep payment records synchronized between both platforms for accurate financial reporting."
+							]
 						},
 						"revenueReporting": {
 							"title": "Revenue Calculations on HubSpot",
-							"paragraphs": ["Leverage HubSpot's reporting capabilities with accurate revenue data synced from Flexprice."]
+							"paragraphs": [
+								"Leverage HubSpot's reporting capabilities with accurate revenue data synced from Flexprice."
+							]
 						}
 					}
 				},
@@ -789,7 +797,9 @@
 						},
 						"createInvoice": {
 							"title": "Create Invoice in Zoho Books",
-							"paragraphs": ["Generate Zoho Books invoices seamlessly from Flexprice usage data or billing triggers, reducing manual work."]
+							"paragraphs": [
+								"Generate Zoho Books invoices seamlessly from Flexprice usage data or billing triggers, reducing manual work."
+							]
 						},
 						"transformInvoice": {
 							"title": "Transform Flexprice Invoice to Zoho Books Invoice",
@@ -921,6 +931,31 @@
 							"title": "Webhook Integration",
 							"paragraphs": [
 								"Receive real-time notifications about payment events through webhooks. Subscribe to transactions.completed event to stay updated on payment status."
+							]
+						}
+					}
+				},
+				"whop": {
+					"name": "Whop",
+					"description": "Sync invoices to Whop with automatic payment status updates.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice Whop integration lets you push invoices directly to Whop as one-time send_invoice payments. Customers can pay via the Whop-hosted checkout page, and Flexprice is automatically updated when payment is received."
+							]
+						},
+						"invoiceSync": {
+							"title": "Invoice Sync",
+							"paragraphs": [
+								"When invoice sync is enabled, Flexprice automatically creates a corresponding invoice in Whop whenever a Flexprice invoice is finalized. The integration ensures your Whop product exists (creating one if needed).",
+								"You can also mark a Whop invoice as paid from Flexprice, which calls the Whop mark_paid API on your behalf."
+							]
+						},
+						"webhooks": {
+							"title": "Webhooks",
+							"paragraphs": [
+								"Register the Flexprice webhook URL in your Whop developer settings to receive invoice.paid events. When Whop fires this event, Flexprice automatically marks the corresponding invoice as paid and records the payment."
 							]
 						}
 					}
