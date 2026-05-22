@@ -95,7 +95,7 @@ const Integrations = () => {
 							connectionByProvider.get(integration.id)?.[0] ??
 							(previewConnected ? { id: PREVIEW_MOCK_CONNECTION_ID, name: t('insightsTools.integrations.previewConnectionName') } : null);
 						return (
-							<div key={`${integration.id}-${index}`} className='min-w-0'>
+							<div key={`${integration.id}-${index}`} className='min-w-0 h-full'>
 								<IntegrationCard
 									integration={integration}
 									connected={connected}
@@ -119,7 +119,7 @@ const Integrations = () => {
 				<p className='mb-4 font-medium text-xl'>{t('insightsTools.integrations.premiumAddonsSection')}</p>
 				<div className='grid grid-cols-2 gap-4'>
 					{availablePremium.map((integration, index) => (
-						<div key={`${integration.id}-${index}`} className='min-w-0'>
+						<div key={`${integration.id}-${index}`} className='min-w-0 h-full'>
 							<IntegrationCard integration={integration} connected={false} connection={null} />
 						</div>
 					))}
@@ -389,8 +389,8 @@ const IntegrationCard = ({ integration, connected, connection, isPreviewConnecti
 
 	return (
 		<PremiumFeature isPremiumFeature={integration.premium}>
-			<Card className={cn('min-w-0 overflow-hidden border-slate-200 shadow-sm rounded-xl')} noPadding>
-				<div className='min-w-0 overflow-hidden p-6'>
+			<Card className={cn('min-w-0 overflow-hidden border-slate-200 shadow-sm rounded-xl h-full flex flex-col')} noPadding>
+				<div className='min-w-0 overflow-hidden p-6 flex-1'>
 					<div className='flex gap-5'>
 						<div className='flex size-14 shrink-0 items-center justify-center rounded-lg bg-slate-100'>
 							<img src={integration.logo} alt={integration.name} className='size-8 object-contain' />
