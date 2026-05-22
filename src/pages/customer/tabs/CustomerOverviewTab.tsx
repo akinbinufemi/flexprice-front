@@ -1,7 +1,8 @@
 import { useNavigate, useParams, useOutletContext } from 'react-router';
-import { AddButton, Card, CardHeader, Loader, Spacer, ShortPagination } from '@/components/atoms';
+import { AddButton, Card, CardHeader, Loader, Spacer, ShortPagination, Input, Button, Dialog } from '@/components/atoms';
 import CustomerApi from '@/api/CustomerApi';
-import { useQuery, useQueries } from '@tanstack/react-query';
+import IntegrationMappingApi, { IntegrationConfigItem, IntegrationMappingItem } from '@/api/IntegrationMappingApi';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SubscriptionTable } from '@/components/organisms';
 import { Subscription, SUBSCRIPTION_STATUS, PRICE_ENTITY_TYPE } from '@/models';
 import toast from 'react-hot-toast';
@@ -10,8 +11,9 @@ import CustomerUsageTable from '@/components/molecules/CustomerUsageTable';
 import { UpcomingCreditGrantApplicationsTable } from '@/components/molecules';
 import SubscriptionApi from '@/api/SubscriptionApi';
 import { PriceApi } from '@/api';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { QueryBuilder } from '@/components/molecules';
+import FlexpriceTable, { ColumnData } from '@/components/molecules/Table';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
 import useFilterSortingWithPersistence from '@/hooks/useFilterSortingWithPersistence';
 import { usePaginationReset } from '@/hooks/usePaginationReset';
@@ -31,6 +33,12 @@ import { toSentenceCase } from '@/utils/common/helper_functions';
 import { searchPlansForFilter } from '@/utils/filterSearchHelpers';
 import { PlanApi } from '@/api';
 import { useTranslation } from 'react-i18next';
+import { ExternalLink } from 'lucide-react';
+import { integrationCatalogSpecs } from '@/pages/insights-tools/integrations/integrationsData';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { BsThreeDotsVertical } from 'react-icons/bs';
+import formatDate from '@/utils/common/format_date';
+import Label from '@/components/atoms/Label';
 
 type ContextType = {
 	isArchived: boolean;
@@ -105,14 +113,98 @@ const initialSubscriptionFilters: FilterCondition[] = [
 
 const initialSubscriptionSorts: SortOption[] = [{ field: 'updated_at', label: 'Updated At', direction: SortDirection.DESC }];
 
+const PROVIDER_ID_MAP: Record<string, string> = {
+	zoho_books: 'zoho',
+};
+
+const providerLogoMap = new Map(integrationCatalogSpecs.map((spec) => [spec.id, spec.logo]));
+
+const getProviderLogo = (providerType: string): string | undefined => {
+	const mappedId = PROVIDER_ID_MAP[providerType] ?? providerType;
+	return providerLogoMap.get(mappedId);
+};
+
+const formatProviderName = (providerType: string): string => {
+	return providerType
+		.split('_')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+};
+
+interface IntegrationRow {
+	provider_type: string;
+	mapping: IntegrationMappingItem | null;
+	syncOutboundEnabled: boolean;
+}
+
 const CustomerOverviewTab = () => {
 	const { t } = useTranslation('customers');
 	const navigate = useNavigate();
 	const { id: customerId } = useParams();
 	const { isArchived } = useOutletContext<ContextType>();
+	const queryClient = useQueryClient();
+
+	const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+	const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+	const [linkTarget, setLinkTarget] = useState<IntegrationRow | null>(null);
+	const [providerEntityId, setProviderEntityId] = useState('');
 
 	const handleAddSubscription = () => {
 		navigate(`${RouteNames.customers}/${customerId}/add-subscription`);
+	};
+
+	const { mutate: syncIntegration, isPending: isSyncing } = useMutation({
+		mutationFn: () =>
+			IntegrationMappingApi.syncIntegration({
+				entity_type: 'customer',
+				entity_id: customerId!,
+			}),
+		onSuccess: () => {
+			toast.success('Integration sync triggered successfully');
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to trigger sync');
+		},
+	});
+
+	const { mutate: linkIntegration, isPending: isLinking } = useMutation({
+		mutationFn: () =>
+			IntegrationMappingApi.linkIntegration({
+				entity_type: 'customer',
+				entity_id: customerId!,
+				provider_type: linkTarget!.provider_type,
+				provider_entity_id: providerEntityId,
+			}),
+		onSuccess: () => {
+			toast.success('Integration linked successfully');
+			setLinkDialogOpen(false);
+			setProviderEntityId('');
+			setLinkTarget(null);
+			queryClient.invalidateQueries({ queryKey: ['integrationMappings', 'customer', customerId] });
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to link integration');
+		},
+	});
+
+	const handleLinkClick = (row: IntegrationRow) => {
+		setLinkTarget(row);
+		setProviderEntityId('');
+		setLinkDialogOpen(true);
+		setDropdownOpen(null);
+	};
+
+	const handleSyncClick = useCallback(() => {
+		setDropdownOpen(null);
+		syncIntegration();
+	}, [syncIntegration]);
+
+	const handleLinkSubmit = () => {
+		if (!providerEntityId.trim()) {
+			toast.error('Provider Entity ID is required');
+			return;
+		}
+		linkIntegration();
 	};
 
 	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSortingWithPersistence({
@@ -146,7 +238,7 @@ const CustomerOverviewTab = () => {
 		enabled: !!customerId,
 	});
 
-	const currentPageItems = subscriptionsData?.items ?? [];
+	const currentPageItems = useMemo(() => subscriptionsData?.items ?? [], [subscriptionsData?.items]);
 
 	const uniquePlanIds = useMemo(() => [...new Set(currentPageItems.map((s) => s.plan_id).filter(Boolean))] as string[], [currentPageItems]);
 
@@ -263,6 +355,122 @@ const CustomerOverviewTab = () => {
 	});
 	void _customer; // used for cache; loading/error drive UI
 
+	const { data: integrationConfigData } = useQuery({
+		queryKey: ['integrationConfig'],
+		queryFn: () => IntegrationMappingApi.getIntegrationConfig(),
+	});
+
+	const hasIntegrationConfig = (integrationConfigData?.integrations?.length ?? 0) > 0;
+
+	const { data: integrationMappingsData } = useQuery({
+		queryKey: ['integrationMappings', 'customer', customerId],
+		queryFn: () => IntegrationMappingApi.getIntegrationMappings('customer', customerId!),
+		enabled: !!customerId && hasIntegrationConfig,
+	});
+
+	const integrationRows = useMemo<IntegrationRow[]>(() => {
+		const configs = integrationConfigData?.integrations ?? [];
+		const mappings = integrationMappingsData?.items ?? [];
+		const mappingByProvider = new Map(mappings.map((m) => [m.provider_type, m]));
+		return configs.map((cfg: IntegrationConfigItem) => ({
+			provider_type: cfg.provider,
+			mapping: mappingByProvider.get(cfg.provider) ?? null,
+			syncOutboundEnabled: !!cfg.current_config?.customer?.outbound,
+		}));
+	}, [integrationConfigData?.integrations, integrationMappingsData?.items]);
+
+	const integrationColumns: ColumnData<IntegrationRow>[] = useMemo(
+		() => [
+			{
+				title: 'Integration',
+				render: (row: IntegrationRow) => {
+					const logo = getProviderLogo(row.provider_type);
+					return (
+						<div className='flex items-center gap-2'>
+							{logo && <img src={logo} alt={row.provider_type} className='size-5 object-contain' />}
+							<span className='font-medium text-foreground'>{formatProviderName(row.provider_type)}</span>
+						</div>
+					);
+				},
+			},
+			{
+				title: 'Integration Customer ID',
+				render: (row: IntegrationRow) => <span className='text-muted-foreground'>{row.mapping?.provider_entity_id || '—'}</span>,
+			},
+			{
+				title: 'Created At',
+				render: (row: IntegrationRow) => (
+					<span className='text-muted-foreground'>{row.mapping?.created_at ? formatDate(row.mapping.created_at) : '—'}</span>
+				),
+			},
+			{
+				title: 'Updated At',
+				render: (row: IntegrationRow) => (
+					<span className='text-muted-foreground'>{row.mapping?.updated_at ? formatDate(row.mapping.updated_at) : '—'}</span>
+				),
+			},
+			{
+				title: '',
+				width: 60,
+				align: 'center' as const,
+				fieldVariant: 'interactive' as const,
+				render: (row: IntegrationRow) =>
+					row.mapping?.provider_url ? (
+						<a
+							href={row.mapping.provider_url}
+							target='_blank'
+							rel='noopener noreferrer'
+							data-interactive='true'
+							className='inline-flex items-center text-primary hover:text-primary/80'>
+							<ExternalLink className='size-4' />
+						</a>
+					) : null,
+			},
+			{
+				title: '',
+				width: 40,
+				fieldVariant: 'interactive' as const,
+				render: (row: IntegrationRow) => {
+					const hasProviderEntity = !!row.mapping?.provider_entity_id;
+					return (
+						<div data-interactive='true'>
+							<DropdownMenu
+								open={dropdownOpen === row.provider_type}
+								onOpenChange={(open) => setDropdownOpen(open ? row.provider_type : null)}>
+								<DropdownMenuTrigger asChild>
+									<button className='focus:outline-none'>
+										<BsThreeDotsVertical className='text-base text-muted-foreground hover:text-foreground transition-colors' />
+									</button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align='end'>
+									<DropdownMenuItem
+										disabled={hasProviderEntity}
+										onSelect={(e) => {
+											e.preventDefault();
+											handleLinkClick(row);
+										}}
+										className='cursor-pointer'>
+										{t('common:actions.link')}
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										disabled={isSyncing || !row.syncOutboundEnabled}
+										onSelect={(e) => {
+											e.preventDefault();
+											handleSyncClick();
+										}}
+										className='cursor-pointer'>
+										{t('common:actions.sync')}
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</div>
+					);
+				},
+			},
+		],
+		[dropdownOpen, isSyncing, handleSyncClick, t],
+	);
+
 	if (subscriptionsLoading || usageLoading || upcomingGrantsLoading || customerLoading || isOverridesLoading || isPlansLoading) {
 		return <Loader />;
 	}
@@ -315,6 +523,49 @@ const CustomerOverviewTab = () => {
 			)}
 
 			<UpcomingCreditGrantApplicationsTable data={upcomingCreditGrantApplications?.items ?? []} customerId={customerId} />
+
+			{hasIntegrationConfig && (
+				<Card variant='notched'>
+					<CardHeader title={t('common:integrations.title')} titleClassName='font-semibold' />
+					<FlexpriceTable data={integrationRows} columns={integrationColumns} showEmptyRow variant='no-bordered' />
+				</Card>
+			)}
+
+			<Dialog
+				isOpen={linkDialogOpen}
+				onOpenChange={(open) => {
+					setLinkDialogOpen(open);
+					if (!open) {
+						setProviderEntityId('');
+						setLinkTarget(null);
+					}
+				}}
+				title={`${t('common:actions.link')} ${linkTarget ? formatProviderName(linkTarget.provider_type) : t('common:integrations.integration')}`}>
+				<div className='space-y-4'>
+					<div className='space-y-1'>
+						<Label label={t('common:integrations.providerEntityId')} />
+						<Input
+							value={providerEntityId}
+							onChange={(val) => setProviderEntityId(val)}
+							placeholder={t('common:integrations.enterProviderEntityId')}
+						/>
+					</div>
+					<div className='flex justify-end gap-2'>
+						<Button
+							variant='outline'
+							onClick={() => {
+								setLinkDialogOpen(false);
+								setProviderEntityId('');
+								setLinkTarget(null);
+							}}>
+							{t('common:actions.cancel')}
+						</Button>
+						<Button onClick={handleLinkSubmit} disabled={isLinking || !providerEntityId.trim()}>
+							{isLinking ? t('common:actions.linking') : t('common:actions.link')}
+						</Button>
+					</div>
+				</div>
+			</Dialog>
 		</div>
 	);
 };

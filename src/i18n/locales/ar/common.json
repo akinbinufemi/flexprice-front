@@ -30,7 +30,10 @@
 		"reset": "إعادة تعيين",
 		"clear": "مسح",
 		"keep": "احتفظ",
-		"view": "عرض"
+		"view": "عرض",
+		"link": "ربط",
+		"sync": "مزامنة",
+		"linking": "جارٍ الربط..."
 	},
 	"status": {
 		"active": "نشط",
@@ -327,6 +330,12 @@
 		"value": "القيمة",
 		"addAnotherItem": "إضافة عنصر آخر",
 		"remove": "إزالة"
+	},
+	"integrations": {
+		"title": "التكاملات",
+		"providerEntityId": "معرف كيان المزود",
+		"enterProviderEntityId": "أدخل معرف كيان المزود",
+		"integration": "التكامل"
 	},
 	"labels": {
 		"payload": "الحمولة",
