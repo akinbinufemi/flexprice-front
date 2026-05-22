@@ -1,6 +1,6 @@
 import { FilterCondition } from '@/components/molecules/QueryBuilder';
 import { SortOption } from '@/components/molecules/Table/Toolbar';
-import { Pagination, TAX_RATE_TYPE, TAX_RATE_STATUS, TAX_RATE_SCOPE, TAXRATE_ENTITY_TYPE, TaxRate } from '@/models';
+import { Pagination, TAX_RATE_TYPE, TAX_RATE_STATUS, TAX_RATE_SCOPE, TAXRATE_ENTITY_TYPE, TaxRate, ENTITY_STATUS } from '@/models';
 import { QueryFilter } from './base';
 
 // CreateTaxRateRequest represents the request to create a tax rate
@@ -54,6 +54,7 @@ export interface TaxRateResponse {
 	name: string;
 	description: string;
 	code: string;
+	status: ENTITY_STATUS;
 	tax_rate_status: TAX_RATE_STATUS;
 	tax_rate_type: TAX_RATE_TYPE;
 	scope: TAX_RATE_SCOPE;
