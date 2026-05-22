@@ -53,7 +53,7 @@ const PremiumFeature: React.FC<Props> = ({ children, isPremiumFeature = false })
 	const { t } = useTranslation('catalog');
 	const [isOpen, setIsOpen] = useState(false);
 	return (
-		<div>
+		<div className='h-full'>
 			<Dialog
 				isOpen={isOpen}
 				onOpenChange={setIsOpen}
@@ -68,6 +68,7 @@ const PremiumFeature: React.FC<Props> = ({ children, isPremiumFeature = false })
 			</Dialog>
 			{isPremiumFeature ? (
 				<div
+					className='h-full'
 					onClick={(e) => {
 						if (isPremiumFeature) {
 							e.preventDefault();
@@ -79,7 +80,7 @@ const PremiumFeature: React.FC<Props> = ({ children, isPremiumFeature = false })
 						pointerEvents: isPremiumFeature ? 'auto' : 'none',
 						cursor: isPremiumFeature ? 'pointer' : 'not-allowed',
 					}}>
-					<div className={cn(isPremiumFeature && 'pointer-events-none cursor-not-allowed')}>{children}</div>
+					<div className={cn('h-full', isPremiumFeature && 'pointer-events-none cursor-not-allowed')}>{children}</div>
 				</div>
 			) : (
 				children
