@@ -1,4 +1,4 @@
-import { FormHeader, Spacer, Button, Divider, Loader, Card, CardHeader, Dialog, Input } from '@/components/atoms';
+import { FormHeader, Spacer, Button, Divider, Loader, Card, CardHeader } from '@/components/atoms';
 import {
 	InvoiceTableMenu,
 	InvoicePaymentStatusModal,
@@ -6,16 +6,16 @@ import {
 	InvoiceLineItemTable,
 	AppliedTaxesTable,
 	InvoiceDownloadFormatDialog,
+	IntegrationMappingCard,
 } from '@/components/molecules';
 import useUser from '@/hooks/useUser';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import InvoiceApi from '@/api/InvoiceApi';
 import CustomerApi from '@/api/CustomerApi';
-import IntegrationMappingApi, { IntegrationConfigItem, IntegrationMappingItem } from '@/api/IntegrationMappingApi';
 import formatDate from '@/utils/common/format_date';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, ExternalLink } from 'lucide-react';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
+import { FC, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
 import { cn } from '@/lib/utils';
@@ -23,35 +23,7 @@ import { getPaymentStatusChip } from '@/components/molecules/InvoiceTable/Invoic
 import { INVOICE_STATUS, INVOICE_TYPE } from '@/models/Invoice';
 import { getTypographyClass } from '@/lib/typography';
 import RedirectCell from '@/components/molecules/Table/RedirectCell';
-import FlexpriceTable, { ColumnData } from '@/components/molecules/Table';
-import { integrationCatalogSpecs } from '@/pages/insights-tools/integrations/integrationsData';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { BsThreeDotsVertical } from 'react-icons/bs';
-import Label from '@/components/atoms/Label';
 import { useTranslation } from 'react-i18next';
-const PROVIDER_ID_MAP: Record<string, string> = {
-	zoho_books: 'zoho',
-};
-
-const providerLogoMap = new Map(integrationCatalogSpecs.map((spec) => [spec.id, spec.logo]));
-
-const getProviderLogo = (providerType: string): string | undefined => {
-	const mappedId = PROVIDER_ID_MAP[providerType] ?? providerType;
-	return providerLogoMap.get(mappedId);
-};
-
-const formatProviderName = (providerType: string): string => {
-	return providerType
-		.split('_')
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ');
-};
-
-interface IntegrationRow {
-	provider_type: string;
-	mapping: IntegrationMappingItem | null;
-	syncOutboundEnabled: boolean;
-}
 
 interface Props {
 	invoice_id: string;
@@ -68,12 +40,7 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 	});
 	const [isDownloadFormatOpen, setIsDownloadFormatOpen] = useState(false);
 	const [metadata, setMetadata] = useState<Record<string, string>>({});
-	const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-	const [linkDialogOpen, setLinkDialogOpen] = useState(false);
-	const [linkTarget, setLinkTarget] = useState<IntegrationRow | null>(null);
-	const [providerEntityId, setProviderEntityId] = useState('');
 	const { updateBreadcrumb } = useBreadcrumbsStore();
-	const queryClient = useQueryClient();
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ['fetchInvoice', invoice_id],
 		queryFn: async () => {
@@ -101,176 +68,6 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 		},
 		enabled: hasSubscriptionCustomer,
 	});
-
-	const { data: integrationConfigData } = useQuery({
-		queryKey: ['integrationConfig'],
-		queryFn: () => IntegrationMappingApi.getIntegrationConfig(),
-	});
-
-	const hasIntegrationConfig = (integrationConfigData?.integrations?.length ?? 0) > 0;
-
-	const { data: integrationMappingsData } = useQuery({
-		queryKey: ['integrationMappings', 'invoice', invoice_id],
-		queryFn: () => IntegrationMappingApi.getIntegrationMappings('invoice', invoice_id),
-		enabled: !!invoice_id && hasIntegrationConfig,
-	});
-
-	const integrationRows = useMemo<IntegrationRow[]>(() => {
-		const configs = integrationConfigData?.integrations ?? [];
-		const mappings = integrationMappingsData?.items ?? [];
-		const mappingByProvider = new Map(mappings.map((m) => [m.provider_type, m]));
-		return configs.map((cfg: IntegrationConfigItem) => ({
-			provider_type: cfg.provider,
-			mapping: mappingByProvider.get(cfg.provider) ?? null,
-			syncOutboundEnabled: !!cfg.current_config?.invoice?.outbound,
-		}));
-	}, [integrationConfigData?.integrations, integrationMappingsData?.items]);
-
-	const { mutate: syncIntegration, isPending: isSyncing } = useMutation({
-		mutationFn: () =>
-			IntegrationMappingApi.syncIntegration({
-				entity_type: 'invoice',
-				entity_id: invoice_id,
-			}),
-		onSuccess: () => {
-			toast.success('Integration sync triggered successfully');
-		},
-		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to trigger sync');
-		},
-	});
-
-	const { mutate: linkIntegration, isPending: isLinking } = useMutation({
-		mutationFn: () =>
-			IntegrationMappingApi.linkIntegration({
-				entity_type: 'invoice',
-				entity_id: invoice_id,
-				provider_type: linkTarget!.provider_type,
-				provider_entity_id: providerEntityId,
-			}),
-		onSuccess: () => {
-			toast.success('Integration linked successfully');
-			setLinkDialogOpen(false);
-			setProviderEntityId('');
-			setLinkTarget(null);
-			queryClient.invalidateQueries({ queryKey: ['integrationMappings', 'invoice', invoice_id] });
-		},
-		onError: (error: Error) => {
-			toast.error(error.message || 'Failed to link integration');
-		},
-	});
-
-	const handleLinkClick = (row: IntegrationRow) => {
-		setLinkTarget(row);
-		setProviderEntityId('');
-		setLinkDialogOpen(true);
-		setDropdownOpen(null);
-	};
-
-	const handleSyncClick = useCallback(() => {
-		setDropdownOpen(null);
-		syncIntegration();
-	}, [syncIntegration]);
-
-	const handleLinkSubmit = () => {
-		if (!providerEntityId.trim()) {
-			toast.error('Provider Entity ID is required');
-			return;
-		}
-		linkIntegration();
-	};
-
-	const integrationColumns: ColumnData<IntegrationRow>[] = useMemo(
-		() => [
-			{
-				title: 'Integration',
-				render: (row: IntegrationRow) => {
-					const logo = getProviderLogo(row.provider_type);
-					return (
-						<div className='flex items-center gap-2'>
-							{logo && <img src={logo} alt={row.provider_type} className='size-5 object-contain' />}
-							<span className='font-medium text-foreground'>{formatProviderName(row.provider_type)}</span>
-						</div>
-					);
-				},
-			},
-			{
-				title: 'Integration Invoice ID',
-				render: (row: IntegrationRow) => <span className='text-muted-foreground'>{row.mapping?.provider_entity_id || '—'}</span>,
-			},
-			{
-				title: 'Created At',
-				render: (row: IntegrationRow) => (
-					<span className='text-muted-foreground'>{row.mapping?.created_at ? formatDate(row.mapping.created_at) : '—'}</span>
-				),
-			},
-			{
-				title: 'Updated At',
-				render: (row: IntegrationRow) => (
-					<span className='text-muted-foreground'>{row.mapping?.updated_at ? formatDate(row.mapping.updated_at) : '—'}</span>
-				),
-			},
-			{
-				title: '',
-				width: 60,
-				align: 'center' as const,
-				fieldVariant: 'interactive' as const,
-				render: (row: IntegrationRow) =>
-					row.mapping?.provider_url ? (
-						<a
-							href={row.mapping.provider_url}
-							target='_blank'
-							rel='noopener noreferrer'
-							data-interactive='true'
-							className='inline-flex items-center text-primary hover:text-primary/80'>
-							<ExternalLink className='size-4' />
-						</a>
-					) : null,
-			},
-			{
-				title: '',
-				width: 40,
-				fieldVariant: 'interactive' as const,
-				render: (row: IntegrationRow) => {
-					const hasProviderEntity = !!row.mapping?.provider_entity_id;
-					return (
-						<div data-interactive='true'>
-							<DropdownMenu
-								open={dropdownOpen === row.provider_type}
-								onOpenChange={(open) => setDropdownOpen(open ? row.provider_type : null)}>
-								<DropdownMenuTrigger asChild>
-									<button className='focus:outline-none'>
-										<BsThreeDotsVertical className='text-base text-muted-foreground hover:text-foreground transition-colors' />
-									</button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align='end'>
-									<DropdownMenuItem
-										disabled={hasProviderEntity || data?.invoice_status !== INVOICE_STATUS.FINALIZED}
-										onSelect={(e) => {
-											e.preventDefault();
-											handleLinkClick(row);
-										}}
-										className='cursor-pointer'>
-										{t('common:actions.link')}
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										disabled={isSyncing || !row.syncOutboundEnabled || data?.invoice_status !== INVOICE_STATUS.FINALIZED}
-										onSelect={(e) => {
-											e.preventDefault();
-											handleSyncClick();
-										}}
-										className='cursor-pointer'>
-										{t('common:actions.sync')}
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</div>
-					);
-				},
-			},
-		],
-		[dropdownOpen, isSyncing, data?.invoice_status, handleSyncClick, t],
-	);
 
 	const { mutateAsync: downloadInvoicePdfAsync, isPending: isPdfDownloadPending } = useMutation({
 		mutationFn: async () => InvoiceApi.downloadInvoicePdf(invoice_id),
@@ -485,12 +282,11 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 				</Card>
 			)}
 
-			{hasIntegrationConfig && (
-				<Card variant='notched'>
-					<CardHeader title={t('common:integrations.title')} titleClassName='font-semibold' />
-					<FlexpriceTable data={integrationRows} columns={integrationColumns} showEmptyRow variant='no-bordered' />
-				</Card>
-			)}
+			<IntegrationMappingCard
+				entityType='invoice'
+				entityId={invoice_id}
+				isActionDisabled={data?.invoice_status !== INVOICE_STATUS.FINALIZED}
+			/>
 
 			{/* metadata section - only show if metadata exists */}
 			{metadata && Object.keys(metadata).length > 0 && (
@@ -520,42 +316,6 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 					</div>
 				</Card>
 			)}
-
-			<Dialog
-				isOpen={linkDialogOpen}
-				onOpenChange={(open) => {
-					setLinkDialogOpen(open);
-					if (!open) {
-						setProviderEntityId('');
-						setLinkTarget(null);
-					}
-				}}
-				title={`${t('common:actions.link')} ${linkTarget ? formatProviderName(linkTarget.provider_type) : t('common:integrations.integration')}`}>
-				<div className='space-y-4'>
-					<div className='space-y-1'>
-						<Label label={t('common:integrations.providerEntityId')} />
-						<Input
-							value={providerEntityId}
-							onChange={(val) => setProviderEntityId(val)}
-							placeholder={t('common:integrations.enterProviderEntityId')}
-						/>
-					</div>
-					<div className='flex justify-end gap-2'>
-						<Button
-							variant='outline'
-							onClick={() => {
-								setLinkDialogOpen(false);
-								setProviderEntityId('');
-								setLinkTarget(null);
-							}}>
-							{t('common:actions.cancel')}
-						</Button>
-						<Button onClick={handleLinkSubmit} disabled={isLinking || !providerEntityId.trim()}>
-							{isLinking ? t('common:actions.linking') : t('common:actions.link')}
-						</Button>
-					</div>
-				</div>
-			</Dialog>
 		</div>
 	);
 };
