@@ -339,7 +339,8 @@
 		"title": "Integrations",
 		"providerEntityId": "Provider Entity ID",
 		"enterProviderEntityId": "Enter provider entity ID",
-		"integration": "Integration"
+		"integration": "Integration",
+		"actions": "Integration actions"
 	},
 	"labels": {
 		"payload": "Payload",

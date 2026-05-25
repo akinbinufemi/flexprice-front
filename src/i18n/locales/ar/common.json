@@ -335,7 +335,8 @@
 		"title": "التكاملات",
 		"providerEntityId": "معرف كيان المزود",
 		"enterProviderEntityId": "أدخل معرف كيان المزود",
-		"integration": "التكامل"
+		"integration": "التكامل",
+		"actions": "إجراءات التكامل"
 	},
 	"labels": {
 		"payload": "الحمولة",

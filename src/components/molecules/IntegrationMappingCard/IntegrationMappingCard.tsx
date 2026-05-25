@@ -23,6 +23,15 @@ const getProviderLogo = (providerType: string): string | undefined => {
 	return providerLogoMap.get(mappedId);
 };
 
+const isSafeExternalUrl = (value: string): boolean => {
+	try {
+		const parsed = new URL(value);
+		return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+	} catch {
+		return false;
+	}
+};
+
 const formatProviderName = (providerType: string): string => {
 	return providerType
 		.split('_')
@@ -64,7 +73,7 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 
 	const hasIntegrationConfig = (integrationConfigData?.integrations?.length ?? 0) > 0;
 
-	const { data: integrationMappingsData } = useQuery({
+	const { data: integrationMappingsData, isPending: isMappingsPending } = useQuery({
 		queryKey: ['integrationMappings', entityType, entityId],
 		queryFn: () => IntegrationMappingApi.getIntegrationMappings(entityType, entityId),
 		enabled: !!entityId && hasIntegrationConfig,
@@ -115,12 +124,12 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 		},
 	});
 
-	const handleLinkClick = (row: IntegrationRow) => {
+	const handleLinkClick = useCallback((row: IntegrationRow) => {
 		setLinkTarget(row);
 		setProviderEntityId('');
 		setLinkDialogOpen(true);
 		setDropdownOpen(null);
-	};
+	}, []);
 
 	const handleSyncClick = useCallback(() => {
 		setDropdownOpen(null);
@@ -128,6 +137,9 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 	}, [syncIntegration]);
 
 	const handleLinkSubmit = () => {
+		if (!linkTarget) {
+			return;
+		}
 		if (!providerEntityId.trim()) {
 			toast.error('Provider Entity ID is required');
 			return;
@@ -173,7 +185,7 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 				align: 'center' as const,
 				fieldVariant: 'interactive' as const,
 				render: (row: IntegrationRow) =>
-					row.mapping?.provider_url ? (
+					row.mapping?.provider_url && isSafeExternalUrl(row.mapping.provider_url) ? (
 						<a
 							href={row.mapping.provider_url}
 							target='_blank'
@@ -196,13 +208,16 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 								open={dropdownOpen === row.provider_type}
 								onOpenChange={(open) => setDropdownOpen(open ? row.provider_type : null)}>
 								<DropdownMenuTrigger asChild>
-									<button className='focus:outline-none'>
+									<button
+										type='button'
+										aria-label={t('integrations.actions')}
+										className='rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>
 										<BsThreeDotsVertical className='text-base text-muted-foreground hover:text-foreground transition-colors' />
 									</button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align='end'>
 									<DropdownMenuItem
-										disabled={hasProviderEntity || isActionDisabled}
+										disabled={isMappingsPending || hasProviderEntity || isActionDisabled}
 										onSelect={(e) => {
 											e.preventDefault();
 											handleLinkClick(row);
@@ -211,7 +226,7 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 										{t('actions.link')}
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										disabled={isSyncing || !row.syncOutboundEnabled || isActionDisabled}
+										disabled={isMappingsPending || isSyncing || !row.syncOutboundEnabled || isActionDisabled}
 										onSelect={(e) => {
 											e.preventDefault();
 											handleSyncClick();
@@ -226,7 +241,7 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 				},
 			},
 		],
-		[dropdownOpen, isSyncing, isActionDisabled, resolvedColumnTitle, handleSyncClick, t],
+		[dropdownOpen, isMappingsPending, isSyncing, isActionDisabled, resolvedColumnTitle, handleLinkClick, handleSyncClick, t],
 	);
 
 	if (!hasIntegrationConfig) {
