@@ -335,6 +335,10 @@ const QueryableDataArea = <T = any,>({
 	const onMainDataChangeRef = useRef(dataConfig.onMainDataChange);
 	onMainDataChangeRef.current = dataConfig.onMainDataChange;
 
+	useEffect(() => {
+		reset();
+	}, [filters, sorts]);
+
 	useLayoutEffect(() => {
 		onMainDataChangeRef.current?.(data);
 	}, [data]);
