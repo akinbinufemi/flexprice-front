@@ -702,6 +702,15 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			inheritancePayload.invoicing_customer_external_id = invoicingCustomerExternalId;
 		}
 
+		const subscriptionCommitmentAmount =
+			sanitized.commitmentAmount && sanitized.commitmentAmount.trim() !== '' ? parseFloat(sanitized.commitmentAmount) : undefined;
+		const hasLineItemCommitments = sanitized.finalLineItemCommitments && Object.keys(sanitized.finalLineItemCommitments).length > 0;
+		const hasAddonLineItemCommitments =
+			sanitized.sanitizedAddons?.some((addon) => addon.line_item_commitments && Object.keys(addon.line_item_commitments).length > 0) ??
+			false;
+		const shouldSendSubscriptionCommitment =
+			subscriptionCommitmentAmount !== undefined && !hasLineItemCommitments && !hasAddonLineItemCommitments;
+
 		// Build API payload
 		const payload: CreateSubscriptionRequest = {
 			billing_period: sanitized.billingPeriod.toUpperCase() as BILLING_PERIOD,
@@ -713,9 +722,11 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			plan_id: sanitized.selectedPlan,
 			start_date: sanitized.finalStartDate,
 			end_date: sanitized.finalEndDate,
-			commitment_amount:
-				sanitized.commitmentAmount && sanitized.commitmentAmount.trim() !== '' ? parseFloat(sanitized.commitmentAmount) : undefined,
-			overage_factor: sanitized.overageFactor && sanitized.overageFactor.trim() !== '' ? parseFloat(sanitized.overageFactor) : undefined,
+			commitment_amount: shouldSendSubscriptionCommitment ? subscriptionCommitmentAmount : undefined,
+			overage_factor:
+				shouldSendSubscriptionCommitment && sanitized.overageFactor && sanitized.overageFactor.trim() !== ''
+					? parseFloat(sanitized.overageFactor)
+					: undefined,
 			lookup_key: '',
 			phases: sanitized.sanitizedPhases,
 			override_line_items:
@@ -735,8 +746,9 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 						sanitized.creditGrants.length > 0
 						? sanitized.creditGrants.map(internalToCreateRequest)
 						: undefined,
-			enable_true_up: subscriptionState.enable_true_up,
-			commitment_duration: sanitized.commitmentDuration ? (sanitized.commitmentDuration as BILLING_PERIOD) : undefined,
+			enable_true_up: shouldSendSubscriptionCommitment ? subscriptionState.enable_true_up : false,
+			commitment_duration:
+				shouldSendSubscriptionCommitment && sanitized.commitmentDuration ? (sanitized.commitmentDuration as BILLING_PERIOD) : undefined,
 			subscription_status: isDraftParam ? SUBSCRIPTION_STATUS.DRAFT : undefined,
 			proration_behavior: subscriptionState.prorationCreateLineItems
 				? SUBSCRIPTION_PRORATION_BEHAVIOR.CREATE_PRORATIONS
