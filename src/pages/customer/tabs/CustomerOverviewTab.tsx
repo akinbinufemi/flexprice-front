@@ -7,7 +7,7 @@ import { Subscription, SUBSCRIPTION_STATUS, PRICE_ENTITY_TYPE } from '@/models';
 import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
 import CustomerUsageTable from '@/components/molecules/CustomerUsageTable';
-import { UpcomingCreditGrantApplicationsTable } from '@/components/molecules';
+import { UpcomingCreditGrantApplicationsTable, IntegrationMappingCard } from '@/components/molecules';
 import SubscriptionApi from '@/api/SubscriptionApi';
 import { PriceApi } from '@/api';
 import { useMemo } from 'react';
@@ -146,7 +146,7 @@ const CustomerOverviewTab = () => {
 		enabled: !!customerId,
 	});
 
-	const currentPageItems = subscriptionsData?.items ?? [];
+	const currentPageItems = useMemo(() => subscriptionsData?.items ?? [], [subscriptionsData?.items]);
 
 	const uniquePlanIds = useMemo(() => [...new Set(currentPageItems.map((s) => s.plan_id).filter(Boolean))] as string[], [currentPageItems]);
 
@@ -315,6 +315,8 @@ const CustomerOverviewTab = () => {
 			)}
 
 			<UpcomingCreditGrantApplicationsTable data={upcomingCreditGrantApplications?.items ?? []} customerId={customerId} />
+
+			<IntegrationMappingCard entityType='customer' entityId={customerId!} />
 		</div>
 	);
 };
