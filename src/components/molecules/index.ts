@@ -167,6 +167,7 @@ export { default as SecretKeyDrawer } from './SecretKeyDrawer';
 export { default as UpdateTenantDrawer } from './Tenant/UpdateTenantDrawer';
 
 // Integrations & Connections
+export { IntegrationMappingCard } from './IntegrationMappingCard';
 export { default as HubSpotConnectionDrawer } from './HubSpotConnectionDrawer';
 export { default as NomodConnectionDrawer } from './NomodConnectionDrawer';
 export { default as MoyasarConnectionDrawer } from './MoyasarConnectionDrawer';

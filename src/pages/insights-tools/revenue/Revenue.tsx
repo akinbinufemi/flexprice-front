@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Page, Select } from '@/components/atoms';
@@ -96,15 +96,17 @@ const Revenue = () => {
 		[t],
 	);
 	const [selectedFilter, setSelectedFilter] = useState<RevenueFilterValue>('this_quarter');
+	const [selectedCurrency, setSelectedCurrency] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [search, setSearch] = useState('');
 	const { start, end } = useMemo(() => getDateRangeForPeriod(selectedFilter), [selectedFilter]);
 
-	const showGraph = GRAPH_ELIGIBLE.includes(selectedFilter);
+	const showGraph = GRAPH_ELIGIBLE.includes(selectedFilter) && selectedCurrency !== '';
 	const window_size: 'MONTH' | undefined = showGraph ? 'MONTH' : undefined;
 
 	const handleFilterChange = (value: RevenueFilterValue) => {
 		setSelectedFilter(value);
+		setSelectedCurrency(''); // re-run auto-select for the new period
 		setCurrentPage(1);
 		setSearch('');
 	};
@@ -114,35 +116,45 @@ const Revenue = () => {
 		setCurrentPage(1);
 	};
 
+	// Single revenue query — returns items (each with their currency) and per-currency summaries.
 	const { data, isLoading } = useQuery({
 		queryKey: ['revenue-dashboard', selectedFilter],
-		queryFn: async () => {
-			return await RevenueDashboardApi.getRevenueDashboard({
+		queryFn: () =>
+			RevenueDashboardApi.getRevenueDashboard({
 				period_start: start.toISOString(),
 				period_end: end.toISOString(),
 				customer_ids: [],
 				window_size,
-			});
-		},
+			}),
 	});
 
-	const summary = data?.summary;
-	const items = data?.items ?? [];
+	// Available currencies come directly from the response (no separate call).
+	const availableCurrencies = useMemo(() => Object.keys(data?.summaries ?? {}).sort(), [data?.summaries]);
+
+	// Auto-select the first currency once data lands (or after period change resets selection).
+	useEffect(() => {
+		if (availableCurrencies.length > 0 && selectedCurrency === '') {
+			setSelectedCurrency(availableCurrencies[0]);
+		}
+	}, [availableCurrencies, selectedCurrency]);
+
+	// Filter items to the selected currency on the frontend.
+	const allItems = data?.items ?? [];
+	const items = useMemo(
+		() => (selectedCurrency === '' ? allItems : allItems.filter((row) => (row.currency || '').toLowerCase() === selectedCurrency)),
+		[allItems, selectedCurrency],
+	);
+
 	const filteredItems = search.trim()
 		? items.filter((row) => (row.customer_name || row.external_customer_id || '').toLowerCase().includes(search.trim().toLowerCase()))
 		: items;
 	const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
 	const pagedItems = filteredItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 	const hasRows = items.length > 0;
-	const hasAnyMetricData = [
-		toNumberOrNull(summary?.total_revenue),
-		toNumberOrNull(summary?.total_fixed_revenue),
-		toNumberOrNull(summary?.total_usage_revenue),
-		toNumberOrNull(summary?.voice_minutes),
-		toNumberOrNull(summary?.cpm),
-	].some((value) => Number(value ?? 0) > 0);
-	const showGlobalEmpty = !isLoading && !hasRows && !hasAnyMetricData;
+	const showGlobalEmpty = !isLoading && !hasRows;
 
+	// Summary for the selected currency, picked from the summaries map.
+	const summary = selectedCurrency !== '' ? data?.summaries?.[selectedCurrency] : undefined;
 	const showVoiceColumns = summary != null && (summary.cpm != null || summary.voice_minutes != null);
 
 	const normalizedSummary = {
@@ -151,10 +163,14 @@ const Revenue = () => {
 		usageRevenue: toNumberOrNull(summary?.total_usage_revenue),
 		totalMinutes: toNumberOrNull(summary?.voice_minutes),
 		cpm: toNumberOrNull(summary?.cpm),
-		currency: 'usd',
+		currency: selectedCurrency,
 	};
 
 	const graph = data?.graph;
+	const currencyOptions = useMemo(
+		() => availableCurrencies.map((c) => ({ value: c.toLowerCase(), label: c.toUpperCase() })),
+		[availableCurrencies],
+	);
 	const graphCharts = useMemo(() => {
 		const charts: { key: 'total_revenue' | 'voice_minutes'; title: string; type: 'currency' | 'minutes' }[] = [];
 		if (!showGraph || !graph) return charts;
@@ -171,53 +187,68 @@ const Revenue = () => {
 		<Page
 			heading={t('insightsTools.revenue.pageHeading')}
 			headingCTA={
-				<div className='w-[220px]'>
-					<Select options={FILTER_OPTIONS} value={selectedFilter} onChange={(value) => handleFilterChange(value as RevenueFilterValue)} />
+				<div className='flex items-center gap-2'>
+					<div className='w-[220px]'>
+						<Select options={FILTER_OPTIONS} value={selectedFilter} onChange={(value) => handleFilterChange(value as RevenueFilterValue)} />
+					</div>
+					{currencyOptions.length > 0 && (
+						<div className='w-[100px]'>
+							<Select
+								options={currencyOptions}
+								value={selectedCurrency}
+								onChange={(value) => {
+									setSelectedCurrency(value as string);
+									setCurrentPage(1);
+									setSearch('');
+								}}
+							/>
+						</div>
+					)}
 				</div>
 			}>
 			<div className='space-y-6 pt-3'>
 				<div className='relative'>
 					<div className={showGlobalEmpty ? 'blur-[3px] select-none pointer-events-none' : ''}>
-						<div className='rounded-xl border border-gray-200 bg-white overflow-hidden'>
-							<div className={`grid grid-cols-1 sm:grid-cols-2 ${showVoiceColumns ? 'lg:grid-cols-5' : 'lg:grid-cols-3'}`}>
-								<MetricTile
-									title={t('insightsTools.revenue.metricNetRevenue')}
-									value={formatCurrency(normalizedSummary.netRevenue, normalizedSummary.currency, naLabel)}
-									loading={isLoading}
-									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
-								/>
-								<MetricTile
-									title={t('insightsTools.revenue.metricContractRevenue')}
-									value={formatCurrency(normalizedSummary.fixedContractRevenue, normalizedSummary.currency, naLabel)}
-									loading={isLoading}
-									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
-								/>
-								<MetricTile
-									title={t('insightsTools.revenue.metricUsageRevenue')}
-									value={formatCurrency(normalizedSummary.usageRevenue, normalizedSummary.currency, naLabel)}
-									loading={isLoading}
-									loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
-									isLast={!showVoiceColumns}
-								/>
-								{showVoiceColumns && (
-									<MetricTile
-										title={t('insightsTools.revenue.metricVoiceMinutes')}
-										value={formatInteger(normalizedSummary.totalMinutes, naLabel)}
-										loading={isLoading}
-										loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
-									/>
-								)}
-								{showVoiceColumns && (
-									<MetricTile
-										title={t('insightsTools.revenue.metricCostPerMinute')}
-										value={formatDecimal(normalizedSummary.cpm, naLabel)}
-										loading={isLoading}
-										loadingLabel={t('insightsTools.revenue.loadingEllipsis')}
-										isLast
-									/>
-								)}
+						{selectedCurrency === '' ? (
+							// No currency selected yet (or no data) — show per-currency summaries from the "summaries" map.
+							isLoading ? (
+								<div className='rounded-xl border border-gray-200 bg-white overflow-hidden'>
+									<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+										<MetricTile title={t('insightsTools.revenue.metricNetRevenue')} value='' loading loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+										<MetricTile title={t('insightsTools.revenue.metricContractRevenue')} value='' loading loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+										<MetricTile title={t('insightsTools.revenue.metricUsageRevenue')} value='' loading loadingLabel={t('insightsTools.revenue.loadingEllipsis')} isLast />
+									</div>
+								</div>
+							) : (
+								<div className='space-y-3'>
+									{Object.entries(data?.summaries ?? {})
+										.sort(([a], [b]) => a.localeCompare(b))
+										.map(([cur, sum]) => (
+											<div key={cur}>
+												<p className='text-xs font-medium text-gray-400 uppercase tracking-wide px-1 mb-1'>{cur}</p>
+												<div className='rounded-xl border border-gray-200 bg-white overflow-hidden'>
+													<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+														<MetricTile title={t('insightsTools.revenue.metricNetRevenue')} value={formatCurrency(toNumberOrNull(sum.total_revenue), cur, naLabel)} loading={false} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+														<MetricTile title={t('insightsTools.revenue.metricContractRevenue')} value={formatCurrency(toNumberOrNull(sum.total_fixed_revenue), cur, naLabel)} loading={false} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+														<MetricTile title={t('insightsTools.revenue.metricUsageRevenue')} value={formatCurrency(toNumberOrNull(sum.total_usage_revenue), cur, naLabel)} loading={false} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} isLast />
+													</div>
+												</div>
+											</div>
+										))}
+								</div>
+							)
+						) : (
+							// Single currency selected — show summary tiles for that currency.
+							<div className='rounded-xl border border-gray-200 bg-white overflow-hidden'>
+								<div className={`grid grid-cols-1 sm:grid-cols-2 ${showVoiceColumns ? 'lg:grid-cols-5' : 'lg:grid-cols-3'}`}>
+									<MetricTile title={t('insightsTools.revenue.metricNetRevenue')} value={formatCurrency(normalizedSummary.netRevenue, normalizedSummary.currency, naLabel)} loading={isLoading} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+									<MetricTile title={t('insightsTools.revenue.metricContractRevenue')} value={formatCurrency(normalizedSummary.fixedContractRevenue, normalizedSummary.currency, naLabel)} loading={isLoading} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />
+									<MetricTile title={t('insightsTools.revenue.metricUsageRevenue')} value={formatCurrency(normalizedSummary.usageRevenue, normalizedSummary.currency, naLabel)} loading={isLoading} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} isLast={!showVoiceColumns} />
+									{showVoiceColumns && <MetricTile title={t('insightsTools.revenue.metricVoiceMinutes')} value={formatInteger(normalizedSummary.totalMinutes, naLabel)} loading={isLoading} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} />}
+									{showVoiceColumns && <MetricTile title={t('insightsTools.revenue.metricCostPerMinute')} value={formatDecimal(normalizedSummary.cpm, naLabel)} loading={isLoading} loadingLabel={t('insightsTools.revenue.loadingEllipsis')} isLast />}
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 
 					{showGlobalEmpty && (
@@ -287,6 +318,9 @@ const Revenue = () => {
 									<TableHead className='rounded-tl-md pl-4 font-semibold text-gray-700 text-[13px]'>
 										{t('insightsTools.revenue.colCustomer')}
 									</TableHead>
+									{selectedCurrency === '' && (
+										<TableHead className='font-semibold text-gray-700 text-[13px]'>Currency</TableHead>
+									)}
 									<TableHead className='font-semibold text-gray-700 text-[13px]'>{t('insightsTools.revenue.metricNetRevenue')}</TableHead>
 									<TableHead className='font-semibold text-gray-700 text-[13px]'>
 										{t('insightsTools.revenue.metricContractRevenue')}
@@ -307,44 +341,54 @@ const Revenue = () => {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{pagedItems.map((row) => (
-									<TableRow
-										key={`${row.customer_id}:${row.external_customer_id}`}
-										className='h-10 align-middle border-b border-gray-200 bg-white hover:bg-gray-50/50 transition-colors'>
-										<TableCell className='py-2.5 pl-4 font-normal text-gray-700 text-[13px] align-middle'>
-											<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`} allowRedirect={Boolean(row.customer_id)}>
-												{row.customer_name || row.external_customer_id || unknownLabel}
-											</RedirectCell>
-										</TableCell>
-										<TableCell className='py-2.5 font-semibold text-gray-700 text-[13px]'>
-											{formatCurrency(
-												toNumberOrNull(row.total_revenue) ??
-													(toNumberOrNull(row.total_usage_revenue) ?? 0) + (toNumberOrNull(row.total_fixed_revenue) ?? 0),
-												normalizedSummary.currency,
-												naLabel,
+								{pagedItems.map((row) => {
+									const rowCurrency = row.currency || selectedCurrency;
+									return (
+										<TableRow
+											key={`${row.customer_id}:${row.currency}`}
+											className='h-10 align-middle border-b border-gray-200 bg-white hover:bg-gray-50/50 transition-colors'>
+											<TableCell className='py-2.5 pl-4 font-normal text-gray-700 text-[13px] align-middle'>
+												<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`} allowRedirect={Boolean(row.customer_id)}>
+													{row.customer_name || row.external_customer_id || unknownLabel}
+												</RedirectCell>
+											</TableCell>
+											{selectedCurrency === '' && (
+												<TableCell className='py-2.5 font-normal text-gray-500 text-[12px]'>
+													<span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600'>
+														{rowCurrency.toUpperCase()}
+													</span>
+												</TableCell>
 											)}
-										</TableCell>
-										<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-											{formatCurrency(toNumberOrNull(row.total_fixed_revenue), normalizedSummary.currency, naLabel)}
-										</TableCell>
-										<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-											{formatCurrency(toNumberOrNull(row.total_usage_revenue), normalizedSummary.currency, naLabel)}
-										</TableCell>
-										{showVoiceColumns && (
-											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-												{formatInteger(toNumberOrNull(row.voice_minutes), naLabel)}
+											<TableCell className='py-2.5 font-semibold text-gray-700 text-[13px]'>
+												{formatCurrency(
+													toNumberOrNull(row.total_revenue) ??
+														(toNumberOrNull(row.total_usage_revenue) ?? 0) + (toNumberOrNull(row.total_fixed_revenue) ?? 0),
+													rowCurrency,
+													naLabel,
+												)}
 											</TableCell>
-										)}
-										{showVoiceColumns && (
 											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
-												{formatDecimal(toNumberOrNull(row.cpm), naLabel)}
+												{formatCurrency(toNumberOrNull(row.total_fixed_revenue), rowCurrency, naLabel)}
 											</TableCell>
-										)}
-									</TableRow>
-								))}
+											<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
+												{formatCurrency(toNumberOrNull(row.total_usage_revenue), rowCurrency, naLabel)}
+											</TableCell>
+											{showVoiceColumns && (
+												<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
+													{formatInteger(toNumberOrNull(row.voice_minutes), naLabel)}
+												</TableCell>
+											)}
+											{showVoiceColumns && (
+												<TableCell className='py-2.5 font-normal text-gray-600 text-[13px]'>
+													{formatDecimal(toNumberOrNull(row.cpm), naLabel)}
+												</TableCell>
+											)}
+										</TableRow>
+									);
+								})}
 								{pagedItems.length === 0 && (
 									<TableRow className='bg-white'>
-										<TableCell colSpan={showVoiceColumns ? 6 : 4} className='pl-4 py-4 font-normal text-gray-500 text-[13px]'>
+										<TableCell colSpan={showVoiceColumns ? 6 : selectedCurrency === '' ? 5 : 4} className='pl-4 py-4 font-normal text-gray-500 text-[13px]'>
 											{search.trim() ? t('insightsTools.revenue.noSearchMatches') : i18n.t('labels.na', { ns: 'common' })}
 										</TableCell>
 									</TableRow>

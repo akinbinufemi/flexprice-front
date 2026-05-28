@@ -6,6 +6,7 @@ import {
 	InvoiceLineItemTable,
 	AppliedTaxesTable,
 	InvoiceDownloadFormatDialog,
+	IntegrationMappingCard,
 } from '@/components/molecules';
 import useUser from '@/hooks/useUser';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
@@ -23,6 +24,7 @@ import { INVOICE_STATUS, INVOICE_TYPE } from '@/models/Invoice';
 import { getTypographyClass } from '@/lib/typography';
 import RedirectCell from '@/components/molecules/Table/RedirectCell';
 import { useTranslation } from 'react-i18next';
+
 interface Props {
 	invoice_id: string;
 	breadcrumb_index: number;
@@ -279,6 +281,12 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 					</div>
 				</Card>
 			)}
+
+			<IntegrationMappingCard
+				entityType='invoice'
+				entityId={invoice_id}
+				isActionDisabled={data?.invoice_status !== INVOICE_STATUS.FINALIZED}
+			/>
 
 			{/* metadata section - only show if metadata exists */}
 			{metadata && Object.keys(metadata).length > 0 && (

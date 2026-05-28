@@ -30,7 +30,10 @@
 		"reset": "Reset",
 		"clear": "Clear",
 		"keep": "Keep",
-		"view": "View"
+		"view": "View",
+		"link": "Link",
+		"sync": "Sync",
+		"linking": "Linking..."
 	},
 	"status": {
 		"active": "Active",
@@ -331,6 +334,13 @@
 		"value": "Value",
 		"addAnotherItem": "Add another item",
 		"remove": "Remove"
+	},
+	"integrations": {
+		"title": "Integrations",
+		"providerEntityId": "Provider Entity ID",
+		"enterProviderEntityId": "Enter provider entity ID",
+		"integration": "Integration",
+		"actions": "Integration actions"
 	},
 	"labels": {
 		"payload": "Payload",
