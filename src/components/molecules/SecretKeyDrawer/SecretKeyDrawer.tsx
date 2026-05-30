@@ -175,7 +175,7 @@ const SecretKeyDrawer: FC<Props> = ({ isOpen, onOpenChange }) => {
 	};
 
 	const maskApiKey = (key: string) => {
-		return '•'.repeat(key.length);
+		return '*'.repeat(key.length);
 	};
 
 	const selectedServiceAccount = useMemo(() => {
