@@ -2,6 +2,7 @@
 	"labels": {
 		"missingValue": "—",
 		"name": "Name",
+		"account": "Account",
 		"token": "Token",
 		"type": "Type",
 		"roles": "Roles",
@@ -136,7 +137,13 @@
 		"rolesHint": "Select one or more roles to define the permissions for this service account",
 		"loadingRoles": "Loading roles...",
 		"noRolesAvailable": "No roles available",
-		"submit": "Create Service Account"
+		"submit": "Create Service Account",
+		"editTitle": "Edit Service Account",
+		"editDescription": "Update the name for this service account.",
+		"namePlaceholder": "e.g. Event Ingestor Service",
+		"saveButton": "Save Changes",
+		"updateSuccess": "Service account updated successfully",
+		"updateFailed": "Failed to update service account"
 	},
 	"webhooks": {
 		"toastFetchError": "Error fetching webhook dashboard: {{message}}",

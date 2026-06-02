@@ -105,6 +105,11 @@ export class UserApi {
 		return await AxiosClient.put<User, UpdateTenantPayload>(`tenants/update`, data);
 	}
 
+	// Update a service account (name, metadata)
+	public static async updateServiceAccount(id: string, data: { name?: string; metadata?: Record<string, string> }): Promise<User> {
+		return await AxiosClient.put<User, typeof data>(`${this.baseUrl}/${id}`, data);
+	}
+
 	// Delete a user
 	public static async deleteUser(userId: string): Promise<void> {
 		return await AxiosClient.delete<void>(`${this.baseUrl}/${userId}`);

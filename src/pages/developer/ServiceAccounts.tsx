@@ -1,4 +1,4 @@
-import { Button, Page, ShortPagination, SectionHeader } from '@/components/atoms';
+import { Button, Page, ShortPagination, SectionHeader, ActionButton, CopyIdButton } from '@/components/atoms';
 import { ColumnData, FlexpriceTable, ApiDocsContent } from '@/components/molecules';
 import { UserApi } from '@/api/UserApi';
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +6,7 @@ import { User } from '@/models';
 import usePagination from '@/hooks/usePagination';
 import { formatDateShort } from '@/utils/common/helper_functions';
 import { Plus, Loader, Bot } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { EmptyPage } from '@/components/organisms';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
@@ -16,7 +16,8 @@ import { useTranslation } from 'react-i18next';
 const ServiceAccountsPage = () => {
 	const { t } = useTranslation(['developers', 'common']);
 	const { page } = usePagination();
-	const [isServiceAccountDrawerOpen, setIsServiceAccountDrawerOpen] = useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+	const [selectedAccount, setSelectedAccount] = useState<User | null>(null);
 
 	const {
 		data: serviceAccountsResponse,
@@ -24,28 +25,37 @@ const ServiceAccountsPage = () => {
 		isError: isServiceAccountsError,
 	} = useQuery({
 		queryKey: ['service-accounts', page],
-		queryFn: async () => {
-			return await UserApi.getServiceAccounts();
-		},
+		queryFn: async () => UserApi.getServiceAccounts(),
 	});
 
-	const handleAddServiceAccount = () => {
-		setIsServiceAccountDrawerOpen(true);
+	const handleAdd = () => {
+		setSelectedAccount(null);
+		setIsDrawerOpen(true);
 	};
+
+	const handleEdit = useCallback((account: User) => {
+		setSelectedAccount(account);
+		setIsDrawerOpen(true);
+	}, []);
 
 	const serviceAccountColumns: ColumnData<User>[] = useMemo(
 		() => [
 			{
-				title: t('labels.id'),
-				render: (rowData: User) => {
-					const displayId = rowData.id;
-					const prefix = displayId.slice(0, 8);
-					const suffix = displayId.slice(-4);
-					const masked = `${prefix}••••${suffix}`;
+				title: t('labels.account'),
+				render: (row: User) => {
+					const displayName = row.name || null;
+					const maskedId = `${row.id.slice(0, 8)}••••${row.id.slice(-4)}`;
 
 					return (
-						<div className='flex gap-2 items-center'>
-							<code className='px-2 py-1 text-sm bg-gray-100 rounded font-mono'>{masked}</code>
+						<div className='flex items-center gap-1.5 group'>
+							{displayName ? (
+								<span className='text-sm font-medium text-gray-800'>{displayName}</span>
+							) : (
+								<code className='px-2 py-0.5 text-sm bg-gray-100 rounded font-mono text-gray-500'>{maskedId}</code>
+							)}
+							<span className='opacity-0 group-hover:opacity-100 transition-opacity'>
+								<CopyIdButton id={row.id} entityType='Service Account' />
+							</span>
 						</div>
 					);
 				},
@@ -53,24 +63,21 @@ const ServiceAccountsPage = () => {
 			{
 				title: t('labels.type'),
 				render: () => (
-					<div className='flex gap-2 items-center'>
-						<div className='flex items-center gap-1.5 text-purple-600'>
-							<Bot size={16} />
-							<span className='text-sm font-medium'>{t('apiKeys.accountTypes.serviceAccount')}</span>
-						</div>
+					<div className='flex items-center gap-1.5 text-purple-600'>
+						<Bot size={16} />
+						<span className='text-sm font-medium'>{t('apiKeys.accountTypes.serviceAccount')}</span>
 					</div>
 				),
 			},
 			{
 				title: t('labels.roles'),
-				render: (rowData: User) => {
-					if (!rowData.roles || rowData.roles.length === 0) {
+				render: (row: User) => {
+					if (!row.roles || row.roles.length === 0) {
 						return <span className='text-gray-500 text-sm'>{t('serviceAccounts.noRoles')}</span>;
 					}
-
 					return (
 						<div className='flex flex-wrap gap-1'>
-							{rowData.roles.map((role) => (
+							{row.roles.map((role) => (
 								<span key={role} className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800'>
 									{role}
 								</span>
@@ -83,12 +90,30 @@ const ServiceAccountsPage = () => {
 				title: t('labels.createdAt'),
 				width: 150,
 				align: 'right',
-				render: (rowData) => (
-					<span className='text-gray-600'>{formatDateShort(rowData.tenant?.created_at || rowData.tenant?.updated_at || '')}</span>
+				render: (row) => (
+					<span className='text-gray-600'>{formatDateShort(row.tenant?.created_at || row.tenant?.updated_at || '')}</span>
+				),
+			},
+			{
+				fieldVariant: 'interactive',
+				render: (row: User) => (
+					<ActionButton
+						id={row.id}
+						entityName={row.name || row.id}
+						deleteMutationFn={async () => UserApi.deleteUser(row.id)}
+						refetchQueryKey='service-accounts'
+						edit={{
+							enabled: true,
+							onClick: () => handleEdit(row),
+						}}
+						archive={{
+							enabled: true,
+						}}
+					/>
 				),
 			},
 		],
-		[t],
+		[t, handleEdit],
 	);
 
 	if (isLoadingServiceAccounts) {
@@ -102,17 +127,21 @@ const ServiceAccountsPage = () => {
 	return (
 		<div>
 			<ApiDocsContent tags={API_DOCS_TAGS.Users} />
-			<ServiceAccountDrawer isOpen={isServiceAccountDrawerOpen} onOpenChange={setIsServiceAccountDrawerOpen} />
+			<ServiceAccountDrawer
+				isOpen={isDrawerOpen}
+				onOpenChange={setIsDrawerOpen}
+				data={selectedAccount}
+			/>
 
 			{serviceAccountsResponse?.items.length === 0 && (
 				<EmptyPage
 					heading={t('common:nav.serviceAccounts')}
-					onAddClick={handleAddServiceAccount}
+					onAddClick={handleAdd}
 					emptyStateCard={{
 						heading: t('serviceAccounts.emptyCard.heading'),
 						description: t('serviceAccounts.emptyCard.description'),
 						buttonLabel: t('serviceAccounts.emptyCard.button'),
-						buttonAction: handleAddServiceAccount,
+						buttonAction: handleAdd,
 					}}
 					tags={API_DOCS_TAGS.Users}
 				/>
@@ -120,7 +149,7 @@ const ServiceAccountsPage = () => {
 			{(serviceAccountsResponse?.items.length || 0) > 0 && (
 				<Page>
 					<SectionHeader title={t('common:nav.serviceAccounts')} titleClassName='text-3xl font-medium'>
-						<Button prefixIcon={<Plus />} onClick={handleAddServiceAccount}>
+						<Button prefixIcon={<Plus />} onClick={handleAdd}>
 							{t('common:actions.add')}
 						</Button>
 					</SectionHeader>

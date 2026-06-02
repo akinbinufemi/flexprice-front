@@ -12,6 +12,7 @@ export interface GetServiceAccountsResponse {
 export interface CreateServiceAccountPayload {
 	type: 'service_account';
 	roles: string[];
+	name?: string;
 }
 
 /** Request for POST /users - add user to tenant. Backend returns one-time password. */
