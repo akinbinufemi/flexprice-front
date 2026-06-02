@@ -1,91 +1,69 @@
 import { FC } from 'react';
 import { CheckCircle2, XCircle, Circle } from 'lucide-react';
-import { DebugTrackerStatus, EventDebugStatus } from '@/types/dto';
+import { DebugTrackerStatus } from '@/types/dto';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 interface EventTrackerStepProps {
 	title: string;
-	status?: DebugTrackerStatus | EventDebugStatus;
-	value: unknown;
+	status?: DebugTrackerStatus;
 	stepKey: string;
 	timestamp?: string;
 	isIngested?: boolean;
-	isAttributed?: boolean;
-	overallStatus?: string;
 }
 
-const EventTrackerStep: FC<EventTrackerStepProps> = ({
-	title,
-	status,
-	timestamp,
-	isIngested = false,
-	isAttributed = false,
-	overallStatus,
-}) => {
+const EventTrackerStep: FC<EventTrackerStepProps> = ({ title, status, timestamp, isIngested = false }) => {
 	const { t } = useTranslation(['developers', 'common']);
 
 	const renderStepIcon = () => {
 		if (isIngested) {
 			return <CheckCircle2 className='h-5 w-5 text-emerald-500' />;
 		}
-		if (isAttributed) {
-			return <XCircle className='h-5 w-5 text-slate-300' />;
-		}
 
 		switch (status) {
-			case 'processing':
-				return <Circle className='h-5 w-5 text-blue-500' />;
-			case 'failed':
-				return <XCircle className='h-5 w-5 text-red-500' />;
+			case 'attributed':
 			case 'found':
 				return <CheckCircle2 className='h-5 w-5 text-emerald-500' />;
+			case 'processing':
+				return <Circle className='h-5 w-5 text-blue-500' />;
 			case 'not_found':
 				return <XCircle className='h-5 w-5 text-amber-500' />;
 			case 'error':
 				return <XCircle className='h-5 w-5 text-red-500' />;
 			default:
-				return <XCircle className='h-5 w-5 text-slate-300' />;
+				// unprocessed — step not yet reached
+				return <Circle className='h-5 w-5 text-slate-300' />;
 		}
 	};
 
 	const renderStepStatusText = () => {
-		const ps = t('events.tracker.stepStatus.processing');
-		const failed = t('events.tracker.stepStatus.failed');
-		const successful = t('events.tracker.stepStatus.successful');
-		const skipped = t('events.tracker.stepStatus.skipped');
-
 		if (isIngested) return null;
-		if (isAttributed) {
-			return overallStatus === 'processing' ? ps : failed;
-		}
 
 		switch (status) {
-			case 'processing':
-				return ps;
-			case 'failed':
-				return failed;
+			case 'attributed':
 			case 'found':
-				return successful;
+				return t('events.tracker.stepStatus.successful');
+			case 'processing':
+				return t('events.tracker.stepStatus.processing');
 			case 'not_found':
-				return failed;
 			case 'error':
-				return failed;
+				return t('events.tracker.stepStatus.failed');
 			default:
-				return skipped;
+				return t('events.tracker.stepStatus.skipped');
 		}
 	};
 
 	const statusText = renderStepStatusText();
-	const statusColorClass = isAttributed
-		? 'text-slate-500'
-		: status === 'found'
+	const statusColorClass =
+		status === 'found' || status === 'attributed'
 			? 'text-emerald-600'
-			: status === 'not_found'
-				? 'text-amber-600'
-				: status === 'error'
-					? 'text-red-600'
-					: 'text-slate-500';
+			: status === 'processing'
+				? 'text-blue-600'
+				: status === 'not_found'
+					? 'text-amber-600'
+					: status === 'error'
+						? 'text-red-600'
+						: 'text-slate-500';
 
 	const formatTimestamp = (ts?: string) => {
 		if (!ts) return null;
