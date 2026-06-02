@@ -478,6 +478,17 @@
 				"noDateInformation": "لا توجد معلومات عن التواريخ",
 				"fallbackName": "--",
 				"charges": "الرسوم",
+				"recurring": "متكرر",
+				"prepaid": "مدفوع مقدماً",
+				"postpaid": "مدفوع لاحقاً",
+				"usageBased": "بناءً على الاستخدام",
+				"notAvailable": "--",
+				"chargeTypeTooltips": {
+					"fixedRecurring": "يتم فوترة الرسوم الثابتة في جدول متكرر",
+					"prepaid": "يتم إصدار الفاتورة قبل بداية فترة الفوترة",
+					"postpaid": "يتم إصدار الفاتورة بعد نهاية فترة الفوترة",
+					"usageBased": "الرسوم بناءً على الاستخدام الفعلي أو الاستهلاك"
+				},
 				"queryBuilder": {
 					"displayName": "اسم العرض",
 					"amount": "المبلغ",

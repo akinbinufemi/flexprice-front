@@ -478,6 +478,17 @@
 				"noDateInformation": "No date information",
 				"fallbackName": "--",
 				"charges": "Charges",
+				"recurring": "Recurring",
+				"prepaid": "PrePaid",
+				"postpaid": "Postpaid",
+				"usageBased": "Usage Based",
+				"notAvailable": "--",
+				"chargeTypeTooltips": {
+					"fixedRecurring": "Fixed charges are billed on a recurring schedule",
+					"prepaid": "Invoice issued before billing period starts",
+					"postpaid": "Invoice issued after billing period ends",
+					"usageBased": "Charges based on actual usage or consumption"
+				},
 				"queryBuilder": {
 					"displayName": "Display name",
 					"amount": "Amount",

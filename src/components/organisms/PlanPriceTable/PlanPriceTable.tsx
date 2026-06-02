@@ -17,10 +17,8 @@ import { PriceApi } from '@/api/PriceApi';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import { getPriceTypeLabel } from '@/utils';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { ChargeValueCell } from '@/components/molecules';
-import { formatInvoiceCadence } from '@/pages';
 import { Dialog } from '@/components/ui';
 import { DeletePriceRequest } from '@/types/dto';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
@@ -390,12 +388,54 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 				render: (row) => <span>{row.display_name ?? t('catalog:plans.organisms.planPriceTable.fallbackName')}</span>,
 			},
 			{
-				title: 'Charge Type',
-				render: (row) => <span>{getPriceTypeLabel(row.type)}</span>,
-			},
-			{
-				title: 'Billing Timing',
-				render: (row) => <span>{formatInvoiceCadence(row.invoice_cadence as string)}</span>,
+				title: 'Charge Type & Timing',
+				render: (row) => {
+					const isFixedCharge = row.type && String(row.type).toUpperCase() === 'FIXED';
+					const isUsageCharge = row.type && String(row.type).toUpperCase() === 'USAGE';
+
+					if (isFixedCharge) {
+						// For fixed charges: show [Recurring] [PrePaid/Postpaid]
+						const isPrepaid = row.invoice_cadence === 'ADVANCE';
+						const billingTimingKey = isPrepaid ? 'prepaid' : 'postpaid';
+						return (
+							<div className='flex gap-2'>
+								<Tooltip
+									content={t('catalog:plans.organisms.planPriceTable.chargeTypeTooltips.fixedRecurring')}
+									delayDuration={0}
+									sideOffset={5}>
+									<span>
+										<Chip label={t('catalog:plans.organisms.planPriceTable.recurring')} variant='default' />
+									</span>
+								</Tooltip>
+								<Tooltip
+									content={t(`catalog:plans.organisms.planPriceTable.chargeTypeTooltips.${billingTimingKey}`)}
+									delayDuration={0}
+									sideOffset={5}>
+									<span>
+										<Chip
+											label={t(`catalog:plans.organisms.planPriceTable.${billingTimingKey}`)}
+											variant={isPrepaid ? 'success' : 'warning'}
+										/>
+									</span>
+								</Tooltip>
+							</div>
+						);
+					}
+
+					if (isUsageCharge) {
+						// For usage charges: show [Usage Based] only
+						return (
+							<Tooltip content={t('catalog:plans.organisms.planPriceTable.chargeTypeTooltips.usageBased')} delayDuration={0} sideOffset={5}>
+								<span>
+									<Chip label={t('catalog:plans.organisms.planPriceTable.usageBased')} variant='info' />
+								</span>
+							</Tooltip>
+						);
+					}
+
+					// Fallback
+					return <span>{t('catalog:plans.organisms.planPriceTable.notAvailable')}</span>;
+				},
 			},
 			{
 				title: 'Billing Period',
@@ -446,7 +486,7 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 				},
 			},
 		],
-		[t],
+		[t, handleEditPrice, handleEditDetails, handleTerminatePrice],
 	);
 
 	// ===== RENDER =====
