@@ -107,7 +107,7 @@ const ServiceAccountDrawer: FC<Props> = ({ isOpen, onOpenChange, data }) => {
 						value={name}
 						onChange={setName}
 					/>
-					<Button isLoading={isPending} disabled={isPending} onClick={() => updateServiceAccount()}>
+					<Button isLoading={isPending} disabled={isPending || !name.trim()} onClick={() => updateServiceAccount()}>
 						{t('developers:serviceAccountDrawer.saveButton')}
 					</Button>
 				</div>

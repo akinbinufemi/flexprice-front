@@ -67,10 +67,10 @@ export class UserApi {
 	}
 
 	// Fetch service accounts only
-	public static async getServiceAccounts(): Promise<GetServiceAccountsResponse> {
+	public static async getServiceAccounts(params: { limit: number; offset: number } = { limit: 10, offset: 0 }): Promise<GetServiceAccountsResponse> {
 		const response = await AxiosClient.post<GetServiceAccountsResponse>(`${this.baseUrl}/search`, {
-			limit: 100,
-			offset: 0,
+			limit: params.limit,
+			offset: params.offset,
 			type: 'service_account',
 			sort: [
 				{
