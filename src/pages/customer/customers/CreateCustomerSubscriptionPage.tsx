@@ -25,6 +25,7 @@ import {
 	SUBSCRIPTION_PRORATION_BEHAVIOR,
 	SUBSCRIPTION_STATUS,
 	PRICE_TYPE,
+	ENTITY_STATUS,
 } from '@/models';
 import { InternalCreditGrantRequest, creditGrantToInternal, internalToCreateRequest } from '@/types/dto/CreditGrant';
 import { BILLING_PERIOD, PAYMENT_TERMS_NONE, SANDBOX_AUTO_CANCELLATION_DAYS } from '@/constants/constants';
@@ -246,14 +247,16 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		if (customerTaxAssociations?.items) {
 			setSubscriptionState((prev) => ({
 				...prev,
-				tax_rate_overrides: customerTaxAssociations.items.map((item) => ({
-					tax_rate_id: item.tax_rate_id,
-					tax_rate_code: item.tax_rate?.code ?? '',
-					currency: item.currency.toLowerCase(),
-					auto_apply: item.auto_apply,
-					priority: item.priority,
-					tax_rate_name: item.tax_rate?.name ?? '',
-				})),
+				tax_rate_overrides: customerTaxAssociations.items
+					.filter((item) => item.tax_rate?.status !== ENTITY_STATUS.ARCHIVED)
+					.map((item) => ({
+						tax_rate_id: item.tax_rate_id,
+						tax_rate_code: item.tax_rate?.code ?? '',
+						currency: item.currency.toLowerCase(),
+						auto_apply: item.auto_apply,
+						priority: item.priority,
+						tax_rate_name: item.tax_rate?.name ?? '',
+					})),
 			}));
 		}
 	}, [customerTaxAssociations]);
