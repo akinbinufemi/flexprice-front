@@ -46,11 +46,14 @@ const usePagination = ({ initialLimit = 10, prefix }: UsePaginationProps = {}) =
 	// Ensure `page` is set in the query parameters
 	useEffect(() => {
 		if (!searchParams.get(pageKey)) {
-			setSearchParams((prev) => {
-				const next = new URLSearchParams(prev);
-				next.set(pageKey, '1');
-				return next;
-			});
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					next.set(pageKey, '1');
+					return next;
+				},
+				{ replace: true },
+			);
 		}
 	}, [searchParams, setSearchParams, pageKey]);
 
