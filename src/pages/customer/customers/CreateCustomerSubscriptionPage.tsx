@@ -248,7 +248,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			setSubscriptionState((prev) => ({
 				...prev,
 				tax_rate_overrides: customerTaxAssociations.items
-					.filter((item) => item.tax_rate?.status !== ENTITY_STATUS.ARCHIVED)
+					.filter((item) => item.tax_rate?.status === ENTITY_STATUS.PUBLISHED)
 					.map((item) => ({
 						tax_rate_id: item.tax_rate_id,
 						tax_rate_code: item.tax_rate?.code ?? '',
