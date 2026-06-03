@@ -539,6 +539,24 @@
 			"webhookIntro": "اضبط عنوان الويب هوك في لوحة Paddle:",
 			"webhookEventsIntro": "اشترك Events في Paddle:",
 			"webhookEventTransactionsCompleted": "transactions.completed"
+		},
+		"whop": {
+			"description": "اربط Flexprice بـ Whop لمزامنة الفواتير.",
+			"connectionPlaceholder": "سمِّ اتصال Whop",
+			"connectionHint": "اسم ودي لهذا الاتصال.",
+			"apiKeyPlaceholder": "apik_...",
+			"apiKeyHint": "رمز Bearer من لوحة مطور Whop.",
+			"companyId": "معرّف الشركة",
+			"companyIdPlaceholder": "biz_...",
+			"companyIdHint": "معرّف شركة Whop (biz_...).",
+			"companyIdRequired": "معرّف الشركة مطلوب",
+			"productIdOptional": "معرّف المنتج (اختياري)",
+			"productIdPlaceholder": "prod_... — اتركه فارغاً للإنشاء التلقائي",
+			"productIdHint": "منتج Whop المستخدم للفواتير. اتركه فارغاً لينشئ Flexprice واحداً تلقائياً.",
+			"invoiceSyncHint": "ادفع فواتير Flexprice إلى Whop كمدفوعات send_invoice",
+			"webhookIntroPrefix": "سجّل هذا العنوان في لوحة Whop ضمن Webhooks. سيتابع Flexprice",
+			"webhookEventName": "invoice.paid",
+			"webhookIntroSuffix": "لتحديث حالة الفاتورة تلقائياً عند الدفع."
 		}
 	},
 	"insightsTools": {
@@ -899,6 +917,7 @@
 			"viewLatestData": "عرض أحدث البيانات",
 			"searchCustomersPlaceholder": "البحث عن عملاء...",
 			"colCustomer": "العميل",
+			"colCurrency": "العملة",
 			"noSearchMatches": "لا يوجد عملاء يطابقون بحثك.",
 			"loadingEllipsis": "...",
 			"filterThisMonth": "هذا الشهر",

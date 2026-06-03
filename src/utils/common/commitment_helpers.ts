@@ -1,5 +1,9 @@
+import { BUCKET_SIZE } from '@/models/Meter';
 import { Price } from '@/models/Price';
 import { CommitmentType, LineItemCommitmentConfig, LineItemCommitmentsMap } from '@/types/dto/LineItemCommitmentConfig';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
+import type { CreateSubscriptionLineItemRequest } from '@/types/dto/Subscription';
+import type { ExtendedPriceOverride } from './price_override_helpers';
 
 /**
  * Check if a price has commitment configured
@@ -46,13 +50,13 @@ export const validateCommitment = (config: Partial<LineItemCommitmentConfig>): s
 		}
 	}
 
-	// Rule 3: Overage factor is required and must be greater than 1.0 when commitment is set
+	// Rule 3: Overage factor is required and must be at least 1.0 when commitment is set
 	if (config.overage_factor === undefined || config.overage_factor === null) {
 		return 'Overage factor is required when commitment is set';
 	}
 
-	if (config.overage_factor <= 1) {
-		return 'Overage factor must be greater than 1.0';
+	if (config.overage_factor < 1) {
+		return 'Overage factor must be at least 1.0';
 	}
 
 	// Rule 4: Validate commitment values are non-negative
@@ -107,12 +111,103 @@ export const formatCommitmentSummary = (config: LineItemCommitmentConfig): strin
 	return parts.join(' • ');
 };
 
+const HOUR_BUCKET_SIZES: BUCKET_SIZE[] = [
+	BUCKET_SIZE.WindowSizeHour,
+	BUCKET_SIZE.WindowSize3Hour,
+	BUCKET_SIZE.WindowSize6Hour,
+	BUCKET_SIZE.WindowSize12Hour,
+];
+
+const MINUTE_BUCKET_SIZES: BUCKET_SIZE[] = [BUCKET_SIZE.WindowSizeMinute, BUCKET_SIZE.WindowSize15Min, BUCKET_SIZE.WindowSize30Min];
+
 /**
  * Check if a price/meter supports window commitment
  * Window commitment is only available for meters with bucket_size configured
  */
 export const supportsWindowCommitment = (price: Price): boolean => {
 	return price.meter?.aggregation?.bucket_size !== undefined && price.meter?.aggregation?.bucket_size !== null;
+};
+
+export const isHourBucketSize = (bucketSize?: BUCKET_SIZE | string | null): boolean => {
+	if (!bucketSize) return false;
+	return HOUR_BUCKET_SIZES.includes(bucketSize as BUCKET_SIZE);
+};
+
+/**
+ * Time buckets are only configurable when the meter window size is hours or minutes.
+ */
+export const supportsCommitmentTimeBuckets = (price: Price): boolean => {
+	const bucketSize = price.meter?.aggregation?.bucket_size;
+	if (!bucketSize) return false;
+	return isHourBucketSize(bucketSize) || MINUTE_BUCKET_SIZES.includes(bucketSize as BUCKET_SIZE);
+};
+
+export const normalizeCommitmentTimeBuckets = (buckets: CommitmentTimeBucket[], minutesEnabled: boolean): CommitmentTimeBucket[] =>
+	buckets.map((bucket) => ({
+		start: {
+			hour: bucket.start.hour,
+			minute: minutesEnabled ? bucket.start.minute : 0,
+		},
+		end: {
+			hour: bucket.end.hour,
+			minute: minutesEnabled ? bucket.end.minute : 0,
+		},
+	}));
+
+export const timePointToMinutes = (point: { hour: number; minute: number }): number => point.hour * 60 + point.minute;
+
+export const validateCommitmentTimeBuckets = (buckets: CommitmentTimeBucket[]): string | null => {
+	for (const { start, end } of buckets) {
+		if (start.hour < 0 || start.hour > 23 || end.hour < 0 || end.hour > 23) {
+			return 'Hour must be between 0 and 23';
+		}
+		if (start.minute < 0 || start.minute > 59 || end.minute < 0 || end.minute > 59) {
+			return 'Minute must be between 0 and 59';
+		}
+
+		const startMinutes = timePointToMinutes(start);
+		const endMinutes = timePointToMinutes(end);
+
+		if (startMinutes === endMinutes) {
+			return 'Start and end time cannot be the same';
+		}
+	}
+	return null;
+};
+
+/**
+ * Build inline line_items entries for commitment_time_buckets (not supported on line_item_commitments map).
+ */
+export const buildCommitmentTimeBucketLineItems = (
+	priceOverrides: Record<string, ExtendedPriceOverride>,
+): CreateSubscriptionLineItemRequest[] =>
+	Object.entries(priceOverrides)
+		.filter(([, override]) => override.commitment_time_buckets && override.commitment_time_buckets.length > 0)
+		.map(([priceId, override]) => ({
+			price_id: priceId,
+			commitment_windowed: override.commitment?.is_window_commitment ?? true,
+			commitment_time_buckets: override.commitment_time_buckets,
+		}));
+
+/** Merge manually added line items with time-bucket line items, keyed by price_id. */
+export const mergeCreateSubscriptionLineItems = (
+	addedItems: CreateSubscriptionLineItemRequest[],
+	timeBucketItems: CreateSubscriptionLineItemRequest[],
+): CreateSubscriptionLineItemRequest[] => {
+	const merged = [...addedItems];
+	for (const timeBucketItem of timeBucketItems) {
+		if (!timeBucketItem.price_id) {
+			merged.push(timeBucketItem);
+			continue;
+		}
+		const existingIndex = merged.findIndex((item) => item.price_id === timeBucketItem.price_id);
+		if (existingIndex >= 0) {
+			merged[existingIndex] = { ...merged[existingIndex], ...timeBucketItem };
+		} else {
+			merged.push(timeBucketItem);
+		}
+	}
+	return merged;
 };
 
 /**

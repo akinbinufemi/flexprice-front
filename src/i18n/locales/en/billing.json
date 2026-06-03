@@ -637,6 +637,23 @@
 		"enableTrueUpHint": "Charge the commitment amount even if usage is below the commitment",
 		"windowCommitment": "Window Commitment",
 		"windowCommitmentHint": "Apply commitment to each bucket window (meter has bucket size: {{bucketSize}})",
+		"timeBuckets": {
+			"title": "Commitment Time Buckets",
+			"description": "Limit window commitment to specific UTC time ranges. Start is inclusive; end is exclusive.",
+			"startLabel": "Start (>=)",
+			"endLabel": "End (<)",
+			"utc": "UTC",
+			"hourPlaceholder": "HH",
+			"minutePlaceholder": "MM",
+			"empty": "No time buckets configured. Add a bucket to restrict commitment to specific UTC hours.",
+			"emptyHourOnly": "No time buckets configured. Add a bucket to restrict commitment to specific UTC hours (minutes fixed to :00).",
+			"addBucket": "+ Add time bucket",
+			"removeBucket": "Remove time bucket",
+			"errors": {
+				"sameTime": "Start and end time cannot be the same",
+				"incomplete": "Please select start and end times for all time buckets"
+			}
+		},
 		"existingNotice": "This price already has a commitment configuration. Your changes will update it.",
 		"cancel": "Cancel",
 		"clearCommitment": "Clear Commitment",
@@ -653,9 +670,11 @@
 			"typeMismatchAmount": "When an amount is set, commitment type must be amount",
 			"typeMismatchQuantity": "When a quantity is set, commitment type must be quantity",
 			"overageRequired": "Overage factor is required when commitment is set",
-			"overageGtOne": "Overage factor must be greater than 1.0",
+			"overageGtOne": "Overage factor must be at least 1.0",
 			"amountNonNegative": "Commitment amount must be non-negative",
-			"quantityNonNegative": "Commitment quantity must be non-negative"
+			"quantityNonNegative": "Commitment quantity must be non-negative",
+			"hourRange": "Hour must be between 0 and 23",
+			"minuteRange": "Minute must be between 0 and 59"
 		}
 	},
 	"termination": {

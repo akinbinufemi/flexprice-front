@@ -1,6 +1,7 @@
 import { Price } from '@/models/Price';
 import { BILLING_MODEL, TIER_MODE, CreatePriceTier, TransformQuantity, PRICE_TYPE, PRICE_UNIT_TYPE } from '@/models/Price';
 import { LineItemCommitmentConfig } from '@/types/dto/LineItemCommitmentConfig';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
 
 /**
  * Interface for line item overrides that will be sent to the backend
@@ -44,6 +45,7 @@ export interface ExtendedPriceOverride {
 	transform_quantity?: TransformQuantity;
 	effective_from?: string; // ISO date string for scheduling price changes
 	commitment?: LineItemCommitmentConfig; // Commitment configuration for this price
+	commitment_time_buckets?: CommitmentTimeBucket[];
 	price_unit_amount?: string; // For CUSTOM price unit type, FLAT_FEE/PACKAGE billing models
 	price_unit_tiers?: CreatePriceTier[]; // For CUSTOM price unit type, TIERED billing model
 }
@@ -179,12 +181,21 @@ export const updatePriceOverride = (
 	overrides: Record<string, ExtendedPriceOverride>,
 	updates: Partial<ExtendedPriceOverride>,
 ): Record<string, ExtendedPriceOverride> => {
+	const merged: ExtendedPriceOverride = {
+		...overrides[priceId],
+		...updates,
+		price_id: priceId,
+	};
+
+	for (const key of Object.keys(updates) as (keyof ExtendedPriceOverride)[]) {
+		if (updates[key] === undefined) {
+			delete merged[key];
+		}
+	}
+
 	return {
 		...overrides,
-		[priceId]: {
-			...overrides[priceId],
-			...updates,
-		},
+		[priceId]: merged,
 	};
 };
 
