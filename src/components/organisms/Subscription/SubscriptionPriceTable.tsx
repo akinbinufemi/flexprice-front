@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import OptionsDropdownMenu from '@/components/molecules/DropdownMenu';
 import { ExtendedPriceOverride } from '@/utils';
 import { LineItemCommitmentConfig } from '@/types/dto/LineItemCommitmentConfig';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
 import type { AddedSubscriptionLineItem } from './AddSubscriptionChargeDialog';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { formatBillingPeriodForPrice } from '@/utils/common/helper_functions';
@@ -190,7 +191,7 @@ export interface Props {
 	overriddenPrices?: Record<string, ExtendedPriceOverride>;
 	lineItemCoupons?: Record<string, Coupon>;
 	onLineItemCouponsChange?: (priceId: string, coupon: Coupon | null) => void;
-	onCommitmentChange?: (priceId: string, config: LineItemCommitmentConfig | null) => void;
+	onCommitmentChange?: (priceId: string, config: LineItemCommitmentConfig | null, timeBuckets?: CommitmentTimeBucket[]) => void;
 	disabled?: boolean;
 	subscriptionLevelCoupon?: Coupon | null;
 	/** Subscription-level added line items (entity type SUBSCRIPTION). Shown with delete-only actions. */
@@ -454,8 +455,9 @@ const SubscriptionPriceTable: FC<Props> = ({
 					isOpen={isCommitmentDialogOpen}
 					onOpenChange={setIsCommitmentDialogOpen}
 					price={selectedCommitmentPrice}
-					onSave={(priceId, config) => onCommitmentChange?.(priceId, config)}
+					onSave={(priceId, config, timeBuckets) => onCommitmentChange?.(priceId, config, timeBuckets)}
 					currentConfig={overriddenPrices[selectedCommitmentPrice.id]?.commitment}
+					currentTimeBuckets={overriddenPrices[selectedCommitmentPrice.id]?.commitment_time_buckets}
 					billingPeriod={billingPeriod}
 				/>
 			)}

@@ -648,20 +648,21 @@ const SubscriptionForm = ({
 									};
 								});
 							}}
-							onCommitmentChange={(priceId, config) => {
-								// Update the commitment field on the price override
+							onCommitmentChange={(priceId, config, timeBuckets) => {
 								if (config) {
-									overridePrice(priceId, { commitment: config });
+									overridePrice(priceId, {
+										commitment: config,
+										commitment_time_buckets: timeBuckets === undefined ? undefined : timeBuckets.length > 0 ? timeBuckets : undefined,
+									});
 								} else {
-									// Remove commitment from override
 									const currentOverride = overriddenPrices[priceId];
 									if (currentOverride) {
-										const { commitment: _commitment, ...restOverride } = currentOverride;
+										const restOverride = { ...currentOverride };
+										delete restOverride.commitment;
+										delete restOverride.commitment_time_buckets;
 										if (Object.keys(restOverride).length > 1) {
-											// Has other overrides, just remove commitment
 											overridePrice(priceId, restOverride);
 										} else {
-											// Only had commitment, remove entire override
 											resetOverride(priceId);
 										}
 									}

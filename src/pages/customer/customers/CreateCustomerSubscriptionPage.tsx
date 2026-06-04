@@ -45,7 +45,11 @@ import type { AddedSubscriptionLineItem } from '@/components/organisms/Subscript
 import { cn } from '@/lib/utils';
 import { toSentenceCase } from '@/utils/common/helper_functions';
 import { ExtendedPriceOverride, getLineItemOverrides } from '@/utils/common/price_override_helpers';
-import { extractLineItemCommitments } from '@/utils/common/commitment_helpers';
+import {
+	extractLineItemCommitments,
+	buildCommitmentTimeBucketLineItems,
+	mergeCreateSubscriptionLineItems,
+} from '@/utils/common/commitment_helpers';
 import { extractSubscriptionBoundaries, extractFirstPhaseData } from '@/utils/subscription/phaseConversion';
 
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
@@ -546,6 +550,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 		let finalLineItemCoupons: Record<string, string[]> | undefined;
 		let finalOverrideLineItems: OverrideLineItemRequest[] | undefined;
 		let finalLineItemCommitments: Record<string, any> | undefined;
+		let finalCommitmentTimeBucketLineItems: ReturnType<typeof buildCommitmentTimeBucketLineItems> | undefined;
 		let sanitizedPhases: SubscriptionPhaseCreateRequest[] | undefined;
 
 		if (phases.length > 0) {
@@ -561,6 +566,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 
 			// Commitments are subscription-level only; phases do not have line_item_commitments per backend
 			finalLineItemCommitments = undefined;
+			finalCommitmentTimeBucketLineItems = undefined;
 
 			// Sanitize phases (quantity exclusion for USAGE prices handled in PhaseList conversion)
 			sanitizedPhases = phases.map((phase) => ({
@@ -587,6 +593,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			// Extract line item commitments from price overrides
 			const commitments = extractLineItemCommitments(priceOverrides);
 			finalLineItemCommitments = Object.keys(commitments).length > 0 ? commitments : undefined;
+			finalCommitmentTimeBucketLineItems = buildCommitmentTimeBucketLineItems(priceOverrides);
 
 			finalCoupons = linkedCoupon ? [linkedCoupon.id] : undefined;
 			finalLineItemCoupons =
@@ -646,6 +653,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			finalLineItemCoupons,
 			finalOverrideLineItems,
 			finalLineItemCommitments,
+			finalCommitmentTimeBucketLineItems,
 			sanitizedPhases,
 			tax_rate_overrides,
 			overageFactor,
@@ -746,10 +754,12 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 				: SUBSCRIPTION_PRORATION_BEHAVIOR.NONE,
 			payment_terms:
 				sanitized.paymentTerms && sanitized.paymentTerms !== PAYMENT_TERMS_NONE ? (sanitized.paymentTerms as PAYMENT_TERMS) : undefined,
-			line_items:
-				!sanitized.sanitizedPhases && sanitized.addedSubscriptionLineItems && sanitized.addedSubscriptionLineItems.length > 0
-					? sanitized.addedSubscriptionLineItems.map(({ tempId: _tempId, ...req }) => req)
-					: undefined,
+			line_items: (() => {
+				if (sanitized.sanitizedPhases) return undefined;
+				const addedItems = sanitized.addedSubscriptionLineItems?.map(({ tempId: _tempId, ...req }) => req) ?? [];
+				const merged = mergeCreateSubscriptionLineItems(addedItems, sanitized.finalCommitmentTimeBucketLineItems ?? []);
+				return merged.length > 0 ? merged : undefined;
+			})(),
 			inheritance: Object.keys(inheritancePayload).length > 0 ? inheritancePayload : undefined,
 			...(sanitized.trial_period_days !== undefined ? { trial_period_days: sanitized.trial_period_days } : {}),
 			...(sanitized.auto_invoice_threshold !== undefined ? { auto_invoice_threshold: sanitized.auto_invoice_threshold } : {}),

@@ -3,19 +3,30 @@ import { Dialog, Button, Input, Select } from '@/components/atoms';
 import { Switch } from '@/components/ui';
 import { Price } from '@/models/Price';
 import { LineItemCommitmentConfig, CommitmentType } from '@/types/dto/LineItemCommitmentConfig';
-import { validateCommitment, supportsWindowCommitment } from '@/utils/common/commitment_helpers';
+import {
+	validateCommitment,
+	supportsWindowCommitment,
+	supportsCommitmentTimeBuckets,
+	isHourBucketSize,
+	normalizeCommitmentTimeBuckets,
+	validateCommitmentTimeBuckets,
+} from '@/utils/common/commitment_helpers';
 import { removeFormatting } from '@/components/atoms/Input/Input';
 import { getCurrencySymbol } from '@/utils/common/helper_functions';
 import { BILLING_PERIOD } from '@/constants/constants';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
+import CommitmentTimeBucketsEditor from '@/components/molecules/CommitmentTimeBucketsEditor';
+import { isTimeBucketDraftComplete, type CommitmentTimeBucketDraft } from '@/utils/common/commitment_time_bucket_draft';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
 
 interface CommitmentConfigDialogProps {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
 	price: Price;
-	onSave: (priceId: string, config: LineItemCommitmentConfig | null) => void;
+	onSave: (priceId: string, config: LineItemCommitmentConfig | null, timeBuckets?: CommitmentTimeBucket[]) => void;
 	currentConfig: LineItemCommitmentConfig | undefined;
+	currentTimeBuckets?: CommitmentTimeBucket[];
 	billingPeriod?: BILLING_PERIOD;
 }
 
@@ -25,9 +36,13 @@ function mapCommitmentValidationError(raw: string, t: TFunction<'billing'>): str
 		'When commitment_amount is set, commitment_type must be "amount"': t('commitmentConfig.errors.typeMismatchAmount'),
 		'When commitment_quantity is set, commitment_type must be "quantity"': t('commitmentConfig.errors.typeMismatchQuantity'),
 		'Overage factor is required when commitment is set': t('commitmentConfig.errors.overageRequired'),
-		'Overage factor must be greater than 1.0': t('commitmentConfig.errors.overageGtOne'),
+		'Overage factor must be at least 1.0': t('commitmentConfig.errors.overageGtOne'),
 		'Commitment amount must be non-negative': t('commitmentConfig.errors.amountNonNegative'),
 		'Commitment quantity must be non-negative': t('commitmentConfig.errors.quantityNonNegative'),
+		'Hour must be between 0 and 23': t('commitmentConfig.errors.hourRange'),
+		'Minute must be between 0 and 59': t('commitmentConfig.errors.minuteRange'),
+		'Start and end time cannot be the same': t('commitmentConfig.timeBuckets.errors.sameTime'),
+		'Please select start and end times for all time buckets': t('commitmentConfig.timeBuckets.errors.incomplete'),
 	};
 	return table[raw] ?? raw;
 }
@@ -43,7 +58,15 @@ function classifyCommitmentValidation(raw: string): CommitmentValidationTarget {
 	return 'banner';
 }
 
-const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpenChange, price, onSave, currentConfig, billingPeriod }) => {
+const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({
+	isOpen,
+	onOpenChange,
+	price,
+	onSave,
+	currentConfig,
+	currentTimeBuckets,
+	billingPeriod,
+}) => {
 	const { t } = useTranslation('billing');
 	const [commitmentType, setCommitmentType] = useState<CommitmentType>(CommitmentType.AMOUNT);
 	const [commitmentAmount, setCommitmentAmount] = useState<string>('');
@@ -52,6 +75,7 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 	const [enableTrueUp, setEnableTrueUp] = useState<boolean>(false);
 	const [isWindowCommitment, setIsWindowCommitment] = useState<boolean>(() => supportsWindowCommitment(price));
 	const [commitmentDuration, setCommitmentDuration] = useState<string>(billingPeriod?.toUpperCase() || '');
+	const [timeBuckets, setTimeBuckets] = useState<CommitmentTimeBucketDraft[]>([]);
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const [commitmentErrorTarget, setCommitmentErrorTarget] = useState<CommitmentValidationTarget | null>(null);
 
@@ -84,6 +108,8 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 	const currencySymbol = getCurrencySymbol(price.currency);
 	const meterDisplayName = price.meter?.name || price.display_name || t('commitmentConfig.thisChargeFallback');
 	const showWindowCommitment = supportsWindowCommitment(price);
+	const showTimeBuckets = showWindowCommitment && supportsCommitmentTimeBuckets(price);
+	const minutesEnabled = !isHourBucketSize(price.meter?.aggregation?.bucket_size);
 
 	useEffect(() => {
 		if (currentConfig) {
@@ -101,6 +127,7 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			setEnableTrueUp(currentConfig.enable_true_up ?? false);
 			setIsWindowCommitment(currentConfig.is_window_commitment ?? showWindowCommitment);
 			setCommitmentDuration(currentConfig.commitment_duration || billingPeriod?.toUpperCase() || '');
+			setTimeBuckets(currentTimeBuckets ?? []);
 		} else {
 			setCommitmentType(CommitmentType.AMOUNT);
 			setCommitmentAmount('');
@@ -109,10 +136,11 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			setEnableTrueUp(false);
 			setIsWindowCommitment(showWindowCommitment);
 			setCommitmentDuration(billingPeriod?.toUpperCase() || '');
+			setTimeBuckets([]);
 		}
 		setValidationError(null);
 		setCommitmentErrorTarget(null);
-	}, [currentConfig, isOpen, showWindowCommitment, billingPeriod]);
+	}, [currentConfig, currentTimeBuckets, isOpen, showWindowCommitment, billingPeriod]);
 
 	const handleSave = () => {
 		const config: Partial<LineItemCommitmentConfig> = {
@@ -136,8 +164,30 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			return;
 		}
 
+		let normalizedTimeBuckets: CommitmentTimeBucket[] | undefined;
+		if (showTimeBuckets && isWindowCommitment) {
+			if (timeBuckets.length > 0) {
+				const incompleteBucket = timeBuckets.some((bucket) => !isTimeBucketDraftComplete(bucket, minutesEnabled));
+				if (incompleteBucket) {
+					setCommitmentErrorTarget('banner');
+					setValidationError(mapCommitmentValidationError('Please select start and end times for all time buckets', t));
+					return;
+				}
+
+				normalizedTimeBuckets = normalizeCommitmentTimeBuckets(timeBuckets, minutesEnabled);
+				const timeBucketError = validateCommitmentTimeBuckets(normalizedTimeBuckets);
+				if (timeBucketError) {
+					setCommitmentErrorTarget('banner');
+					setValidationError(mapCommitmentValidationError(timeBucketError, t));
+					return;
+				}
+			} else {
+				normalizedTimeBuckets = [];
+			}
+		}
+
 		setCommitmentErrorTarget(null);
-		onSave(price.id, config as LineItemCommitmentConfig);
+		onSave(price.id, config as LineItemCommitmentConfig, normalizedTimeBuckets);
 		onOpenChange(false);
 	};
 
@@ -160,8 +210,8 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 			onOpenChange={onOpenChange}
 			title={t('commitmentConfig.title')}
 			description={t('commitmentConfig.description', { name: meterDisplayName })}
-			className='w-auto min-w-[32rem] max-w-[90vw]'>
-			<div className='space-y-6 max-h-[80vh] overflow-y-auto'>
+			className='w-auto min-w-[36rem] max-w-[42rem]'>
+			<div className='space-y-6'>
 				<div className='space-y-3'>
 					<label className='text-sm font-medium text-gray-700'>{t('commitmentConfig.commitmentType')}</label>
 					<div className='flex gap-2'>
@@ -300,8 +350,20 @@ const CommitmentConfigDialog: FC<CommitmentConfigDialogProps> = ({ isOpen, onOpe
 								{t('commitmentConfig.windowCommitmentHint', { bucketSize: price.meter?.aggregation?.bucket_size })}
 							</p>
 						</div>
-						<Switch checked={isWindowCommitment} onCheckedChange={setIsWindowCommitment} />
+						<Switch
+							checked={isWindowCommitment}
+							onCheckedChange={(checked) => {
+								setIsWindowCommitment(checked);
+								if (!checked) {
+									setTimeBuckets([]);
+								}
+							}}
+						/>
 					</div>
+				)}
+
+				{showTimeBuckets && isWindowCommitment && (
+					<CommitmentTimeBucketsEditor buckets={timeBuckets} onChange={setTimeBuckets} minutesEnabled={minutesEnabled} />
 				)}
 
 				{validationError && commitmentErrorTarget === 'banner' && (
