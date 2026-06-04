@@ -1,4 +1,5 @@
 import { BILLING_PERIOD } from '@/constants/constants';
+import type { CommitmentTimeBucket } from './CommitmentTimeBucket';
 
 export enum CommitmentType {
 	AMOUNT = 'amount',
@@ -27,6 +28,10 @@ export interface LineItemCommitmentConfig {
 	// CommitmentDuration specifies the duration period for the commitment (e.g., ANNUAL, MONTHLY)
 	// If not set, defaults to the subscription's billing period
 	commitment_duration?: BILLING_PERIOD;
+
+	// CommitmentTimeBuckets restricts commitment application to specific UTC time-of-day windows.
+	// Requires is_window_commitment=true.
+	commitment_time_buckets?: CommitmentTimeBucket[];
 }
 
 export type LineItemCommitmentsMap = Record<string, LineItemCommitmentConfig>;
