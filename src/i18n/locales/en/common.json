@@ -340,7 +340,9 @@
 		"providerEntityId": "Provider Entity ID",
 		"enterProviderEntityId": "Enter provider entity ID",
 		"integration": "Integration",
-		"actions": "Integration actions"
+		"actions": "Integration actions",
+		"syncPush": "Push to Integration",
+		"syncPull": "Pull from Integration"
 	},
 	"labels": {
 		"payload": "Payload",

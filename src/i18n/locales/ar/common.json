@@ -336,7 +336,9 @@
 		"providerEntityId": "معرف كيان المزود",
 		"enterProviderEntityId": "أدخل معرف كيان المزود",
 		"integration": "التكامل",
-		"actions": "إجراءات التكامل"
+		"actions": "إجراءات التكامل",
+		"syncPush": "دفع إلى التكامل",
+		"syncPull": "سحب من التكامل"
 	},
 	"labels": {
 		"payload": "الحمولة",
