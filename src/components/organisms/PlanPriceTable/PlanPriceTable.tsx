@@ -9,7 +9,7 @@ import {
 	UpdatePriceDetailsDrawer,
 	QueryBuilder,
 } from '@/components/molecules';
-import { Price, Plan, PRICE_STATUS, PRICE_ENTITY_TYPE } from '@/models';
+import { Price, Plan, PRICE_STATUS, PRICE_ENTITY_TYPE, PRICE_TYPE, INVOICE_CADENCE } from '@/models';
 import { PriceUnit } from '@/models/PriceUnit';
 import { Plus, Trash2, Pencil, FileText, Copy } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -390,12 +390,12 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 			{
 				title: 'Charge Type & Timing',
 				render: (row) => {
-					const isFixedCharge = row.type && String(row.type).toUpperCase() === 'FIXED';
-					const isUsageCharge = row.type && String(row.type).toUpperCase() === 'USAGE';
+					const isFixedCharge = row.type === PRICE_TYPE.FIXED;
+					const isUsageCharge = row.type === PRICE_TYPE.USAGE;
 
 					if (isFixedCharge) {
 						// For fixed charges: show [Recurring] [PrePaid/Postpaid]
-						const isPrepaid = row.invoice_cadence === 'ADVANCE';
+						const isPrepaid = row.invoice_cadence === INVOICE_CADENCE.ADVANCE;
 						const billingTimingKey = isPrepaid ? 'prepaid' : 'postpaid';
 						return (
 							<div className='flex gap-2'>

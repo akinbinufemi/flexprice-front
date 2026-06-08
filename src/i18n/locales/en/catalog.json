@@ -479,7 +479,7 @@
 				"fallbackName": "--",
 				"charges": "Charges",
 				"recurring": "Recurring",
-				"prepaid": "PrePaid",
+				"prepaid": "Prepaid",
 				"postpaid": "Postpaid",
 				"usageBased": "Usage Based",
 				"notAvailable": "--",
