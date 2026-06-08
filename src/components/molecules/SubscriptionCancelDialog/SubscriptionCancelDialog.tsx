@@ -15,10 +15,11 @@ interface Props {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	subscriptionId?: string | null;
+	currentPeriodStart?: string | null;
 	refetchQueryKeys?: string[];
 }
 
-const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetchQueryKeys = [] }: Props) => {
+const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, currentPeriodStart, refetchQueryKeys = [] }: Props) => {
 	const { t } = useTranslation(['billing', 'common']);
 	const [cancellationType, setCancellationType] = useState<SUBSCRIPTION_CANCELLATION_TYPE>(SUBSCRIPTION_CANCELLATION_TYPE.IMMEDIATE);
 	const [prorationBehavior, setProrationBehavior] = useState<SUBSCRIPTION_PRORATION_BEHAVIOR>(SUBSCRIPTION_PRORATION_BEHAVIOR.NONE);
@@ -26,7 +27,7 @@ const SubscriptionCancelDialog = ({ isOpen, onOpenChange, subscriptionId, refetc
 	const [reason, setReason] = useState('');
 	const [cancelAtDate, setCancelAtDate] = useState<Date | undefined>(undefined);
 
-	const minCancelAtDate = useMemo(() => new Date(), []);
+	const minCancelAtDate = useMemo(() => (currentPeriodStart ? new Date(currentPeriodStart) : new Date()), [currentPeriodStart]);
 
 	const resetState = () => {
 		setCancellationType(SUBSCRIPTION_CANCELLATION_TYPE.IMMEDIATE);
