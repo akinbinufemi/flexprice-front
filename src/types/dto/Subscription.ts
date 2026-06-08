@@ -67,6 +67,7 @@ import { TaxRateOverride } from './tax';
 import { TypedBackendFilter, TypedBackendSort } from '../formatters/QueryBuilder';
 import { CreateCreditGrantRequest } from './CreditGrant';
 import { LineItemCommitmentsMap } from './LineItemCommitmentConfig';
+import type { CommitmentTimeBucket } from './CommitmentTimeBucket';
 import { AddonResponse } from './Addon';
 import { ADDON_ASSOCIATION_STATUS } from '@/models/AddonAssociation';
 
@@ -607,6 +608,7 @@ export interface CreateSubscriptionLineItemRequest {
 	commitment_true_up_enabled?: boolean;
 	commitment_windowed?: boolean;
 	commitment_duration?: BILLING_PERIOD;
+	commitment_time_buckets?: CommitmentTimeBucket[];
 }
 
 export interface UpdateSubscriptionLineItemRequest {
@@ -628,6 +630,7 @@ export interface UpdateSubscriptionLineItemRequest {
 	commitment_true_up_enabled?: boolean;
 	commitment_windowed?: boolean;
 	commitment_duration?: BILLING_PERIOD;
+	commitment_time_buckets?: CommitmentTimeBucket[];
 }
 
 export interface DeleteSubscriptionLineItemRequest {

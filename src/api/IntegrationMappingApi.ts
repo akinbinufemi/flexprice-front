@@ -41,6 +41,7 @@ export interface IntegrationMappingsResponse {
 export interface IntegrationSyncRequest {
 	entity_type: string;
 	entity_id: string;
+	method?: 'push' | 'pull';
 }
 
 export interface IntegrationLinkRequest {

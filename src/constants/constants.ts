@@ -14,6 +14,8 @@ import {
 	SUBSCRIPTION_STATUS,
 } from '@/models/Subscription';
 
+export const DEFAULT_CURRENCY_CODE = 'USD';
+
 export enum BILLING_PERIOD {
 	DAILY = 'DAILY',
 	WEEKLY = 'WEEKLY',

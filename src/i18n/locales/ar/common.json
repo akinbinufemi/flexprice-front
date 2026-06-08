@@ -336,7 +336,9 @@
 		"providerEntityId": "معرف كيان المزود",
 		"enterProviderEntityId": "أدخل معرف كيان المزود",
 		"integration": "التكامل",
-		"actions": "إجراءات التكامل"
+		"actions": "إجراءات التكامل",
+		"syncPush": "دفع إلى التكامل",
+		"syncPull": "سحب من التكامل"
 	},
 	"labels": {
 		"payload": "الحمولة",
@@ -711,6 +713,10 @@
 		"integrations": "التكاملات",
 		"pricingWidget": "أداة التسعير",
 		"settings": "الإعدادات"
+	},
+	"fundingStrip": {
+		"announcement": "Flexprice تحصل على تمويل بذري بقيمة 1.5 مليون دولار",
+		"knowMore": "اعرف المزيد"
 	},
 	"queryableDataArea": {
 		"errorFetching": "خطأ في جلب البيانات",

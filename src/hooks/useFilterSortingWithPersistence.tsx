@@ -86,16 +86,19 @@ const useFilterSortingWithPersistence = ({
 
 	const persistToUrlAndSession = useCallback(
 		(key: string, filters: FilterCondition[], sorts: SortOption[]) => {
-			setSearchParams((prev) => {
-				const next = new URLSearchParams(prev);
-				const fKey = getFiltersParamKey(key);
-				const sKey = getSortsParamKey(key);
-				if (filters.length) next.set(fKey, serializeFilters(filters));
-				else next.delete(fKey);
-				if (sorts.length) next.set(sKey, serializeSorts(sorts));
-				else next.delete(sKey);
-				return next;
-			});
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					const fKey = getFiltersParamKey(key);
+					const sKey = getSortsParamKey(key);
+					if (filters.length) next.set(fKey, serializeFilters(filters));
+					else next.delete(fKey);
+					if (sorts.length) next.set(sKey, serializeSorts(sorts));
+					else next.delete(sKey);
+					return next;
+				},
+				{ replace: true },
+			);
 			writeFiltersAndSortsToSession(key, filters, sorts);
 		},
 		[setSearchParams],

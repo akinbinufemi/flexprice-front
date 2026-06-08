@@ -1,5 +1,7 @@
+import { BUCKET_SIZE } from '@/models/Meter';
 import { Price } from '@/models/Price';
 import { CommitmentType, LineItemCommitmentConfig, LineItemCommitmentsMap } from '@/types/dto/LineItemCommitmentConfig';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
 
 /**
  * Check if a price has commitment configured
@@ -46,13 +48,13 @@ export const validateCommitment = (config: Partial<LineItemCommitmentConfig>): s
 		}
 	}
 
-	// Rule 3: Overage factor is required and must be greater than 1.0 when commitment is set
+	// Rule 3: Overage factor is required and must be at least 1.0 when commitment is set
 	if (config.overage_factor === undefined || config.overage_factor === null) {
 		return 'Overage factor is required when commitment is set';
 	}
 
-	if (config.overage_factor <= 1) {
-		return 'Overage factor must be greater than 1.0';
+	if (config.overage_factor < 1) {
+		return 'Overage factor must be at least 1.0';
 	}
 
 	// Rule 4: Validate commitment values are non-negative
@@ -107,6 +109,15 @@ export const formatCommitmentSummary = (config: LineItemCommitmentConfig): strin
 	return parts.join(' • ');
 };
 
+const HOUR_BUCKET_SIZES: BUCKET_SIZE[] = [
+	BUCKET_SIZE.WindowSizeHour,
+	BUCKET_SIZE.WindowSize3Hour,
+	BUCKET_SIZE.WindowSize6Hour,
+	BUCKET_SIZE.WindowSize12Hour,
+];
+
+const MINUTE_BUCKET_SIZES: BUCKET_SIZE[] = [BUCKET_SIZE.WindowSizeMinute, BUCKET_SIZE.WindowSize15Min, BUCKET_SIZE.WindowSize30Min];
+
 /**
  * Check if a price/meter supports window commitment
  * Window commitment is only available for meters with bucket_size configured
@@ -115,19 +126,74 @@ export const supportsWindowCommitment = (price: Price): boolean => {
 	return price.meter?.aggregation?.bucket_size !== undefined && price.meter?.aggregation?.bucket_size !== null;
 };
 
+export const isHourBucketSize = (bucketSize?: BUCKET_SIZE | string | null): boolean => {
+	if (!bucketSize) return false;
+	return HOUR_BUCKET_SIZES.includes(bucketSize as BUCKET_SIZE);
+};
+
+/**
+ * Time buckets are only configurable when the meter window size is hours or minutes.
+ */
+export const supportsCommitmentTimeBuckets = (price: Price): boolean => {
+	const bucketSize = price.meter?.aggregation?.bucket_size;
+	if (!bucketSize) return false;
+	return isHourBucketSize(bucketSize) || MINUTE_BUCKET_SIZES.includes(bucketSize as BUCKET_SIZE);
+};
+
+export const normalizeCommitmentTimeBuckets = (buckets: CommitmentTimeBucket[], minutesEnabled: boolean): CommitmentTimeBucket[] =>
+	buckets.map((bucket) => ({
+		start: {
+			hour: bucket.start.hour,
+			minute: minutesEnabled ? bucket.start.minute : 0,
+		},
+		end: {
+			hour: bucket.end.hour,
+			minute: minutesEnabled ? bucket.end.minute : 0,
+		},
+	}));
+
+export const timePointToMinutes = (point: { hour: number; minute: number }): number => point.hour * 60 + point.minute;
+
+export const validateCommitmentTimeBuckets = (buckets: CommitmentTimeBucket[]): string | null => {
+	for (const { start, end } of buckets) {
+		if (start.hour < 0 || start.hour > 23 || end.hour < 0 || end.hour > 23) {
+			return 'Hour must be between 0 and 23';
+		}
+		if (start.minute < 0 || start.minute > 59 || end.minute < 0 || end.minute > 59) {
+			return 'Minute must be between 0 and 59';
+		}
+
+		const startMinutes = timePointToMinutes(start);
+		const endMinutes = timePointToMinutes(end);
+
+		if (startMinutes === endMinutes) {
+			return 'Start and end time cannot be the same';
+		}
+	}
+	return null;
+};
+
 /**
  * Extract line item commitments from price overrides
- * Converts the frontend ExtendedPriceOverride format to backend LineItemCommitmentsMap
+ * Converts the frontend ExtendedPriceOverride format to backend LineItemCommitmentsMap.
+ * Commitment time buckets are stored on the override at the top level for UI ergonomics; we
+ * fold them into the commitment config here so the whole config rides on line_item_commitments
+ * (avoiding a duplicate line_items[] entry on the backend).
  */
 export const extractLineItemCommitments = (
-	priceOverrides: Record<string, { commitment?: LineItemCommitmentConfig }>,
+	priceOverrides: Record<string, { commitment?: LineItemCommitmentConfig; commitment_time_buckets?: CommitmentTimeBucket[] }>,
 ): LineItemCommitmentsMap => {
 	const commitments: LineItemCommitmentsMap = {};
 
 	Object.entries(priceOverrides).forEach(([priceId, override]) => {
-		if (override.commitment) {
-			commitments[priceId] = override.commitment;
+		const hasBuckets = override.commitment_time_buckets && override.commitment_time_buckets.length > 0;
+		if (!override.commitment && !hasBuckets) {
+			return;
 		}
+		commitments[priceId] = {
+			...(override.commitment ?? {}),
+			...(hasBuckets ? { commitment_time_buckets: override.commitment_time_buckets } : {}),
+		};
 	});
 
 	return commitments;

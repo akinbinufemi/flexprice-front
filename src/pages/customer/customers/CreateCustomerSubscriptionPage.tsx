@@ -584,7 +584,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			// Note: getLineItemOverrides automatically excludes quantity for USAGE type prices
 			finalOverrideLineItems = getLineItemOverrides(currentPrices, priceOverrides);
 
-			// Extract line item commitments from price overrides
+			// Extract line item commitments from price overrides (time buckets are folded in)
 			const commitments = extractLineItemCommitments(priceOverrides);
 			finalLineItemCommitments = Object.keys(commitments).length > 0 ? commitments : undefined;
 
@@ -746,10 +746,11 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 				: SUBSCRIPTION_PRORATION_BEHAVIOR.NONE,
 			payment_terms:
 				sanitized.paymentTerms && sanitized.paymentTerms !== PAYMENT_TERMS_NONE ? (sanitized.paymentTerms as PAYMENT_TERMS) : undefined,
-			line_items:
-				!sanitized.sanitizedPhases && sanitized.addedSubscriptionLineItems && sanitized.addedSubscriptionLineItems.length > 0
-					? sanitized.addedSubscriptionLineItems.map(({ tempId: _tempId, ...req }) => req)
-					: undefined,
+			line_items: (() => {
+				if (sanitized.sanitizedPhases) return undefined;
+				const addedItems = sanitized.addedSubscriptionLineItems?.map(({ tempId: _tempId, ...req }) => req) ?? [];
+				return addedItems.length > 0 ? addedItems : undefined;
+			})(),
 			inheritance: Object.keys(inheritancePayload).length > 0 ? inheritancePayload : undefined,
 			...(sanitized.trial_period_days !== undefined ? { trial_period_days: sanitized.trial_period_days } : {}),
 			...(sanitized.auto_invoice_threshold !== undefined ? { auto_invoice_threshold: sanitized.auto_invoice_threshold } : {}),
