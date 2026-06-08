@@ -145,7 +145,6 @@ div[class*='react-hot-toast'] {
 	width: auto !important;
 	min-width: min(280px, 100%);
 	white-space: normal !important;
-	word-break: break-word;
 	overflow-wrap: break-word;
 }
 

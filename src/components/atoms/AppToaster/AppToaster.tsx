@@ -5,7 +5,6 @@ export const appToastOptions = {
 	duration: 4000,
 	style: {
 		maxWidth: 'min(calc(100vw - 32px), 520px)',
-		wordBreak: 'break-word' as const,
 		overflowWrap: 'break-word' as const,
 	},
 	success: {
