@@ -106,7 +106,7 @@ const CustomerTaxAssociationTab = () => {
 					title={t('tabPanels.tax.associationsTitle')}
 					cta={!isArchived && <AddButton onClick={handleAddTaxAssociation} disabled={false} />}
 				/>
-				<TaxAssociationTable data={taxAssociationsData.items} />
+				<TaxAssociationTable data={taxAssociationsData.items} showDelete={!isArchived} />
 				<ShortPagination unit={t('tabPanels.tax.associationsPaginationUnit')} totalItems={taxAssociationsData.pagination.total ?? 0} />
 			</Card>
 

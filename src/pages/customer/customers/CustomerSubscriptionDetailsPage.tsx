@@ -455,7 +455,7 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				<Card className='card mt-8'>
 					<FormHeader title={t('subscriptionDetail.taxAssociations')} variant='sub-header' titleClassName='font-semibold' />
 					<div className='mt-4'>
-						<TaxAssociationTable data={subscriptionTaxAssociations.items} />
+						<TaxAssociationTable data={subscriptionTaxAssociations.items} refetchQueryKey='subscriptionTaxAssociations' />
 					</div>
 				</Card>
 			)}
