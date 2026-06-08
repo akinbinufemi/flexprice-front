@@ -21,16 +21,16 @@ const App = () => {
 					{/* Toast Notifications */}
 					<Toaster
 						toastOptions={{
+							duration: 4000,
+							style: {
+								maxWidth: 'min(calc(100vw - 32px), 520px)',
+								wordBreak: 'break-word',
+								overflowWrap: 'break-word',
+							},
 							success: {
 								iconTheme: {
 									primary: '#5CA7A0',
 									secondary: '#fff',
-								},
-								style: {
-									whiteSpace: 'nowrap',
-									minWidth: 'fit-content',
-									width: 'auto',
-									maxWidth: 'none',
 								},
 								className: 'whitespace-nowrap',
 							},
@@ -38,15 +38,6 @@ const App = () => {
 								iconTheme: {
 									primary: '#E76E50',
 									secondary: '#fff',
-								},
-								// Long API messages (e.g. validation_error) must wrap; nowrap + maxWidth:none
-								// makes the bar huge and centers it so most of the text sits off-screen.
-								style: {
-									whiteSpace: 'normal',
-									wordBreak: 'break-word',
-									minWidth: 'min(100%, 280px)',
-									maxWidth: 'min(calc(100vw - 32px), 520px)',
-									width: 'max-content',
 								},
 								className: 'break-words',
 							},

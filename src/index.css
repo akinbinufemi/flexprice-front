@@ -139,43 +139,38 @@ html {
 	}
 }
 
-/* Toast notification styles - prevent line breaks and allow container to expand */
+/* Toast notifications — wrap long API/validation messages inside the box */
 div[class*='react-hot-toast'] {
-	white-space: nowrap !important;
-	min-width: fit-content !important;
+	max-width: min(calc(100vw - 32px), 520px) !important;
 	width: auto !important;
-	max-width: none !important;
+	min-width: min(280px, 100%);
+	white-space: normal !important;
+	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
-div[class*='react-hot-toast'] > div {
-	white-space: nowrap !important;
-	min-width: fit-content !important;
-	width: auto !important;
-}
-
+div[class*='react-hot-toast'] > div,
 div[class*='react-hot-toast'] > div > div {
-	white-space: nowrap !important;
-	min-width: fit-content !important;
-	width: auto !important;
+	min-width: 0;
+	white-space: normal !important;
+	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
-/* Target the message text specifically */
 div[class*='react-hot-toast'] div[class*='message'] {
-	white-space: nowrap !important;
+	white-space: normal !important;
+	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
-/* General toast container */
-div[role='status'] {
+/* Success toasts: stay compact on one line when marked */
+div[class*='react-hot-toast'].whitespace-nowrap,
+div[class*='react-hot-toast'].whitespace-nowrap > div,
+div[class*='react-hot-toast'].whitespace-nowrap > div > div {
 	white-space: nowrap !important;
-	min-width: fit-content !important;
-	width: auto !important;
 	max-width: none !important;
-}
-
-div[role='status'] > div {
-	white-space: nowrap !important;
-	min-width: fit-content !important;
 	width: auto !important;
+	min-width: fit-content !important;
 }
 
 /* Toast container positioning - move higher from bottom */
