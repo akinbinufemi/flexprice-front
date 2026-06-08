@@ -479,14 +479,14 @@
 				"fallbackName": "--",
 				"charges": "Charges",
 				"recurring": "Recurring",
-				"prepaid": "Prepaid",
-				"postpaid": "Postpaid",
+				"advance": "Advance",
+				"arrear": "Arrear",
 				"usageBased": "Usage Based",
 				"notAvailable": "--",
 				"chargeTypeTooltips": {
 					"fixedRecurring": "Fixed charges are billed on a recurring schedule",
-					"prepaid": "Invoice issued before billing period starts",
-					"postpaid": "Invoice issued after billing period ends",
+					"advance": "Charge at the start of each billing cycle.",
+					"arrear": "Charge at the end of the billing cycle.",
 					"usageBased": "Charges based on actual usage or consumption"
 				},
 				"queryBuilder": {

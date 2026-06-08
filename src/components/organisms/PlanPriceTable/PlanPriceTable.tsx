@@ -394,9 +394,9 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 					const isUsageCharge = row.type === PRICE_TYPE.USAGE;
 
 					if (isFixedCharge) {
-						// For fixed charges: show [Recurring] [PrePaid/Postpaid]
-						const isPrepaid = row.invoice_cadence === INVOICE_CADENCE.ADVANCE;
-						const billingTimingKey = isPrepaid ? 'prepaid' : 'postpaid';
+						// For fixed charges: show [Recurring] [Advance/Arrear]
+						const isAdvance = row.invoice_cadence === INVOICE_CADENCE.ADVANCE;
+						const billingTimingKey = isAdvance ? 'advance' : 'arrear';
 						return (
 							<div className='flex gap-2'>
 								<Tooltip
@@ -414,7 +414,7 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 									<span>
 										<Chip
 											label={t(`catalog:plans.organisms.planPriceTable.${billingTimingKey}`)}
-											variant={isPrepaid ? 'success' : 'warning'}
+											variant={isAdvance ? 'success' : 'warning'}
 										/>
 									</span>
 								</Tooltip>
