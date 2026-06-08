@@ -9,7 +9,7 @@ import {
 	UpdatePriceDetailsDrawer,
 	QueryBuilder,
 } from '@/components/molecules';
-import { Price, Plan, PRICE_STATUS, PRICE_ENTITY_TYPE } from '@/models';
+import { Price, Plan, PRICE_STATUS, PRICE_ENTITY_TYPE, PRICE_TYPE, INVOICE_CADENCE } from '@/models';
 import { PriceUnit } from '@/models/PriceUnit';
 import { Plus, Trash2, Pencil, FileText, Copy } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -17,10 +17,8 @@ import { PriceApi } from '@/api/PriceApi';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { RouteNames } from '@/core/routes/Routes';
-import { getPriceTypeLabel } from '@/utils';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { ChargeValueCell } from '@/components/molecules';
-import { formatInvoiceCadence } from '@/pages';
 import { Dialog } from '@/components/ui';
 import { DeletePriceRequest } from '@/types/dto';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
@@ -390,12 +388,54 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 				render: (row) => <span>{row.display_name ?? t('catalog:plans.organisms.planPriceTable.fallbackName')}</span>,
 			},
 			{
-				title: 'Charge Type',
-				render: (row) => <span>{getPriceTypeLabel(row.type)}</span>,
-			},
-			{
-				title: 'Billing Timing',
-				render: (row) => <span>{formatInvoiceCadence(row.invoice_cadence as string)}</span>,
+				title: 'Charge Type & Timing',
+				render: (row) => {
+					const isFixedCharge = row.type === PRICE_TYPE.FIXED;
+					const isUsageCharge = row.type === PRICE_TYPE.USAGE;
+
+					if (isFixedCharge) {
+						// For fixed charges: show [Recurring] [Advance/Arrear]
+						const isAdvance = row.invoice_cadence === INVOICE_CADENCE.ADVANCE;
+						const billingTimingKey = isAdvance ? 'advance' : 'arrear';
+						return (
+							<div className='flex gap-2'>
+								<Tooltip
+									content={t('catalog:plans.organisms.planPriceTable.chargeTypeTooltips.fixedRecurring')}
+									delayDuration={0}
+									sideOffset={5}>
+									<span>
+										<Chip label={t('catalog:plans.organisms.planPriceTable.recurring')} variant='default' />
+									</span>
+								</Tooltip>
+								<Tooltip
+									content={t(`catalog:plans.organisms.planPriceTable.chargeTypeTooltips.${billingTimingKey}`)}
+									delayDuration={0}
+									sideOffset={5}>
+									<span>
+										<Chip
+											label={t(`catalog:plans.organisms.planPriceTable.${billingTimingKey}`)}
+											variant={isAdvance ? 'success' : 'warning'}
+										/>
+									</span>
+								</Tooltip>
+							</div>
+						);
+					}
+
+					if (isUsageCharge) {
+						// For usage charges: show [Usage Based] only
+						return (
+							<Tooltip content={t('catalog:plans.organisms.planPriceTable.chargeTypeTooltips.usageBased')} delayDuration={0} sideOffset={5}>
+								<span>
+									<Chip label={t('catalog:plans.organisms.planPriceTable.usageBased')} variant='info' />
+								</span>
+							</Tooltip>
+						);
+					}
+
+					// Fallback
+					return <span>{t('catalog:plans.organisms.planPriceTable.notAvailable')}</span>;
+				},
 			},
 			{
 				title: 'Billing Period',
@@ -446,7 +486,7 @@ const PlanPriceTable: FC<PlanChargesTableProps> = ({ plan, onPriceUpdate }) => {
 				},
 			},
 		],
-		[t],
+		[t, handleEditPrice, handleEditDetails, handleTerminatePrice],
 	);
 
 	// ===== RENDER =====

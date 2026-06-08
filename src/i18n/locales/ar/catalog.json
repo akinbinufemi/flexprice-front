@@ -478,6 +478,17 @@
 				"noDateInformation": "لا توجد معلومات عن التواريخ",
 				"fallbackName": "--",
 				"charges": "الرسوم",
+				"recurring": "متكرر",
+				"advance": "مقدّمًا",
+				"arrear": "مؤخرًا",
+				"usageBased": "بناءً على الاستخدام",
+				"notAvailable": "--",
+				"chargeTypeTooltips": {
+					"fixedRecurring": "يتم فوترة الرسوم الثابتة في جدول متكرر",
+					"advance": "تحصيل الرسوم في بداية كل دورة فوترة.",
+					"arrear": "تحصيل الرسوم في نهاية دورة الفوترة.",
+					"usageBased": "الرسوم بناءً على الاستخدام الفعلي أو الاستهلاك"
+				},
 				"queryBuilder": {
 					"displayName": "اسم العرض",
 					"amount": "المبلغ",
