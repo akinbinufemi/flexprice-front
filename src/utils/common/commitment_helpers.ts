@@ -2,8 +2,6 @@ import { BUCKET_SIZE } from '@/models/Meter';
 import { Price } from '@/models/Price';
 import { CommitmentType, LineItemCommitmentConfig, LineItemCommitmentsMap } from '@/types/dto/LineItemCommitmentConfig';
 import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
-import type { CreateSubscriptionLineItemRequest } from '@/types/dto/Subscription';
-import type { ExtendedPriceOverride } from './price_override_helpers';
 
 /**
  * Check if a price has commitment configured
@@ -176,53 +174,26 @@ export const validateCommitmentTimeBuckets = (buckets: CommitmentTimeBucket[]): 
 };
 
 /**
- * Build inline line_items entries for commitment_time_buckets (not supported on line_item_commitments map).
- */
-export const buildCommitmentTimeBucketLineItems = (
-	priceOverrides: Record<string, ExtendedPriceOverride>,
-): CreateSubscriptionLineItemRequest[] =>
-	Object.entries(priceOverrides)
-		.filter(([, override]) => override.commitment_time_buckets && override.commitment_time_buckets.length > 0)
-		.map(([priceId, override]) => ({
-			price_id: priceId,
-			commitment_windowed: override.commitment?.is_window_commitment ?? true,
-			commitment_time_buckets: override.commitment_time_buckets,
-		}));
-
-/** Merge manually added line items with time-bucket line items, keyed by price_id. */
-export const mergeCreateSubscriptionLineItems = (
-	addedItems: CreateSubscriptionLineItemRequest[],
-	timeBucketItems: CreateSubscriptionLineItemRequest[],
-): CreateSubscriptionLineItemRequest[] => {
-	const merged = [...addedItems];
-	for (const timeBucketItem of timeBucketItems) {
-		if (!timeBucketItem.price_id) {
-			merged.push(timeBucketItem);
-			continue;
-		}
-		const existingIndex = merged.findIndex((item) => item.price_id === timeBucketItem.price_id);
-		if (existingIndex >= 0) {
-			merged[existingIndex] = { ...merged[existingIndex], ...timeBucketItem };
-		} else {
-			merged.push(timeBucketItem);
-		}
-	}
-	return merged;
-};
-
-/**
  * Extract line item commitments from price overrides
- * Converts the frontend ExtendedPriceOverride format to backend LineItemCommitmentsMap
+ * Converts the frontend ExtendedPriceOverride format to backend LineItemCommitmentsMap.
+ * Commitment time buckets are stored on the override at the top level for UI ergonomics; we
+ * fold them into the commitment config here so the whole config rides on line_item_commitments
+ * (avoiding a duplicate line_items[] entry on the backend).
  */
 export const extractLineItemCommitments = (
-	priceOverrides: Record<string, { commitment?: LineItemCommitmentConfig }>,
+	priceOverrides: Record<string, { commitment?: LineItemCommitmentConfig; commitment_time_buckets?: CommitmentTimeBucket[] }>,
 ): LineItemCommitmentsMap => {
 	const commitments: LineItemCommitmentsMap = {};
 
 	Object.entries(priceOverrides).forEach(([priceId, override]) => {
-		if (override.commitment) {
-			commitments[priceId] = override.commitment;
+		const hasBuckets = override.commitment_time_buckets && override.commitment_time_buckets.length > 0;
+		if (!override.commitment && !hasBuckets) {
+			return;
 		}
+		commitments[priceId] = {
+			...(override.commitment ?? {}),
+			...(hasBuckets ? { commitment_time_buckets: override.commitment_time_buckets } : {}),
+		};
 	});
 
 	return commitments;
