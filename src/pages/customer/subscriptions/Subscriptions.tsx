@@ -79,7 +79,7 @@ const SubscriptionsPage = () => {
 	const { t } = useTranslation(['billing', 'common']);
 	const { t: tGuide } = useTranslation('guides');
 	const guides = useMemo(() => buildGuides(tGuide), [tGuide]);
-	const [cancelSubscriptionId, setCancelSubscriptionId] = useState<string | null>(null);
+	const [cancelSubscription, setCancelSubscription] = useState<{ id: string; currentPeriodStart: string } | null>(null);
 
 	const sortingOptions: SortOption[] = useMemo(
 		() => [
@@ -238,7 +238,7 @@ const SubscriptionsPage = () => {
 									text: t('subscriptions.listPage.cancelAction'),
 									icon: <Trash2 />,
 									enabled: row.subscription_status !== SUBSCRIPTION_STATUS.CANCELLED,
-									onClick: () => setCancelSubscriptionId(row.id),
+									onClick: () => setCancelSubscription({ id: row.id, currentPeriodStart: row.current_period_start }),
 								},
 							]}
 						/>
@@ -298,13 +298,14 @@ const SubscriptionsPage = () => {
 				/>
 			</Page>
 			<SubscriptionCancelDialog
-				isOpen={!!cancelSubscriptionId}
+				isOpen={!!cancelSubscription}
 				onOpenChange={(open) => {
 					if (!open) {
-						setCancelSubscriptionId(null);
+						setCancelSubscription(null);
 					}
 				}}
-				subscriptionId={cancelSubscriptionId}
+				subscriptionId={cancelSubscription?.id}
+				currentPeriodStart={cancelSubscription?.currentPeriodStart}
 				refetchQueryKeys={['fetchSubscriptions']}
 			/>
 		</>

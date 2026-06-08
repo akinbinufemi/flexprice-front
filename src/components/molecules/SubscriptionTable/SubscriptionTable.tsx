@@ -19,7 +19,7 @@ interface Props {
 const SubscriptionTable: FC<Props> = ({ data, onEdit }) => {
 	const { t } = useTranslation(['billing', 'common']);
 	const navigate = useNavigate();
-	const [cancelSubscriptionId, setCancelSubscriptionId] = useState<string | null>(null);
+	const [cancelSubscription, setCancelSubscription] = useState<{ id: string; currentPeriodStart: string } | null>(null);
 
 	const getSubscriptionStatusChip = (status: SUBSCRIPTION_STATUS) => {
 		switch (status) {
@@ -94,7 +94,7 @@ const SubscriptionTable: FC<Props> = ({ data, onEdit }) => {
 									text: t('subscriptions.listPage.cancelAction'),
 									icon: <Trash2 />,
 									enabled: row.subscription_status !== SUBSCRIPTION_STATUS.CANCELLED,
-									onClick: () => setCancelSubscriptionId(row.id),
+									onClick: () => setCancelSubscription({ id: row.id, currentPeriodStart: row.current_period_start }),
 								},
 							]}
 						/>
@@ -116,13 +116,14 @@ const SubscriptionTable: FC<Props> = ({ data, onEdit }) => {
 				}}
 			/>
 			<SubscriptionCancelDialog
-				isOpen={!!cancelSubscriptionId}
+				isOpen={!!cancelSubscription}
 				onOpenChange={(open) => {
 					if (!open) {
-						setCancelSubscriptionId(null);
+						setCancelSubscription(null);
 					}
 				}}
-				subscriptionId={cancelSubscriptionId}
+				subscriptionId={cancelSubscription?.id}
+				currentPeriodStart={cancelSubscription?.currentPeriodStart}
 				refetchQueryKeys={['fetchSubscriptions']}
 			/>
 		</>
