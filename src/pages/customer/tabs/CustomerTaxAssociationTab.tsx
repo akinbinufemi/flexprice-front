@@ -4,7 +4,7 @@ import { Card, CardHeader, AddButton, Loader, NoDataCard, ShortPagination } from
 import { ApiDocsContent } from '@/components/molecules';
 import { API_DOCS_TAGS } from '@/constants/apiDocsTags';
 import TaxApi from '@/api/TaxApi';
-import { TAXRATE_ENTITY_TYPE } from '@/models';
+import { ENTITY_STATUS, TAXRATE_ENTITY_TYPE } from '@/models';
 import usePagination from '@/hooks/usePagination';
 import toast from 'react-hot-toast';
 import { TaxAssociationTable, TaxAssociationDialog } from '@/components/molecules';
@@ -31,6 +31,7 @@ const CustomerTaxAssociationTab = () => {
 			limit,
 			offset,
 			expand: EXPAND.TAX_RATE,
+			status: ENTITY_STATUS.PUBLISHED,
 		});
 	};
 
@@ -106,7 +107,7 @@ const CustomerTaxAssociationTab = () => {
 					title={t('tabPanels.tax.associationsTitle')}
 					cta={!isArchived && <AddButton onClick={handleAddTaxAssociation} disabled={false} />}
 				/>
-				<TaxAssociationTable data={taxAssociationsData.items} showDelete={!isArchived} />
+				<TaxAssociationTable data={taxAssociationsData.items} />
 				<ShortPagination unit={t('tabPanels.tax.associationsPaginationUnit')} totalItems={taxAssociationsData.pagination.total ?? 0} />
 			</Card>
 
