@@ -5,7 +5,7 @@
 		"entityName": "Customer",
 		"openPortal": "Open Customer Portal",
 		"emptyHeading": "Customers",
-		"emptyDescription": "Create a plan to display pricing and start billing customers.",
+		"emptyDescription": "Add your first customer to start managing subscriptions and billing.",
 		"createCustomer": "Create Customer",
 		"columns": {
 			"name": "Name",

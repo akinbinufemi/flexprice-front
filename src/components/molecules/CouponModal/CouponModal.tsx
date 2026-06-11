@@ -2,7 +2,7 @@ import { Button, Select, SelectOption } from '@/components/atoms';
 import Dialog from '@/components/atoms/Dialog';
 import { Coupon } from '@/models/Coupon';
 import formatCouponName from '@/utils/common/format_coupon_name';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -22,6 +22,13 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 	const { t } = useTranslation(['catalog', 'common']);
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [selectedCoupon, setSelectedCoupon] = useState<string>(selectedCouponId || '');
+
+	useEffect(() => {
+		if (isOpen) {
+			setSelectedCoupon(selectedCouponId || '');
+			setErrors({});
+		}
+	}, [isOpen, selectedCouponId]);
 
 	const validateForm = useCallback((): { isValid: boolean; errors: FormErrors } => {
 		const newErrors: FormErrors = {};
@@ -73,12 +80,17 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 	}));
 
 	return (
-		<Dialog isOpen={isOpen} showCloseButton={false} onOpenChange={onOpenChange} title={t('labels.linkCoupon')} className='sm:max-w-[500px]'>
+		<Dialog
+			isOpen={isOpen}
+			showCloseButton={false}
+			onOpenChange={onOpenChange}
+			title={t('coupons.modal.title')}
+			className='sm:max-w-[500px]'>
 			<div className='grid gap-4 mt-3'>
 				<div className='space-y-2'>
 					<Select
-						label={t('labels.selectCoupon')}
-						placeholder={t('labels.chooseACoupon')}
+						label={t('coupons.modal.selectCoupon')}
+						placeholder={t('coupons.modal.chooseACoupon')}
 						options={couponOptions}
 						value={selectedCoupon}
 						onChange={handleCouponChange}
@@ -89,9 +101,9 @@ const CouponModal: React.FC<Props> = ({ isOpen, onOpenChange, onSave, onCancel, 
 
 			<div className='flex justify-end gap-2 mt-6'>
 				<Button variant='outline' onClick={handleCancel}>
-					{t('actions.cancel')}
+					{t('common:actions.cancel')}
 				</Button>
-				<Button onClick={handleSave}>{t('actions.add')}</Button>
+				<Button onClick={handleSave}>{t('common:actions.add')}</Button>
 			</div>
 		</Dialog>
 	);
