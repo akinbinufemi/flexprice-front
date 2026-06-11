@@ -251,6 +251,9 @@
 			"statusInactive": "Inactive"
 		},
 		"modal": {
+			"title": "Link Coupon",
+			"selectCoupon": "Select Coupon",
+			"chooseACoupon": "Choose a coupon to link",
 			"selectCouponRequired": "Please select a coupon"
 		},
 		"details": {
