@@ -1,7 +1,10 @@
+import { Metadata } from '@/models/base';
+
 export interface SignupData {
 	email: string;
 	password?: string;
 	token?: string;
+	metadata?: Metadata;
 }
 
 export interface LoginData {

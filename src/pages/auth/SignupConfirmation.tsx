@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { buildSignupMetadata, getPersistedSignupMetadata } from '@/utils/auth/signupMetadata';
 
 const SignupConfirmation = () => {
 	const userContext = useUser();
@@ -40,6 +41,7 @@ const SignupConfirmation = () => {
 			const signupResponse = await AuthApi.Signup({
 				email: user.data.user?.email || '',
 				token: session?.access_token || '',
+				metadata: getPersistedSignupMetadata() ?? buildSignupMetadata(),
 			});
 			await supabase.auth.refreshSession();
 			return signupResponse;
