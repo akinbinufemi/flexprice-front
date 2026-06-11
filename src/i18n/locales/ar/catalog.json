@@ -251,6 +251,9 @@
 			"statusInactive": "غير نشط"
 		},
 		"modal": {
+			"title": "ربط كوبون",
+			"selectCoupon": "اختر كوبون",
+			"chooseACoupon": "اختر كوبوناً للربط",
 			"selectCouponRequired": "يُرجى اختيار قسيمة"
 		},
 		"details": {
