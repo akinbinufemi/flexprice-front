@@ -4,12 +4,15 @@ import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
 import { RouteNames } from '@/core/routes/Routes';
 import { useTranslation } from 'react-i18next';
+import { buildSignupMetadata, persistSignupMetadata } from '@/utils/auth/signupMetadata';
 
 const GoogleSignin = () => {
 	const { t } = useTranslation('auth');
 	// Use React Query for Google auth mutation
 	const googleAuthMutation = useMutation({
 		mutationFn: async () => {
+			persistSignupMetadata(buildSignupMetadata({ signup_method: 'google' }));
+
 			// Get the current site URL (to handle different environments)
 			const siteUrl = window.location.origin;
 
