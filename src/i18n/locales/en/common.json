@@ -145,7 +145,8 @@
 		}
 	},
 	"actionButton": {
-		"confirmActionOnEntity": "Are you sure you want to {{action}} this {{entity}}?",
+		"confirmActionOnEntity": "Are you sure you want to {{action}} {{entity}}?",
+		"confirmActionOnEntityPrefix": "Are you sure you want to {{action}}",
 		"archiveFailed": "Could not archive {{entity}}. Please try again.",
 		"actionFailedGeneric": "Could not complete this action for {{entity}}. Please try again."
 	},
