@@ -1,7 +1,7 @@
 import { Event, WindowSize, UsageAnalyticItem } from '@/models';
 
 export type EventDebugStatus = 'processed' | 'processing' | 'failed';
-export type DebugTrackerStatus = 'unprocessed' | 'found' | 'not_found' | 'error';
+export type DebugTrackerStatus = 'unprocessed' | 'found' | 'not_found' | 'error' | 'processing' | 'attributed';
 
 export interface EventDebugErrorDetail {
 	message: string;
@@ -71,8 +71,20 @@ export interface EventDebugSubscriptionLineItemLookupResult {
 	error?: EventDebugErrorResponse;
 }
 
+export interface MeterUsageAttribution {
+	meter_id: string;
+	external_customer_id: string;
+	qty_total: string;
+}
+
+export interface EventDebugAttributedToCustomerResult {
+	status: DebugTrackerStatus;
+	meter_usage?: MeterUsageAttribution;
+	error?: EventDebugErrorResponse;
+}
+
 export interface EventDebugFailurePoint {
-	failure_point_type: 'customer_lookup' | 'meter_lookup' | 'price_lookup' | 'subscription_line_item_lookup' | null;
+	failure_point_type: 'customer_lookup' | 'meter_lookup' | 'price_lookup' | 'subscription_line_item_lookup' | 'attributed_to_customer' | null;
 	error?: EventDebugErrorResponse;
 }
 
@@ -81,6 +93,7 @@ export interface EventDebugTracker {
 	meter_matching: EventDebugMeterMatchingResult;
 	price_lookup: EventDebugPriceLookupResult;
 	subscription_line_item_lookup: EventDebugSubscriptionLineItemLookupResult;
+	attributed_to_customer?: EventDebugAttributedToCustomerResult;
 	failure_point?: EventDebugFailurePoint;
 }
 
