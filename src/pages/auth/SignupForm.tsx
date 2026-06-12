@@ -12,6 +12,7 @@ import { config, APP_ENV } from '@/config/config';
 import GoogleSignin from './GoogleSignin';
 import { AuthTab } from './authTabs';
 import { useTranslation } from 'react-i18next';
+import { buildSignupMetadata, persistSignupMetadata } from '@/utils/auth/signupMetadata';
 
 interface SignupFormProps {
 	switchTab: (tab: AuthTab) => void;
@@ -39,6 +40,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ switchTab }) => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
+		persistSignupMetadata(buildSignupMetadata({ signup_method: 'email' }));
+	}, []);
+
+	useEffect(() => {
 		if (queryEmail) {
 			setSignupData({ ...signupData, email: queryEmail });
 		}
@@ -53,6 +58,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ switchTab }) => {
 			return await AuthApi.Signup({
 				email: signupData.email,
 				password: signupData.password,
+				metadata: buildSignupMetadata({ signup_method: 'email' }),
 			});
 		},
 		onSuccess: (data) => {
@@ -115,6 +121,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ switchTab }) => {
 			return;
 		}
 		if (config.app.env !== APP_ENV.SelfHosted) {
+			persistSignupMetadata(buildSignupMetadata({ signup_method: 'email' }));
 			setIsLoading(true);
 			const { error } = await supabase.auth.signUp({
 				email: signupData.email,
