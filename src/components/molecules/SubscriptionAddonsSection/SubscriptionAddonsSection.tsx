@@ -20,6 +20,13 @@ import toast from 'react-hot-toast';
 import AddAddonDialog from './AddAddonDialog';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
+import CommitmentTimeBucketsInline from '@/components/molecules/CommitmentTimeBucketsInline/CommitmentTimeBucketsInline';
+import { EXPAND } from '@/models';
+import { SUBSCRIPTION_LINE_ITEM_ENTITY_TYPE } from '@/models/Subscription';
+import { DataType, FilterOperator } from '@/types/common/QueryBuilder';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
+import { lineItemHasWindowCommitment } from '@/utils/subscription/subscription_line_item_commitment_helpers';
+import { subscriptionLineItemListItemToLineItem } from '@/utils/subscription/subscriptionLineItemListItemToLineItem';
 
 interface SubscriptionAddonsSectionProps {
 	subscriptionId: string;
@@ -33,6 +40,9 @@ interface SubscriptionAddonsSectionProps {
 	subscriptionCurrency?: string;
 	subscriptionCurrentPeriodStart?: string;
 	subscriptionCurrentPeriodEnd?: string;
+	subscriptionCustomerId?: string;
+	/** Show window commitment time buckets from addon usage line items. */
+	showCommitmentColumn?: boolean;
 }
 
 const formatAddonCharges = (prices: Price[] = []): string => {
@@ -149,6 +159,8 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 	subscriptionCurrency,
 	subscriptionCurrentPeriodStart,
 	subscriptionCurrentPeriodEnd,
+	subscriptionCustomerId,
+	showCommitmentColumn = false,
 }) => {
 	const { t } = useTranslation('common');
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -202,6 +214,40 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 		const response = addonAssociationsResponse as any;
 		return response.items ?? response ?? [];
 	}, [addonAssociationsResponse]);
+
+	const { data: addonLineItemsResponse } = useQuery({
+		queryKey: ['subscriptionAddonLineItems', subscriptionId, subscriptionCustomerId, subscriptionCurrentPeriodStart],
+		queryFn: () =>
+			SubscriptionApi.searchSubscriptionLineItems({
+				subscription_ids: [subscriptionId],
+				customer_ids: subscriptionCustomerId ? [subscriptionCustomerId] : undefined,
+				current_period_start: subscriptionCurrentPeriodStart!,
+				active_filter: true,
+				limit: 100,
+				offset: 0,
+				expand: EXPAND.PRICES,
+				filters: [
+					{
+						field: 'entity_type',
+						operator: FilterOperator.EQUAL,
+						data_type: DataType.STRING,
+						value: { string: SUBSCRIPTION_LINE_ITEM_ENTITY_TYPE.ADDON },
+					},
+				],
+			}),
+		enabled: showCommitmentColumn && !!subscriptionId && !!subscriptionCustomerId && !!subscriptionCurrentPeriodStart,
+	});
+
+	const addonCommitmentBucketsByAddonId = useMemo(() => {
+		const map = new Map<string, CommitmentTimeBucket[]>();
+		for (const item of addonLineItemsResponse?.items ?? []) {
+			const lineItem = subscriptionLineItemListItemToLineItem(item);
+			if (!lineItemHasWindowCommitment(lineItem) || !lineItem.entity_id) continue;
+			const existing = map.get(lineItem.entity_id) ?? [];
+			map.set(lineItem.entity_id, [...existing, ...(lineItem.commitment_time_buckets ?? [])]);
+		}
+		return map;
+	}, [addonLineItemsResponse?.items]);
 
 	const processedAddonAssociations = useMemo<AddonAssociationWithStatus[]>(() => {
 		return addonAssociations.map((association) => {
@@ -305,6 +351,20 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 					return <span>{formatAddonCharges(prices)}</span>;
 				},
 			},
+			...(showCommitmentColumn
+				? [
+						{
+							title: 'Commitment',
+							render: (row: AddonAssociationWithStatus) => {
+								const buckets = addonCommitmentBucketsByAddonId.get(row.addon_id);
+								if (!buckets?.length) {
+									return <span className='text-sm text-gray-400'>—</span>;
+								}
+								return <CommitmentTimeBucketsInline buckets={buckets} currency={subscriptionDetails?.currency} />;
+							},
+						},
+					]
+				: []),
 			{
 				title: '',
 				width: '30px',
@@ -345,13 +405,15 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 				},
 			},
 		],
-		[dropdownOpen, handleCancel, readOnly],
+		[addonCommitmentBucketsByAddonId, dropdownOpen, handleCancel, readOnly, showCommitmentColumn, subscriptionDetails?.currency],
 	);
+
+	const addButton = readOnly ? undefined : <AddButton onClick={() => setIsAddDialogOpen(true)} />;
 
 	if (isLoading) {
 		return (
 			<Card variant='notched'>
-				<CardHeader title={t('labels.addons')} cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
+				<CardHeader title={t('labels.addons')} cta={addButton} />
 				<div className='flex justify-center items-center py-8'>
 					<span className='text-gray-500'>{t('labels.loadingAddons')}</span>
 				</div>
@@ -367,26 +429,23 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({
 		<>
 			{processedAddonAssociations.length > 0 ? (
 				<Card variant='notched'>
-					<CardHeader title={t('labels.addons')} cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />} />
+					<CardHeader title={t('labels.addons')} cta={addButton} />
 					<FlexpriceTable showEmptyRow data={processedAddonAssociations} columns={columns} variant='no-bordered' />
 				</Card>
 			) : (
-				<NoDataCard
-					title={t('labels.addons')}
-					subtitle={t('labels.noAddonsAddedYet')}
-					cta={<AddButton onClick={() => setIsAddDialogOpen(true)} disabled={readOnly} />}
-				/>
+				<NoDataCard title={t('labels.addons')} subtitle={t('labels.noAddonsAddedYet')} cta={addButton} />
 			)}
 
-			{/* Add Addon Dialog */}
-			<AddAddonDialog
-				isOpen={isAddDialogOpen}
-				onOpenChange={setIsAddDialogOpen}
-				subscriptionId={subscriptionId}
-				billingPeriod={subscriptionDetails?.billing_period}
-				currency={subscriptionDetails?.currency}
-				currentPeriodEndIso={subscriptionDetails?.current_period_end}
-			/>
+			{!readOnly && (
+				<AddAddonDialog
+					isOpen={isAddDialogOpen}
+					onOpenChange={setIsAddDialogOpen}
+					subscriptionId={subscriptionId}
+					billingPeriod={subscriptionDetails?.billing_period}
+					currency={subscriptionDetails?.currency}
+					currentPeriodEndIso={subscriptionDetails?.current_period_end}
+				/>
+			)}
 
 			{/* Cancel Addon Dialog */}
 			<Dialog

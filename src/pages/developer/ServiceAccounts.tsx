@@ -90,9 +90,7 @@ const ServiceAccountsPage = () => {
 				title: t('labels.createdAt'),
 				width: 150,
 				align: 'right',
-				render: (row) => (
-					<span className='text-gray-600'>{formatDateShort(row.tenant?.created_at || row.tenant?.updated_at || '')}</span>
-				),
+				render: (row) => <span className='text-gray-600'>{formatDateShort(row.tenant?.created_at || row.tenant?.updated_at || '')}</span>,
 			},
 			{
 				fieldVariant: 'interactive',
@@ -127,11 +125,7 @@ const ServiceAccountsPage = () => {
 	return (
 		<div>
 			<ApiDocsContent tags={API_DOCS_TAGS.Users} />
-			<ServiceAccountDrawer
-				isOpen={isDrawerOpen}
-				onOpenChange={setIsDrawerOpen}
-				data={selectedAccount}
-			/>
+			<ServiceAccountDrawer isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen} data={selectedAccount} />
 
 			{serviceAccountsResponse?.items.length === 0 && (
 				<EmptyPage

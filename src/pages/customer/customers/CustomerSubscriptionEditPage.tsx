@@ -34,7 +34,6 @@ import { DataType, FilterOperator } from '@/types/common/QueryBuilder';
 import { EXPAND } from '@/models';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import { ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
-import { convertPriceOverrideToLineItemUpdate } from '@/utils/subscription/priceOverrideToLineItemUpdate';
 import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
 import { getPriceTypeFromLineItem, lineItemToPrice } from '@/utils/subscription/lineItemToPrice';
 import { RouteNames } from '@/core/routes/Routes';
@@ -132,7 +131,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 
 	const inheritedSubscriptionRows = inheritedSubscriptionsData?.items ?? [];
 
-	const { mutate: updateLineItem } = useMutation({
+	const { mutate: updateLineItem, isPending: isUpdatingLineItem } = useMutation({
 		mutationFn: async ({ lineItemId, updateData }: { lineItemId: string; updateData: UpdateSubscriptionLineItemRequest }) => {
 			return await SubscriptionApi.updateSubscriptionLineItem(lineItemId, updateData);
 		},
@@ -256,12 +255,10 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 		[terminateLineItem],
 	);
 
-	const handlePriceOverride = useCallback(
-		(priceId: string, override: Partial<ExtendedPriceOverride>) => {
+	const handleUsageLineItemUpdate = useCallback(
+		(updateData: UpdateSubscriptionLineItemRequest) => {
 			if (!editingLineItem || editingLineItem.mode !== SUBSCRIPTION_LINE_ITEM_EDIT_MODE.USAGE_OVERRIDE) return;
-			const updateData = convertPriceOverrideToLineItemUpdate(priceId, override);
-			updateLineItem({ lineItemId: editingLineItem.lineItem.id, updateData });
-			setEditingLineItem(null);
+			updateLineItem({ lineItemId: editingLineItem.lineItem.id, updateData }, { onSuccess: () => setEditingLineItem(null) });
 		},
 		[editingLineItem, updateLineItem],
 	);
@@ -304,7 +301,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 	const handleAddChargeSave = useCallback(
 		(item: AddedSubscriptionLineItem) => {
 			const { tempId, ...request } = item;
-			void tempId; // omitted from API request
+			void tempId;
 			createLineItem(request as CreateSubscriptionLineItemRequest);
 		},
 		[createLineItem],
@@ -405,6 +402,8 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 							subscriptionCurrency={subscriptionDetails.currency}
 							subscriptionCurrentPeriodStart={subscriptionDetails.current_period_start}
 							subscriptionCurrentPeriodEnd={subscriptionDetails.current_period_end}
+							subscriptionCustomerId={subscriptionDetails.customer_id}
+							showCommitmentColumn
 						/>
 
 						{editingLineItem?.mode === SUBSCRIPTION_LINE_ITEM_EDIT_MODE.USAGE_OVERRIDE && (
@@ -412,10 +411,13 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 								isOpen={true}
 								onOpenChange={(open: boolean) => !open && setEditingLineItem(null)}
 								price={lineItemToPrice(editingLineItem.lineItem)}
-								onPriceOverride={handlePriceOverride}
+								onPriceOverride={() => {}}
 								onResetOverride={handleResetOverride}
 								overriddenPrices={overriddenPrices}
 								showEffectiveFrom={true}
+								lineItem={editingLineItem.lineItem}
+								onLineItemUpdate={handleUsageLineItemUpdate}
+								isSaving={isUpdatingLineItem}
 							/>
 						)}
 

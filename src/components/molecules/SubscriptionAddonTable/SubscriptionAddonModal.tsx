@@ -12,7 +12,8 @@ import { BILLING_PERIOD } from '@/constants/constants';
 import { LineItemCommitmentConfig, LineItemCommitmentsMap } from '@/types/dto/LineItemCommitmentConfig';
 import CommitmentConfigDialog from '@/components/molecules/CommitmentConfigDialog';
 import { formatCommitmentSummary } from '@/utils/common/commitment_helpers';
-import { isOneTimePlanPrice } from '@/utils/subscription/planPricesForSubscriptionUi';
+import type { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
+import { buildCommitmentConfigOnSave, filterAddonPricesForSubscription } from '@/utils/subscription/addon_commitment_helpers';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -148,18 +149,10 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 		[addons, errors.addon_id],
 	);
 
-	const selectedAddonPrices = useMemo(() => {
-		const prices: Price[] = (selectedAddonDetails?.prices as Price[]) || [];
-		let filtered = prices;
-		if (currency) {
-			filtered = filtered.filter((p) => p.currency?.toLowerCase() === currency.toLowerCase());
-		}
-		if (billingPeriod) {
-			const periodKey = billingPeriod.toUpperCase();
-			filtered = filtered.filter((p) => isOneTimePlanPrice(p) || p.billing_period?.toUpperCase() === periodKey);
-		}
-		return filtered;
-	}, [selectedAddonDetails, billingPeriod, currency]);
+	const selectedAddonPrices = useMemo(
+		() => filterAddonPricesForSubscription((selectedAddonDetails?.prices as Price[]) || [], billingPeriod, currency),
+		[selectedAddonDetails, billingPeriod, currency],
+	);
 
 	const commitmentMap = useMemo(() => {
 		return ((formData.line_item_commitments || {}) as LineItemCommitmentsMap) || {};
@@ -185,6 +178,17 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 			};
 		});
 	}, []);
+
+	const handleCommitmentSave = useCallback(
+		(priceId: string, config: LineItemCommitmentConfig | null, timeBuckets?: CommitmentTimeBucket[]) => {
+			if (!config) {
+				setCommitmentForPrice(priceId, null);
+				return;
+			}
+			setCommitmentForPrice(priceId, buildCommitmentConfigOnSave(config, timeBuckets));
+		},
+		[setCommitmentForPrice],
+	);
 
 	const addonChargeColumns: ColumnData<AddonChargeRow>[] = useMemo(
 		() => [
@@ -321,10 +325,9 @@ const SubscriptionAddonModal: React.FC<Props> = ({
 					isOpen={isCommitmentDialogOpen}
 					onOpenChange={setIsCommitmentDialogOpen}
 					price={selectedCommitmentPrice}
-					onSave={(priceId, config) => {
-						setCommitmentForPrice(priceId, config);
-					}}
+					onSave={handleCommitmentSave}
 					currentConfig={commitmentMap[selectedCommitmentPrice.id]}
+					currentTimeBuckets={commitmentMap[selectedCommitmentPrice.id]?.commitment_time_buckets}
 					billingPeriod={billingPeriod}
 				/>
 			)}

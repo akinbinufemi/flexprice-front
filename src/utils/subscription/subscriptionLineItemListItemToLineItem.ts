@@ -48,5 +48,6 @@ export function subscriptionLineItemListItemToLineItem(item: SubscriptionLineIte
 		commitment_overage_factor: item.commitment_overage_factor,
 		commitment_true_up_enabled: item.commitment_true_up_enabled,
 		commitment_windowed: item.commitment_windowed,
+		commitment_time_buckets: item.commitment_time_buckets,
 	} as LineItem;
 }
