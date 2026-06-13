@@ -55,9 +55,7 @@ const ServiceAccountDrawer: FC<Props> = ({ isOpen, onOpenChange, data }) => {
 	}, [isOpen, data, isEditMode]);
 
 	const toggleRole = (roleValue: string) => {
-		setSelectedRoles((prev) =>
-			prev.includes(roleValue) ? prev.filter((r) => r !== roleValue) : [...prev, roleValue],
-		);
+		setSelectedRoles((prev) => (prev.includes(roleValue) ? prev.filter((r) => r !== roleValue) : [...prev, roleValue]));
 	};
 
 	// --- Create mutation ---
@@ -77,8 +75,7 @@ const ServiceAccountDrawer: FC<Props> = ({ isOpen, onOpenChange, data }) => {
 
 	// --- Update mutation ---
 	const { mutate: updateServiceAccount, isPending: isUpdating } = useMutation({
-		mutationFn: async () =>
-			UserApi.updateServiceAccount(data!.id, { name: name.trim() || undefined }),
+		mutationFn: async () => UserApi.updateServiceAccount(data!.id, { name: name.trim() || undefined }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['service-accounts'] });
 			toast.success(t('developers:serviceAccountDrawer.updateSuccess'));

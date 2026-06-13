@@ -140,6 +140,7 @@ const SubscriptionEditChargesSection: FC<SubscriptionEditChargesSectionProps> = 
 				readOnly={readOnly}
 				phaseLabelsById={phaseLabelsById}
 				showNoDataCard={false}
+				showCommitmentColumn
 			/>
 			<Spacer className='!h-2' />
 			<ShortPagination totalItems={totalLineItems} pageSize={limit} unit='charges' prefix={LINE_ITEMS_PAGINATION_PREFIX} />

@@ -36,16 +36,12 @@ const validateDecimal = (value: string): boolean => {
 // Helper function to get display symbol for currency or price unit
 const getDisplaySymbol = (value?: string): string => {
 	if (!value) return '';
+	const normalized = value.toUpperCase();
 	// Check if it's a currency code (3 uppercase letters)
-	const isCurrencyCode = /^[A-Z]{3}$/.test(value);
+	const isCurrencyCode = /^[A-Z]{3}$/.test(normalized);
 
 	if (isCurrencyCode) {
-		// Try to get currency symbol
-		const symbol = getCurrencySymbol(value);
-		// If getCurrencySymbol returns a symbol (different from input), use it
-		// Otherwise, it might be a custom price unit that looks like a currency code
-		// In that case, we'll still try to use getCurrencySymbol which will return the code if not found
-		return symbol;
+		return getCurrencySymbol(normalized);
 	}
 	// Otherwise, it's a custom price unit code - display as-is
 	return value;

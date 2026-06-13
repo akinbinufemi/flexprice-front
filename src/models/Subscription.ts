@@ -5,6 +5,7 @@ import { Plan } from './Plan';
 import { CreditGrant } from './CreditGrant';
 import { BaseModel, ENTITY_STATUS, Metadata } from './base';
 import { Price, PRICE_TYPE } from './Price';
+import { CommitmentTimeBucket } from '@/types/dto/CommitmentTimeBucket';
 
 export interface SubscriptionCommitmentInfo {
 	enable_true_up?: boolean;
@@ -45,6 +46,7 @@ export interface LineItem extends BaseModel {
 	readonly commitment_overage_factor?: string;
 	readonly commitment_true_up_enabled?: boolean;
 	readonly commitment_windowed?: boolean;
+	readonly commitment_time_buckets?: CommitmentTimeBucket[];
 }
 
 export interface Subscription extends BaseModel {
@@ -247,6 +249,7 @@ export enum SUBSCRIPTION_MODIFY_INVOICE_RESOURCE_ACTION {
 export enum SUBSCRIPTION_LINE_ITEM_EDIT_MODE {
 	USAGE_OVERRIDE = 'usage_override',
 	FIXED_QUANTITY = 'fixed_quantity',
+	WINDOW_COMMITMENT = 'window_commitment',
 }
 
 // PaymentBehavior determines how subscription payments are handled

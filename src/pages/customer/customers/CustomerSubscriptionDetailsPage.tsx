@@ -1,5 +1,6 @@
 import { Card, FormHeader, Page, Spacer, Chip } from '@/components/atoms';
-import { UpcomingCreditGrantApplicationsTable } from '@/components/molecules';
+import { SubscriptionAddonsSection, UpcomingCreditGrantApplicationsTable } from '@/components/molecules';
+import SubscriptionDetailChargesSection from '@/components/molecules/Subscription/SubscriptionDetailChargesSection';
 import FlexpriceTable, { ColumnData, RedirectCell } from '@/components/molecules/Table';
 import { SubscriptionPreviewLineItemTable } from '@/components/molecules/InvoiceLineItemTable';
 import SubscriptionActionButton from '@/components/organisms/Subscription/SubscriptionActionButton';
@@ -436,6 +437,41 @@ const CustomerSubscriptionDetailsPage: FC = () => {
 				</div>
 				<Spacer className='!my-4' />
 			</Card>
+
+			{subscription_id && subscriptionDetails?.customer_id && subscriptionDetails?.current_period_start && (
+				<Card className='card mt-8'>
+					<FormHeader title={t('common:labels.charges')} variant='sub-header' titleClassName='font-semibold' />
+					<div className='mt-4'>
+						<SubscriptionDetailChargesSection
+							subscriptionId={subscription_id}
+							customerId={subscriptionDetails.customer_id}
+							currentPeriodStart={subscriptionDetails.current_period_start}
+							commitmentInfo={{
+								enable_true_up: subscriptionDetails.enable_true_up,
+								commitment_amount: subscriptionDetails.commitment_amount,
+								overage_factor: subscriptionDetails.overage_factor,
+								commitment_duration: subscriptionDetails.commitment_duration,
+								currency: subscriptionDetails.currency,
+							}}
+						/>
+					</div>
+				</Card>
+			)}
+
+			{subscription_id && subscriptionDetails && (
+				<div className='mt-8'>
+					<SubscriptionAddonsSection
+						subscriptionId={subscription_id}
+						readOnly
+						subscriptionBillingPeriod={subscriptionDetails.billing_period}
+						subscriptionCurrency={subscriptionDetails.currency}
+						subscriptionCurrentPeriodStart={subscriptionDetails.current_period_start}
+						subscriptionCurrentPeriodEnd={subscriptionDetails.current_period_end}
+						subscriptionCustomerId={subscriptionDetails.customer_id}
+						showCommitmentColumn
+					/>
+				</div>
+			)}
 
 			{inheritedSubscriptionRows.length > 0 && (
 				<Card className='card mt-8'>

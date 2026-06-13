@@ -1,5 +1,6 @@
 export { default as SubscriptionEditDetailsHeader } from './SubscriptionEditDetailsHeader';
 export { default as SubscriptionEditChargesSection } from './SubscriptionEditChargesSection';
+export { default as SubscriptionDetailChargesSection } from './SubscriptionDetailChargesSection';
 export { default as SubscriptionEditCreditGrantsSection } from './SubscriptionEditCreditGrantsSection';
 export { default as SubscriptionEditInheritingCustomersSection } from './SubscriptionEditInheritingCustomersSection';
 export type { SubscriptionEditInheritingCustomersSectionProps } from './SubscriptionEditInheritingCustomersSection';

@@ -670,6 +670,7 @@ export interface SubscriptionLineItemResponse {
 	commitment_overage_factor?: string;
 	commitment_true_up_enabled?: boolean;
 	commitment_windowed?: boolean;
+	commitment_time_buckets?: CommitmentTimeBucket[];
 }
 
 /** Line item as returned by list/search when `expand` includes related entities (e.g. `prices`). */

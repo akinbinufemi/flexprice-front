@@ -1,4 +1,5 @@
 import { FC, useState, useEffect, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { Dialog } from '@/components/atoms';
 import { Input, Button, Select, SelectOption, DatePicker } from '@/components/atoms';
 import { Price, BILLING_MODEL, TIER_MODE, CreatePriceTier, TransformQuantity, PRICE_TYPE, PRICE_UNIT_TYPE } from '@/models/Price';
@@ -8,6 +9,20 @@ import { ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
 import VolumeTieredPricingForm from '@/components/organisms/PlanForm/VolumeTieredPricingForm';
 import { PremiumFeatureIcon } from '../PremiumFeature/PremiumFeature';
 import { useTranslation } from 'react-i18next';
+import type { LineItem } from '@/models/Subscription';
+import type { UpdateSubscriptionLineItemRequest } from '@/types/dto/Subscription';
+import SubscriptionChargeCommitmentSection, {
+	DEFAULT_SUBSCRIPTION_CHARGE_COMMITMENT_STATE,
+	type SubscriptionChargeCommitmentState,
+} from '@/components/organisms/Subscription/SubscriptionChargeCommitmentSection';
+import { useMeterForCommitment } from '@/hooks/useMeterForCommitment';
+import {
+	buildLineItemCommitmentUpdatePayload,
+	formatWindowCommitmentError,
+	lineItemWindowCommitmentStateFromBuckets,
+} from '@/utils/subscription/subscription_line_item_commitment_helpers';
+import { useCommitmentTimeBucketPrices } from '@/hooks/useCommitmentTimeBucketPrices';
+import { convertPriceOverrideToLineItemUpdate } from '@/utils/subscription/priceOverrideToLineItemUpdate';
 
 interface Props {
 	isOpen: boolean;
@@ -17,6 +32,10 @@ interface Props {
 	onResetOverride: (priceId: string) => void;
 	overriddenPrices: Record<string, ExtendedPriceOverride>;
 	showEffectiveFrom?: boolean; // Optional prop to conditionally show effective_from date
+	/** When set (subscription line item edit), shows window commitment and merges into line item update. */
+	lineItem?: LineItem;
+	onLineItemUpdate?: (updateData: UpdateSubscriptionLineItemRequest) => void;
+	isSaving?: boolean;
 }
 
 const PriceOverrideDialog: FC<Props> = ({
@@ -27,8 +46,29 @@ const PriceOverrideDialog: FC<Props> = ({
 	onResetOverride,
 	overriddenPrices,
 	showEffectiveFrom = false,
+	lineItem,
+	onLineItemUpdate,
+	isSaving = false,
 }) => {
 	const { t } = useTranslation('catalog');
+	const { t: tBilling } = useTranslation('billing');
+	const meterId = lineItem?.meter_id || lineItem?.price?.meter_id;
+	const { meter } = useMeterForCommitment(meterId, lineItem?.price?.meter);
+	const { bucketsWithPrices, isLoading: isLoadingBucketPrices } = useCommitmentTimeBucketPrices(
+		isOpen && lineItem ? lineItem.commitment_time_buckets : undefined,
+	);
+	const [commitmentState, setCommitmentState] = useState<SubscriptionChargeCommitmentState>(DEFAULT_SUBSCRIPTION_CHARGE_COMMITMENT_STATE);
+	const [initialCommitmentState, setInitialCommitmentState] = useState<SubscriptionChargeCommitmentState>(
+		DEFAULT_SUBSCRIPTION_CHARGE_COMMITMENT_STATE,
+	);
+
+	useEffect(() => {
+		if (isOpen && lineItem && !isLoadingBucketPrices) {
+			const state = lineItemWindowCommitmentStateFromBuckets(lineItem, bucketsWithPrices);
+			setCommitmentState(state);
+			setInitialCommitmentState(state);
+		}
+	}, [isOpen, lineItem, bucketsWithPrices, isLoadingBucketPrices]);
 
 	const billingModelOptions: SelectOption[] = useMemo(
 		() => [
@@ -152,7 +192,7 @@ const PriceOverrideDialog: FC<Props> = ({
 		isCustomPriceUnit,
 	]);
 
-	const handleOverride = () => {
+	const buildPriceOverride = (): Partial<ExtendedPriceOverride> => {
 		const override: Partial<ExtendedPriceOverride> = {};
 
 		// Handle amount/price_unit_amount based on price unit type and billing model
@@ -205,6 +245,35 @@ const PriceOverrideDialog: FC<Props> = ({
 		// Include effective_from if showEffectiveFrom is enabled
 		if (showEffectiveFrom && effectiveFrom) {
 			override.effective_from = effectiveFrom.toISOString();
+		}
+
+		return override;
+	};
+
+	const hasCommitmentChanges = () => {
+		if (!lineItem) return false;
+		return JSON.stringify(commitmentState) !== JSON.stringify(initialCommitmentState);
+	};
+
+	const handleOverride = () => {
+		const override = buildPriceOverride();
+
+		if (lineItem && onLineItemUpdate) {
+			const priceUpdate = convertPriceOverrideToLineItemUpdate(price.id, override);
+			const commitmentResult = buildLineItemCommitmentUpdatePayload(commitmentState, lineItem, meter);
+			if (!commitmentResult.ok) {
+				toast.error(formatWindowCommitmentError(commitmentResult.error, tBilling));
+				return;
+			}
+			const merged: UpdateSubscriptionLineItemRequest = { ...priceUpdate, ...commitmentResult.payload };
+			const hasPriceChanges = Object.keys(priceUpdate).length > 0;
+			if (!hasPriceChanges && !hasCommitmentChanges()) {
+				onOpenChange(false);
+				return;
+			}
+			onLineItemUpdate(merged);
+			onOpenChange(false);
+			return;
 		}
 
 		if (Object.keys(override).length > 0) {
@@ -441,8 +510,8 @@ const PriceOverrideDialog: FC<Props> = ({
 				</div>
 			}
 			description={t('priceDialogs.modifyPricingDescription', { name: chargeDisplayName })}
-			className='w-auto min-w-[32rem] max-w-[90vw]'>
-			<div className='space-y-6 max-h-[80vh] overflow-y-auto'>
+			className={lineItem ? 'w-full max-w-4xl overflow-x-hidden' : 'w-full max-w-lg sm:max-w-[32rem]'}>
+			<div className='space-y-6 max-h-[80vh] overflow-y-auto overflow-x-hidden min-w-0'>
 				<div className='space-y-4'>
 					{/* Original Price Display */}
 					<div className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
@@ -593,17 +662,26 @@ const PriceOverrideDialog: FC<Props> = ({
 					)}
 				</div>
 
+				{lineItem && (
+					<SubscriptionChargeCommitmentSection
+						meterId={meterId}
+						currency={lineItem.currency}
+						value={commitmentState}
+						onChange={setCommitmentState}
+					/>
+				)}
+
 				<div className='flex gap-3 pt-4'>
-					<Button variant='outline' onClick={handleCancel} className='flex-1'>
+					<Button variant='outline' onClick={handleCancel} className='flex-1' disabled={isSaving}>
 						{t('priceDialogs.cancel')}
 					</Button>
-					{isOverridden && (
-						<Button variant='outline' onClick={handleReset} className='flex-1'>
+					{isOverridden && !lineItem && (
+						<Button variant='outline' onClick={handleReset} className='flex-1' disabled={isSaving}>
 							{t('priceDialogs.reset')}
 						</Button>
 					)}
-					<Button onClick={handleOverride} className='flex-1' disabled={!hasChanges()}>
-						{isOverridden ? t('priceDialogs.updateOverride') : t('priceDialogs.overridePrice')}
+					<Button onClick={handleOverride} className='flex-1' disabled={isSaving || (!hasChanges() && !hasCommitmentChanges())}>
+						{lineItem || isOverridden ? t('priceDialogs.updateOverride') : t('priceDialogs.overridePrice')}
 					</Button>
 				</div>
 			</div>

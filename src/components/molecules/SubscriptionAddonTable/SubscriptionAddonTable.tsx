@@ -11,6 +11,7 @@ import { getTotalPayableTextWithCoupons } from '@/utils/common/helper_functions'
 import { Price, PRICE_TYPE } from '@/models/Price';
 import { BILLING_PERIOD } from '@/constants/constants';
 import { getCurrentPriceAmount, ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
+import { formatCommitmentSummary } from '@/utils/common/commitment_helpers';
 import { Coupon } from '@/models/Coupon';
 
 interface Props {
@@ -148,6 +149,17 @@ const SubscriptionAddonTable: React.FC<Props> = ({
 					const addonDetails = getAddonDetails(row.addon_id);
 					const prices = addonDetails?.prices || [];
 					return <span>{formatAddonCharges(prices, priceOverrides, coupons, t)}</span>;
+				},
+			},
+			{
+				title: t('subscriptionAddon.columnCommitment'),
+				render: (row) => {
+					const commitments = row.line_item_commitments;
+					if (!commitments || Object.keys(commitments).length === 0) {
+						return <span className='text-gray-400'>—</span>;
+					}
+					const summaries = Object.values(commitments).map((config) => formatCommitmentSummary(config));
+					return <span className='text-sm text-gray-600'>{summaries.join(' · ')}</span>;
 				},
 			},
 			// {
