@@ -25,6 +25,18 @@ export {
 	validateCommitment,
 	formatCommitmentSummary,
 	supportsWindowCommitment,
+	supportsCommitmentTimeBuckets,
+	isHourBucketSize,
+	getCommitmentTimeBucketConstraints,
+	buildCommitmentTimeValues,
+	isCommitmentTimePointAligned,
+	enrichCommitmentTimeBucketsForApi,
+	priceToCommitmentBucketPrice,
 	extractLineItemCommitments,
 	mergeCommitmentsIntoOverrides,
+	classifyCommitmentValidation,
+	mapCommitmentValidationError,
+	resolveCommitmentTypeFromConfig,
+	bucketPriceContextFromPrice,
 } from './commitment_helpers';
+export type { ExtractLineItemCommitmentsOptions, CommitmentValidationTarget, CommitmentTimeBucketConstraints } from './commitment_helpers';

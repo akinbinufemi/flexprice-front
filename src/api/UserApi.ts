@@ -67,10 +67,12 @@ export class UserApi {
 	}
 
 	// Fetch service accounts only
-	public static async getServiceAccounts(): Promise<GetServiceAccountsResponse> {
+	public static async getServiceAccounts(
+		params: { limit: number; offset: number } = { limit: 10, offset: 0 },
+	): Promise<GetServiceAccountsResponse> {
 		const response = await AxiosClient.post<GetServiceAccountsResponse>(`${this.baseUrl}/search`, {
-			limit: 100,
-			offset: 0,
+			limit: params.limit,
+			offset: params.offset,
 			type: 'service_account',
 			sort: [
 				{
@@ -103,6 +105,11 @@ export class UserApi {
 	// Update an existing user
 	public static async updateUser(data: UpdateTenantPayload): Promise<User> {
 		return await AxiosClient.put<User, UpdateTenantPayload>(`tenants/update`, data);
+	}
+
+	// Update a service account (name, metadata)
+	public static async updateServiceAccount(id: string, data: { name?: string; metadata?: Record<string, string> }): Promise<User> {
+		return await AxiosClient.put<User, typeof data>(`${this.baseUrl}/${id}`, data);
 	}
 
 	// Delete a user

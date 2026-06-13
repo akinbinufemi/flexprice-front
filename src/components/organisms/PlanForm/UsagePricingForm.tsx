@@ -1,5 +1,5 @@
 import { Price } from '@/models/Price';
-import { FC, useState, useEffect, useMemo } from 'react';
+import { FC, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { Button, Input, Select, SelectOption, Spacer, DatePicker } from '@/components/atoms';
 import SelectFeature from '@/components/atoms/SelectFeature/SelectFeature';
 import SelectGroup from './SelectGroup';
@@ -38,6 +38,9 @@ interface Props {
 	price: Partial<InternalPrice>;
 	entityType?: PRICE_ENTITY_TYPE;
 	entityId?: string;
+	onMeterChange?: (feature: Feature | null) => void;
+	/** Rendered after form fields and before the action buttons */
+	formFooter?: ReactNode;
 }
 
 export interface PriceTier {
@@ -86,6 +89,8 @@ const UsagePricingForm: FC<Props> = ({
 	price,
 	entityType = PRICE_ENTITY_TYPE.PLAN,
 	entityId,
+	onMeterChange,
+	formFooter,
 }) => {
 	const { t } = useTranslation(['catalog', 'common']);
 	const [currency, setCurrency] = useState(price.currency || currencyOptions[0].value);
@@ -204,12 +209,13 @@ const UsagePricingForm: FC<Props> = ({
 	useEffect(() => {
 		if (featuresData && price.internal_state === PriceInternalState.EDIT) {
 			setSelectedFeature(featuresData);
+			onMeterChange?.(featuresData);
 			// Set display_name from feature name if not already set
 			if (!displayName && featuresData.name) {
 				setDisplayName(featuresData.name);
 			}
 		}
-	}, [featuresData, price.internal_state]);
+	}, [featuresData, price.internal_state, onMeterChange, displayName]);
 
 	// Update display_name when feature changes
 	useEffect(() => {
@@ -485,10 +491,14 @@ const UsagePricingForm: FC<Props> = ({
 				onChange={(feature) => {
 					if (feature) {
 						setSelectedFeature(feature);
+						onMeterChange?.(feature);
 						// Auto-fill display_name with feature name if empty
 						if (!displayName) {
 							setDisplayName(feature.name);
 						}
+					} else {
+						setSelectedFeature(undefined);
+						onMeterChange?.(null);
 					}
 				}}
 				value={selectedFeature?.id}
@@ -653,6 +663,8 @@ const UsagePricingForm: FC<Props> = ({
 				label={t('catalog:plans.organisms.priceForm.startDateOptional')}
 				placeholder={t('catalog:plans.organisms.priceForm.selectStartDate')}
 			/>
+
+			{formFooter}
 
 			<Spacer height={'16px'} />
 			<div className='flex justify-end'>

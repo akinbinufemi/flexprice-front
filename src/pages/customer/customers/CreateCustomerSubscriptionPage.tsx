@@ -26,6 +26,7 @@ import {
 	SUBSCRIPTION_STATUS,
 	PRICE_TYPE,
 	ENTITY_STATUS,
+	Price,
 } from '@/models';
 import { InternalCreditGrantRequest, creditGrantToInternal, internalToCreateRequest } from '@/types/dto/CreditGrant';
 import { BILLING_PERIOD, PAYMENT_TERMS_NONE, SANDBOX_AUTO_CANCELLATION_DAYS } from '@/constants/constants';
@@ -46,6 +47,7 @@ import { cn } from '@/lib/utils';
 import { toSentenceCase } from '@/utils/common/helper_functions';
 import { ExtendedPriceOverride, getLineItemOverrides } from '@/utils/common/price_override_helpers';
 import { extractLineItemCommitments } from '@/utils/common/commitment_helpers';
+import { sanitizeAddonLineItemCommitmentsForApi, filterAddonPricesForSubscription } from '@/utils/subscription/addon_commitment_helpers';
 import { extractSubscriptionBoundaries, extractFirstPhaseData } from '@/utils/subscription/phaseConversion';
 
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
@@ -318,7 +320,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 	const allCouponsData = couponsResponse?.items || [];
 
 	const addonIds = useMemo(() => subscriptionState.addons?.map((addon) => addon.addon_id) || [], [subscriptionState.addons]);
-	useAddons(addonIds);
+	const { data: addonsData } = useAddons(addonIds);
 
 	const isPriceActive = (price: { start_date?: string }) => {
 		if (!price.start_date) return true;
@@ -584,8 +586,8 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			// Note: getLineItemOverrides automatically excludes quantity for USAGE type prices
 			finalOverrideLineItems = getLineItemOverrides(currentPrices, priceOverrides);
 
-			// Extract line item commitments from price overrides (time buckets are folded in)
-			const commitments = extractLineItemCommitments(priceOverrides);
+			// Extract line item commitments from price overrides (time buckets enriched for API)
+			const commitments = extractLineItemCommitments(priceOverrides, { prices: currentPrices });
 			finalLineItemCommitments = Object.keys(commitments).length > 0 ? commitments : undefined;
 
 			finalCoupons = linkedCoupon ? [linkedCoupon.id] : undefined;
@@ -597,14 +599,16 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 			sanitizedPhases = undefined;
 		}
 
+		const addonsById = new Map((addonsData?.items ?? []).map((addon) => [addon.id, addon]));
 		const sanitizedAddons =
 			subscriptionState.addons && subscriptionState.addons.length > 0
 				? subscriptionState.addons.map((addon: AddAddonToSubscriptionRequest) => {
-						const commitments = addon.line_item_commitments;
-						const hasCommitments = commitments && Object.keys(commitments).length > 0;
+						const addonDetails = addonsById.get(addon.addon_id);
+						const prices = filterAddonPricesForSubscription(addonDetails?.prices as Price[] | undefined, billingPeriod, currency);
+						const line_item_commitments = sanitizeAddonLineItemCommitmentsForApi(addon.line_item_commitments, prices);
 						return {
 							...addon,
-							line_item_commitments: hasCommitments ? commitments : undefined,
+							line_item_commitments,
 						};
 					})
 				: undefined;
@@ -748,6 +752,7 @@ const CreateCustomerSubscriptionPage: React.FC = () => {
 				sanitized.paymentTerms && sanitized.paymentTerms !== PAYMENT_TERMS_NONE ? (sanitized.paymentTerms as PAYMENT_TERMS) : undefined,
 			line_items: (() => {
 				if (sanitized.sanitizedPhases) return undefined;
+				// Window commitment buckets are sanitized in AddSubscriptionChargeDialog (with meter context).
 				const addedItems = sanitized.addedSubscriptionLineItems?.map(({ tempId: _tempId, ...req }) => req) ?? [];
 				return addedItems.length > 0 ? addedItems : undefined;
 			})(),

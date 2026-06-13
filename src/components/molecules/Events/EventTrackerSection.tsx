@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { GetEventDebugResponse, DebugTrackerStatus, EventDebugStatus } from '@/types/dto';
+import { GetEventDebugResponse, DebugTrackerStatus } from '@/types/dto';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/atoms';
 import EventTrackerStep from './EventTrackerStep';
 import JsonCodeBlock from './JsonCodeBlock';
@@ -14,12 +14,11 @@ interface EventTrackerSectionProps {
 const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, displayEventTimestamp }) => {
 	const { t } = useTranslation(['developers', 'common']);
 	const tracker = debugResponse.debug_tracker;
-	const overallStatus = debugResponse.status;
 
 	const steps: Array<{
-		key: 'customer_lookup' | 'meter_lookup' | 'price_lookup' | 'subscription_line_item_lookup';
+		key: string;
 		title: string;
-		status?: DebugTrackerStatus | EventDebugStatus;
+		status: DebugTrackerStatus;
 		value: unknown;
 	}> = [
 		{
@@ -57,7 +56,6 @@ const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, disp
 					<EventTrackerStep
 						title={t('events.tracker.ingested')}
 						stepKey='ingested'
-						value={{}}
 						isIngested={true}
 						timestamp={displayEventTimestamp}
 					/>
@@ -67,7 +65,7 @@ const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, disp
 					{steps.map((s) => (
 						<AccordionItem key={s.key} value={s.key} className='border-b-0'>
 							<AccordionTrigger className='py-2 hover:no-underline px-0'>
-								<EventTrackerStep title={s.title} status={s.status} value={s.value} stepKey={s.key} />
+								<EventTrackerStep title={s.title} status={s.status} stepKey={s.key} />
 							</AccordionTrigger>
 							<AccordionContent className='pl-0'>
 								<div className='ml-[40px] relative z-10 mt-3'>
@@ -83,17 +81,33 @@ const EventTrackerSection: FC<EventTrackerSectionProps> = ({ debugResponse, disp
 							</AccordionContent>
 						</AccordionItem>
 					))}
-				</Accordion>
 
-				<div className='mt-4'>
-					<EventTrackerStep
-						title={t('events.tracker.attributedToCustomer')}
-						stepKey='attributed'
-						value={{}}
-						isAttributed={true}
-						overallStatus={overallStatus}
-					/>
-				</div>
+					{tracker?.attributed_to_customer && (
+						<AccordionItem value='attributed_to_customer' className='border-b-0'>
+							<AccordionTrigger className='py-2 hover:no-underline px-0'>
+								<EventTrackerStep
+									title={t('events.tracker.attributedToCustomer')}
+									stepKey='attributed_to_customer'
+									status={tracker.attributed_to_customer.status}
+								/>
+							</AccordionTrigger>
+							<AccordionContent className='pl-0'>
+								<div className='ml-[40px] relative z-10 mt-3'>
+									<JsonCodeBlock
+										value={tracker.attributed_to_customer}
+										title={t('labels.response')}
+										onCopy={() => {
+											navigator.clipboard.writeText(
+												JSON.stringify(tracker.attributed_to_customer ?? {}, null, 2),
+											);
+											toast.success(t('common:toast.copySuccess'));
+										}}
+									/>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+					)}
+				</Accordion>
 			</div>
 		</div>
 	);

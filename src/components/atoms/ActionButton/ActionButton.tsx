@@ -188,8 +188,13 @@ const ActionButton: FC<ActionProps> = ({
 			</div>
 
 			<Dialog
-				title={t('actionButton.confirmActionOnEntity', { action: confirmArchiveVerb, entity: entityName })}
-				titleClassName='text-lg font-normal text-gray-800 w-[90%]'
+				title={
+					<span className='text-lg font-normal text-gray-800'>
+						{t('actionButton.confirmActionOnEntityPrefix', { action: confirmArchiveVerb })}{' '}
+						<span className='font-semibold text-gray-900'>{entityName}</span>?
+					</span>
+				}
+				titleClassName='w-[90%]'
 				isOpen={isDialogOpen}
 				onOpenChange={setIsDialogOpen}
 				showCloseButton={false}>

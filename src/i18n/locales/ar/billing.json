@@ -794,6 +794,8 @@
 		"close": "إغلاق"
 	},
 	"commitmentConfig": {
+		"lineItemTitle": "التزام النافذة الزمنية",
+		"viewCommitment": "عرض الالتزام",
 		"title": "تهيئة الالتزام",
 		"description": "إعداد التزام لـ {{name}}",
 		"thisChargeFallback": "هذا الرسم",
@@ -818,21 +820,48 @@
 		"enableTrueUpHint": "تحصيل مبلغ الالتزام حتى لو كان الاستخدام أقل من الالتزام",
 		"windowCommitment": "التزام بالنافذة",
 		"windowCommitmentHint": "تطبيق الالتزام على كل نافذة تجميع (حجم الدلو للعداد: {{bucketSize}})",
+		"addCharge": {
+			"selectMeterForBuckets": "اختر ميزة مُقاسة لتهيئة فترات التزام بالنافذة.",
+			"loadingMeter": "جارٍ تحميل تفاصيل العداد…",
+			"meterNotSupported": "هذا العداد لا يدعم التزام النافذة. قم أولاً بتهيئة حجم الدلو على العداد."
+		},
 		"timeBuckets": {
-			"title": "فترات وقت الالتزام",
+			"bucketCount": "{{count}} فترة/فترات زمنية",
+			"moreBuckets": "المزيد",
+			"title": "فترات الوقت",
 			"description": "تقييد التزام النافذة بنطاقات UTC محددة. وقت البداية شامل؛ وقت النهاية غير شامل.",
-			"startLabel": "البداية (>=)",
-			"endLabel": "النهاية (<)",
+			"descriptionShort": "نوافذ UTC. البداية شاملة، النهاية غير شاملة.",
+			"startLabel": "البداية",
+			"endLabel": "النهاية",
 			"utc": "UTC",
 			"hourPlaceholder": "HH",
 			"minutePlaceholder": "MM",
 			"empty": "لم يتم تهيئة فترات وقت. أضف فترة لتقييد الالتزام بساعات UTC محددة.",
 			"emptyHourOnly": "لم يتم تهيئة فترات وقت. أضف فترة لتقييد الالتزام بساعات UTC محددة (الدقائق ثابتة عند :00).",
-			"addBucket": "+ إضافة فترة وقت",
+			"emptyShort": "لا توجد فترات وقت بعد.",
+			"addBucket": "إضافة فترة",
 			"removeBucket": "إزالة فترة الوقت",
+			"bucketLabel": "فترة {{index}}",
+			"commitmentValue": "الالتزام",
+			"commitmentQuantity": "الكمية",
+			"commitmentValuePlaceholder": "القيمة",
+			"bucketAmount": "السعر",
+			"bucketAmountPlaceholder": "المبلغ",
+			"billingModel": "نموذج الفوترة",
+			"billingModelPlaceholder": "اختر نموذج الفوترة",
+			"unitsPerPackage": "الوحدات لكل حزمة",
+			"pricingFlat": "ثابت",
+			"pricingSlab": "شرائح",
+			"slabTiers": "شرائح التسعير",
+			"upTo": "حتى",
+			"unitAmount": "مبلغ الوحدة",
+			"lookupKey": "مفتاح البحث",
+			"overageFactor": "التجاوز",
+			"trueUpEnabled": "التسوية",
 			"errors": {
 				"sameTime": "لا يمكن أن يكون وقت البداية والنهاية متطابقين",
-				"incomplete": "يرجى اختيار وقت البداية والنهاية لجميع الفترات"
+				"incomplete": "يرجى اختيار وقت البداية والنهاية لجميع الفترات",
+				"incompleteCommitment": "يرجى إكمال حقول الالتزام لجميع الفترات"
 			}
 		},
 		"existingNotice": "هذا السعر لديه بالفعل تهيئة التزام. ستُحدَّث بتغييراتك.",
@@ -855,7 +884,9 @@
 			"amountNonNegative": "مبلغ الالتزام يجب ألا يكون سالبًا",
 			"quantityNonNegative": "كمية الالتزام يجب ألا تكون سالبة",
 			"hourRange": "يجب أن تكون الساعة بين 0 و 23",
-			"minuteRange": "يجب أن تكون الدقيقة بين 0 و 59"
+			"minuteRange": "يجب أن تكون الدقيقة بين 0 و 59",
+			"minuteStep": "يجب أن تكون الدقيقة من مضاعفات {{step}}",
+			"hourStep": "يجب أن تكون الساعة من مضاعفات {{step}}"
 		}
 	},
 	"termination": {
