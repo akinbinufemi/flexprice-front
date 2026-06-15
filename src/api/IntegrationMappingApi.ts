@@ -1,6 +1,7 @@
 import { AxiosClient } from '@/core/axios/verbs';
 import { generateQueryParams } from '@/utils/common/api_helper';
 import { Pagination } from '@/models';
+import { IntegrationDelinkRequest, IntegrationDelinkResponse } from '@/types/dto';
 
 export interface SyncConfig {
 	inbound: boolean;
@@ -75,6 +76,10 @@ class IntegrationMappingApi {
 
 	public static async linkIntegration(request: IntegrationLinkRequest): Promise<IntegrationLinkResponse> {
 		return await AxiosClient.post<IntegrationLinkResponse>(`${this.baseUrl}/link`, request);
+	}
+
+	public static async delinkIntegration(request: IntegrationDelinkRequest): Promise<IntegrationDelinkResponse> {
+		return await AxiosClient.delete<IntegrationDelinkResponse>(`${this.baseUrl}/link`, request);
 	}
 }
 

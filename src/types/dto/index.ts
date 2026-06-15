@@ -118,7 +118,13 @@ export type {
 	ListEntitlementsResponse,
 } from './Entitlement';
 
-export type { CreateIntegrationRequest, LinkedinIntegrationResponse, IntegrationResponse } from './Integration';
+export type {
+	CreateIntegrationRequest,
+	LinkedinIntegrationResponse,
+	IntegrationResponse,
+	IntegrationDelinkRequest,
+	IntegrationDelinkResponse,
+} from './Integration';
 
 export type {
 	GetInvoicesResponse,
