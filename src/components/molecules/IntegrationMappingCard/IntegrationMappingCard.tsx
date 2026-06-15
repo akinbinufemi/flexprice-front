@@ -66,6 +66,8 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 	const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 	const [linkTarget, setLinkTarget] = useState<IntegrationRow | null>(null);
 	const [providerEntityId, setProviderEntityId] = useState('');
+	const [delinkDialogOpen, setDelinkDialogOpen] = useState(false);
+	const [delinkTarget, setDelinkTarget] = useState<IntegrationRow | null>(null);
 
 	const { data: integrationConfigData } = useQuery({
 		queryKey: ['integrationConfig'],
@@ -127,6 +129,24 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 		},
 	});
 
+	const { mutate: delinkIntegration, isPending: isDelinking } = useMutation({
+		mutationFn: () =>
+			IntegrationMappingApi.delinkIntegration({
+				entity_type: entityType,
+				entity_id: entityId,
+				provider_type: delinkTarget!.provider_type,
+			}),
+		onSuccess: () => {
+			toast.success('Integration unlinked successfully');
+			setDelinkDialogOpen(false);
+			setDelinkTarget(null);
+			queryClient.invalidateQueries({ queryKey: ['integrationMappings', entityType, entityId] });
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || 'Failed to unlink integration');
+		},
+	});
+
 	const handleLinkClick = useCallback((row: IntegrationRow) => {
 		setLinkTarget(row);
 		setProviderEntityId('');
@@ -141,6 +161,12 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 		},
 		[syncIntegration],
 	);
+
+	const handleDelinkClick = useCallback((row: IntegrationRow) => {
+		setDelinkTarget(row);
+		setDelinkDialogOpen(true);
+		setDropdownOpen(null);
+	}, []);
 
 	const handleLinkSubmit = () => {
 		if (!linkTarget) {
@@ -232,6 +258,15 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 										{t('actions.link')}
 									</DropdownMenuItem>
 									<DropdownMenuItem
+										disabled={isMappingsPending || isDelinking || !hasProviderEntity || isActionDisabled}
+										onSelect={(e) => {
+											e.preventDefault();
+											handleDelinkClick(row);
+										}}
+										className='cursor-pointer text-destructive focus:text-destructive'>
+										{t('actions.unlink')}
+									</DropdownMenuItem>
+									<DropdownMenuItem
 										disabled={isMappingsPending || isSyncing || !row.syncOutboundEnabled || isActionDisabled}
 										onSelect={(e) => {
 											e.preventDefault();
@@ -258,7 +293,18 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 				},
 			},
 		],
-		[dropdownOpen, isMappingsPending, isSyncing, isActionDisabled, resolvedColumnTitle, handleLinkClick, handleSyncClick, t],
+		[
+			dropdownOpen,
+			isMappingsPending,
+			isSyncing,
+			isDelinking,
+			isActionDisabled,
+			resolvedColumnTitle,
+			handleLinkClick,
+			handleSyncClick,
+			handleDelinkClick,
+			t,
+		],
 	);
 
 	if (!hasIntegrationConfig) {
@@ -303,6 +349,37 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 						</Button>
 						<Button onClick={handleLinkSubmit} disabled={isLinking || !providerEntityId.trim()}>
 							{isLinking ? t('actions.linking') : t('actions.link')}
+						</Button>
+					</div>
+				</div>
+			</Dialog>
+
+			<Dialog
+				isOpen={delinkDialogOpen}
+				onOpenChange={(open) => {
+					setDelinkDialogOpen(open);
+					if (!open) {
+						setDelinkTarget(null);
+					}
+				}}
+				title={t('integrations.unlinkConfirmTitle')}>
+				<div className='space-y-4'>
+					<p className='text-sm text-muted-foreground'>
+						{t('integrations.unlinkConfirmDescription', {
+							provider: delinkTarget ? formatProviderName(delinkTarget.provider_type) : t('integrations.integration'),
+						})}
+					</p>
+					<div className='flex justify-end gap-2'>
+						<Button
+							variant='outline'
+							onClick={() => {
+								setDelinkDialogOpen(false);
+								setDelinkTarget(null);
+							}}>
+							{t('actions.cancel')}
+						</Button>
+						<Button variant='destructive' onClick={() => delinkIntegration()} disabled={isDelinking}>
+							{isDelinking ? t('actions.unlinking') : t('integrations.unlink')}
 						</Button>
 					</div>
 				</div>

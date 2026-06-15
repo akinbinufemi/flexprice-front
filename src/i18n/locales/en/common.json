@@ -33,7 +33,9 @@
 		"view": "View",
 		"link": "Link",
 		"sync": "Sync",
-		"linking": "Linking..."
+		"linking": "Linking...",
+		"unlink": "Unlink",
+		"unlinking": "Unlinking..."
 	},
 	"status": {
 		"active": "Active",
@@ -343,7 +345,10 @@
 		"integration": "Integration",
 		"actions": "Integration actions",
 		"syncPush": "Push to Integration",
-		"syncPull": "Pull from Integration"
+		"syncPull": "Pull from Integration",
+		"unlinkConfirmTitle": "Unlink Integration",
+		"unlinkConfirmDescription": "This will remove the link between this entity and {{provider}}. You can re-link it again later.",
+		"unlink": "Unlink"
 	},
 	"labels": {
 		"payload": "Payload",

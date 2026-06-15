@@ -56,6 +56,12 @@ export interface IntegrationLinkResponse {
 	mapping: IntegrationMappingItem;
 }
 
+export interface IntegrationDelinkRequest {
+	entity_type: string;
+	entity_id: string;
+	provider_type: string;
+}
+
 class IntegrationMappingApi {
 	private static baseUrl = '/integrations';
 
@@ -75,6 +81,10 @@ class IntegrationMappingApi {
 
 	public static async linkIntegration(request: IntegrationLinkRequest): Promise<IntegrationLinkResponse> {
 		return await AxiosClient.post<IntegrationLinkResponse>(`${this.baseUrl}/link`, request);
+	}
+
+	public static async delinkIntegration(request: IntegrationDelinkRequest): Promise<{ message: string }> {
+		return await AxiosClient.post<{ message: string }>(`${this.baseUrl}/delink`, request);
 	}
 }
 
