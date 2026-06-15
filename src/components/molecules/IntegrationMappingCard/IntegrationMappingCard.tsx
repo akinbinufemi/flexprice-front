@@ -379,7 +379,7 @@ const IntegrationMappingCard: FC<IntegrationMappingCardProps> = ({
 							{t('actions.cancel')}
 						</Button>
 						<Button variant='destructive' onClick={() => delinkIntegration()} disabled={isDelinking}>
-							{isDelinking ? t('actions.unlinking') : t('integrations.unlink')}
+							{isDelinking ? t('actions.unlinking') : t('actions.unlink')}
 						</Button>
 					</div>
 				</div>

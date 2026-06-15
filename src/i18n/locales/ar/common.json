@@ -342,8 +342,7 @@
 		"syncPush": "دفع إلى التكامل",
 		"syncPull": "سحب من التكامل",
 		"unlinkConfirmTitle": "إلغاء ربط التكامل",
-		"unlinkConfirmDescription": "سيؤدي هذا إلى إزالة الربط بين هذا الكيان و{{provider}}. يمكنك إعادة ربطه مرة أخرى لاحقًا.",
-		"unlink": "إلغاء الربط"
+		"unlinkConfirmDescription": "سيؤدي هذا إلى إزالة الربط بين هذا الكيان و{{provider}}. يمكنك إعادة ربطه مرة أخرى لاحقًا."
 	},
 	"labels": {
 		"payload": "الحمولة",
