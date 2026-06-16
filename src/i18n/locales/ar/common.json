@@ -33,7 +33,9 @@
 		"view": "عرض",
 		"link": "ربط",
 		"sync": "مزامنة",
-		"linking": "جارٍ الربط..."
+		"linking": "جارٍ الربط...",
+		"unlink": "إلغاء الربط",
+		"unlinking": "جارٍ إلغاء الربط..."
 	},
 	"status": {
 		"active": "نشط",
@@ -338,7 +340,9 @@
 		"integration": "التكامل",
 		"actions": "إجراءات التكامل",
 		"syncPush": "دفع إلى التكامل",
-		"syncPull": "سحب من التكامل"
+		"syncPull": "سحب من التكامل",
+		"unlinkConfirmTitle": "إلغاء ربط التكامل",
+		"unlinkConfirmDescription": "سيؤدي هذا إلى إزالة الربط بين هذا الكيان و{{provider}}. يمكنك إعادة ربطه مرة أخرى لاحقًا."
 	},
 	"labels": {
 		"payload": "الحمولة",
