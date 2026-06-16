@@ -24,6 +24,5 @@ export interface IntegrationDelinkRequest {
 }
 
 export interface IntegrationDelinkResponse {
-	success: boolean;
-	archived: number;
+	message: string;
 }
