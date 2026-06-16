@@ -187,6 +187,11 @@ const DeveloperPage = () => {
 								}}
 								refetchQueryKey='secret-keys'
 								entityName={t('apiKeys.entityName')}
+								// edit={{
+								// 	enabled: true,
+								// 	onClick: () => {},
+								// }}
+								edit={{ enabled: false }}
 								archive={{
 									text: t('common:actions.delete'),
 									icon: <TrashIcon />,
