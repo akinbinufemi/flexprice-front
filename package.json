@@ -12,7 +12,7 @@
     "format": "prettier --write src",
     "preview": "vite preview",
     "prepare": "husky",
-    "start": "vite --port 3000 --host 0.0.0.0",
+    "start": "vite --port 3000 --host 0.0.0.0 --allowedHosts true",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "test:ui": "vitest --ui",
