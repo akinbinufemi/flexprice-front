@@ -19,6 +19,6 @@ export default defineConfig({
             methods: ['GET', 'POST'],
         },
         host: '0.0.0.0',
-        allowedHosts: process.env.ALLOWED_HOST ? [process.env.ALLOWED_HOST] : [],
+        allowedHosts: true,
     },
 });
