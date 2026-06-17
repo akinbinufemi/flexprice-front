@@ -18,6 +18,7 @@ export default defineConfig({
             origin: 'http://localhost:3000',
             methods: ['GET', 'POST'],
         },
-        host: 'localhost',
+        host: '0.0.0.0',
+        allowedHosts: process.env.ALLOWED_HOST ? [process.env.ALLOWED_HOST] : [],
     },
 });
